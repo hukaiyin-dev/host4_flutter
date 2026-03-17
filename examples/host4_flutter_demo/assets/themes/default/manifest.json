@@ -1,0 +1,9 @@
+{
+  "id": "default",
+  "name": "Default Aurora",
+  "version": "1.0.0",
+  "min_sdk": "1.0.0",
+  "defaultMode": "light",
+  "modes": ["light", "dark"],
+  "preview": "preview.png"
+}
