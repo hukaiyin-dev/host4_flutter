@@ -21,10 +21,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homePageSubtitle => 'Theme story';
 
   @override
-  String get listPageTitle => 'List';
+  String get listPageTitle => 'Components';
 
   @override
-  String get listPageSubtitle => 'Component density';
+  String get listPageSubtitle => 'Component gallery';
+
+  @override
+  String get componentButtonsTitle => 'Buttons';
+
+  @override
+  String get componentButtonsSubtitle => 'Variants, states & icon combinations';
+
+  @override
+  String get sectionVariants => 'Variants';
+
+  @override
+  String get sectionWithIcon => 'With Icon';
+
+  @override
+  String get sectionExpanded => 'Expanded';
+
+  @override
+  String get sectionDisabled => 'Disabled';
 
   @override
   String get themePlaygroundPageTitle => 'Theme Playground';
@@ -242,4 +260,85 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get switchToChineseButton => '简体中文';
+
+  @override
+  String get languageFollowSystem => 'Follow System';
+
+  @override
+  String get languageFollowSystemSubtitle =>
+      'Automatically matches your device language';
+
+  @override
+  String get languageManualSection => 'Manual Selection';
+
+  @override
+  String get tabHome => 'Home';
+
+  @override
+  String get tabList => 'List';
+
+  @override
+  String get tabSettings => 'Settings';
+
+  @override
+  String get logsPageTitle => 'Logs';
+
+  @override
+  String get logsPageSubtitle => 'Runtime log output';
+
+  @override
+  String get logsExportButton => 'Export';
+
+  @override
+  String get logsClearButton => 'Clear';
+
+  @override
+  String get logsClearConfirmTitle => 'Clear logs?';
+
+  @override
+  String get logsClearConfirmBody =>
+      'All log records will be permanently deleted.';
+
+  @override
+  String get logsClearConfirmAction => 'Clear';
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get logsEmptyMessage => 'No logs yet.';
+
+  @override
+  String get settingsPageTitle => 'Settings';
+
+  @override
+  String get settingsPageSubtitle => 'Theme & Language';
+
+  @override
+  String get settingsBannerTitle => 'Appearance';
+
+  @override
+  String get settingsBannerSubtitle =>
+      'Switch visual theme or app language below.';
+
+  @override
+  String get testerPageTitle => 'Tester';
+
+  @override
+  String get testerPageSubtitle => 'Development tools';
+
+  @override
+  String get testerResetTitle => 'Reset Install';
+
+  @override
+  String get testerResetSubtitle => 'Clear all saved data';
+
+  @override
+  String get testerResetConfirmTitle => 'Reset to defaults?';
+
+  @override
+  String get testerResetConfirmBody => 'All saved preferences will be cleared.';
+
+  @override
+  String get testerResetConfirmAction => 'Reset';
 }

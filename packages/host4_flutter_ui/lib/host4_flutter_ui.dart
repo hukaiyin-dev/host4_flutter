@@ -8,6 +8,7 @@ export 'src/components/host4_page_scaffold.dart';
 export 'src/components/host4_search_bar.dart';
 export 'src/components/host4_section_header.dart';
 export 'src/components/host4_text.dart';
+export 'src/components/host4_tab_bar.dart';
 export 'src/components/host4_text_field.dart';
 export 'src/foundation/theme/host4_runtime_theme.dart';
 export 'src/foundation/theme/host4_theme_loader.dart';

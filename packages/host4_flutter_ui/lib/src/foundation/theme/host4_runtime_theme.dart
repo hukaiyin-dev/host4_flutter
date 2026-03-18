@@ -7,6 +7,7 @@ class Host4RuntimeTheme {
     required this.colors,
     required this.typography,
     required this.spacing,
+    required this.sizes,
     required this.radius,
     required this.blur,
     required this.images,
@@ -17,6 +18,7 @@ class Host4RuntimeTheme {
   final Host4ThemeColors colors;
   final Host4ThemeTypography typography;
   final Host4ThemeSpacing spacing;
+  final Host4ThemeSizes sizes;
   final Host4ThemeRadius radius;
   final Host4ThemeBlur blur;
   final Host4ThemeImages images;
@@ -184,6 +186,19 @@ class Host4ThemeRadius {
 }
 
 @immutable
+class Host4ThemeSizes {
+  const Host4ThemeSizes({
+    required this.iconSm,
+    required this.iconMd,
+    required this.iconLg,
+  });
+
+  final double iconSm;
+  final double iconMd;
+  final double iconLg;
+}
+
+@immutable
 class Host4ThemeBlur {
   const Host4ThemeBlur({
     required this.card,
@@ -204,6 +219,7 @@ class Host4ThemeImages {
     required this.heroBanner,
     required this.promoBanner,
     required this.spotIllustration,
+    required this.tabItems,
   });
 
   final String pageBackground;
@@ -211,6 +227,30 @@ class Host4ThemeImages {
   final String heroBanner;
   final String promoBanner;
   final String spotIllustration;
+  /// Tab icon image pairs, ordered by index (tab0, tab1, …).
+  /// Length equals the number of consecutive tab slots defined in the token.
+  final List<Host4TabItemImages> tabItems;
+}
+
+@immutable
+class Host4TabItemImages {
+  const Host4TabItemImages({
+    required this.normal,
+    required this.selected,
+    this.lightFallbackNormal,
+    this.lightFallbackSelected,
+  });
+
+  final String normal;
+  final String selected;
+
+  /// Light-mode image path used as fallback when [normal] fails to load.
+  /// Only set for non-light modes.
+  final String? lightFallbackNormal;
+
+  /// Light-mode image path used as fallback when [selected] fails to load.
+  /// Only set for non-light modes.
+  final String? lightFallbackSelected;
 }
 
 @immutable
@@ -222,6 +262,7 @@ class Host4ThemeComponents {
     required this.textField,
     required this.banner,
     required this.listCell,
+    required this.tabBar,
   });
 
   final Host4ButtonComponentTokens button;
@@ -230,29 +271,49 @@ class Host4ThemeComponents {
   final Host4TextFieldComponentTokens textField;
   final Host4BannerComponentTokens banner;
   final Host4ListCellComponentTokens listCell;
+  final Host4TabBarComponentTokens tabBar;
 }
 
 @immutable
 class Host4ButtonComponentTokens {
   const Host4ButtonComponentTokens({
+    required this.spacing,
     required this.primary,
     required this.secondary,
     required this.ghost,
   });
 
+  final Host4ButtonSpacingTokens spacing;
   final Host4ButtonVariantTokens primary;
   final Host4ButtonVariantTokens secondary;
   final Host4ButtonVariantTokens ghost;
 }
 
 @immutable
+class Host4ButtonSpacingTokens {
+  const Host4ButtonSpacingTokens({
+    required this.horizontal,
+    required this.vertical,
+    required this.iconHorizontal,
+    required this.iconVertical,
+  });
+
+  final double horizontal;
+  final double vertical;
+  final double iconHorizontal;
+  final double iconVertical;
+}
+
+@immutable
 class Host4ButtonVariantTokens {
   const Host4ButtonVariantTokens({
+    required this.radius,
     required this.background,
     required this.foreground,
     required this.border,
   });
 
+  final double radius;
   final Color background;
   final Color foreground;
   final Color border;
@@ -341,4 +402,27 @@ class Host4ListCellComponentTokens {
   final Color subtitle;
   final Color trailing;
   final Color divider;
+}
+
+@immutable
+class Host4TabBarComponentTokens {
+  const Host4TabBarComponentTokens({
+    required this.background,
+    required this.blur,
+    required this.height,
+    required this.iconSize,
+    required this.featuredIconSize,
+    required this.showLabels,
+    required this.labelColor,
+    required this.selectedLabelColor,
+  });
+
+  final Color background;
+  final double blur;
+  final double height;
+  final double iconSize;
+  final double featuredIconSize;
+  final bool showLabels;
+  final Color labelColor;
+  final Color selectedLabelColor;
 }

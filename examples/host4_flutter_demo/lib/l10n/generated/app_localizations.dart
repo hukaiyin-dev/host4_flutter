@@ -125,14 +125,50 @@ abstract class AppLocalizations {
   /// No description provided for @listPageTitle.
   ///
   /// In en, this message translates to:
-  /// **'List'**
+  /// **'Components'**
   String get listPageTitle;
 
   /// No description provided for @listPageSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Component density'**
+  /// **'Component gallery'**
   String get listPageSubtitle;
+
+  /// No description provided for @componentButtonsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Buttons'**
+  String get componentButtonsTitle;
+
+  /// No description provided for @componentButtonsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Variants, states & icon combinations'**
+  String get componentButtonsSubtitle;
+
+  /// No description provided for @sectionVariants.
+  ///
+  /// In en, this message translates to:
+  /// **'Variants'**
+  String get sectionVariants;
+
+  /// No description provided for @sectionWithIcon.
+  ///
+  /// In en, this message translates to:
+  /// **'With Icon'**
+  String get sectionWithIcon;
+
+  /// No description provided for @sectionExpanded.
+  ///
+  /// In en, this message translates to:
+  /// **'Expanded'**
+  String get sectionExpanded;
+
+  /// No description provided for @sectionDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Disabled'**
+  String get sectionDisabled;
 
   /// No description provided for @themePlaygroundPageTitle.
   ///
@@ -523,6 +559,162 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'简体中文'**
   String get switchToChineseButton;
+
+  /// No description provided for @languageFollowSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'Follow System'**
+  String get languageFollowSystem;
+
+  /// No description provided for @languageFollowSystemSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatically matches your device language'**
+  String get languageFollowSystemSubtitle;
+
+  /// No description provided for @languageManualSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Manual Selection'**
+  String get languageManualSection;
+
+  /// No description provided for @tabHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get tabHome;
+
+  /// No description provided for @tabList.
+  ///
+  /// In en, this message translates to:
+  /// **'List'**
+  String get tabList;
+
+  /// No description provided for @tabSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get tabSettings;
+
+  /// No description provided for @logsPageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Logs'**
+  String get logsPageTitle;
+
+  /// No description provided for @logsPageSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Runtime log output'**
+  String get logsPageSubtitle;
+
+  /// No description provided for @logsExportButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Export'**
+  String get logsExportButton;
+
+  /// No description provided for @logsClearButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get logsClearButton;
+
+  /// No description provided for @logsClearConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear logs?'**
+  String get logsClearConfirmTitle;
+
+  /// No description provided for @logsClearConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'All log records will be permanently deleted.'**
+  String get logsClearConfirmBody;
+
+  /// No description provided for @logsClearConfirmAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get logsClearConfirmAction;
+
+  /// No description provided for @cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// No description provided for @logsEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'No logs yet.'**
+  String get logsEmptyMessage;
+
+  /// No description provided for @settingsPageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get settingsPageTitle;
+
+  /// No description provided for @settingsPageSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme & Language'**
+  String get settingsPageSubtitle;
+
+  /// No description provided for @settingsBannerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance'**
+  String get settingsBannerTitle;
+
+  /// No description provided for @settingsBannerSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch visual theme or app language below.'**
+  String get settingsBannerSubtitle;
+
+  /// No description provided for @testerPageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tester'**
+  String get testerPageTitle;
+
+  /// No description provided for @testerPageSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Development tools'**
+  String get testerPageSubtitle;
+
+  /// No description provided for @testerResetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset Install'**
+  String get testerResetTitle;
+
+  /// No description provided for @testerResetSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear all saved data'**
+  String get testerResetSubtitle;
+
+  /// No description provided for @testerResetConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset to defaults?'**
+  String get testerResetConfirmTitle;
+
+  /// No description provided for @testerResetConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'All saved preferences will be cleared.'**
+  String get testerResetConfirmBody;
+
+  /// No description provided for @testerResetConfirmAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get testerResetConfirmAction;
 }
 
 class _AppLocalizationsDelegate

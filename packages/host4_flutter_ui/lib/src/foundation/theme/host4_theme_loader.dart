@@ -112,31 +112,36 @@ class Host4ThemeLoader {
         card: _readDouble(resolved, 'alias.shared.spacing.card'),
         buttonHorizontal: _readDouble(
           resolved,
-          'alias.shared.spacing.button.horizontal',
+          'alias.shared.spacing.interactive.horizontal',
         ),
         buttonVertical: _readDouble(
           resolved,
-          'alias.shared.spacing.button.vertical',
+          'alias.shared.spacing.interactive.vertical',
         ),
         inputHorizontal: _readDouble(
           resolved,
-          'alias.shared.spacing.input.horizontal',
+          'alias.shared.spacing.interactive.horizontal',
         ),
         inputVertical: _readDouble(
           resolved,
-          'alias.shared.spacing.input.vertical',
+          'alias.shared.spacing.interactive.vertical',
         ),
         listGap: _readDouble(resolved, 'alias.shared.spacing.list.gap'),
+      ),
+      sizes: Host4ThemeSizes(
+        iconSm: _readDouble(resolved, 'alias.shared.size.icon.sm'),
+        iconMd: _readDouble(resolved, 'alias.shared.size.icon.md'),
+        iconLg: _readDouble(resolved, 'alias.shared.size.icon.lg'),
       ),
       radius: Host4ThemeRadius(
         sm: _readDouble(resolved, 'primitive.radius.sm'),
         md: _readDouble(resolved, 'primitive.radius.md'),
         lg: _readDouble(resolved, 'primitive.radius.lg'),
         pill: _readDouble(resolved, 'primitive.radius.pill'),
-        button: _readDouble(resolved, 'alias.shared.radius.button'),
-        card: _readDouble(resolved, 'alias.shared.radius.card'),
-        input: _readDouble(resolved, 'alias.shared.radius.input'),
-        banner: _readDouble(resolved, 'alias.shared.radius.banner'),
+        button: _readDouble(resolved, 'alias.shared.radius.default'),
+        card: _readDouble(resolved, 'alias.shared.radius.prominent'),
+        input: _readDouble(resolved, 'alias.shared.radius.default'),
+        banner: _readDouble(resolved, 'alias.shared.radius.prominent'),
       ),
       blur: Host4ThemeBlur(
         card: _readDouble(resolved, 'primitive.blur.card'),
@@ -167,9 +172,28 @@ class Host4ThemeLoader {
           assetDirectory,
           _readString(resolved, 'alias.shared.image.spotIllustration'),
         ),
+        tabItems: _readTabItemImages(resolved, assetDirectory, selectedMode),
       ),
       components: Host4ThemeComponents(
         button: Host4ButtonComponentTokens(
+          spacing: Host4ButtonSpacingTokens(
+            horizontal: _readDouble(
+              resolved,
+              'component.button.spacing.horizontal',
+            ),
+            vertical: _readDouble(
+              resolved,
+              'component.button.spacing.vertical',
+            ),
+            iconHorizontal: _readDouble(
+              resolved,
+              'component.button.spacing.icon.horizontal',
+            ),
+            iconVertical: _readDouble(
+              resolved,
+              'component.button.spacing.icon.vertical',
+            ),
+          ),
           primary: _readButtonVariant(resolved, 'component.button.primary'),
           secondary: _readButtonVariant(resolved, 'component.button.secondary'),
           ghost: _readButtonVariant(resolved, 'component.button.ghost'),
@@ -218,8 +242,71 @@ class Host4ThemeLoader {
           trailing: _readColor(resolved, 'component.listCell.trailing'),
           divider: _readColor(resolved, 'component.listCell.divider'),
         ),
+        tabBar: Host4TabBarComponentTokens(
+          background: _readColor(resolved, 'component.tabBar.background'),
+          blur: _readDouble(resolved, 'component.tabBar.blur'),
+          height: _readDouble(resolved, 'component.tabBar.height'),
+          iconSize: _readDouble(resolved, 'component.tabBar.iconSize'),
+          featuredIconSize: _readDouble(
+            resolved,
+            'component.tabBar.featuredIconSize',
+          ),
+          showLabels: _readBool(resolved, 'component.tabBar.showLabels'),
+          labelColor: _readColor(resolved, 'component.tabBar.labelColor'),
+          selectedLabelColor: _readColor(
+            resolved,
+            'component.tabBar.selectedLabelColor',
+          ),
+        ),
       ),
     );
+  }
+
+  static List<Host4TabItemImages> _readTabItemImages(
+    Map<String, dynamic> resolved,
+    String assetDirectory,
+    String mode,
+  ) {
+    final isLight = mode == 'light';
+    final items = <Host4TabItemImages>[];
+    for (var i = 0; i < 5; i++) {
+      try {
+        final normal = _readString(resolved, 'alias.modes.$mode.image.tab_$i');
+        final selected = _readString(
+          resolved,
+          'alias.modes.$mode.image.tab_${i}_selected',
+        );
+
+        String? lightFallbackNormal;
+        String? lightFallbackSelected;
+        if (!isLight) {
+          try {
+            lightFallbackNormal = _resolveAssetPath(
+              assetDirectory,
+              _readString(resolved, 'alias.modes.light.image.tab_$i'),
+            );
+            lightFallbackSelected = _resolveAssetPath(
+              assetDirectory,
+              _readString(resolved, 'alias.modes.light.image.tab_${i}_selected'),
+            );
+          } on FormatException {
+            // No light fallback defined for this slot; leave null.
+          }
+        }
+
+        items.add(
+          Host4TabItemImages(
+            normal: _resolveAssetPath(assetDirectory, normal),
+            selected: _resolveAssetPath(assetDirectory, selected),
+            lightFallbackNormal: lightFallbackNormal,
+            lightFallbackSelected: lightFallbackSelected,
+          ),
+        );
+      } on FormatException {
+        break;
+      }
+    }
+    return List.unmodifiable(items);
   }
 
   static Host4ButtonVariantTokens _readButtonVariant(
@@ -227,6 +314,7 @@ class Host4ThemeLoader {
     String path,
   ) {
     return Host4ButtonVariantTokens(
+      radius: _readDouble(json, '$path.radius'),
       background: _readColor(json, '$path.background'),
       foreground: _readColor(json, '$path.foreground'),
       border: _readColor(json, '$path.border'),
@@ -417,6 +505,14 @@ Color _readColor(Map<String, dynamic> json, String path) {
     throw FormatException('Expected hex color at $path.');
   }
   return Color(int.parse(hex, radix: 16));
+}
+
+bool _readBool(Map<String, dynamic> json, String path) {
+  final value = _readPath(json, path);
+  if (value is! bool) {
+    throw FormatException('Expected bool at $path.');
+  }
+  return value;
 }
 
 FontWeight _readFontWeight(Map<String, dynamic> json, String path) {

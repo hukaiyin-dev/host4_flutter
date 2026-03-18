@@ -21,10 +21,28 @@ class AppLocalizationsZh extends AppLocalizations {
   String get homePageSubtitle => '主题故事';
 
   @override
-  String get listPageTitle => '列表';
+  String get listPageTitle => '控件';
 
   @override
-  String get listPageSubtitle => '组件密度';
+  String get listPageSubtitle => '控件展示';
+
+  @override
+  String get componentButtonsTitle => '按钮';
+
+  @override
+  String get componentButtonsSubtitle => '变体、状态与图标组合';
+
+  @override
+  String get sectionVariants => '变体';
+
+  @override
+  String get sectionWithIcon => '带图标';
+
+  @override
+  String get sectionExpanded => '展开宽度';
+
+  @override
+  String get sectionDisabled => '禁用状态';
 
   @override
   String get themePlaygroundPageTitle => '主题调试台';
@@ -228,4 +246,82 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get switchToChineseButton => '简体中文';
+
+  @override
+  String get languageFollowSystem => '跟随系统';
+
+  @override
+  String get languageFollowSystemSubtitle => '自动匹配设备语言';
+
+  @override
+  String get languageManualSection => '手动选择';
+
+  @override
+  String get tabHome => '首页';
+
+  @override
+  String get tabList => '列表';
+
+  @override
+  String get tabSettings => '设置';
+
+  @override
+  String get logsPageTitle => '日志';
+
+  @override
+  String get logsPageSubtitle => '运行时日志输出';
+
+  @override
+  String get logsExportButton => '导出';
+
+  @override
+  String get logsClearButton => '清空';
+
+  @override
+  String get logsClearConfirmTitle => '清空日志？';
+
+  @override
+  String get logsClearConfirmBody => '所有日志记录将被永久删除。';
+
+  @override
+  String get logsClearConfirmAction => '清空';
+
+  @override
+  String get cancel => '取消';
+
+  @override
+  String get logsEmptyMessage => '暂无日志';
+
+  @override
+  String get settingsPageTitle => '设置';
+
+  @override
+  String get settingsPageSubtitle => '主题与语言';
+
+  @override
+  String get settingsBannerTitle => '外观设置';
+
+  @override
+  String get settingsBannerSubtitle => '在下方切换主题或应用语言。';
+
+  @override
+  String get testerPageTitle => 'Tester';
+
+  @override
+  String get testerPageSubtitle => '开发工具';
+
+  @override
+  String get testerResetTitle => '恢复初次安装';
+
+  @override
+  String get testerResetSubtitle => '清除所有已保存的数据';
+
+  @override
+  String get testerResetConfirmTitle => '恢复初次安装？';
+
+  @override
+  String get testerResetConfirmBody => '所有已保存的偏好设置将被清除。';
+
+  @override
+  String get testerResetConfirmAction => '恢复';
 }

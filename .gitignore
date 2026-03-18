@@ -5,7 +5,13 @@
 
 docs/
 AGENTS.md
+CLAUDE.md
 .agents
+.claude
+.vscode
+
+scripts/
+Server/
 
 ## Various settings
 *.pbxuser

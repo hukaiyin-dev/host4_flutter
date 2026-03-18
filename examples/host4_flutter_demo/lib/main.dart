@@ -1,10 +1,29 @@
+import 'dart:io';
+import 'dart:ui';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:host4_flutter_log/host4_flutter_log.dart';
 import 'package:host4_flutter_ui/host4_flutter_ui.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'l10n/generated/app_localizations.dart';
 
-void main() {
+const _supportedLanguageCodes = ['en', 'zh'];
+const _prefKeyLocale = 'locale';
+
+final _log = Host4Logger('App');
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Host4Logger.configure(Host4LoggerConfig(
+    minimumLevel: Host4LogLevel.debug,
+    fileEnabled: true,
+    consoleEnabled: kDebugMode,
+  ));
+  _log.info('App starting');
   runApp(const Host4DemoBootstrap());
 }
 
@@ -20,7 +39,20 @@ class Host4DemoBootstrap extends StatefulWidget {
 class _Host4DemoBootstrapState extends State<Host4DemoBootstrap> {
   late final Host4ThemeManager _themeManager;
   late final Future<void> _bootstrapFuture;
-  Locale _locale = const Locale('en');
+  // null = follow system; non-null = explicit user choice
+  Locale? _localePreference;
+
+  static Locale _resolveSystemLocale() {
+    final systemLocales = PlatformDispatcher.instance.locales;
+    for (final locale in systemLocales) {
+      if (_supportedLanguageCodes.contains(locale.languageCode)) {
+        return Locale(locale.languageCode);
+      }
+    }
+    return const Locale('en');
+  }
+
+  Locale get _effectiveLocale => _localePreference ?? _resolveSystemLocale();
 
   @override
   void initState() {
@@ -40,7 +72,28 @@ class _Host4DemoBootstrapState extends State<Host4DemoBootstrap> {
       ],
       bundle: widget.bundle ?? rootBundle,
     );
-    _bootstrapFuture = _themeManager.initialize('default');
+    _bootstrapFuture = Future.wait([
+      _themeManager.initialize('default'),
+      _loadLocalePref(),
+    ]);
+  }
+
+  Future<void> _loadLocalePref() async {
+    final prefs = await SharedPreferences.getInstance();
+    final saved = prefs.getString(_prefKeyLocale);
+    if (saved != null && _supportedLanguageCodes.contains(saved)) {
+      // Set directly — no setState needed here because this future runs
+      // concurrently with theme init inside _bootstrapFuture. The FutureBuilder
+      // will rebuild with the correct value when both complete.
+      _localePreference = Locale(saved);
+    }
+  }
+
+  Future<void> _resetToDefaults() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+    _log.info('Reset to defaults');
+    if (mounted) setState(() => _localePreference = null);
   }
 
   @override
@@ -49,11 +102,18 @@ class _Host4DemoBootstrapState extends State<Host4DemoBootstrap> {
     super.dispose();
   }
 
-  void _setLocale(Locale locale) {
-    if (_locale == locale) {
-      return;
-    }
-    setState(() => _locale = locale);
+  /// [locale] null means revert to follow-system.
+  void _setLocalePreference(Locale? locale) {
+    if (_localePreference == locale) return;
+    _log.info('Locale preference: ${locale?.languageCode ?? 'system'}');
+    setState(() => _localePreference = locale);
+    SharedPreferences.getInstance().then((prefs) {
+      if (locale == null) {
+        prefs.remove(_prefKeyLocale);
+      } else {
+        prefs.setString(_prefKeyLocale, locale.languageCode);
+      }
+    });
   }
 
   @override
@@ -117,7 +177,11 @@ class _Host4DemoBootstrapState extends State<Host4DemoBootstrap> {
               final theme = _themeManager.theme;
               return _buildMaterialApp(
                 brightness: theme.meta.brightness,
-                home: Host4DemoShell(onLocaleChanged: _setLocale),
+                home: Host4DemoShell(
+                  localePreference: _localePreference,
+                  onLocalePreferenceChanged: _setLocalePreference,
+                  onResetToDefaults: _resetToDefaults,
+                ),
               );
             },
           ),
@@ -132,7 +196,7 @@ class _Host4DemoBootstrapState extends State<Host4DemoBootstrap> {
   }) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      locale: _locale,
+      locale: _effectiveLocale,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
@@ -148,9 +212,16 @@ class _Host4DemoBootstrapState extends State<Host4DemoBootstrap> {
 }
 
 class Host4DemoShell extends StatefulWidget {
-  const Host4DemoShell({required this.onLocaleChanged, super.key});
+  const Host4DemoShell({
+    required this.localePreference,
+    required this.onLocalePreferenceChanged,
+    required this.onResetToDefaults,
+    super.key,
+  });
 
-  final ValueChanged<Locale> onLocaleChanged;
+  final Locale? localePreference;
+  final ValueChanged<Locale?> onLocalePreferenceChanged;
+  final Future<void> Function() onResetToDefaults;
 
   @override
   State<Host4DemoShell> createState() => _Host4DemoShellState();
@@ -173,17 +244,16 @@ class _Host4DemoShellState extends State<Host4DemoShell> {
       _ShellPage(
         title: l10n.listPageTitle,
         subtitle: l10n.listPageSubtitle,
-        child: const ListPage(),
+        child: const ComponentsPage(),
       ),
       _ShellPage(
-        title: l10n.themePlaygroundPageTitle,
-        subtitle: l10n.themePlaygroundPageSubtitle,
-        child: const ThemePlaygroundPage(),
-      ),
-      _ShellPage(
-        title: l10n.languagePageTitle,
-        subtitle: l10n.languagePageSubtitle,
-        child: LanguagePage(onLocaleChanged: widget.onLocaleChanged),
+        title: l10n.settingsPageTitle,
+        subtitle: l10n.settingsPageSubtitle,
+        child: SettingsPage(
+          localePreference: widget.localePreference,
+          onLocalePreferenceChanged: widget.onLocalePreferenceChanged,
+          onResetToDefaults: widget.onResetToDefaults,
+        ),
       ),
     ];
     final currentPage = pages[_currentIndex];
@@ -191,6 +261,33 @@ class _Host4DemoShellState extends State<Host4DemoShell> {
     return Stack(
       children: [
         Host4PageScaffold(
+          bottomNavigationBar: Host4TabBar(
+            currentIndex: _currentIndex,
+            onTap: (index) {
+              _log.debug('Tab selected: $index');
+              setState(() => _currentIndex = index);
+            },
+            items: [
+              Host4TabItem(
+                index: 0,
+                label: l10n.tabHome,
+                fallbackIcon: Icons.home_outlined,
+                fallbackSelectedIcon: Icons.home_rounded,
+              ),
+              Host4TabItem(
+                index: 1,
+                label: l10n.tabList,
+                fallbackIcon: Icons.widgets_outlined,
+                fallbackSelectedIcon: Icons.widgets_rounded,
+              ),
+              Host4TabItem(
+                index: 2,
+                label: l10n.tabSettings,
+                fallbackIcon: Icons.settings_outlined,
+                fallbackSelectedIcon: Icons.settings_rounded,
+              ),
+            ],
+          ),
           body: Column(
             children: [
               Host4NavigationBar(
@@ -220,37 +317,6 @@ class _Host4DemoShellState extends State<Host4DemoShell> {
                   child: KeyedSubtree(
                     key: ValueKey(_currentIndex),
                     child: currentPage.child,
-                  ),
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.fromLTRB(
-                  theme.spacing.page,
-                  0,
-                  theme.spacing.page,
-                  theme.spacing.page,
-                ),
-                child: Host4Card(
-                  padding: EdgeInsets.all(theme.spacing.sm),
-                  child: Wrap(
-                    spacing: theme.spacing.xs,
-                    runSpacing: theme.spacing.xs,
-                    children: List.generate(pages.length, (index) {
-                      final page = pages[index];
-                      final selected = index == _currentIndex;
-                      return SizedBox(
-                        width: 156,
-                        child: Host4Button(
-                          label: page.title,
-                          variant: selected
-                              ? Host4ButtonVariant.primary
-                              : Host4ButtonVariant.ghost,
-                          expanded: true,
-                          onPressed: () =>
-                              setState(() => _currentIndex = index),
-                        ),
-                      );
-                    }),
                   ),
                 ),
               ),
@@ -338,6 +404,7 @@ class HomePage extends StatelessWidget {
                   Expanded(
                     child: Host4Button(
                       label: l10n.useCurrentThemeButton,
+                      content: Host4ButtonContent.iconLeft,
                       icon: Icons.palette_outlined,
                       expanded: true,
                       onPressed: () {},
@@ -348,6 +415,7 @@ class HomePage extends StatelessWidget {
                     child: Host4Button(
                       label: l10n.previewRemoteFlowButton,
                       variant: Host4ButtonVariant.secondary,
+                      content: Host4ButtonContent.iconLeft,
                       icon: Icons.cloud_download_outlined,
                       expanded: true,
                       onPressed: null,
@@ -363,14 +431,13 @@ class HomePage extends StatelessWidget {
   }
 }
 
-class ListPage extends StatelessWidget {
-  const ListPage({super.key});
+class ComponentsPage extends StatelessWidget {
+  const ComponentsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = context.host4Theme;
-    final listItems = _buildListItems(l10n);
 
     return ListView(
       padding: EdgeInsets.fromLTRB(
@@ -380,48 +447,231 @@ class ListPage extends StatelessWidget {
         theme.spacing.page,
       ),
       children: [
-        Host4SearchBar(hintText: l10n.searchHint),
-        SizedBox(height: theme.spacing.section),
-        Host4SectionHeader(
-          title: l10n.componentInventoryTitle,
-          subtitle: l10n.componentInventorySubtitle,
-        ),
-        SizedBox(height: theme.spacing.md),
-        ...List.generate(
-          listItems.length,
-          (index) => Padding(
-            padding: EdgeInsets.only(bottom: theme.spacing.listGap),
-            child: Host4ListCell(
-              title: listItems[index].title,
-              subtitle: listItems[index].subtitle,
-              trailingText: listItems[index].badge,
-              leading: _ListIcon(
-                icon: listItems[index].icon,
-                color: index.isEven
-                    ? theme.colors.brandPrimary
-                    : theme.colors.brandAccent,
-              ),
+        Host4ListCell(
+          title: l10n.componentButtonsTitle,
+          subtitle: l10n.componentButtonsSubtitle,
+          leading: _ListIcon(
+            icon: Icons.smart_button_outlined,
+            color: theme.colors.brandPrimary,
+          ),
+          onTap: () => Navigator.of(context).push(MaterialPageRoute(
+            builder: (context) => _ComponentDemoScaffold(
+              title: l10n.componentButtonsTitle,
+              subtitle: l10n.componentButtonsSubtitle,
+              child: const ButtonsPage(),
             ),
-          ),
-        ),
-        SizedBox(height: theme.spacing.section),
-        Host4Card(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Host4Text(l10n.listDiagnosticsTitle, role: Host4TextRole.heading),
-              SizedBox(height: theme.spacing.sm),
-              Host4Text(
-                l10n.listDiagnosticsBody,
-                colorRole: Host4TextColorRole.secondary,
-              ),
-            ],
-          ),
+          )),
         ),
       ],
     );
   }
 }
+
+class ButtonsPage extends StatelessWidget {
+  const ButtonsPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = context.host4Theme;
+
+    return ListView(
+      padding: EdgeInsets.fromLTRB(
+        theme.spacing.page,
+        0,
+        theme.spacing.page,
+        theme.spacing.page,
+      ),
+      children: [
+        // ── Variants ──────────────────────────────────────────
+        Host4SectionHeader(
+          title: l10n.sectionVariants,
+          subtitle: 'primary · secondary · ghost',
+        ),
+        SizedBox(height: theme.spacing.md),
+        Wrap(
+          spacing: theme.spacing.sm,
+          runSpacing: theme.spacing.sm,
+          children: const [
+            Host4Button(
+              label: 'Primary',
+              onPressed: _noOp,
+            ),
+            Host4Button(
+              label: 'Secondary',
+              variant: Host4ButtonVariant.secondary,
+              onPressed: _noOp,
+            ),
+            Host4Button(
+              label: 'Ghost',
+              variant: Host4ButtonVariant.ghost,
+              onPressed: _noOp,
+            ),
+          ],
+        ),
+        SizedBox(height: theme.spacing.section),
+
+        // ── With icon ─────────────────────────────────────────
+        Host4SectionHeader(
+          title: l10n.sectionWithIcon,
+          subtitle: 'icon + label',
+        ),
+        SizedBox(height: theme.spacing.md),
+        Wrap(
+          spacing: theme.spacing.sm,
+          runSpacing: theme.spacing.sm,
+          children: const [
+            Host4Button(
+              label: 'Primary',
+              content: Host4ButtonContent.iconLeft,
+              icon: Icons.palette_outlined,
+              onPressed: _noOp,
+            ),
+            Host4Button(
+              label: 'Secondary',
+              variant: Host4ButtonVariant.secondary,
+              content: Host4ButtonContent.iconLeft,
+              icon: Icons.cloud_download_outlined,
+              onPressed: _noOp,
+            ),
+            Host4Button(
+              label: 'Ghost',
+              variant: Host4ButtonVariant.ghost,
+              content: Host4ButtonContent.iconLeft,
+              icon: Icons.info_outline_rounded,
+              onPressed: _noOp,
+            ),
+          ],
+        ),
+        SizedBox(height: theme.spacing.section),
+
+        // ── Icon Top ──────────────────────────────────────────
+        Host4SectionHeader(
+          title: 'Icon Top',
+          subtitle: 'icon above label',
+        ),
+        SizedBox(height: theme.spacing.md),
+        Wrap(
+          spacing: theme.spacing.sm,
+          runSpacing: theme.spacing.sm,
+          children: const [
+            Host4Button(
+              label: 'Primary',
+              content: Host4ButtonContent.iconTop,
+              icon: Icons.palette_outlined,
+              onPressed: _noOp,
+            ),
+            Host4Button(
+              label: 'Secondary',
+              variant: Host4ButtonVariant.secondary,
+              content: Host4ButtonContent.iconTop,
+              icon: Icons.cloud_download_outlined,
+              onPressed: _noOp,
+            ),
+            Host4Button(
+              label: 'Ghost',
+              variant: Host4ButtonVariant.ghost,
+              content: Host4ButtonContent.iconTop,
+              icon: Icons.info_outline_rounded,
+              onPressed: _noOp,
+            ),
+          ],
+        ),
+        SizedBox(height: theme.spacing.section),
+
+        // ── Icon Only ─────────────────────────────────────────
+        Host4SectionHeader(
+          title: 'Icon Only',
+          subtitle: 'no label · square padding',
+        ),
+        SizedBox(height: theme.spacing.md),
+        Wrap(
+          spacing: theme.spacing.sm,
+          runSpacing: theme.spacing.sm,
+          children: const [
+            Host4Button(
+              label: 'Primary',
+              content: Host4ButtonContent.iconOnly,
+              icon: Icons.palette_outlined,
+              onPressed: _noOp,
+            ),
+            Host4Button(
+              label: 'Secondary',
+              variant: Host4ButtonVariant.secondary,
+              content: Host4ButtonContent.iconOnly,
+              icon: Icons.cloud_download_outlined,
+              onPressed: _noOp,
+            ),
+            Host4Button(
+              label: 'Ghost',
+              variant: Host4ButtonVariant.ghost,
+              content: Host4ButtonContent.iconOnly,
+              icon: Icons.info_outline_rounded,
+              onPressed: _noOp,
+            ),
+          ],
+        ),
+        SizedBox(height: theme.spacing.section),
+
+        // ── Expanded ──────────────────────────────────────────
+        Host4SectionHeader(
+          title: l10n.sectionExpanded,
+          subtitle: 'expanded: true',
+        ),
+        SizedBox(height: theme.spacing.md),
+        const Host4Button(
+          label: 'Primary Expanded',
+          expanded: true,
+          onPressed: _noOp,
+        ),
+        SizedBox(height: theme.spacing.sm),
+        const Host4Button(
+          label: 'Secondary Expanded',
+          variant: Host4ButtonVariant.secondary,
+          expanded: true,
+          onPressed: _noOp,
+        ),
+        SizedBox(height: theme.spacing.sm),
+        const Host4Button(
+          label: 'Ghost Expanded',
+          variant: Host4ButtonVariant.ghost,
+          expanded: true,
+          onPressed: _noOp,
+        ),
+        SizedBox(height: theme.spacing.section),
+
+        // ── Disabled ──────────────────────────────────────────
+        Host4SectionHeader(
+          title: l10n.sectionDisabled,
+          subtitle: 'onPressed: null',
+        ),
+        SizedBox(height: theme.spacing.md),
+        Wrap(
+          spacing: theme.spacing.sm,
+          runSpacing: theme.spacing.sm,
+          children: const [
+            Host4Button(
+              label: 'Primary',
+              onPressed: null,
+            ),
+            Host4Button(
+              label: 'Secondary',
+              variant: Host4ButtonVariant.secondary,
+              onPressed: null,
+            ),
+            Host4Button(
+              label: 'Ghost',
+              variant: Host4ButtonVariant.ghost,
+              onPressed: null,
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+void _noOp() {}
 
 class ThemePlaygroundPage extends StatefulWidget {
   const ThemePlaygroundPage({super.key});
@@ -497,8 +747,10 @@ class _ThemePlaygroundPageState extends State<ThemePlaygroundPage> {
                   variant: selected
                       ? Host4ButtonVariant.primary
                       : Host4ButtonVariant.secondary,
-                  onPressed: () =>
-                      manager.applyTheme(entry.id, mode: manager.currentMode),
+                  onPressed: () {
+                    _log.info('Theme switching to: ${entry.id}');
+                    manager.applyTheme(entry.id, mode: manager.currentMode);
+                  },
                 );
               })
               .toList(growable: false),
@@ -520,7 +772,10 @@ class _ThemePlaygroundPageState extends State<ThemePlaygroundPage> {
                   variant: selected
                       ? Host4ButtonVariant.primary
                       : Host4ButtonVariant.secondary,
-                  onPressed: () => manager.applyMode(mode),
+                  onPressed: () {
+                    _log.info('Mode switching to: $mode');
+                    manager.applyMode(mode);
+                  },
                 );
               })
               .toList(growable: false),
@@ -545,6 +800,7 @@ class _ThemePlaygroundPageState extends State<ThemePlaygroundPage> {
               SizedBox(height: theme.spacing.md),
               Host4Button(
                 label: l10n.generateThemeButton,
+                content: Host4ButtonContent.iconLeft,
                 icon: Icons.auto_awesome_outlined,
                 expanded: true,
                 onPressed: null,
@@ -605,20 +861,57 @@ class _ThemePlaygroundPageState extends State<ThemePlaygroundPage> {
   }
 }
 
-class LanguagePage extends StatelessWidget {
-  const LanguagePage({required this.onLocaleChanged, super.key});
+class LanguagePage extends StatefulWidget {
+  const LanguagePage({
+    required this.localePreference,
+    required this.onLocalePreferenceChanged,
+    super.key,
+  });
 
-  final ValueChanged<Locale> onLocaleChanged;
+  final Locale? localePreference;
+  final ValueChanged<Locale?> onLocalePreferenceChanged;
+
+  @override
+  State<LanguagePage> createState() => _LanguagePageState();
+}
+
+class _LanguagePageState extends State<LanguagePage> {
+  late Locale? _preference;
+
+  @override
+  void initState() {
+    super.initState();
+    _preference = widget.localePreference;
+  }
+
+  void _select(Locale? locale) {
+    setState(() => _preference = locale);
+    widget.onLocalePreferenceChanged(locale);
+  }
+
+  static String _systemLocaleName(AppLocalizations l10n) {
+    final systemLocales = PlatformDispatcher.instance.locales;
+    for (final locale in systemLocales) {
+      if (_supportedLanguageCodes.contains(locale.languageCode)) {
+        return switch (locale.languageCode) {
+          'zh' => l10n.chineseLanguageName,
+          _ => l10n.englishLanguageName,
+        };
+      }
+    }
+    return l10n.englishLanguageName;
+  }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = context.host4Theme;
-    final locale = Localizations.localeOf(context);
-    final currentLanguage = switch (locale.languageCode) {
-      'zh' => l10n.chineseLanguageName,
-      _ => l10n.englishLanguageName,
-    };
+    final isFollowingSystem = _preference == null;
+
+    final languages = [
+      (code: 'en', name: l10n.englishLanguageName),
+      (code: 'zh', name: l10n.chineseLanguageName),
+    ];
 
     return ListView(
       padding: EdgeInsets.fromLTRB(
@@ -628,49 +921,498 @@ class LanguagePage extends StatelessWidget {
         theme.spacing.page,
       ),
       children: [
-        Host4Card(
+        Host4ListCell(
+          title: l10n.languageFollowSystem,
+          subtitle: isFollowingSystem
+              ? '${l10n.languageFollowSystemSubtitle} · ${_systemLocaleName(l10n)}'
+              : l10n.languageFollowSystemSubtitle,
+          trailingText: isFollowingSystem ? '✓' : null,
+          onTap: () => _select(null),
+        ),
+        SizedBox(height: theme.spacing.section),
+        Host4SectionHeader(title: l10n.languageManualSection, subtitle: ''),
+        SizedBox(height: theme.spacing.sm),
+        ...languages.map((lang) {
+          final isActive = _preference?.languageCode == lang.code;
+          return Padding(
+            padding: EdgeInsets.only(bottom: theme.spacing.listGap),
+            child: Host4ListCell(
+              title: lang.name,
+              subtitle: '',
+              trailingText: isActive ? '✓' : null,
+              onTap: () => _select(Locale(lang.code)),
+            ),
+          );
+        }),
+      ],
+    );
+  }
+}
+
+class SettingsPage extends StatelessWidget {
+  const SettingsPage({
+    required this.localePreference,
+    required this.onLocalePreferenceChanged,
+    required this.onResetToDefaults,
+    super.key,
+  });
+
+  final Locale? localePreference;
+  final ValueChanged<Locale?> onLocalePreferenceChanged;
+  final Future<void> Function() onResetToDefaults;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = context.host4Theme;
+
+    return ListView(
+      padding: EdgeInsets.fromLTRB(
+        theme.spacing.page,
+        0,
+        theme.spacing.page,
+        theme.spacing.page,
+      ),
+      children: [
+        Host4Banner(
+          badge: l10n.localThemesBadge,
+          imagePath: theme.images.promoBanner,
+          title: l10n.settingsBannerTitle,
+          subtitle: l10n.settingsBannerSubtitle,
+        ),
+        SizedBox(height: theme.spacing.section),
+        Host4ListCell(
+          title: l10n.themePlaygroundPageTitle,
+          subtitle: l10n.themePlaygroundPageSubtitle,
+          leading: _ListIcon(
+            icon: Icons.palette_outlined,
+            color: theme.colors.brandPrimary,
+          ),
+          onTap: () => Navigator.of(context).push(MaterialPageRoute(
+            builder: (context) => _SubPageScaffold(
+              title: l10n.themePlaygroundPageTitle,
+              subtitle: l10n.themePlaygroundPageSubtitle,
+              child: const ThemePlaygroundPage(),
+            ),
+          )),
+        ),
+        SizedBox(height: theme.spacing.listGap),
+        Host4ListCell(
+          title: l10n.languagePageTitle,
+          subtitle: l10n.languagePageSubtitle,
+          leading: _ListIcon(
+            icon: Icons.language_outlined,
+            color: theme.colors.brandAccent,
+          ),
+          onTap: () => Navigator.of(context).push(MaterialPageRoute(
+            builder: (context) => _SubPageScaffold(
+              title: l10n.languagePageTitle,
+              subtitle: l10n.languagePageSubtitle,
+              child: LanguagePage(
+                localePreference: localePreference,
+                onLocalePreferenceChanged: onLocalePreferenceChanged,
+              ),
+            ),
+          )),
+        ),
+        SizedBox(height: theme.spacing.listGap),
+        Host4ListCell(
+          title: l10n.logsPageTitle,
+          subtitle: l10n.logsPageSubtitle,
+          leading: _ListIcon(
+            icon: Icons.article_outlined,
+            color: theme.colors.success,
+          ),
+          onTap: () => Navigator.of(context).push(MaterialPageRoute(
+            builder: (context) => const LogsPage(),
+          )),
+        ),
+        SizedBox(height: theme.spacing.listGap),
+        Host4ListCell(
+          title: l10n.testerPageTitle,
+          subtitle: l10n.testerPageSubtitle,
+          leading: _ListIcon(
+            icon: Icons.developer_mode_outlined,
+            color: theme.colors.brandSecondary,
+          ),
+          onTap: () => Navigator.of(context).push(MaterialPageRoute(
+            builder: (context) => _SubPageScaffold(
+              title: l10n.testerPageTitle,
+              subtitle: l10n.testerPageSubtitle,
+              child: TesterPage(onResetToDefaults: onResetToDefaults),
+            ),
+          )),
+        ),
+      ],
+    );
+  }
+}
+
+/// Sub-page scaffold that keeps the theme background image.
+/// Used for Settings sub-pages (Theme Playground, Language, etc.).
+class _SubPageScaffold extends StatelessWidget {
+  const _SubPageScaffold({
+    required this.title,
+    required this.child,
+    this.subtitle,
+  });
+
+  final String title;
+  final String? subtitle;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = context.host4Theme;
+
+    return Host4PageScaffold(
+      useSafeArea: false,
+      body: Column(
+        children: [
+          SafeArea(
+            bottom: false,
+            child: Host4NavigationBar(
+              title: title,
+              subtitle: subtitle,
+              leading: GestureDetector(
+                onTap: () => Navigator.of(context).pop(),
+                child: Icon(
+                  Icons.arrow_back_ios_new_rounded,
+                  color: theme.components.navigationBar.icon,
+                  size: 20,
+                ),
+              ),
+            ),
+          ),
+          Expanded(child: child),
+        ],
+      ),
+    );
+  }
+}
+
+/// Sub-page scaffold for component demo pages.
+/// Uses a plain surface color (no background image) so components
+/// are always shown against a neutral, predictable canvas.
+class _ComponentDemoScaffold extends StatelessWidget {
+  const _ComponentDemoScaffold({
+    required this.title,
+    required this.child,
+    this.subtitle,
+  });
+
+  final String title;
+  final String? subtitle;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = context.host4Theme;
+
+    return Scaffold(
+      backgroundColor: theme.colors.pageBackground,
+      body: Column(
+        children: [
+          SafeArea(
+            bottom: false,
+            child: Host4NavigationBar(
+              title: title,
+              subtitle: subtitle,
+              leading: GestureDetector(
+                onTap: () => Navigator.of(context).pop(),
+                child: Icon(
+                  Icons.arrow_back_ios_new_rounded,
+                  color: theme.components.navigationBar.icon,
+                  size: 20,
+                ),
+              ),
+            ),
+          ),
+          Expanded(child: child),
+        ],
+      ),
+    );
+  }
+}
+
+class TesterPage extends StatelessWidget {
+  const TesterPage({required this.onResetToDefaults, super.key});
+
+  final Future<void> Function() onResetToDefaults;
+
+  Future<void> _confirmReset(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.testerResetConfirmTitle),
+        content: Text(l10n.testerResetConfirmBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(l10n.testerResetConfirmAction),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    await onResetToDefaults();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = context.host4Theme;
+
+    return GridView.count(
+      crossAxisCount: 3,
+      padding: EdgeInsets.all(theme.spacing.page),
+      crossAxisSpacing: theme.spacing.md,
+      mainAxisSpacing: theme.spacing.md,
+      children: [
+        _TesterGridItem(
+          icon: Icons.restore_rounded,
+          label: l10n.testerResetTitle,
+          color: theme.colors.warning,
+          onTap: () => _confirmReset(context),
+        ),
+      ],
+    );
+  }
+}
+
+class _TesterGridItem extends StatelessWidget {
+  const _TesterGridItem({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = context.host4Theme;
+
+    return Material(
+      color: theme.colors.surface,
+      borderRadius: BorderRadius.circular(theme.radius.md),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(theme.radius.md),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(theme.radius.md),
+            border: Border.all(color: theme.colors.borderDefault),
+          ),
+          padding: EdgeInsets.all(theme.spacing.md),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Host4Text(
-                l10n.languageSettingsTitle,
-                role: Host4TextRole.heading,
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(theme.radius.md),
+                ),
+                child: Icon(icon, color: color, size: 22),
               ),
               SizedBox(height: theme.spacing.sm),
-              Host4Text(
-                l10n.languageSettingsSubtitle,
-                colorRole: Host4TextColorRole.secondary,
-              ),
-              SizedBox(height: theme.spacing.lg),
-              Host4Text(
-                l10n.currentLanguageLabel(currentLanguage),
-                colorRole: Host4TextColorRole.secondary,
-              ),
-              SizedBox(height: theme.spacing.md),
-              Wrap(
-                spacing: theme.spacing.sm,
-                runSpacing: theme.spacing.sm,
-                children: [
-                  Host4Button(
-                    label: l10n.switchToEnglishButton,
-                    variant: locale.languageCode == 'en'
-                        ? Host4ButtonVariant.primary
-                        : Host4ButtonVariant.secondary,
-                    onPressed: () => onLocaleChanged(const Locale('en')),
+              Flexible(
+                child: Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.typography.caption.toTextStyle(
+                    theme.colors.textPrimary,
                   ),
-                  Host4Button(
-                    label: l10n.switchToChineseButton,
-                    variant: locale.languageCode == 'zh'
-                        ? Host4ButtonVariant.primary
-                        : Host4ButtonVariant.secondary,
-                    onPressed: () => onLocaleChanged(const Locale('zh')),
-                  ),
-                ],
+                ),
               ),
             ],
           ),
         ),
-      ],
+      ),
+    );
+  }
+}
+
+class LogsPage extends StatefulWidget {
+  const LogsPage({super.key});
+
+  @override
+  State<LogsPage> createState() => _LogsPageState();
+}
+
+class _LogsPageState extends State<LogsPage> {
+  String? _content;
+  File? _file;
+  bool _loading = true;
+  final _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLogs();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadLogs() async {
+    final file = await Host4Logger.exportLogFile();
+    final content = file != null && file.existsSync()
+        ? file.readAsStringSync()
+        : null;
+    if (!mounted) return;
+    setState(() {
+      _file = file;
+      _content = (content?.isEmpty ?? true) ? null : content;
+      _loading = false;
+    });
+    if (_content != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_scrollController.hasClients) {
+          _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+        }
+      });
+    }
+  }
+
+  Future<void> _export() async {
+    final file = _file;
+    if (file == null || !file.existsSync()) return;
+    await Share.shareXFiles(
+      [XFile(file.path)],
+      subject: 'host4_flutter.log',
+    );
+  }
+
+  Future<void> _confirmClear() async {
+    final l10n = AppLocalizations.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.logsClearConfirmTitle),
+        content: Text(l10n.logsClearConfirmBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(l10n.logsClearConfirmAction),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    await Host4Logger.clearLogFile();
+    setState(() => _content = null);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = context.host4Theme;
+
+    return Host4PageScaffold(
+      useSafeArea: false,
+      body: Column(
+        children: [
+          SafeArea(
+            bottom: false,
+            child: Host4NavigationBar(
+              title: l10n.logsPageTitle,
+              leading: GestureDetector(
+                onTap: () => Navigator.of(context).pop(),
+                child: Icon(
+                  Icons.arrow_back_ios_new_rounded,
+                  color: theme.components.navigationBar.icon,
+                  size: 20,
+                ),
+              ),
+              trailing: GestureDetector(
+                onTap: _confirmClear,
+                child: Text(
+                  l10n.logsClearButton,
+                  style: theme.typography.label
+                      .toTextStyle(theme.colors.warning),
+                ),
+              ),
+            ),
+          ),
+          Expanded(child: _buildBody(context)),
+          SafeArea(
+            top: false,
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(
+                theme.spacing.page,
+                theme.spacing.sm,
+                theme.spacing.page,
+                theme.spacing.md,
+              ),
+              child: Host4Button(
+                label: l10n.logsExportButton,
+                content: Host4ButtonContent.iconLeft,
+                icon: Icons.ios_share_rounded,
+                expanded: true,
+                onPressed: _content != null ? _export : null,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBody(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = context.host4Theme;
+
+    if (_loading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_content == null) {
+      return Center(
+        child: Host4Text(
+          l10n.logsEmptyMessage,
+          colorRole: Host4TextColorRole.secondary,
+        ),
+      );
+    }
+
+    return SingleChildScrollView(
+      controller: _scrollController,
+      padding: EdgeInsets.all(theme.spacing.page),
+      child: SizedBox(
+        width: double.infinity,
+        child: SelectableText(
+          _content!,
+          style: theme.typography.caption
+              .toTextStyle(theme.colors.textPrimary)
+              .copyWith(
+                fontFamily: 'Courier New',
+                fontFamilyFallback: const ['Courier', 'monospace'],
+                fontSize: 13,
+                height: 1.6,
+              ),
+        ),
+      ),
     );
   }
 }
@@ -814,48 +1556,6 @@ class _ColorChip extends StatelessWidget {
   }
 }
 
-class _ListItemData {
-  const _ListItemData({
-    required this.title,
-    required this.subtitle,
-    required this.badge,
-    required this.icon,
-  });
-
-  final String title;
-  final String subtitle;
-  final String badge;
-  final IconData icon;
-}
-
-List<_ListItemData> _buildListItems(AppLocalizations l10n) {
-  return [
-    _ListItemData(
-      title: l10n.themeRegistryTitle,
-      subtitle: l10n.themeRegistrySubtitle,
-      badge: l10n.badgeP0,
-      icon: Icons.folder_outlined,
-    ),
-    _ListItemData(
-      title: l10n.tokenParserTitle,
-      subtitle: l10n.tokenParserSubtitle,
-      badge: l10n.badgeReady,
-      icon: Icons.data_object_rounded,
-    ),
-    _ListItemData(
-      title: l10n.themeScopeTitle,
-      subtitle: l10n.themeScopeSubtitle,
-      badge: l10n.badgeLive,
-      icon: Icons.refresh_rounded,
-    ),
-    _ListItemData(
-      title: l10n.playgroundTitle,
-      subtitle: l10n.playgroundSubtitle,
-      badge: l10n.badgeStub,
-      icon: Icons.auto_awesome_outlined,
-    ),
-  ];
-}
 
 String _localizedModeLabel(AppLocalizations l10n, String mode) {
   return switch (mode) {

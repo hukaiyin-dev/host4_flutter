@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../foundation/theme/host4_theme_scope.dart';
-import 'host4_text.dart';
 
 class Host4Banner extends StatelessWidget {
   const Host4Banner({
@@ -97,21 +96,25 @@ class Host4Banner extends StatelessWidget {
                               theme.radius.pill,
                             ),
                           ),
-                          child: Host4Text(
+                          child: Text(
                             badge,
-                            role: Host4TextRole.caption,
-                            colorRole: Host4TextColorRole.inverse,
+                            style: theme.typography.caption
+                                .toTextStyle(colors.badgeForeground),
                           ),
                         ),
                         SizedBox(height: theme.spacing.md),
-                        Host4Text(
+                        Text(
                           title,
-                          role: Host4TextRole.title,
-                          colorRole: Host4TextColorRole.inverse,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.typography.title
+                              .toTextStyle(colors.title),
                         ),
                         SizedBox(height: theme.spacing.xs),
                         Text(
                           subtitle,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                           style: theme.typography.body.toTextStyle(
                             colors.subtitle,
                           ),

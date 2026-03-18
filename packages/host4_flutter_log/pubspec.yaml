@@ -10,6 +10,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  host4_flutter_core:
+    path: ../host4_flutter_core
+  path_provider: ^2.1.0
 
 dev_dependencies:
   flutter_test:
