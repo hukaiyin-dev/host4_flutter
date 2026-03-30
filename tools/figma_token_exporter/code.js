@@ -36,17 +36,17 @@ async function processTokens(tokens) {
 
   // 2. 第一遍: 处理 Primitive (只处理原始值)
   if (tokens.primitive) {
-    traverseAndCreate(tokens.primitive, 'Primitive', []);
+    await traverseAndCreate(tokens.primitive, 'Primitive', []);
   }
 
   // 3. 第二遍: 处理 Semantic (建立对 Primitive 的引用)
   if (tokens.semantic) {
-    traverseAndCreate(tokens.semantic, 'Semantic', []);
+    await traverseAndCreate(tokens.semantic, 'Semantic', []);
   }
 
   // 4. 第三遍: 处理 Component (建立对 Semantic 的引用)
   if (tokens.component) {
-    traverseAndCreate(tokens.component, 'Component', []);
+    await traverseAndCreate(tokens.component, 'Component', []);
   }
 }
 
@@ -62,7 +62,7 @@ function isModeObject(value, colName) {
   return keys.length > 0 && keys.every(k => validModes.includes(k));
 }
 
-function traverseAndCreate(node, colName, pathSegments) {
+async function traverseAndCreate(node, colName, pathSegments) {
   const collection = collections[colName];
   const modeIds = collection.modes.map(m => m.modeId);
 
@@ -75,54 +75,79 @@ function traverseAndCreate(node, colName, pathSegments) {
       // 检查是否是 mode 对象 (light/dark 等)
       if (isModeObject(value, colName)) {
         // 作为一个变量处理，不再递归
-        createVariable(collection, fullPath, value, colName);
+        await createVariable(collection, fullPath, value, colName);
       } else {
         // 递归处理子节点
-        traverseAndCreate(value, colName, currentPath);
+        await traverseAndCreate(value, colName, currentPath);
       }
     } else {
       // 创建或更新变量
-      createVariable(collection, fullPath, value, colName);
+      await createVariable(collection, fullPath, value, colName);
     }
   }
 }
 
 
-function createVariable(collection, path, value, colName) {
-  let variable = (figma.variables.getLocalVariablesAsync()).then(vars => 
-    vars.find(v => v.name === path && v.variableCollectionId === collection.id)
+async function createVariable(collection, path, value, colName) {
+  // 获取现有变量列表
+  const vars = await figma.variables.getLocalVariablesAsync();
+  let v = vars.find(variable => 
+    variable.name === path && variable.variableCollectionId === collection.id
   );
   
-  // 这里简化处理，如果不存在则创建
-  // 注意：真实场景建议先 async 获取所有变量列表缓存起来提速
-  // 为了逻辑清晰，以下展示核心转换逻辑
-  
-  let type = 'FLOAT';
-  if (typeof value === 'string' && (value.startsWith('#') || isColorAlias(value))) {
-    type = 'COLOR';
-  } else if (typeof value === 'string' && isAlias(value)) {
-    // 可能是引用的数值
-    type = 'FLOAT'; 
-  }
-
-  const v = figma.variables.createVariable(path, collection, type);
-  
-  // 设置值
-  collection.modes.forEach(mode => {
-    const val = resolveValue(value, mode.name.toLowerCase());
-    if (typeof val === 'string' && val.startsWith('{')) {
-      // 设置 Alias
-      const aliasPath = val.replace(/[{}]/g, '').replace(/\./g, '/');
-      const targetId = variableMap[aliasPath];
-      if (targetId) {
-        v.setValueForMode(mode.modeId, { type: 'VARIABLE_ALIAS', id: targetId });
+  // 如果变量已存在，直接复用
+  if (v) {
+    // 更新现有变量的值
+    collection.modes.forEach(mode => {
+      const val = resolveValue(value, mode.name);
+      if (typeof val === 'string' && val.startsWith('{')) {
+        // 设置 Alias
+        const aliasPath = val.replace(/[{}]/g, '').replace(/\./g, '/');
+        const targetId = variableMap[aliasPath];
+        if (targetId) {
+          v.setValueForMode(mode.modeId, { type: 'VARIABLE_ALIAS', id: targetId });
+        }
+      } else {
+        // 设置原始值
+        const type = v.resolvedType;
+        const finalVal = type === 'COLOR' ? parseColor(val) : val;
+        v.setValueForMode(mode.modeId, finalVal);
       }
-    } else {
-      // 设置原始值
-      const finalVal = type === 'COLOR' ? parseColor(val) : val;
-      v.setValueForMode(mode.modeId, finalVal);
+    });
+  } else {
+    // 变量不存在，创建新变量
+    let type = 'FLOAT';
+    if (typeof value === 'string' && (value.startsWith('#') || isColorAlias(value))) {
+      type = 'COLOR';
+    } else if (typeof value === 'object' && !isAlias(value)) {
+      // mode 对象中的值
+      const firstVal = Object.values(value)[0];
+      if (typeof firstVal === 'string' && firstVal.startsWith('#')) {
+        type = 'COLOR';
+      }
+    } else if (typeof value === 'string' && isAlias(value)) {
+      type = 'FLOAT'; 
     }
-  });
+
+    v = figma.variables.createVariable(path, collection, type);
+    
+    // 设置值
+    collection.modes.forEach(mode => {
+      const val = resolveValue(value, mode.name);
+      if (typeof val === 'string' && val.startsWith('{')) {
+        // 设置 Alias
+        const aliasPath = val.replace(/[{}]/g, '').replace(/\./g, '/');
+        const targetId = variableMap[aliasPath];
+        if (targetId) {
+          v.setValueForMode(mode.modeId, { type: 'VARIABLE_ALIAS', id: targetId });
+        }
+      } else {
+        // 设置原始值
+        const finalVal = type === 'COLOR' ? parseColor(val) : val;
+        v.setValueForMode(mode.modeId, finalVal);
+      }
+    });
+  }
 
   variableMap[`${colName.toLowerCase()}/${path}`] = v.id;
   // 特例：primitive 的路径可能需要去掉层级前缀供 semantic 引用
