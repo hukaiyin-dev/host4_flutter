@@ -64,7 +64,6 @@ function isModeObject(value, colName) {
 
 async function traverseAndCreate(node, colName, pathSegments) {
   const collection = collections[colName];
-  const modeIds = collection.modes.map(m => m.modeId);
 
   for (const key in node) {
     const value = node[key];
@@ -87,6 +86,32 @@ async function traverseAndCreate(node, colName, pathSegments) {
   }
 }
 
+function inferVariableType(value) {
+  // 如果是 mode 对象，检查所有值的类型
+  if (typeof value === 'object' && value !== null && !isAlias(value) && !isColor(value)) {
+    const vals = Object.values(value);
+    if (vals.length > 0) {
+      const firstVal = vals[0];
+      if (typeof firstVal === 'string') {
+        if (firstVal.startsWith('#') || isColorAlias(firstVal)) {
+          // 验证所有值都是颜色类型
+          if (vals.every(v => typeof v === 'string' && (v.startsWith('#') || isColorAlias(v)))) {
+            return 'COLOR';
+          }
+        }
+      }
+    }
+  }
+  
+  // 直接值
+  if (typeof value === 'string') {
+    if (value.startsWith('#') || isColorAlias(value)) {
+      return 'COLOR';
+    }
+  }
+  
+  return 'FLOAT';
+}
 
 async function createVariable(collection, path, value, colName) {
   // 获取现有变量列表
@@ -107,28 +132,17 @@ async function createVariable(collection, path, value, colName) {
         if (targetId) {
           v.setValueForMode(mode.modeId, { type: 'VARIABLE_ALIAS', id: targetId });
         }
+      } else if (typeof val === 'string' && val.startsWith('#')) {
+        // 颜色值
+        v.setValueForMode(mode.modeId, parseColor(val));
       } else {
-        // 设置原始值
-        const type = v.resolvedType;
-        const finalVal = type === 'COLOR' ? parseColor(val) : val;
-        v.setValueForMode(mode.modeId, finalVal);
+        // 数值
+        v.setValueForMode(mode.modeId, val);
       }
     });
   } else {
     // 变量不存在，创建新变量
-    let type = 'FLOAT';
-    if (typeof value === 'string' && (value.startsWith('#') || isColorAlias(value))) {
-      type = 'COLOR';
-    } else if (typeof value === 'object' && !isAlias(value)) {
-      // mode 对象中的值
-      const firstVal = Object.values(value)[0];
-      if (typeof firstVal === 'string' && firstVal.startsWith('#')) {
-        type = 'COLOR';
-      }
-    } else if (typeof value === 'string' && isAlias(value)) {
-      type = 'FLOAT'; 
-    }
-
+    const type = inferVariableType(value);
     v = figma.variables.createVariable(path, collection, type);
     
     // 设置值
@@ -141,16 +155,17 @@ async function createVariable(collection, path, value, colName) {
         if (targetId) {
           v.setValueForMode(mode.modeId, { type: 'VARIABLE_ALIAS', id: targetId });
         }
+      } else if (typeof val === 'string' && val.startsWith('#')) {
+        // 颜色值
+        v.setValueForMode(mode.modeId, parseColor(val));
       } else {
-        // 设置原始值
-        const finalVal = type === 'COLOR' ? parseColor(val) : val;
-        v.setValueForMode(mode.modeId, finalVal);
+        // 数值
+        v.setValueForMode(mode.modeId, val);
       }
     });
   }
 
   variableMap[`${colName.toLowerCase()}/${path}`] = v.id;
-  // 特例：primitive 的路径可能需要去掉层级前缀供 semantic 引用
   if (colName === 'Primitive') {
     variableMap[`primitive/${path}`] = v.id;
   } else if (colName === 'Semantic') {
