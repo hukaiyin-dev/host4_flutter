@@ -1,14 +1,13 @@
 figma.showUI(__html__, { width: 320, height: 240 });
 
-const variableMap = {}; // path -> Variable ID
-const collections = {}; // name -> VariableCollection
+const variableMap = {}; 
+const collections = {}; 
 
 figma.ui.onmessage = async (msg) => {
   if (msg.type === 'process-tokens') {
-    const tokens = msg.data;
     try {
-      await processTokens(tokens);
-      figma.ui.postMessage({ type: 'status', text: '✅ 成功! 变量已同步。' });
+      await processTokens(msg.data);
+      figma.ui.postMessage({ type: 'status', text: '✅ 同步成功!' });
     } catch (err) {
       figma.ui.postMessage({ type: 'status', text: '❌ 错误: ' + err.message });
       console.error(err);
@@ -17,49 +16,36 @@ figma.ui.onmessage = async (msg) => {
 };
 
 async function processTokens(tokens) {
-  // 1. 创建或获取 Collections
   const colNames = ['Primitive', 'Semantic', 'Component'];
+  const localCollections = await figma.variables.getLocalVariableCollectionsAsync();
+  
   for (const name of colNames) {
-    let col = (await figma.variables.getLocalVariableCollectionsAsync()).find(c => c.name === name);
+    let col = localCollections.find(c => c.name === name);
     if (!col) {
       col = figma.variables.createVariableCollection(name);
     }
-    // 确保有 Light 和 Dark 模式 (对应 Semantic 和 Component)
-    if (name !== 'Primitive') {
-      if (col.modes.length < 2) {
-        col.addMode('Dark');
-        col.renameMode(col.modes[0].modeId, 'Light');
-      }
+    // 强制建立 Light/Dark 模式
+    if (name !== 'Primitive' && col.modes.length < 2) {
+      col.addMode('Dark');
+      col.renameMode(col.modes[0].modeId, 'Light');
     }
     collections[name] = col;
   }
 
-  // 2. 第一遍: 处理 Primitive (只处理原始值)
+  // 1. Primitive 层 (不含 Mode，直接创建)
   if (tokens.primitive) {
     await traverseAndCreate(tokens.primitive, 'Primitive', []);
   }
 
-  // 3. 第二遍: 处理 Semantic (建立对 Primitive 的引用)
+  // 2. Semantic 层 (支持 Mode)
   if (tokens.semantic) {
     await traverseAndCreate(tokens.semantic, 'Semantic', []);
   }
 
-  // 4. 第三遍: 处理 Component (建立对 Semantic 的引用)
+  // 3. Component 层 (支持 Mode)
   if (tokens.component) {
     await traverseAndCreate(tokens.component, 'Component', []);
   }
-}
-
-function isModeObject(value, colName) {
-  // Primitive 层不应该有 mode，只有 Semantic 和 Component
-  if (colName === 'Primitive') return false;
-  
-  // 检查对象键是否都是模式名（light, dark 等）
-  const keys = Object.keys(value);
-  const validModes = ['light', 'dark'];
-  
-  // 如果所有键都是有效的 mode，则这是一个 mode 对象
-  return keys.length > 0 && keys.every(k => validModes.includes(k));
 }
 
 async function traverseAndCreate(node, colName, pathSegments) {
@@ -70,132 +56,90 @@ async function traverseAndCreate(node, colName, pathSegments) {
     const currentPath = [...pathSegments, key];
     const fullPath = currentPath.join('/');
 
-    if (typeof value === 'object' && value !== null && !isColor(value) && !isAlias(value)) {
-      // 检查是否是 mode 对象 (light/dark 等)
-      if (isModeObject(value, colName)) {
-        // 作为一个变量处理，不再递归
+    // 修复关键：判断是否是 Mode 对象 (即包含 light/dark 键)
+    if (isModeObject(value)) {
+      await createVariable(collection, fullPath, value, colName);
+    } else if (typeof value === 'string' && value.startsWith('{')) {
+      // 这是一个 alias，检查是否指向对象结构
+      // 如果 alias 指向 typography、effect 这样的对象结构，不创建变量
+      if (!isAliasToObjectStructure(value)) {
+        // 只为指向原始值（颜色、数字）的 alias 创建变量
         await createVariable(collection, fullPath, value, colName);
-      } else {
-        // 递归处理子节点
-        await traverseAndCreate(value, colName, currentPath);
       }
+      // 否则跳过，让设计师手动处理复杂对象
+    } else if (typeof value === 'object' && value !== null && !isColor(value)) {
+      // 递归处理子对象
+      await traverseAndCreate(value, colName, currentPath);
     } else {
-      // 创建或更新变量
+      // 基础值（颜色或数字）
       await createVariable(collection, fullPath, value, colName);
     }
   }
 }
 
-function inferVariableType(value) {
-  // 如果是 mode 对象，检查所有值的类型
-  if (typeof value === 'object' && value !== null && !isAlias(value) && !isColor(value)) {
-    const vals = Object.values(value);
-    if (vals.length > 0) {
-      const firstVal = vals[0];
-      if (typeof firstVal === 'string') {
-        if (firstVal.startsWith('#') || isColorAlias(firstVal)) {
-          // 验证所有值都是颜色类型
-          if (vals.every(v => typeof v === 'string' && (v.startsWith('#') || isColorAlias(v)))) {
-            return 'COLOR';
-          }
-        }
-      }
-    }
-  }
-  
-  // 直接值
-  if (typeof value === 'string') {
-    if (value.startsWith('#') || isColorAlias(value)) {
-      return 'COLOR';
-    }
-  }
-  
-  return 'FLOAT';
-}
-
 async function createVariable(collection, path, value, colName) {
-  // 获取现有变量列表
-  const vars = await figma.variables.getLocalVariablesAsync();
-  let v = vars.find(variable => 
-    variable.name === path && variable.variableCollectionId === collection.id
-  );
-  
-  // 如果变量已存在，直接复用
-  if (v) {
-    // 更新现有变量的值
-    collection.modes.forEach(mode => {
-      const val = resolveValue(value, mode.name);
-      if (typeof val === 'string' && val.startsWith('{')) {
-        // 设置 Alias
-        const aliasPath = val.replace(/[{}]/g, '').replace(/\./g, '/');
-        const targetId = variableMap[aliasPath];
-        if (targetId) {
-          v.setValueForMode(mode.modeId, { type: 'VARIABLE_ALIAS', id: targetId });
-        }
-      } else if (typeof val === 'string' && val.startsWith('#')) {
-        // 颜色值
-        v.setValueForMode(mode.modeId, parseColor(val));
-      } else {
-        // 数值
-        v.setValueForMode(mode.modeId, val);
-      }
-    });
-  } else {
-    // 变量不存在，创建新变量
-    const type = inferVariableType(value);
-    v = figma.variables.createVariable(path, collection, type);
-    
-    // 设置值
-    collection.modes.forEach(mode => {
-      const val = resolveValue(value, mode.name);
-      if (typeof val === 'string' && val.startsWith('{')) {
-        // 设置 Alias
-        const aliasPath = val.replace(/[{}]/g, '').replace(/\./g, '/');
-        const targetId = variableMap[aliasPath];
-        if (targetId) {
-          v.setValueForMode(mode.modeId, { type: 'VARIABLE_ALIAS', id: targetId });
-        }
-      } else if (typeof val === 'string' && val.startsWith('#')) {
-        // 颜色值
-        v.setValueForMode(mode.modeId, parseColor(val));
-      } else {
-        // 数值
-        v.setValueForMode(mode.modeId, val);
-      }
-    });
+  const localVars = await figma.variables.getLocalVariablesAsync();
+  let v = localVars.find(varItem => varItem.name === path && varItem.variableCollectionId === collection.id);
+
+  // 类型识别
+  let type = 'FLOAT';
+  const firstVal = typeof value === 'object' ? Object.values(value)[0] : value;
+  if (typeof firstVal === 'string' && (firstVal.startsWith('#') || firstVal.includes('.color.'))) {
+    type = 'COLOR';
+  } else if (typeof firstVal === 'string' && (firstVal.includes('.typography.') || firstVal.includes('.style.'))) {
+     // 文本样式在 Variables 中通常不支持，但如果是引用数值
+     type = 'FLOAT';
   }
 
-  variableMap[`${colName.toLowerCase()}/${path}`] = v.id;
-  if (colName === 'Primitive') {
-    variableMap[`primitive/${path}`] = v.id;
-  } else if (colName === 'Semantic') {
-    variableMap[`semantic/${path}`] = v.id;
+  if (!v) {
+    v = figma.variables.createVariable(path, collection, type);
   }
+
+  // 模式赋值逻辑
+  for (const mode of collection.modes) {
+    const modeName = mode.name.toLowerCase();
+    const rawVal = resolveValueForMode(value, modeName);
+    
+    if (typeof rawVal === 'string' && rawVal.startsWith('{')) {
+      // 处理 Alias
+      const aliasPath = rawVal.replace(/[{}]/g, '').replace(/\./g, '/');
+      const targetId = variableMap[aliasPath];
+      if (targetId) {
+        v.setValueForMode(mode.modeId, { type: 'VARIABLE_ALIAS', id: targetId });
+      }
+    } else if (rawVal !== undefined) {
+      // 处理原始值
+      const finalVal = type === 'COLOR' ? parseColor(rawVal) : rawVal;
+      v.setValueForMode(mode.modeId, finalVal);
+    }
+  }
+
+  // 记录到 Map 供后续引用
+  variableMap[`${colName.toLowerCase()}/${path}`] = v.id;
 }
 
-function resolveValue(value, modeName) {
-  // modeName 来自 Figma mode 名称 ("Light" 或 "Dark")
-  // 需要转换为 tokens.json 中的模式键 ("light" 或 "dark")
-  const modeKey = modeName.toLowerCase();
-  
+function isModeObject(val) {
+  return typeof val === 'object' && val !== null && (val.hasOwnProperty('light') || val.hasOwnProperty('dark'));
+}
+
+function isAliasToObjectStructure(aliasStr) {
+  // 检查 alias 是否指向复杂对象结构
+  // typography、effect、size 等通常是对象结构，不应作为 Variables 引用
+  const objectPaths = ['.typography.', '.effect.', '.size.'];
+  return objectPaths.some(path => aliasStr.includes(path));
+}
+
+function resolveValueForMode(value, mode) {
   if (typeof value === 'object' && value !== null) {
-    return value[modeKey] || value['light'] || Object.values(value)[0];
+    if (value.hasOwnProperty(mode)) return value[mode];
+    if (value.hasOwnProperty('light')) return value['light'];
+    return Object.values(value)[0];
   }
   return value;
 }
 
-function isColor(val) {
-  return typeof val === 'string' && val.startsWith('#');
-}
-
-function isAlias(val) {
-  return typeof val === 'string' && val.startsWith('{');
-}
-
-function isColorAlias(val) {
-  // 启发式判断：如果引用路径包含 .color. 则是颜色引用
-  return typeof val === 'string' && val.includes('.color.');
-}
+function isColor(val) { return typeof val === 'string' && val.startsWith('#'); }
+function isAlias(val) { return typeof val === 'string' && val.startsWith('{'); }
 
 function parseColor(hex) {
   hex = hex.replace('#', '');
@@ -203,8 +147,6 @@ function parseColor(hex) {
   const g = parseInt(hex.substring(2, 4), 16) / 255;
   const b = parseInt(hex.substring(4, 6), 16) / 255;
   let a = 1;
-  if (hex.length === 8) {
-    a = parseInt(hex.substring(6, 8), 16) / 255;
-  }
+  if (hex.length === 8) a = parseInt(hex.substring(6, 8), 16) / 255;
   return { r, g, b, a };
 }
