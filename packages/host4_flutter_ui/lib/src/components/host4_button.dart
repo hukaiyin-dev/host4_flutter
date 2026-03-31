@@ -2,13 +2,12 @@ import 'package:flutter/material.dart';
 
 import '../foundation/theme/host4_runtime_theme.dart';
 import '../foundation/theme/host4_theme_scope.dart';
-import 'host4_text.dart';
 
 enum Host4ButtonVariant { primary, secondary, ghost }
 
 enum Host4ButtonContent { textOnly, iconLeft, iconTop, iconOnly }
 
-class Host4Button extends StatelessWidget {
+class Host4Button extends StatefulWidget {
   const Host4Button({
     required this.label,
     required this.onPressed,
@@ -30,68 +29,89 @@ class Host4Button extends StatelessWidget {
   final bool expanded;
 
   @override
+  State<Host4Button> createState() => _Host4ButtonState();
+}
+
+class _Host4ButtonState extends State<Host4Button> {
+  bool _pressed = false;
+  bool _focused = false;
+
+  @override
   Widget build(BuildContext context) {
     final theme = context.host4Theme;
-    final tokens = _variantTokens(theme, variant);
-    final enabled = onPressed != null;
+    final variantTokens = _variantTokens(theme, widget.variant);
+    final enabled = widget.onPressed != null;
     final buttonTokens = theme.components.button;
-    final radius = BorderRadius.circular(tokens.radius);
+    final stateTokens = _stateTokens(variantTokens, enabled: enabled);
+    final radius = BorderRadius.circular(variantTokens.radius);
 
-    final padding = content == Host4ButtonContent.iconOnly
+    final padding = widget.content == Host4ButtonContent.iconOnly
         ? EdgeInsets.symmetric(
-            horizontal: buttonTokens.spacing.iconHorizontal,
-            vertical: buttonTokens.spacing.iconVertical,
+            horizontal: buttonTokens.spacing.iconOnlyHorizontal,
+            vertical: buttonTokens.spacing.iconOnlyVertical,
           )
         : EdgeInsets.symmetric(
             horizontal: buttonTokens.spacing.horizontal,
             vertical: buttonTokens.spacing.vertical,
           );
 
-    final button = Material(
-      color: enabled
-          ? tokens.background
-          : tokens.background.withValues(alpha: 0.4),
-      borderRadius: radius,
-      child: InkWell(
-        onTap: onPressed,
+    final buttonChild = ConstrainedBox(
+      constraints: BoxConstraints(minHeight: buttonTokens.minHeight),
+      child: Material(
+        color: stateTokens.background,
         borderRadius: radius,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
-          padding: padding,
-          decoration: BoxDecoration(
-            borderRadius: radius,
-            border: Border.all(
-              color: enabled
-                  ? tokens.border
-                  : tokens.border.withValues(alpha: 0.4),
+        child: InkWell(
+          onTap: enabled ? widget.onPressed : null,
+          onHighlightChanged: (value) => setState(() => _pressed = value),
+          borderRadius: radius,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 160),
+            padding: padding,
+            decoration: BoxDecoration(
+              borderRadius: radius,
+              border: Border.all(color: stateTokens.border),
             ),
+            child: _buildContent(theme, stateTokens),
           ),
-          child: _buildContent(theme, tokens),
         ),
       ),
     );
 
-    if (!expanded) return button;
-    return SizedBox(width: double.infinity, child: button);
+    final focusable = Focus(
+      onFocusChange: (value) => setState(() => _focused = value),
+      child: buttonChild,
+    );
+
+    if (!widget.expanded) return focusable;
+    return SizedBox(width: double.infinity, child: focusable);
   }
 
-  Widget _buildContent(Host4RuntimeTheme theme, Host4ButtonVariantTokens tokens) {
-    switch (content) {
+  Widget _buildContent(
+    Host4RuntimeTheme theme,
+    Host4ButtonStateTokens stateTokens,
+  ) {
+    final buttonTokens = theme.components.button;
+
+    switch (widget.content) {
       case Host4ButtonContent.textOnly:
         return Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: expanded ? MainAxisSize.max : MainAxisSize.min,
-          children: [_label(theme, tokens)],
+          mainAxisSize: widget.expanded ? MainAxisSize.max : MainAxisSize.min,
+          children: [_label(theme, stateTokens)],
         );
 
       case Host4ButtonContent.iconLeft:
         return Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: expanded ? MainAxisSize.max : MainAxisSize.min,
+          mainAxisSize: widget.expanded ? MainAxisSize.max : MainAxisSize.min,
           children: [
-            Icon(icon, size: theme.sizes.iconMd, color: tokens.foreground),
-            SizedBox(width: theme.spacing.sm),
-            _label(theme, tokens),
+            Icon(
+              widget.icon,
+              size: buttonTokens.leadingIconSize,
+              color: stateTokens.foreground,
+            ),
+            SizedBox(width: buttonTokens.spacing.iconGap),
+            _label(theme, stateTokens),
           ],
         );
 
@@ -99,27 +119,46 @@ class Host4Button extends StatelessWidget {
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: theme.sizes.iconLg, color: tokens.foreground),
-            SizedBox(height: theme.spacing.xs),
-            _label(theme, tokens),
+            Icon(
+              widget.icon,
+              size: buttonTokens.topIconSize,
+              color: stateTokens.foreground,
+            ),
+            SizedBox(height: buttonTokens.spacing.stackGap),
+            _label(theme, stateTokens),
           ],
         );
 
       case Host4ButtonContent.iconOnly:
-        return Icon(icon, size: theme.sizes.iconLg, color: tokens.foreground);
+        return Icon(
+          widget.icon,
+          size: buttonTokens.iconOnlySize,
+          color: stateTokens.foreground,
+        );
     }
   }
 
-  Widget _label(Host4RuntimeTheme theme, Host4ButtonVariantTokens tokens) {
+  Widget _label(Host4RuntimeTheme theme, Host4ButtonStateTokens stateTokens) {
     return Flexible(
-      child: Host4Text(
-        label,
-        role: Host4TextRole.label,
-        style: theme.typography.label.toTextStyle(tokens.foreground),
+      child: Text(
+        widget.label,
+        style: theme.components.button.labelStyle.toTextStyle(
+          stateTokens.foreground,
+        ),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
       ),
     );
+  }
+
+  Host4ButtonStateTokens _stateTokens(
+    Host4ButtonVariantTokens tokens, {
+    required bool enabled,
+  }) {
+    if (!enabled) return tokens.disabledState;
+    if (_pressed) return tokens.pressedState;
+    if (_focused) return tokens.focusedState;
+    return tokens.defaultState;
   }
 
   Host4ButtonVariantTokens _variantTokens(

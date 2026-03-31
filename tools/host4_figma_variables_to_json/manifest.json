@@ -1,0 +1,10 @@
+{
+  "name": "Host4 Figma variables to json",
+  "id": "host4-variables-to-json",
+  "api": "1.0.0",
+  "main": "code.js",
+  "ui": "ui.html",
+  "capabilities": [],
+  "enableProposedApi": false,
+  "editorType": ["figma"]
+}

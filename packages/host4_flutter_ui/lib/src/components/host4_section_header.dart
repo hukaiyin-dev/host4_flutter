@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../foundation/theme/host4_theme_scope.dart';
-import 'host4_text.dart';
 
 class Host4SectionHeader extends StatelessWidget {
   const Host4SectionHeader({
@@ -18,6 +17,7 @@ class Host4SectionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = context.host4Theme;
+    final tokens = theme.components.sectionHeader;
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.end,
@@ -26,18 +26,19 @@ class Host4SectionHeader extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Host4Text(title, role: Host4TextRole.heading),
-              SizedBox(height: theme.spacing.xs),
+              Text(
+                title,
+                style: tokens.titleStyle.toTextStyle(tokens.titleColor),
+              ),
+              SizedBox(height: tokens.subtitleGap),
               Text(
                 subtitle,
-                style: theme.typography.body.toTextStyle(
-                  theme.colors.textSecondary,
-                ),
+                style: tokens.subtitleStyle.toTextStyle(tokens.subtitleColor),
               ),
             ],
           ),
         ),
-        if (action != null) ...[SizedBox(width: theme.spacing.md), action!],
+        if (action != null) ...[SizedBox(width: tokens.actionGap), action!],
       ],
     );
   }

@@ -15,10 +15,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get themeBootstrapFailed => 'Theme bootstrap failed';
 
   @override
-  String get homePageTitle => 'Home';
+  String get homePageTitle => 'Lab';
 
   @override
-  String get homePageSubtitle => 'Theme story';
+  String get homePageSubtitle => 'Flutter technical experiments';
 
   @override
   String get listPageTitle => 'Components';
@@ -272,10 +272,108 @@ class AppLocalizationsEn extends AppLocalizations {
   String get languageManualSection => 'Manual Selection';
 
   @override
-  String get tabHome => 'Home';
+  String get tabHome => 'Lab';
 
   @override
-  String get tabList => 'List';
+  String get labThemePlaygroundTitle => 'Theme Playground';
+
+  @override
+  String get labThemePlaygroundSubtitle =>
+      'Try runtime theme switching, mode merge and prompt-driven generation flow.';
+
+  @override
+  String get labLogsTitle => 'Runtime Logs';
+
+  @override
+  String get labLogsSubtitle =>
+      'Verify local log writing, export flow and native share behavior on device.';
+
+  @override
+  String get labDebugTitle => 'Theme Inspector';
+
+  @override
+  String get labDebugSubtitle =>
+      'Inspect manifest fields, token paths and resolved runtime colors in one place.';
+
+  @override
+  String get labUsbDriveTitle => 'USB Drive Experiment';
+
+  @override
+  String get labUsbDriveSubtitle =>
+      'Validate whether iOS and Android can read files from an attached USB drive.';
+
+  @override
+  String get labTesterTitle => 'Reset Sandbox';
+
+  @override
+  String get labTesterSubtitle =>
+      'Run destructive test actions like reset-install without mixing them into Settings.';
+
+  @override
+  String get tabList => 'Components';
+
+  @override
+  String get usbDrivePageTitle => 'USB Drive Experiment';
+
+  @override
+  String get usbDrivePageSubtitle =>
+      'Cross-platform external storage validation';
+
+  @override
+  String get usbDriveIntroTitle => 'Experiment Goal';
+
+  @override
+  String get usbDriveIntroBody =>
+      'Use this page to validate whether the demo can enumerate and read content from a connected USB drive on iOS and Android.';
+
+  @override
+  String get usbDriveIosStatusTitle => 'iOS status';
+
+  @override
+  String get usbDriveIosStatusBody =>
+      'Pending verification. The next step is to confirm whether Files-based import or external drive access is available in the current app sandbox.';
+
+  @override
+  String get usbDriveAndroidStatusTitle => 'Android status';
+
+  @override
+  String get usbDriveAndroidStatusBody =>
+      'Pending verification. The next step is to confirm USB OTG mount visibility and readable document access from Flutter.';
+
+  @override
+  String get usbDriveActionTitle => 'Run Experiment';
+
+  @override
+  String get usbDriveActionBody =>
+      'On iOS this opens the system document picker. If the external USB drive is visible in Files, you can choose a file and read a preview.';
+
+  @override
+  String get usbDrivePickButton => 'Choose File';
+
+  @override
+  String get usbDrivePicking => 'Picking...';
+
+  @override
+  String get usbDrivePickUnsupported =>
+      'Only the iOS picker experiment is implemented right now';
+
+  @override
+  String get usbDrivePickFailed => 'Read failed';
+
+  @override
+  String get usbDrivePickedResultTitle => 'Result';
+
+  @override
+  String get usbDrivePickedName => 'Name';
+
+  @override
+  String get usbDrivePickedSize => 'Size';
+
+  @override
+  String get usbDrivePickedPath => 'Path';
+
+  @override
+  String get usbDrivePickedPreview => 'Preview';
 
   @override
   String get tabSettings => 'Settings';
@@ -309,17 +407,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String get logsEmptyMessage => 'No logs yet.';
 
   @override
+  String get logsExportUnavailable => 'No log file available to export.';
+
+  @override
+  String get logsExportSuccess => 'System share sheet opened.';
+
+  @override
+  String get logsExportFailed => 'Failed to export logs.';
+
+  @override
   String get settingsPageTitle => 'Settings';
 
   @override
   String get settingsPageSubtitle => 'Theme & Language';
 
   @override
-  String get settingsBannerTitle => 'Appearance';
+  String get settingsBannerTitle => 'Settings';
 
   @override
   String get settingsBannerSubtitle =>
-      'Switch visual theme or app language below.';
+      'General preferences and developer tools';
 
   @override
   String get testerPageTitle => 'Tester';
@@ -341,4 +448,103 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get testerResetConfirmAction => 'Reset';
+
+  @override
+  String get testerClearRecordsTitle => 'Delete All Records';
+
+  @override
+  String get testerClearRecordsConfirmTitle => 'Delete all records?';
+
+  @override
+  String get testerClearRecordsConfirmBody =>
+      'This clears the log file, generated theme records, and all downloaded theme assets.';
+
+  @override
+  String get testerClearRecordsConfirmAction => 'Delete';
+
+  @override
+  String get testerClearRecordsDone => 'Cleared logs and all theme records';
+
+  @override
+  String get onboardingDemoSettingsTitle => 'Onboarding Demo';
+
+  @override
+  String get onboardingDemoSettingsSubtitle =>
+      'Test the onboarding module with a 6-step simulated flow';
+
+  @override
+  String get onboardingDemoSkip => 'Skip';
+
+  @override
+  String get onboardingDemoCompleteMessage => 'Onboarding completed';
+
+  @override
+  String get onboardingP1Title => 'Welcome to Pantas';
+
+  @override
+  String get onboardingP1Desc =>
+      'To get you started, please complete a few essential setup steps.';
+
+  @override
+  String get onboardingP1Action => 'Let\'s Go';
+
+  @override
+  String get onboardingP2Title => 'Storage Permission';
+
+  @override
+  String get onboardingP2Desc =>
+      'Pantas needs storage access to read and manage your files. Tap the button below to grant access.';
+
+  @override
+  String get onboardingP2Action => 'Grant Permission';
+
+  @override
+  String get onboardingP3Title => 'Choose Data Folder';
+
+  @override
+  String get onboardingP3Desc =>
+      'Select a folder to store your settings, game lists and media. We recommend naming it Pantas.';
+
+  @override
+  String get onboardingP3Action => 'Choose Folder';
+
+  @override
+  String get onboardingP4Title => 'Choose ROMs Folder';
+
+  @override
+  String get onboardingP4Desc =>
+      'Select a folder to store your game files (ROMs). We recommend naming it roms.';
+
+  @override
+  String get onboardingP4Hint =>
+      'You will need at least one game file after setup, otherwise the app may not launch.';
+
+  @override
+  String get onboardingP4Action => 'Choose Folder';
+
+  @override
+  String get onboardingP5Title => 'Create Platform Directories?';
+
+  @override
+  String get onboardingP5Desc =>
+      'Subdirectories for all supported game platforms will be created inside your ROMs folder, each with an auto-generated systeminfo.txt config file. If you skip this, you will need to create these files manually.';
+
+  @override
+  String get onboardingP5Action => 'Create Now';
+
+  @override
+  String get onboardingP5Skip => 'Skip';
+
+  @override
+  String get onboardingP6Title => 'All Set!';
+
+  @override
+  String get onboardingP6Desc => 'Pantas is configured and ready to use.';
+
+  @override
+  String get onboardingP6Hint =>
+      'You still need to install an emulator for each game platform. Some emulators may require additional ROM folder access permissions, otherwise games may not launch.';
+
+  @override
+  String get onboardingP6Action => 'Start Using';
 }

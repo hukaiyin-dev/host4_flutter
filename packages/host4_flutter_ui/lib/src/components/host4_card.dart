@@ -14,16 +14,16 @@ class Host4Card extends StatelessWidget {
     final tokens = theme.components.card;
 
     return Container(
-      padding: padding ?? EdgeInsets.all(theme.spacing.card),
+      padding: padding ?? EdgeInsets.all(tokens.padding),
       decoration: BoxDecoration(
         color: tokens.background,
-        borderRadius: BorderRadius.circular(theme.radius.card),
+        borderRadius: BorderRadius.circular(tokens.radius),
         border: Border.all(color: tokens.border),
         boxShadow: [
           BoxShadow(
-            color: theme.colors.textPrimary.withValues(alpha: 0.06),
-            blurRadius: theme.blur.card,
-            offset: const Offset(0, 10),
+            color: tokens.shadowColor.withValues(alpha: tokens.shadowOpacity),
+            blurRadius: tokens.shadowBlur,
+            offset: Offset(0, tokens.shadowOffsetY),
           ),
         ],
       ),

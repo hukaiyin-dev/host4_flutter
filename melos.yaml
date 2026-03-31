@@ -1,0 +1,22 @@
+name: host4_flutter
+
+packages:
+  - packages/**
+  - examples/**
+
+scripts:
+  analyze:
+    description: Run flutter analyze for all workspace packages.
+    run: melos exec -- "flutter analyze"
+
+  test:
+    description: Run tests for packages that contain a test directory.
+    run: melos exec --dir-exists=test -- "flutter test"
+
+  format:
+    description: Format Dart files in workspace packages.
+    run: melos exec -- "dart format lib test"
+
+  pub:get:
+    description: Run flutter pub get for all workspace packages.
+    run: melos exec -- "flutter pub get"

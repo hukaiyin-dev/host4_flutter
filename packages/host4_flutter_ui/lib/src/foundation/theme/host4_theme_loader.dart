@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:host4_flutter_utils/host4_flutter_utils.dart';
 
 import 'host4_runtime_theme.dart';
 
@@ -19,6 +20,13 @@ class Host4ThemeLoader {
       throw const FormatException('Theme tokens root must be a JSON object.');
     }
 
+    // Load asset.json if present and merge into tokens under the 'asset' namespace.
+    // Falls back gracefully when asset.json is absent (e.g. legacy bundles).
+    final assetFileData = await _loadAssetFile(bundle, assetPath);
+    if (assetFileData is Map<String, dynamic>) {
+      decoded['asset'] = assetFileData;
+    }
+
     final manifest = await _loadManifest(bundle, assetPath);
     if (manifest is! Map<String, dynamic>) {
       throw const FormatException('Theme manifest root must be a JSON object.');
@@ -26,7 +34,7 @@ class Host4ThemeLoader {
 
     final selectedMode = _resolveSelectedMode(manifest, mode);
     final normalized = _normalizeTheme(decoded, manifest, selectedMode);
-    final resolved = _TokenResolver(normalized).resolveMap(normalized);
+    final resolved = Host4ReferenceResolver(normalized).resolveMap(normalized);
     final assetDirectory = assetPath.substring(
       0,
       assetPath.lastIndexOf('/') + 1,
@@ -43,62 +51,44 @@ class Host4ThemeLoader {
         brightness: _parseBrightness(_readString(resolved, 'meta.mode')),
       ),
       colors: Host4ThemeColors(
-        brandPrimary: _readColor(resolved, 'alias.shared.color.brand.primary'),
-        brandSecondary: _readColor(
-          resolved,
-          'alias.shared.color.brand.secondary',
-        ),
-        brandAccent: _readColor(resolved, 'alias.shared.color.brand.accent'),
-        pageBackground: _readColor(
-          resolved,
-          'alias.modes.$selectedMode.color.bg.page',
-        ),
-        surface: _readColor(
-          resolved,
-          'alias.modes.$selectedMode.color.bg.surface',
-        ),
-        surfaceMuted: _readColor(
-          resolved,
-          'alias.modes.$selectedMode.color.bg.muted',
-        ),
+        brandPrimary: _readColor(resolved, 'semantic.color.brand.primary'),
+        brandSecondary: _readColor(resolved, 'semantic.color.brand.secondary'),
+        brandAccent: _readColor(resolved, 'semantic.color.brand.accent'),
+        pageBackground: _readColor(resolved, 'semantic.color.background.page'),
+        surface: _readColor(resolved, 'semantic.color.surface.default'),
+        surfaceMuted: _readColor(resolved, 'semantic.color.surface.muted'),
         surfaceElevated: _readColor(
           resolved,
-          'alias.modes.$selectedMode.color.bg.elevated',
+          'semantic.color.surface.elevated',
         ),
-        textPrimary: _readColor(
+        textPrimary: _readColor(resolved, 'semantic.color.text.primary'),
+        textSecondary: _readColor(resolved, 'semantic.color.text.secondary'),
+        textInverse: _readColor(resolved, 'semantic.color.text.inverse'),
+        borderDefault: _readColor(resolved, 'semantic.color.border.default'),
+        borderStrong: _readColor(resolved, 'semantic.color.border.strong'),
+        focus: _readColor(resolved, 'semantic.color.interactive.focus'),
+        interactivePressed: _readColor(
           resolved,
-          'alias.modes.$selectedMode.color.text.primary',
+          'semantic.color.interactive.pressed',
         ),
-        textSecondary: _readColor(
+        interactiveDisabled: _readColor(
           resolved,
-          'alias.modes.$selectedMode.color.text.secondary',
+          'semantic.color.interactive.disabled',
         ),
-        textInverse: _readColor(
+        interactiveSelected: _readColor(
           resolved,
-          'alias.modes.$selectedMode.color.text.inverse',
+          'semantic.color.interactive.selected',
         ),
-        borderDefault: _readColor(
-          resolved,
-          'alias.modes.$selectedMode.color.border.default',
-        ),
-        borderStrong: _readColor(
-          resolved,
-          'alias.modes.$selectedMode.color.border.strong',
-        ),
-        focus: _readColor(
-          resolved,
-          'alias.modes.$selectedMode.color.interactive.focus',
-        ),
-        success: _readColor(resolved, 'alias.shared.color.status.success'),
-        warning: _readColor(resolved, 'alias.shared.color.status.warning'),
+        success: _readColor(resolved, 'semantic.color.status.success'),
+        warning: _readColor(resolved, 'semantic.color.status.warning'),
       ),
       typography: Host4ThemeTypography(
-        display: _readTextToken(resolved, 'primitive.typography.display'),
-        title: _readTextToken(resolved, 'primitive.typography.title'),
-        heading: _readTextToken(resolved, 'primitive.typography.heading'),
-        body: _readTextToken(resolved, 'primitive.typography.body'),
-        label: _readTextToken(resolved, 'primitive.typography.label'),
-        caption: _readTextToken(resolved, 'primitive.typography.caption'),
+        display: _readTextToken(resolved, 'semantic.typography.display'),
+        title: _readTextToken(resolved, 'semantic.typography.title'),
+        heading: _readTextToken(resolved, 'semantic.typography.heading'),
+        body: _readTextToken(resolved, 'semantic.typography.body'),
+        label: _readTextToken(resolved, 'semantic.typography.label'),
+        caption: _readTextToken(resolved, 'semantic.typography.caption'),
       ),
       spacing: Host4ThemeSpacing(
         xs: _readDouble(resolved, 'primitive.spacing.xs'),
@@ -107,74 +97,79 @@ class Host4ThemeLoader {
         lg: _readDouble(resolved, 'primitive.spacing.lg'),
         xl: _readDouble(resolved, 'primitive.spacing.xl'),
         xxl: _readDouble(resolved, 'primitive.spacing.xxl'),
-        page: _readDouble(resolved, 'alias.shared.spacing.page'),
-        section: _readDouble(resolved, 'alias.shared.spacing.section'),
-        card: _readDouble(resolved, 'alias.shared.spacing.card'),
+        page: _readDouble(resolved, 'semantic.spacing.page'),
+        section: _readDouble(resolved, 'semantic.spacing.section'),
+        card: _readDouble(resolved, 'semantic.spacing.card'),
         buttonHorizontal: _readDouble(
           resolved,
-          'alias.shared.spacing.interactive.horizontal',
+          'semantic.spacing.interactive.horizontal',
         ),
         buttonVertical: _readDouble(
           resolved,
-          'alias.shared.spacing.interactive.vertical',
+          'semantic.spacing.interactive.vertical',
         ),
         inputHorizontal: _readDouble(
           resolved,
-          'alias.shared.spacing.interactive.horizontal',
+          'semantic.spacing.interactive.horizontal',
         ),
         inputVertical: _readDouble(
           resolved,
-          'alias.shared.spacing.interactive.vertical',
+          'semantic.spacing.interactive.vertical',
         ),
-        listGap: _readDouble(resolved, 'alias.shared.spacing.list.gap'),
+        listGap: _readDouble(resolved, 'semantic.spacing.list.gap'),
       ),
       sizes: Host4ThemeSizes(
-        iconSm: _readDouble(resolved, 'alias.shared.size.icon.sm'),
-        iconMd: _readDouble(resolved, 'alias.shared.size.icon.md'),
-        iconLg: _readDouble(resolved, 'alias.shared.size.icon.lg'),
+        iconMd: _readDouble(resolved, 'semantic.size.icon.md'),
+        iconLg: _readDouble(resolved, 'semantic.size.icon.lg'),
       ),
       radius: Host4ThemeRadius(
         sm: _readDouble(resolved, 'primitive.radius.sm'),
         md: _readDouble(resolved, 'primitive.radius.md'),
         lg: _readDouble(resolved, 'primitive.radius.lg'),
         pill: _readDouble(resolved, 'primitive.radius.pill'),
-        button: _readDouble(resolved, 'alias.shared.radius.default'),
-        card: _readDouble(resolved, 'alias.shared.radius.prominent'),
-        input: _readDouble(resolved, 'alias.shared.radius.default'),
-        banner: _readDouble(resolved, 'alias.shared.radius.prominent'),
+        button: _readDouble(resolved, 'semantic.radius.default'),
+        card: _readDouble(resolved, 'semantic.radius.prominent'),
+        input: _readDouble(resolved, 'semantic.radius.default'),
       ),
       blur: Host4ThemeBlur(
-        card: _readDouble(resolved, 'primitive.blur.card'),
-        banner: _readDouble(resolved, 'primitive.blur.banner'),
-        chrome: _readDouble(resolved, 'primitive.blur.chrome'),
+        card: _readDouble(resolved, 'primitive.effect.blur-card'),
       ),
       images: Host4ThemeImages(
         pageBackground: _resolveAssetPath(
           assetDirectory,
-          _readString(
-            resolved,
-            'alias.modes.$selectedMode.image.pageBackground',
-          ),
-        ),
-        pageOverlay: _resolveAssetPath(
-          assetDirectory,
-          _readString(resolved, 'alias.shared.image.pageOverlay'),
+          _readString(resolved, 'asset.image.page-background'),
         ),
         heroBanner: _resolveAssetPath(
           assetDirectory,
-          _readString(resolved, 'alias.modes.$selectedMode.image.heroBanner'),
-        ),
-        promoBanner: _resolveAssetPath(
-          assetDirectory,
-          _readString(resolved, 'alias.modes.$selectedMode.image.promoBanner'),
+          _readString(resolved, 'asset.image.hero-banner'),
         ),
         spotIllustration: _resolveAssetPath(
           assetDirectory,
-          _readString(resolved, 'alias.shared.image.spotIllustration'),
+          _readString(resolved, 'asset.image.spot-illustration'),
         ),
-        tabItems: _readTabItemImages(resolved, assetDirectory, selectedMode),
+        tabItems: _readTabItemImages(
+          resolved,
+          decoded,
+          assetDirectory,
+          selectedMode,
+        ),
       ),
       components: Host4ThemeComponents(
+        pageShell: Host4PageShellComponentTokens(
+          pageColor: _readColor(resolved, 'component.page-shell.page-color'),
+          image: _resolveAssetPath(
+            assetDirectory,
+            _readString(resolved, 'asset.image.page-background'),
+          ),
+          accentGlowColor: _readColor(
+            resolved,
+            'component.page-shell.accent-glow-color',
+          ),
+          accentGlowOpacity: _readDouble(
+            resolved,
+            'component.page-shell.accent-glow-opacity',
+          ),
+        ),
         button: Host4ButtonComponentTokens(
           spacing: Host4ButtonSpacingTokens(
             horizontal: _readDouble(
@@ -185,78 +180,680 @@ class Host4ThemeLoader {
               resolved,
               'component.button.spacing.vertical',
             ),
-            iconHorizontal: _readDouble(
+            iconOnlyHorizontal: _readDouble(
               resolved,
-              'component.button.spacing.icon.horizontal',
+              'component.button.spacing.icon-only.horizontal',
             ),
-            iconVertical: _readDouble(
+            iconOnlyVertical: _readDouble(
               resolved,
-              'component.button.spacing.icon.vertical',
+              'component.button.spacing.icon-only.vertical',
             ),
+            iconGap: _readDouble(resolved, 'component.button.spacing.icon-gap'),
+            stackGap: _readDouble(
+              resolved,
+              'component.button.spacing.stack-gap',
+            ),
+          ),
+          labelStyle: _readTextToken(resolved, 'component.button.label-style'),
+          minHeight: _readDouble(resolved, 'component.button.min-height'),
+          leadingIconSize: _readDouble(
+            resolved,
+            'component.button.leading-icon-size',
+          ),
+          topIconSize: _readDouble(resolved, 'component.button.top-icon-size'),
+          iconOnlySize: _readDouble(
+            resolved,
+            'component.button.icon-only-size',
           ),
           primary: _readButtonVariant(resolved, 'component.button.primary'),
           secondary: _readButtonVariant(resolved, 'component.button.secondary'),
           ghost: _readButtonVariant(resolved, 'component.button.ghost'),
         ),
         card: Host4CardComponentTokens(
+          padding: _readDouble(resolved, 'component.card.padding'),
+          radius: _readDouble(resolved, 'component.card.radius'),
           background: _readColor(resolved, 'component.card.background'),
           border: _readColor(resolved, 'component.card.border'),
           title: _readColor(resolved, 'component.card.title'),
           subtitle: _readColor(resolved, 'component.card.subtitle'),
+          shadowColor: _readColor(resolved, 'component.card.shadow-color'),
+          shadowOpacity: _readDouble(resolved, 'component.card.shadow-opacity'),
+          shadowBlur: _readDouble(resolved, 'component.card.shadow-blur'),
+          shadowOffsetY: _readDouble(
+            resolved,
+            'component.card.shadow-offset-y',
+          ),
         ),
         navigationBar: Host4NavigationBarComponentTokens(
+          paddingHorizontal: _readDouble(
+            resolved,
+            'component.navigation-bar.padding-horizontal',
+          ),
+          paddingTop: _readDouble(
+            resolved,
+            'component.navigation-bar.padding-top',
+          ),
+          paddingBottom: _readDouble(
+            resolved,
+            'component.navigation-bar.padding-bottom',
+          ),
+          leadingGap: _readDouble(
+            resolved,
+            'component.navigation-bar.leading-gap',
+          ),
           background: _readColor(
             resolved,
-            'component.navigationBar.background',
+            'component.navigation-bar.background',
           ),
-          title: _readColor(resolved, 'component.navigationBar.title'),
-          subtitle: _readColor(resolved, 'component.navigationBar.subtitle'),
-          icon: _readColor(resolved, 'component.navigationBar.icon'),
+          titleStyle: _readTextToken(
+            resolved,
+            'component.navigation-bar.title-style',
+          ),
+          subtitleStyle: _readTextToken(
+            resolved,
+            'component.navigation-bar.subtitle-style',
+          ),
+          title: _readColor(resolved, 'component.navigation-bar.title'),
+          subtitle: _readColor(resolved, 'component.navigation-bar.subtitle'),
+          icon: _readColor(resolved, 'component.navigation-bar.icon'),
+        ),
+        searchBar: Host4SearchBarComponentTokens(
+          shortcutHorizontal: _readDouble(
+            resolved,
+            'component.search-bar.shortcut.horizontal',
+          ),
+          shortcutVertical: _readDouble(
+            resolved,
+            'component.search-bar.shortcut.vertical',
+          ),
+          shortcutBackground: _readColor(
+            resolved,
+            'component.search-bar.shortcut.background',
+          ),
+          shortcutRadius: _readDouble(
+            resolved,
+            'component.search-bar.shortcut.radius',
+          ),
+          shortcutStyle: _readTextToken(
+            resolved,
+            'component.search-bar.shortcut.text-style',
+          ),
+          shortcutTextColor: _readColor(
+            resolved,
+            'component.search-bar.shortcut.text-color',
+          ),
+        ),
+        sectionHeader: Host4SectionHeaderComponentTokens(
+          titleStyle: _readTextToken(
+            resolved,
+            'component.section-header.title-style',
+          ),
+          titleColor: _readColor(
+            resolved,
+            'component.section-header.title-color',
+          ),
+          subtitleGap: _readDouble(
+            resolved,
+            'component.section-header.subtitle-gap',
+          ),
+          actionGap: _readDouble(
+            resolved,
+            'component.section-header.action-gap',
+          ),
+          subtitleStyle: _readTextToken(
+            resolved,
+            'component.section-header.subtitle-style',
+          ),
+          subtitleColor: _readColor(
+            resolved,
+            'component.section-header.subtitle-color',
+          ),
         ),
         textField: Host4TextFieldComponentTokens(
-          background: _readColor(resolved, 'component.textField.background'),
-          border: _readColor(resolved, 'component.textField.border'),
-          focusBorder: _readColor(resolved, 'component.textField.focusBorder'),
-          text: _readColor(resolved, 'component.textField.text'),
-          placeholder: _readColor(resolved, 'component.textField.placeholder'),
-          icon: _readColor(resolved, 'component.textField.icon'),
-        ),
-        banner: Host4BannerComponentTokens(
-          background: _readColor(resolved, 'component.banner.background'),
-          overlay: _readColor(resolved, 'component.banner.overlay'),
-          title: _readColor(resolved, 'component.banner.title'),
-          subtitle: _readColor(resolved, 'component.banner.subtitle'),
-          badgeBackground: _readColor(
+          paddingHorizontal: _readDouble(
             resolved,
-            'component.banner.badgeBackground',
+            'component.text-field.padding-horizontal',
           ),
-          badgeForeground: _readColor(
+          paddingVertical: _readDouble(
             resolved,
-            'component.banner.badgeForeground',
+            'component.text-field.padding-vertical',
+          ),
+          radius: _readDouble(resolved, 'component.text-field.radius'),
+          minHeight: _readDouble(resolved, 'component.text-field.min-height'),
+          prefixIconSize: _readDouble(
+            resolved,
+            'component.text-field.prefix-icon-size',
+          ),
+          suffixGap: _readDouble(resolved, 'component.text-field.suffix-gap'),
+          textStyle: _readTextToken(
+            resolved,
+            'component.text-field.text-style',
+          ),
+          placeholderStyle: _readTextToken(
+            resolved,
+            'component.text-field.placeholder-style',
+          ),
+          defaultState: _readTextFieldState(
+            resolved,
+            'component.text-field.state.default',
+          ),
+          focusedState: _readTextFieldState(
+            resolved,
+            'component.text-field.state.focused',
+          ),
+          disabledState: _readTextFieldState(
+            resolved,
+            'component.text-field.state.disabled',
+          ),
+          readOnlyState: _readTextFieldState(
+            resolved,
+            'component.text-field.state.read-only',
+          ),
+          errorState: _readTextFieldState(
+            resolved,
+            'component.text-field.state.error',
+          ),
+          successState: _readTextFieldState(
+            resolved,
+            'component.text-field.state.success',
           ),
         ),
         listCell: Host4ListCellComponentTokens(
-          background: _readColor(resolved, 'component.listCell.background'),
-          title: _readColor(resolved, 'component.listCell.title'),
-          subtitle: _readColor(resolved, 'component.listCell.subtitle'),
-          trailing: _readColor(resolved, 'component.listCell.trailing'),
-          divider: _readColor(resolved, 'component.listCell.divider'),
+          radius: _readDouble(resolved, 'component.list-cell.radius'),
+          paddingHorizontal: _readDouble(
+            resolved,
+            'component.list-cell.padding-horizontal',
+          ),
+          paddingVertical: _readDouble(
+            resolved,
+            'component.list-cell.padding-vertical',
+          ),
+          minHeight: _readDouble(resolved, 'component.list-cell.min-height'),
+          leadingGap: _readDouble(resolved, 'component.list-cell.leading-gap'),
+          subtitleGap: _readDouble(
+            resolved,
+            'component.list-cell.subtitle-gap',
+          ),
+          trailingGap: _readDouble(
+            resolved,
+            'component.list-cell.trailing-gap',
+          ),
+          chevronGap: _readDouble(resolved, 'component.list-cell.chevron-gap'),
+          titleStyle: _readTextToken(
+            resolved,
+            'component.list-cell.title-style',
+          ),
+          subtitleStyle: _readTextToken(
+            resolved,
+            'component.list-cell.subtitle-style',
+          ),
+          trailingStyle: _readTextToken(
+            resolved,
+            'component.list-cell.trailing-style',
+          ),
+          defaultState: _readListCellState(
+            resolved,
+            'component.list-cell.state.default',
+          ),
+          pressedState: _readListCellState(
+            resolved,
+            'component.list-cell.state.pressed',
+          ),
+          disabledState: _readListCellState(
+            resolved,
+            'component.list-cell.state.disabled',
+          ),
+          selectedState: _readListCellState(
+            resolved,
+            'component.list-cell.state.selected',
+          ),
         ),
         tabBar: Host4TabBarComponentTokens(
-          background: _readColor(resolved, 'component.tabBar.background'),
-          blur: _readDouble(resolved, 'component.tabBar.blur'),
-          height: _readDouble(resolved, 'component.tabBar.height'),
-          iconSize: _readDouble(resolved, 'component.tabBar.iconSize'),
+          background: _readColor(resolved, 'component.tab-bar.background'),
+          height: _readDouble(resolved, 'component.tab-bar.height'),
+          iconSize: _readDouble(resolved, 'component.tab-bar.icon-size'),
           featuredIconSize: _readDouble(
             resolved,
-            'component.tabBar.featuredIconSize',
+            'component.tab-bar.featured-icon-size',
           ),
-          showLabels: _readBool(resolved, 'component.tabBar.showLabels'),
-          labelColor: _readColor(resolved, 'component.tabBar.labelColor'),
-          selectedLabelColor: _readColor(
+          labelStyle: _readTextToken(resolved, 'component.tab-bar.label-style'),
+          labelGap: _readDouble(resolved, 'component.tab-bar.label-gap'),
+          bottomGap: _readDouble(resolved, 'component.tab-bar.bottom-gap'),
+          itemStates: Host4TabBarItemStateSet(
+            defaultState: _readTabBarItemState(
+              resolved,
+              'component.tab-bar.item.state.default',
+            ),
+            pressedState: _readTabBarItemState(
+              resolved,
+              'component.tab-bar.item.state.pressed',
+            ),
+            disabledState: _readTabBarItemState(
+              resolved,
+              'component.tab-bar.item.state.disabled',
+            ),
+            selectedState: _readTabBarItemState(
+              resolved,
+              'component.tab-bar.item.state.selected',
+            ),
+          ),
+          items: _readTabItemImages(
             resolved,
-            'component.tabBar.selectedLabelColor',
+            decoded,
+            assetDirectory,
+            selectedMode,
           ),
+        ),
+      ),
+    );
+  }
+
+  /// Load a [Host4RuntimeTheme] directly from an in-memory [tokensMap].
+  ///
+  /// Reuses all existing parsing logic. Pass [fallbackImages] to keep the
+  /// current theme's images while only switching colors (Phase 2).
+  static Future<Host4RuntimeTheme> loadFromMap(
+    Map<String, dynamic> tokensMap, {
+    String mode = 'light',
+    Host4ThemeImages? fallbackImages,
+  }) async {
+    final syntheticManifest = <String, dynamic>{
+      'id': 'generated',
+      'name': 'Generated',
+      'defaultMode': mode,
+      'modes': ['light', 'dark'],
+    };
+
+    final normalized = _normalizeTheme(tokensMap, syntheticManifest, mode);
+    final resolved = Host4ReferenceResolver(normalized).resolveMap(normalized);
+
+    final images =
+        fallbackImages ??
+        const Host4ThemeImages(
+          pageBackground: '',
+          heroBanner: '',
+          spotIllustration: '',
+          tabItems: [],
+        );
+
+    return Host4RuntimeTheme(
+      meta: Host4ThemeMeta(
+        id: 'generated',
+        name: 'Generated',
+        schema: _readString(resolved, 'schema'),
+        mode: mode,
+        defaultMode: mode,
+        supportedModes: const ['light', 'dark'],
+        brightness: _parseBrightness(mode),
+      ),
+      colors: Host4ThemeColors(
+        brandPrimary: _readColor(resolved, 'semantic.color.brand.primary'),
+        brandSecondary: _readColor(resolved, 'semantic.color.brand.secondary'),
+        brandAccent: _readColor(resolved, 'semantic.color.brand.accent'),
+        pageBackground: _readColor(resolved, 'semantic.color.background.page'),
+        surface: _readColor(resolved, 'semantic.color.surface.default'),
+        surfaceMuted: _readColor(resolved, 'semantic.color.surface.muted'),
+        surfaceElevated: _readColor(
+          resolved,
+          'semantic.color.surface.elevated',
+        ),
+        textPrimary: _readColor(resolved, 'semantic.color.text.primary'),
+        textSecondary: _readColor(resolved, 'semantic.color.text.secondary'),
+        textInverse: _readColor(resolved, 'semantic.color.text.inverse'),
+        borderDefault: _readColor(resolved, 'semantic.color.border.default'),
+        borderStrong: _readColor(resolved, 'semantic.color.border.strong'),
+        focus: _readColor(resolved, 'semantic.color.interactive.focus'),
+        interactivePressed: _readColor(
+          resolved,
+          'semantic.color.interactive.pressed',
+        ),
+        interactiveDisabled: _readColor(
+          resolved,
+          'semantic.color.interactive.disabled',
+        ),
+        interactiveSelected: _readColor(
+          resolved,
+          'semantic.color.interactive.selected',
+        ),
+        success: _readColor(resolved, 'semantic.color.status.success'),
+        warning: _readColor(resolved, 'semantic.color.status.warning'),
+      ),
+      typography: Host4ThemeTypography(
+        display: _readTextToken(resolved, 'semantic.typography.display'),
+        title: _readTextToken(resolved, 'semantic.typography.title'),
+        heading: _readTextToken(resolved, 'semantic.typography.heading'),
+        body: _readTextToken(resolved, 'semantic.typography.body'),
+        label: _readTextToken(resolved, 'semantic.typography.label'),
+        caption: _readTextToken(resolved, 'semantic.typography.caption'),
+      ),
+      spacing: Host4ThemeSpacing(
+        xs: _readDouble(resolved, 'primitive.spacing.xs'),
+        sm: _readDouble(resolved, 'primitive.spacing.sm'),
+        md: _readDouble(resolved, 'primitive.spacing.md'),
+        lg: _readDouble(resolved, 'primitive.spacing.lg'),
+        xl: _readDouble(resolved, 'primitive.spacing.xl'),
+        xxl: _readDouble(resolved, 'primitive.spacing.xxl'),
+        page: _readDouble(resolved, 'semantic.spacing.page'),
+        section: _readDouble(resolved, 'semantic.spacing.section'),
+        card: _readDouble(resolved, 'semantic.spacing.card'),
+        buttonHorizontal: _readDouble(
+          resolved,
+          'semantic.spacing.interactive.horizontal',
+        ),
+        buttonVertical: _readDouble(
+          resolved,
+          'semantic.spacing.interactive.vertical',
+        ),
+        inputHorizontal: _readDouble(
+          resolved,
+          'semantic.spacing.interactive.horizontal',
+        ),
+        inputVertical: _readDouble(
+          resolved,
+          'semantic.spacing.interactive.vertical',
+        ),
+        listGap: _readDouble(resolved, 'semantic.spacing.list.gap'),
+      ),
+      sizes: Host4ThemeSizes(
+        iconMd: _readDouble(resolved, 'semantic.size.icon.md'),
+        iconLg: _readDouble(resolved, 'semantic.size.icon.lg'),
+      ),
+      radius: Host4ThemeRadius(
+        sm: _readDouble(resolved, 'primitive.radius.sm'),
+        md: _readDouble(resolved, 'primitive.radius.md'),
+        lg: _readDouble(resolved, 'primitive.radius.lg'),
+        pill: _readDouble(resolved, 'primitive.radius.pill'),
+        button: _readDouble(resolved, 'semantic.radius.default'),
+        card: _readDouble(resolved, 'semantic.radius.prominent'),
+        input: _readDouble(resolved, 'semantic.radius.default'),
+      ),
+      blur: Host4ThemeBlur(
+        card: _readDouble(resolved, 'primitive.effect.blur-card'),
+      ),
+      images: images,
+      components: Host4ThemeComponents(
+        pageShell: Host4PageShellComponentTokens(
+          pageColor: _readColor(resolved, 'component.page-shell.page-color'),
+          image:
+              fallbackImages?.pageBackground ??
+              _readString(resolved, 'asset.image.page-background'),
+          accentGlowColor: _readColor(
+            resolved,
+            'component.page-shell.accent-glow-color',
+          ),
+          accentGlowOpacity: _readDouble(
+            resolved,
+            'component.page-shell.accent-glow-opacity',
+          ),
+        ),
+        button: Host4ButtonComponentTokens(
+          spacing: Host4ButtonSpacingTokens(
+            horizontal: _readDouble(
+              resolved,
+              'component.button.spacing.horizontal',
+            ),
+            vertical: _readDouble(
+              resolved,
+              'component.button.spacing.vertical',
+            ),
+            iconOnlyHorizontal: _readDouble(
+              resolved,
+              'component.button.spacing.icon-only.horizontal',
+            ),
+            iconOnlyVertical: _readDouble(
+              resolved,
+              'component.button.spacing.icon-only.vertical',
+            ),
+            iconGap: _readDouble(resolved, 'component.button.spacing.icon-gap'),
+            stackGap: _readDouble(
+              resolved,
+              'component.button.spacing.stack-gap',
+            ),
+          ),
+          labelStyle: _readTextToken(resolved, 'component.button.label-style'),
+          minHeight: _readDouble(resolved, 'component.button.min-height'),
+          leadingIconSize: _readDouble(
+            resolved,
+            'component.button.leading-icon-size',
+          ),
+          topIconSize: _readDouble(resolved, 'component.button.top-icon-size'),
+          iconOnlySize: _readDouble(
+            resolved,
+            'component.button.icon-only-size',
+          ),
+          primary: _readButtonVariant(resolved, 'component.button.primary'),
+          secondary: _readButtonVariant(resolved, 'component.button.secondary'),
+          ghost: _readButtonVariant(resolved, 'component.button.ghost'),
+        ),
+        card: Host4CardComponentTokens(
+          padding: _readDouble(resolved, 'component.card.padding'),
+          radius: _readDouble(resolved, 'component.card.radius'),
+          background: _readColor(resolved, 'component.card.background'),
+          border: _readColor(resolved, 'component.card.border'),
+          title: _readColor(resolved, 'component.card.title'),
+          subtitle: _readColor(resolved, 'component.card.subtitle'),
+          shadowColor: _readColor(resolved, 'component.card.shadow-color'),
+          shadowOpacity: _readDouble(resolved, 'component.card.shadow-opacity'),
+          shadowBlur: _readDouble(resolved, 'component.card.shadow-blur'),
+          shadowOffsetY: _readDouble(
+            resolved,
+            'component.card.shadow-offset-y',
+          ),
+        ),
+        navigationBar: Host4NavigationBarComponentTokens(
+          paddingHorizontal: _readDouble(
+            resolved,
+            'component.navigation-bar.padding-horizontal',
+          ),
+          paddingTop: _readDouble(
+            resolved,
+            'component.navigation-bar.padding-top',
+          ),
+          paddingBottom: _readDouble(
+            resolved,
+            'component.navigation-bar.padding-bottom',
+          ),
+          leadingGap: _readDouble(
+            resolved,
+            'component.navigation-bar.leading-gap',
+          ),
+          background: _readColor(
+            resolved,
+            'component.navigation-bar.background',
+          ),
+          titleStyle: _readTextToken(
+            resolved,
+            'component.navigation-bar.title-style',
+          ),
+          subtitleStyle: _readTextToken(
+            resolved,
+            'component.navigation-bar.subtitle-style',
+          ),
+          title: _readColor(resolved, 'component.navigation-bar.title'),
+          subtitle: _readColor(resolved, 'component.navigation-bar.subtitle'),
+          icon: _readColor(resolved, 'component.navigation-bar.icon'),
+        ),
+        searchBar: Host4SearchBarComponentTokens(
+          shortcutHorizontal: _readDouble(
+            resolved,
+            'component.search-bar.shortcut.horizontal',
+          ),
+          shortcutVertical: _readDouble(
+            resolved,
+            'component.search-bar.shortcut.vertical',
+          ),
+          shortcutBackground: _readColor(
+            resolved,
+            'component.search-bar.shortcut.background',
+          ),
+          shortcutRadius: _readDouble(
+            resolved,
+            'component.search-bar.shortcut.radius',
+          ),
+          shortcutStyle: _readTextToken(
+            resolved,
+            'component.search-bar.shortcut.text-style',
+          ),
+          shortcutTextColor: _readColor(
+            resolved,
+            'component.search-bar.shortcut.text-color',
+          ),
+        ),
+        sectionHeader: Host4SectionHeaderComponentTokens(
+          titleStyle: _readTextToken(
+            resolved,
+            'component.section-header.title-style',
+          ),
+          titleColor: _readColor(
+            resolved,
+            'component.section-header.title-color',
+          ),
+          subtitleGap: _readDouble(
+            resolved,
+            'component.section-header.subtitle-gap',
+          ),
+          actionGap: _readDouble(
+            resolved,
+            'component.section-header.action-gap',
+          ),
+          subtitleStyle: _readTextToken(
+            resolved,
+            'component.section-header.subtitle-style',
+          ),
+          subtitleColor: _readColor(
+            resolved,
+            'component.section-header.subtitle-color',
+          ),
+        ),
+        textField: Host4TextFieldComponentTokens(
+          paddingHorizontal: _readDouble(
+            resolved,
+            'component.text-field.padding-horizontal',
+          ),
+          paddingVertical: _readDouble(
+            resolved,
+            'component.text-field.padding-vertical',
+          ),
+          radius: _readDouble(resolved, 'component.text-field.radius'),
+          minHeight: _readDouble(resolved, 'component.text-field.min-height'),
+          prefixIconSize: _readDouble(
+            resolved,
+            'component.text-field.prefix-icon-size',
+          ),
+          suffixGap: _readDouble(resolved, 'component.text-field.suffix-gap'),
+          textStyle: _readTextToken(
+            resolved,
+            'component.text-field.text-style',
+          ),
+          placeholderStyle: _readTextToken(
+            resolved,
+            'component.text-field.placeholder-style',
+          ),
+          defaultState: _readTextFieldState(
+            resolved,
+            'component.text-field.state.default',
+          ),
+          focusedState: _readTextFieldState(
+            resolved,
+            'component.text-field.state.focused',
+          ),
+          disabledState: _readTextFieldState(
+            resolved,
+            'component.text-field.state.disabled',
+          ),
+          readOnlyState: _readTextFieldState(
+            resolved,
+            'component.text-field.state.read-only',
+          ),
+          errorState: _readTextFieldState(
+            resolved,
+            'component.text-field.state.error',
+          ),
+          successState: _readTextFieldState(
+            resolved,
+            'component.text-field.state.success',
+          ),
+        ),
+        listCell: Host4ListCellComponentTokens(
+          radius: _readDouble(resolved, 'component.list-cell.radius'),
+          paddingHorizontal: _readDouble(
+            resolved,
+            'component.list-cell.padding-horizontal',
+          ),
+          paddingVertical: _readDouble(
+            resolved,
+            'component.list-cell.padding-vertical',
+          ),
+          minHeight: _readDouble(resolved, 'component.list-cell.min-height'),
+          leadingGap: _readDouble(resolved, 'component.list-cell.leading-gap'),
+          subtitleGap: _readDouble(
+            resolved,
+            'component.list-cell.subtitle-gap',
+          ),
+          trailingGap: _readDouble(
+            resolved,
+            'component.list-cell.trailing-gap',
+          ),
+          chevronGap: _readDouble(resolved, 'component.list-cell.chevron-gap'),
+          titleStyle: _readTextToken(
+            resolved,
+            'component.list-cell.title-style',
+          ),
+          subtitleStyle: _readTextToken(
+            resolved,
+            'component.list-cell.subtitle-style',
+          ),
+          trailingStyle: _readTextToken(
+            resolved,
+            'component.list-cell.trailing-style',
+          ),
+          defaultState: _readListCellState(
+            resolved,
+            'component.list-cell.state.default',
+          ),
+          pressedState: _readListCellState(
+            resolved,
+            'component.list-cell.state.pressed',
+          ),
+          disabledState: _readListCellState(
+            resolved,
+            'component.list-cell.state.disabled',
+          ),
+          selectedState: _readListCellState(
+            resolved,
+            'component.list-cell.state.selected',
+          ),
+        ),
+        tabBar: Host4TabBarComponentTokens(
+          background: _readColor(resolved, 'component.tab-bar.background'),
+          height: _readDouble(resolved, 'component.tab-bar.height'),
+          iconSize: _readDouble(resolved, 'component.tab-bar.icon-size'),
+          featuredIconSize: _readDouble(
+            resolved,
+            'component.tab-bar.featured-icon-size',
+          ),
+          labelStyle: _readTextToken(resolved, 'component.tab-bar.label-style'),
+          labelGap: _readDouble(resolved, 'component.tab-bar.label-gap'),
+          bottomGap: _readDouble(resolved, 'component.tab-bar.bottom-gap'),
+          itemStates: Host4TabBarItemStateSet(
+            defaultState: _readTabBarItemState(
+              resolved,
+              'component.tab-bar.item.state.default',
+            ),
+            pressedState: _readTabBarItemState(
+              resolved,
+              'component.tab-bar.item.state.pressed',
+            ),
+            disabledState: _readTabBarItemState(
+              resolved,
+              'component.tab-bar.item.state.disabled',
+            ),
+            selectedState: _readTabBarItemState(
+              resolved,
+              'component.tab-bar.item.state.selected',
+            ),
+          ),
+          items: fallbackImages?.tabItems ?? const [],
         ),
       ),
     );
@@ -264,17 +861,22 @@ class Host4ThemeLoader {
 
   static List<Host4TabItemImages> _readTabItemImages(
     Map<String, dynamic> resolved,
+    Map<String, dynamic> sourceTokens,
     String assetDirectory,
     String mode,
   ) {
     final isLight = mode == 'light';
     final items = <Host4TabItemImages>[];
-    for (var i = 0; i < 5; i++) {
+    const slots = <String>['home', 'list', 'settings', 'slot3', 'slot4'];
+    for (final slot in slots) {
       try {
-        final normal = _readString(resolved, 'alias.modes.$mode.image.tab_$i');
+        final normal = _readString(
+          resolved,
+          'asset.image.tab.$slot.default',
+        );
         final selected = _readString(
           resolved,
-          'alias.modes.$mode.image.tab_${i}_selected',
+          'asset.image.tab.$slot.selected',
         );
 
         String? lightFallbackNormal;
@@ -283,11 +885,11 @@ class Host4ThemeLoader {
           try {
             lightFallbackNormal = _resolveAssetPath(
               assetDirectory,
-              _readString(resolved, 'alias.modes.light.image.tab_$i'),
+              _readString(sourceTokens, 'asset.image.tab.$slot.default.light'),
             );
             lightFallbackSelected = _resolveAssetPath(
               assetDirectory,
-              _readString(resolved, 'alias.modes.light.image.tab_${i}_selected'),
+              _readString(sourceTokens, 'asset.image.tab.$slot.selected.light'),
             );
           } on FormatException {
             // No light fallback defined for this slot; leave null.
@@ -315,18 +917,66 @@ class Host4ThemeLoader {
   ) {
     return Host4ButtonVariantTokens(
       radius: _readDouble(json, '$path.radius'),
+      defaultState: _readButtonState(json, '$path.state.default'),
+      pressedState: _readButtonState(json, '$path.state.pressed'),
+      disabledState: _readButtonState(json, '$path.state.disabled'),
+      focusedState: _readButtonState(json, '$path.state.focused'),
+    );
+  }
+
+  static Host4ButtonStateTokens _readButtonState(
+    Map<String, dynamic> json,
+    String path,
+  ) {
+    return Host4ButtonStateTokens(
       background: _readColor(json, '$path.background'),
       foreground: _readColor(json, '$path.foreground'),
       border: _readColor(json, '$path.border'),
     );
   }
 
+  static Host4TextFieldStateTokens _readTextFieldState(
+    Map<String, dynamic> json,
+    String path,
+  ) {
+    return Host4TextFieldStateTokens(
+      background: _readColor(json, '$path.background'),
+      border: _readColor(json, '$path.border'),
+      text: _readColor(json, '$path.text'),
+      placeholder: _readColor(json, '$path.placeholder'),
+      icon: _readColor(json, '$path.icon'),
+    );
+  }
+
+  static Host4ListCellStateTokens _readListCellState(
+    Map<String, dynamic> json,
+    String path,
+  ) {
+    return Host4ListCellStateTokens(
+      background: _readColor(json, '$path.background'),
+      title: _readColor(json, '$path.title'),
+      subtitle: _readColor(json, '$path.subtitle'),
+      trailing: _readColor(json, '$path.trailing'),
+      divider: _readColor(json, '$path.divider'),
+    );
+  }
+
+  static Host4TabBarItemStateTokens _readTabBarItemState(
+    Map<String, dynamic> json,
+    String path,
+  ) {
+    return Host4TabBarItemStateTokens(
+      labelColor: _readColor(json, '$path.label-color'),
+      iconColor: _readColor(json, '$path.icon-color'),
+    );
+  }
+
   static Host4TextToken _readTextToken(Map<String, dynamic> json, String path) {
     return Host4TextToken(
-      fontSize: _readDouble(json, '$path.fontSize'),
-      lineHeight: _readDouble(json, '$path.lineHeight'),
-      fontWeight: _readFontWeight(json, '$path.fontWeight'),
-      letterSpacing: _readDouble(json, '$path.letterSpacing', fallback: 0),
+      fontSize: _readDouble(json, '$path.font-size'),
+      lineHeight: _readDouble(json, '$path.line-height'),
+      fontWeight: _readFontWeight(json, '$path.font-weight'),
+      letterSpacing: _readDouble(json, '$path.letter-spacing', fallback: 0),
     );
   }
 
@@ -334,7 +984,6 @@ class Host4ThemeLoader {
     if (assetPath.startsWith('packages/') || assetPath.startsWith('assets/')) {
       return assetPath;
     }
-
     return '$directory$assetPath';
   }
 
@@ -348,6 +997,22 @@ class Host4ThemeLoader {
     );
     final manifestString = await bundle.loadString(manifestPath);
     return json.decode(manifestString);
+  }
+
+  static Future<dynamic> _loadAssetFile(
+    AssetBundle bundle,
+    String assetPath,
+  ) async {
+    final filePath = assetPath.replaceFirst(
+      RegExp(r'tokens\.json$'),
+      'asset.json',
+    );
+    try {
+      final jsonString = await bundle.loadString(filePath);
+      return json.decode(jsonString);
+    } catch (_) {
+      return null;
+    }
   }
 }
 
@@ -373,9 +1038,54 @@ Map<String, dynamic> _normalizeTheme(
       'modes': supportedModes,
     },
     'primitive': tokens['primitive'],
-    'alias': tokens['alias'],
-    'component': _readMap(_readMap(tokens, 'component.modes'), selectedMode),
+    'semantic': _selectModeBranches(
+      readJsonMap(tokens, 'semantic'),
+      supportedModes,
+      selectedMode,
+    ),
+    'asset': _selectModeBranches(
+      readJsonMap(tokens, 'asset'),
+      supportedModes,
+      selectedMode,
+    ),
+    'component': readJsonMap(tokens, 'component'),
   };
+}
+
+dynamic _selectModeBranches(
+  dynamic value,
+  List<String> supportedModes,
+  String selectedMode,
+) {
+  if (value is Map<String, dynamic>) {
+    final keys = value.keys.toSet();
+    if (keys.isNotEmpty &&
+        keys.every(supportedModes.contains) &&
+        value.containsKey(selectedMode)) {
+      return _selectModeBranches(
+        value[selectedMode],
+        supportedModes,
+        selectedMode,
+      );
+    }
+
+    return value.map<String, dynamic>(
+      (key, entry) => MapEntry(
+        key,
+        _selectModeBranches(entry, supportedModes, selectedMode),
+      ),
+    );
+  }
+
+  if (value is List<dynamic>) {
+    return value
+        .map(
+          (entry) => _selectModeBranches(entry, supportedModes, selectedMode),
+        )
+        .toList(growable: false);
+  }
+
+  return value;
 }
 
 String _resolveSelectedMode(
@@ -392,51 +1102,6 @@ String _resolveSelectedMode(
   throw const FormatException('manifest.defaultMode is required.');
 }
 
-class _TokenResolver {
-  const _TokenResolver(this.root);
-
-  final Map<String, dynamic> root;
-
-  Map<String, dynamic> resolveMap(Map<String, dynamic> input) {
-    return input.map<String, dynamic>(
-      (key, value) => MapEntry(key, _resolve(value)),
-    );
-  }
-
-  dynamic _resolve(dynamic value) {
-    if (value is Map<String, dynamic>) {
-      return resolveMap(value);
-    }
-    if (value is List<dynamic>) {
-      return value.map(_resolve).toList(growable: false);
-    }
-    if (value is String) {
-      final match = RegExp(r'^\{(.+)\}$').firstMatch(value);
-      if (match == null) {
-        return value;
-      }
-
-      final reference = match.group(1)!;
-      final target = _lookup(reference);
-      return _resolve(target);
-    }
-
-    return value;
-  }
-
-  dynamic _lookup(String path) {
-    dynamic current = root;
-    for (final segment in path.split('.')) {
-      if (current is Map<String, dynamic> && current.containsKey(segment)) {
-        current = current[segment];
-        continue;
-      }
-      throw FormatException('Unknown token reference: $path');
-    }
-    return current;
-  }
-}
-
 Brightness _parseBrightness(String value) {
   return switch (value) {
     'dark' => Brightness.dark,
@@ -445,56 +1110,47 @@ Brightness _parseBrightness(String value) {
 }
 
 dynamic _readPath(Map<String, dynamic> json, String path) {
-  dynamic current = json;
-  for (final segment in path.split('.')) {
-    if (current is Map<String, dynamic> && current.containsKey(segment)) {
-      current = current[segment];
-      continue;
-    }
+  try {
+    return readJsonPath(json, path);
+  } on FormatException {
     throw FormatException('Missing token path: $path');
   }
-  return current;
-}
-
-Map<String, dynamic> _readMap(Map<String, dynamic> json, String path) {
-  final value = _readPath(json, path);
-  if (value is! Map) {
-    throw FormatException('Expected object at $path.');
-  }
-  return value.cast<String, dynamic>();
 }
 
 String _readString(Map<String, dynamic> json, String path) {
-  final value = _readPath(json, path);
-  if (value is! String) {
-    throw FormatException('Expected string at $path.');
-  }
-  return value;
-}
-
-List<String> _readStringList(Map<String, dynamic> json, String path) {
-  final value = _readPath(json, path);
-  if (value is! List) {
-    throw FormatException('Expected string list at $path.');
-  }
-  return value.map((item) => item.toString()).toList(growable: false);
-}
-
-double _readDouble(Map<String, dynamic> json, String path, {double? fallback}) {
-  final dynamic value;
   try {
-    value = _readPath(json, path);
-  } on FormatException {
-    if (fallback != null) {
-      return fallback;
+    return readJsonString(json, path);
+  } on FormatException catch (error) {
+    if (error.message == 'Missing json path: $path') {
+      throw FormatException('Missing token path: $path');
     }
     rethrow;
   }
+}
 
-  if (value is num) {
-    return value.toDouble();
+List<String> _readStringList(Map<String, dynamic> json, String path) {
+  try {
+    return readJsonStringList(json, path);
+  } on FormatException catch (error) {
+    if (error.message == 'Missing json path: $path') {
+      throw FormatException('Missing token path: $path');
+    }
+    rethrow;
   }
-  throw FormatException('Expected number at $path.');
+}
+
+double _readDouble(Map<String, dynamic> json, String path, {double? fallback}) {
+  try {
+    return readJsonDouble(json, path, fallback: fallback);
+  } on FormatException catch (error) {
+    if (error.message == 'Missing json path: $path') {
+      if (fallback != null) {
+        return fallback;
+      }
+      throw FormatException('Missing token path: $path');
+    }
+    rethrow;
+  }
 }
 
 Color _readColor(Map<String, dynamic> json, String path) {
@@ -505,14 +1161,6 @@ Color _readColor(Map<String, dynamic> json, String path) {
     throw FormatException('Expected hex color at $path.');
   }
   return Color(int.parse(hex, radix: 16));
-}
-
-bool _readBool(Map<String, dynamic> json, String path) {
-  final value = _readPath(json, path);
-  if (value is! bool) {
-    throw FormatException('Expected bool at $path.');
-  }
-  return value;
 }
 
 FontWeight _readFontWeight(Map<String, dynamic> json, String path) {

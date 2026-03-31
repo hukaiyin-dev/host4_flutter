@@ -10,34 +10,29 @@ class Host4Background extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = context.host4Theme;
+    final tokens = theme.components.pageShell;
 
     return DecoratedBox(
-      decoration: BoxDecoration(color: theme.colors.pageBackground),
+      decoration: BoxDecoration(color: tokens.pageColor),
       child: Stack(
         fit: StackFit.expand,
         children: [
           _BackgroundImage(
-            imagePath: theme.images.pageBackground,
-            tint: theme.colors.brandPrimary.withValues(alpha: 0.08),
-            fallback: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                theme.colors.pageBackground,
-                theme.colors.surfaceElevated,
-              ],
-            ),
+            imagePath: tokens.image,
+            fallbackColor: tokens.pageColor,
           ),
-          _BackgroundImage(
-            imagePath: theme.images.pageOverlay,
-            tint: theme.colors.brandAccent.withValues(alpha: 0.06),
-            fallback: RadialGradient(
-              center: const Alignment(0.8, -0.9),
-              radius: 1.2,
-              colors: [
-                theme.colors.brandAccent.withValues(alpha: 0.12),
-                Colors.transparent,
-              ],
+          DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: RadialGradient(
+                center: const Alignment(0.8, -0.9),
+                radius: 1.2,
+                colors: [
+                  tokens.accentGlowColor.withValues(
+                    alpha: tokens.accentGlowOpacity,
+                  ),
+                  Colors.transparent,
+                ],
+              ),
             ),
           ),
           child,
@@ -50,25 +45,24 @@ class Host4Background extends StatelessWidget {
 class _BackgroundImage extends StatelessWidget {
   const _BackgroundImage({
     required this.imagePath,
-    required this.tint,
-    required this.fallback,
+    required this.fallbackColor,
   });
 
   final String imagePath;
-  final Color tint;
-  final Gradient fallback;
+  final Color fallbackColor;
 
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
-      decoration: BoxDecoration(gradient: fallback),
-      child: Image.asset(
-        imagePath,
-        fit: BoxFit.cover,
-        color: tint,
-        colorBlendMode: BlendMode.srcATop,
-        errorBuilder: (context, error, stackTrace) => const SizedBox.expand(),
-      ),
+      decoration: BoxDecoration(color: fallbackColor),
+      child: imagePath.isEmpty
+          ? const SizedBox.expand()
+          : Image.asset(
+              imagePath,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) =>
+                  const SizedBox.expand(),
+            ),
     );
   }
 }

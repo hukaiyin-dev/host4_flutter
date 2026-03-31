@@ -113,13 +113,13 @@ abstract class AppLocalizations {
   /// No description provided for @homePageTitle.
   ///
   /// In en, this message translates to:
-  /// **'Home'**
+  /// **'Lab'**
   String get homePageTitle;
 
   /// No description provided for @homePageSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Theme story'**
+  /// **'Flutter technical experiments'**
   String get homePageSubtitle;
 
   /// No description provided for @listPageTitle.
@@ -581,14 +581,188 @@ abstract class AppLocalizations {
   /// No description provided for @tabHome.
   ///
   /// In en, this message translates to:
-  /// **'Home'**
+  /// **'Lab'**
   String get tabHome;
+
+  /// No description provided for @labThemePlaygroundTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme Playground'**
+  String get labThemePlaygroundTitle;
+
+  /// No description provided for @labThemePlaygroundSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Try runtime theme switching, mode merge and prompt-driven generation flow.'**
+  String get labThemePlaygroundSubtitle;
+
+  /// No description provided for @labLogsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Runtime Logs'**
+  String get labLogsTitle;
+
+  /// No description provided for @labLogsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify local log writing, export flow and native share behavior on device.'**
+  String get labLogsSubtitle;
+
+  /// No description provided for @labDebugTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme Inspector'**
+  String get labDebugTitle;
+
+  /// No description provided for @labDebugSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Inspect manifest fields, token paths and resolved runtime colors in one place.'**
+  String get labDebugSubtitle;
+
+  /// No description provided for @labUsbDriveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'USB Drive Experiment'**
+  String get labUsbDriveTitle;
+
+  /// No description provided for @labUsbDriveSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Validate whether iOS and Android can read files from an attached USB drive.'**
+  String get labUsbDriveSubtitle;
+
+  /// No description provided for @labTesterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset Sandbox'**
+  String get labTesterTitle;
+
+  /// No description provided for @labTesterSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Run destructive test actions like reset-install without mixing them into Settings.'**
+  String get labTesterSubtitle;
 
   /// No description provided for @tabList.
   ///
   /// In en, this message translates to:
-  /// **'List'**
+  /// **'Components'**
   String get tabList;
+
+  /// No description provided for @usbDrivePageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'USB Drive Experiment'**
+  String get usbDrivePageTitle;
+
+  /// No description provided for @usbDrivePageSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cross-platform external storage validation'**
+  String get usbDrivePageSubtitle;
+
+  /// No description provided for @usbDriveIntroTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Experiment Goal'**
+  String get usbDriveIntroTitle;
+
+  /// No description provided for @usbDriveIntroBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Use this page to validate whether the demo can enumerate and read content from a connected USB drive on iOS and Android.'**
+  String get usbDriveIntroBody;
+
+  /// No description provided for @usbDriveIosStatusTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'iOS status'**
+  String get usbDriveIosStatusTitle;
+
+  /// No description provided for @usbDriveIosStatusBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending verification. The next step is to confirm whether Files-based import or external drive access is available in the current app sandbox.'**
+  String get usbDriveIosStatusBody;
+
+  /// No description provided for @usbDriveAndroidStatusTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Android status'**
+  String get usbDriveAndroidStatusTitle;
+
+  /// No description provided for @usbDriveAndroidStatusBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending verification. The next step is to confirm USB OTG mount visibility and readable document access from Flutter.'**
+  String get usbDriveAndroidStatusBody;
+
+  /// No description provided for @usbDriveActionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Run Experiment'**
+  String get usbDriveActionTitle;
+
+  /// No description provided for @usbDriveActionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'On iOS this opens the system document picker. If the external USB drive is visible in Files, you can choose a file and read a preview.'**
+  String get usbDriveActionBody;
+
+  /// No description provided for @usbDrivePickButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose File'**
+  String get usbDrivePickButton;
+
+  /// No description provided for @usbDrivePicking.
+  ///
+  /// In en, this message translates to:
+  /// **'Picking...'**
+  String get usbDrivePicking;
+
+  /// No description provided for @usbDrivePickUnsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'Only the iOS picker experiment is implemented right now'**
+  String get usbDrivePickUnsupported;
+
+  /// No description provided for @usbDrivePickFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Read failed'**
+  String get usbDrivePickFailed;
+
+  /// No description provided for @usbDrivePickedResultTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Result'**
+  String get usbDrivePickedResultTitle;
+
+  /// No description provided for @usbDrivePickedName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get usbDrivePickedName;
+
+  /// No description provided for @usbDrivePickedSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Size'**
+  String get usbDrivePickedSize;
+
+  /// No description provided for @usbDrivePickedPath.
+  ///
+  /// In en, this message translates to:
+  /// **'Path'**
+  String get usbDrivePickedPath;
+
+  /// No description provided for @usbDrivePickedPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview'**
+  String get usbDrivePickedPreview;
 
   /// No description provided for @tabSettings.
   ///
@@ -650,6 +824,24 @@ abstract class AppLocalizations {
   /// **'No logs yet.'**
   String get logsEmptyMessage;
 
+  /// No description provided for @logsExportUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No log file available to export.'**
+  String get logsExportUnavailable;
+
+  /// No description provided for @logsExportSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'System share sheet opened.'**
+  String get logsExportSuccess;
+
+  /// No description provided for @logsExportFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to export logs.'**
+  String get logsExportFailed;
+
   /// No description provided for @settingsPageTitle.
   ///
   /// In en, this message translates to:
@@ -665,13 +857,13 @@ abstract class AppLocalizations {
   /// No description provided for @settingsBannerTitle.
   ///
   /// In en, this message translates to:
-  /// **'Appearance'**
+  /// **'Settings'**
   String get settingsBannerTitle;
 
   /// No description provided for @settingsBannerSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Switch visual theme or app language below.'**
+  /// **'General preferences and developer tools'**
   String get settingsBannerSubtitle;
 
   /// No description provided for @testerPageTitle.
@@ -715,6 +907,186 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Reset'**
   String get testerResetConfirmAction;
+
+  /// No description provided for @testerClearRecordsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete All Records'**
+  String get testerClearRecordsTitle;
+
+  /// No description provided for @testerClearRecordsConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete all records?'**
+  String get testerClearRecordsConfirmTitle;
+
+  /// No description provided for @testerClearRecordsConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This clears the log file, generated theme records, and all downloaded theme assets.'**
+  String get testerClearRecordsConfirmBody;
+
+  /// No description provided for @testerClearRecordsConfirmAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get testerClearRecordsConfirmAction;
+
+  /// No description provided for @testerClearRecordsDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Cleared logs and all theme records'**
+  String get testerClearRecordsDone;
+
+  /// No description provided for @onboardingDemoSettingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Onboarding Demo'**
+  String get onboardingDemoSettingsTitle;
+
+  /// No description provided for @onboardingDemoSettingsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Test the onboarding module with a 6-step simulated flow'**
+  String get onboardingDemoSettingsSubtitle;
+
+  /// No description provided for @onboardingDemoSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get onboardingDemoSkip;
+
+  /// No description provided for @onboardingDemoCompleteMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Onboarding completed'**
+  String get onboardingDemoCompleteMessage;
+
+  /// No description provided for @onboardingP1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to Pantas'**
+  String get onboardingP1Title;
+
+  /// No description provided for @onboardingP1Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'To get you started, please complete a few essential setup steps.'**
+  String get onboardingP1Desc;
+
+  /// No description provided for @onboardingP1Action.
+  ///
+  /// In en, this message translates to:
+  /// **'Let\'s Go'**
+  String get onboardingP1Action;
+
+  /// No description provided for @onboardingP2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Storage Permission'**
+  String get onboardingP2Title;
+
+  /// No description provided for @onboardingP2Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Pantas needs storage access to read and manage your files. Tap the button below to grant access.'**
+  String get onboardingP2Desc;
+
+  /// No description provided for @onboardingP2Action.
+  ///
+  /// In en, this message translates to:
+  /// **'Grant Permission'**
+  String get onboardingP2Action;
+
+  /// No description provided for @onboardingP3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Data Folder'**
+  String get onboardingP3Title;
+
+  /// No description provided for @onboardingP3Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a folder to store your settings, game lists and media. We recommend naming it Pantas.'**
+  String get onboardingP3Desc;
+
+  /// No description provided for @onboardingP3Action.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Folder'**
+  String get onboardingP3Action;
+
+  /// No description provided for @onboardingP4Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose ROMs Folder'**
+  String get onboardingP4Title;
+
+  /// No description provided for @onboardingP4Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a folder to store your game files (ROMs). We recommend naming it roms.'**
+  String get onboardingP4Desc;
+
+  /// No description provided for @onboardingP4Hint.
+  ///
+  /// In en, this message translates to:
+  /// **'You will need at least one game file after setup, otherwise the app may not launch.'**
+  String get onboardingP4Hint;
+
+  /// No description provided for @onboardingP4Action.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Folder'**
+  String get onboardingP4Action;
+
+  /// No description provided for @onboardingP5Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Platform Directories?'**
+  String get onboardingP5Title;
+
+  /// No description provided for @onboardingP5Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Subdirectories for all supported game platforms will be created inside your ROMs folder, each with an auto-generated systeminfo.txt config file. If you skip this, you will need to create these files manually.'**
+  String get onboardingP5Desc;
+
+  /// No description provided for @onboardingP5Action.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Now'**
+  String get onboardingP5Action;
+
+  /// No description provided for @onboardingP5Skip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get onboardingP5Skip;
+
+  /// No description provided for @onboardingP6Title.
+  ///
+  /// In en, this message translates to:
+  /// **'All Set!'**
+  String get onboardingP6Title;
+
+  /// No description provided for @onboardingP6Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Pantas is configured and ready to use.'**
+  String get onboardingP6Desc;
+
+  /// No description provided for @onboardingP6Hint.
+  ///
+  /// In en, this message translates to:
+  /// **'You still need to install an emulator for each game platform. Some emulators may require additional ROM folder access permissions, otherwise games may not launch.'**
+  String get onboardingP6Hint;
+
+  /// No description provided for @onboardingP6Action.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Using'**
+  String get onboardingP6Action;
 }
 
 class _AppLocalizationsDelegate

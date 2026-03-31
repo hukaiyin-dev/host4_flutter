@@ -30,6 +30,8 @@ class Host4ThemeManager extends ChangeNotifier {
   Host4RuntimeTheme? _theme;
   String? _currentThemeId;
   String? _currentMode;
+  Map<String, dynamic>? _generatedTokensMap;
+  Host4ThemeImages? _generatedImages;
   bool _isLoading = false;
 
   List<Host4ThemeCatalogEntry> get catalog => _catalog;
@@ -84,11 +86,42 @@ class Host4ThemeManager extends ChangeNotifier {
     }
   }
 
+  Future<void> applyGeneratedTheme(
+    Map<String, dynamic> tokensMap, {
+    String? mode,
+    Host4ThemeImages? images,
+  }) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final targetMode = mode ?? _currentMode ?? 'light';
+      _theme = await Host4ThemeLoader.loadFromMap(
+        tokensMap,
+        mode: targetMode,
+        fallbackImages: images ?? _generatedImages ?? _theme?.images,
+      );
+      _generatedTokensMap = tokensMap;
+      _generatedImages = images;
+      _currentThemeId = null;
+      _currentMode = targetMode;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   Future<void> applyMode(String mode) async {
-    final themeId = _currentThemeId;
-    if (themeId == null) {
+    if (_currentThemeId != null) {
+      await applyTheme(_currentThemeId!, mode: mode);
+    } else if (_generatedTokensMap != null) {
+      await applyGeneratedTheme(
+        _generatedTokensMap!,
+        mode: mode,
+        images: _generatedImages,
+      );
+    } else {
       throw StateError('Theme has not been initialized yet.');
     }
-    await applyTheme(themeId, mode: mode);
   }
 }

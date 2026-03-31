@@ -17,11 +17,12 @@ class Host4PageScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final pageShellTokens = context.host4Theme.components.pageShell;
     // bottom: false — the tab bar handles its own safe area inset
     final content = useSafeArea ? SafeArea(bottom: false, child: body) : body;
     // Use pageBackground so iOS keyboard rounded-corner gutter shows the
     // correct color instead of the engine's default black window background.
-    final backgroundColor = context.host4Theme.colors.pageBackground;
+    final backgroundColor = pageShellTokens.pageColor;
     return Scaffold(
       backgroundColor: backgroundColor,
       body: Host4Background(child: content),

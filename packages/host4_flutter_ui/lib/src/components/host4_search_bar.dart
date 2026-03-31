@@ -12,24 +12,24 @@ class Host4SearchBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = context.host4Theme;
+    final tokens = theme.components.searchBar;
+
     return Host4TextField(
       controller: controller,
       hintText: hintText,
       prefixIcon: Icons.search_rounded,
       suffix: Container(
         padding: EdgeInsets.symmetric(
-          horizontal: theme.spacing.sm,
-          vertical: theme.spacing.xs,
+          horizontal: tokens.shortcutHorizontal,
+          vertical: tokens.shortcutVertical,
         ),
         decoration: BoxDecoration(
-          color: theme.colors.surfaceMuted,
-          borderRadius: BorderRadius.circular(theme.radius.pill),
+          color: tokens.shortcutBackground,
+          borderRadius: BorderRadius.circular(tokens.shortcutRadius),
         ),
         child: Text(
           '⌘K',
-          style: theme.typography.caption.toTextStyle(
-            theme.colors.textSecondary,
-          ),
+          style: tokens.shortcutStyle.toTextStyle(tokens.shortcutTextColor),
         ),
       ),
     );

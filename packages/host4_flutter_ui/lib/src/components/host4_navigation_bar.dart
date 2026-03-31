@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../foundation/theme/host4_theme_scope.dart';
-import 'host4_text.dart';
 
 class Host4NavigationBar extends StatelessWidget {
   const Host4NavigationBar({
@@ -24,14 +23,18 @@ class Host4NavigationBar extends StatelessWidget {
 
     return Container(
       padding: EdgeInsets.fromLTRB(
-        theme.spacing.page,
-        theme.spacing.lg,
-        theme.spacing.page,
-        theme.spacing.md,
+        tokens.paddingHorizontal,
+        tokens.paddingTop,
+        tokens.paddingHorizontal,
+        tokens.paddingBottom,
       ),
+      color: tokens.background,
       child: Row(
         children: [
-          if (leading != null) ...[leading!, SizedBox(width: theme.spacing.md)],
+          if (leading != null) ...[
+            leading!,
+            SizedBox(width: tokens.leadingGap),
+          ],
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -39,15 +42,9 @@ class Host4NavigationBar extends StatelessWidget {
                 if (subtitle case String subtitleText)
                   Text(
                     subtitleText,
-                    style: theme.typography.caption.toTextStyle(
-                      tokens.subtitle,
-                    ),
+                    style: tokens.subtitleStyle.toTextStyle(tokens.subtitle),
                   ),
-                Host4Text(
-                  title,
-                  role: Host4TextRole.title,
-                  style: theme.typography.title.toTextStyle(tokens.title),
-                ),
+                Text(title, style: tokens.titleStyle.toTextStyle(tokens.title)),
               ],
             ),
           ),

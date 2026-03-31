@@ -62,6 +62,9 @@ class Host4ThemeColors {
     required this.borderDefault,
     required this.borderStrong,
     required this.focus,
+    required this.interactivePressed,
+    required this.interactiveDisabled,
+    required this.interactiveSelected,
     required this.success,
     required this.warning,
   });
@@ -79,6 +82,9 @@ class Host4ThemeColors {
   final Color borderDefault;
   final Color borderStrong;
   final Color focus;
+  final Color interactivePressed;
+  final Color interactiveDisabled;
+  final Color interactiveSelected;
   final Color success;
   final Color warning;
 }
@@ -172,7 +178,6 @@ class Host4ThemeRadius {
     required this.button,
     required this.card,
     required this.input,
-    required this.banner,
   });
 
   final double sm;
@@ -182,51 +187,36 @@ class Host4ThemeRadius {
   final double button;
   final double card;
   final double input;
-  final double banner;
 }
 
 @immutable
 class Host4ThemeSizes {
-  const Host4ThemeSizes({
-    required this.iconSm,
-    required this.iconMd,
-    required this.iconLg,
-  });
+  const Host4ThemeSizes({required this.iconMd, required this.iconLg});
 
-  final double iconSm;
   final double iconMd;
   final double iconLg;
 }
 
 @immutable
 class Host4ThemeBlur {
-  const Host4ThemeBlur({
-    required this.card,
-    required this.banner,
-    required this.chrome,
-  });
+  const Host4ThemeBlur({required this.card});
 
   final double card;
-  final double banner;
-  final double chrome;
 }
 
 @immutable
 class Host4ThemeImages {
   const Host4ThemeImages({
     required this.pageBackground,
-    required this.pageOverlay,
     required this.heroBanner,
-    required this.promoBanner,
     required this.spotIllustration,
     required this.tabItems,
   });
 
   final String pageBackground;
-  final String pageOverlay;
   final String heroBanner;
-  final String promoBanner;
   final String spotIllustration;
+
   /// Tab icon image pairs, ordered by index (tab0, tab1, …).
   /// Length equals the number of consecutive tab slots defined in the token.
   final List<Host4TabItemImages> tabItems;
@@ -256,34 +246,63 @@ class Host4TabItemImages {
 @immutable
 class Host4ThemeComponents {
   const Host4ThemeComponents({
+    required this.pageShell,
     required this.button,
     required this.card,
     required this.navigationBar,
+    required this.searchBar,
+    required this.sectionHeader,
     required this.textField,
-    required this.banner,
     required this.listCell,
     required this.tabBar,
   });
 
+  final Host4PageShellComponentTokens pageShell;
   final Host4ButtonComponentTokens button;
   final Host4CardComponentTokens card;
   final Host4NavigationBarComponentTokens navigationBar;
+  final Host4SearchBarComponentTokens searchBar;
+  final Host4SectionHeaderComponentTokens sectionHeader;
   final Host4TextFieldComponentTokens textField;
-  final Host4BannerComponentTokens banner;
   final Host4ListCellComponentTokens listCell;
   final Host4TabBarComponentTokens tabBar;
+}
+
+@immutable
+class Host4PageShellComponentTokens {
+  const Host4PageShellComponentTokens({
+    required this.pageColor,
+    required this.image,
+    required this.accentGlowColor,
+    required this.accentGlowOpacity,
+  });
+
+  final Color pageColor;
+  final String image;
+  final Color accentGlowColor;
+  final double accentGlowOpacity;
 }
 
 @immutable
 class Host4ButtonComponentTokens {
   const Host4ButtonComponentTokens({
     required this.spacing,
+    required this.labelStyle,
+    required this.minHeight,
+    required this.leadingIconSize,
+    required this.topIconSize,
+    required this.iconOnlySize,
     required this.primary,
     required this.secondary,
     required this.ghost,
   });
 
   final Host4ButtonSpacingTokens spacing;
+  final Host4TextToken labelStyle;
+  final double minHeight;
+  final double leadingIconSize;
+  final double topIconSize;
+  final double iconOnlySize;
   final Host4ButtonVariantTokens primary;
   final Host4ButtonVariantTokens secondary;
   final Host4ButtonVariantTokens ghost;
@@ -294,26 +313,45 @@ class Host4ButtonSpacingTokens {
   const Host4ButtonSpacingTokens({
     required this.horizontal,
     required this.vertical,
-    required this.iconHorizontal,
-    required this.iconVertical,
+    required this.iconOnlyHorizontal,
+    required this.iconOnlyVertical,
+    required this.iconGap,
+    required this.stackGap,
   });
 
   final double horizontal;
   final double vertical;
-  final double iconHorizontal;
-  final double iconVertical;
+  final double iconOnlyHorizontal;
+  final double iconOnlyVertical;
+  final double iconGap;
+  final double stackGap;
 }
 
 @immutable
 class Host4ButtonVariantTokens {
   const Host4ButtonVariantTokens({
     required this.radius,
+    required this.defaultState,
+    required this.pressedState,
+    required this.disabledState,
+    required this.focusedState,
+  });
+
+  final double radius;
+  final Host4ButtonStateTokens defaultState;
+  final Host4ButtonStateTokens pressedState;
+  final Host4ButtonStateTokens disabledState;
+  final Host4ButtonStateTokens focusedState;
+}
+
+@immutable
+class Host4ButtonStateTokens {
+  const Host4ButtonStateTokens({
     required this.background,
     required this.foreground,
     required this.border,
   });
 
-  final double radius;
   final Color background;
   final Color foreground;
   final Color border;
@@ -322,39 +360,135 @@ class Host4ButtonVariantTokens {
 @immutable
 class Host4CardComponentTokens {
   const Host4CardComponentTokens({
+    required this.padding,
+    required this.radius,
     required this.background,
     required this.border,
     required this.title,
     required this.subtitle,
+    required this.shadowColor,
+    required this.shadowOpacity,
+    required this.shadowBlur,
+    required this.shadowOffsetY,
   });
 
+  final double padding;
+  final double radius;
   final Color background;
   final Color border;
   final Color title;
   final Color subtitle;
+  final Color shadowColor;
+  final double shadowOpacity;
+  final double shadowBlur;
+  final double shadowOffsetY;
 }
 
 @immutable
 class Host4NavigationBarComponentTokens {
   const Host4NavigationBarComponentTokens({
+    required this.paddingHorizontal,
+    required this.paddingTop,
+    required this.paddingBottom,
+    required this.leadingGap,
     required this.background,
+    required this.titleStyle,
+    required this.subtitleStyle,
     required this.title,
     required this.subtitle,
     required this.icon,
   });
 
+  final double paddingHorizontal;
+  final double paddingTop;
+  final double paddingBottom;
+  final double leadingGap;
   final Color background;
+  final Host4TextToken titleStyle;
+  final Host4TextToken subtitleStyle;
   final Color title;
   final Color subtitle;
   final Color icon;
 }
 
 @immutable
+class Host4SearchBarComponentTokens {
+  const Host4SearchBarComponentTokens({
+    required this.shortcutHorizontal,
+    required this.shortcutVertical,
+    required this.shortcutBackground,
+    required this.shortcutRadius,
+    required this.shortcutStyle,
+    required this.shortcutTextColor,
+  });
+
+  final double shortcutHorizontal;
+  final double shortcutVertical;
+  final Color shortcutBackground;
+  final double shortcutRadius;
+  final Host4TextToken shortcutStyle;
+  final Color shortcutTextColor;
+}
+
+@immutable
+class Host4SectionHeaderComponentTokens {
+  const Host4SectionHeaderComponentTokens({
+    required this.titleStyle,
+    required this.titleColor,
+    required this.subtitleGap,
+    required this.actionGap,
+    required this.subtitleStyle,
+    required this.subtitleColor,
+  });
+
+  final Host4TextToken titleStyle;
+  final Color titleColor;
+  final double subtitleGap;
+  final double actionGap;
+  final Host4TextToken subtitleStyle;
+  final Color subtitleColor;
+}
+
+@immutable
 class Host4TextFieldComponentTokens {
   const Host4TextFieldComponentTokens({
+    required this.paddingHorizontal,
+    required this.paddingVertical,
+    required this.radius,
+    required this.minHeight,
+    required this.prefixIconSize,
+    required this.suffixGap,
+    required this.textStyle,
+    required this.placeholderStyle,
+    required this.defaultState,
+    required this.focusedState,
+    required this.disabledState,
+    required this.readOnlyState,
+    required this.errorState,
+    required this.successState,
+  });
+
+  final double paddingHorizontal;
+  final double paddingVertical;
+  final double radius;
+  final double minHeight;
+  final double prefixIconSize;
+  final double suffixGap;
+  final Host4TextToken textStyle;
+  final Host4TextToken placeholderStyle;
+  final Host4TextFieldStateTokens defaultState;
+  final Host4TextFieldStateTokens focusedState;
+  final Host4TextFieldStateTokens disabledState;
+  final Host4TextFieldStateTokens readOnlyState;
+  final Host4TextFieldStateTokens errorState;
+  final Host4TextFieldStateTokens successState;
+}
+
+@immutable
+class Host4TextFieldStateTokens {
+  const Host4TextFieldStateTokens({
     required this.background,
     required this.border,
-    required this.focusBorder,
     required this.text,
     required this.placeholder,
     required this.icon,
@@ -362,34 +496,51 @@ class Host4TextFieldComponentTokens {
 
   final Color background;
   final Color border;
-  final Color focusBorder;
   final Color text;
   final Color placeholder;
   final Color icon;
 }
 
 @immutable
-class Host4BannerComponentTokens {
-  const Host4BannerComponentTokens({
-    required this.background,
-    required this.overlay,
-    required this.title,
-    required this.subtitle,
-    required this.badgeBackground,
-    required this.badgeForeground,
+class Host4ListCellComponentTokens {
+  const Host4ListCellComponentTokens({
+    required this.radius,
+    required this.paddingHorizontal,
+    required this.paddingVertical,
+    required this.minHeight,
+    required this.leadingGap,
+    required this.subtitleGap,
+    required this.trailingGap,
+    required this.chevronGap,
+    required this.titleStyle,
+    required this.subtitleStyle,
+    required this.trailingStyle,
+    required this.defaultState,
+    required this.pressedState,
+    required this.disabledState,
+    required this.selectedState,
   });
 
-  final Color background;
-  final Color overlay;
-  final Color title;
-  final Color subtitle;
-  final Color badgeBackground;
-  final Color badgeForeground;
+  final double radius;
+  final double paddingHorizontal;
+  final double paddingVertical;
+  final double minHeight;
+  final double leadingGap;
+  final double subtitleGap;
+  final double trailingGap;
+  final double chevronGap;
+  final Host4TextToken titleStyle;
+  final Host4TextToken subtitleStyle;
+  final Host4TextToken trailingStyle;
+  final Host4ListCellStateTokens defaultState;
+  final Host4ListCellStateTokens pressedState;
+  final Host4ListCellStateTokens disabledState;
+  final Host4ListCellStateTokens selectedState;
 }
 
 @immutable
-class Host4ListCellComponentTokens {
-  const Host4ListCellComponentTokens({
+class Host4ListCellStateTokens {
+  const Host4ListCellStateTokens({
     required this.background,
     required this.title,
     required this.subtitle,
@@ -408,21 +559,49 @@ class Host4ListCellComponentTokens {
 class Host4TabBarComponentTokens {
   const Host4TabBarComponentTokens({
     required this.background,
-    required this.blur,
     required this.height,
     required this.iconSize,
     required this.featuredIconSize,
-    required this.showLabels,
-    required this.labelColor,
-    required this.selectedLabelColor,
+    required this.labelStyle,
+    required this.labelGap,
+    required this.bottomGap,
+    required this.itemStates,
+    required this.items,
   });
 
   final Color background;
-  final double blur;
   final double height;
   final double iconSize;
   final double featuredIconSize;
-  final bool showLabels;
+  final Host4TextToken labelStyle;
+  final double labelGap;
+  final double bottomGap;
+  final Host4TabBarItemStateSet itemStates;
+  final List<Host4TabItemImages> items;
+}
+
+@immutable
+class Host4TabBarItemStateSet {
+  const Host4TabBarItemStateSet({
+    required this.defaultState,
+    required this.pressedState,
+    required this.disabledState,
+    required this.selectedState,
+  });
+
+  final Host4TabBarItemStateTokens defaultState;
+  final Host4TabBarItemStateTokens pressedState;
+  final Host4TabBarItemStateTokens disabledState;
+  final Host4TabBarItemStateTokens selectedState;
+}
+
+@immutable
+class Host4TabBarItemStateTokens {
+  const Host4TabBarItemStateTokens({
+    required this.labelColor,
+    required this.iconColor,
+  });
+
   final Color labelColor;
-  final Color selectedLabelColor;
+  final Color iconColor;
 }

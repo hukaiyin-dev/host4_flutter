@@ -1,0 +1,48 @@
+{
+  "image": {
+    "page-background": {
+      "light": "images/page_background_light.png",
+      "dark": "images/page_background_dark.png"
+    },
+    "hero-banner": {
+      "light": "images/hero_banner_light.png",
+      "dark": "images/hero_banner_dark.png"
+    },
+    "spot-illustration": {
+      "light": "images/spot_illustration_light.png",
+      "dark": "images/spot_illustration_dark.png"
+    },
+    "tab": {
+      "home": {
+        "default": {
+          "light": "images/tab_0.png",
+          "dark": "images/tab_dark_0.png"
+        },
+        "selected": {
+          "light": "images/tab_0_selected.png",
+          "dark": "images/tab_dark_0_selected.png"
+        }
+      },
+      "list": {
+        "default": {
+          "light": "images/tab_1.png",
+          "dark": "images/tab_dark_1.png"
+        },
+        "selected": {
+          "light": "images/tab_1_selected.png",
+          "dark": "images/tab_dark_1_selected.png"
+        }
+      },
+      "settings": {
+        "default": {
+          "light": "images/tab_2.png",
+          "dark": "images/tab_dark_2.png"
+        },
+        "selected": {
+          "light": "images/tab_2_selected.png",
+          "dark": "images/tab_dark_2_selected.png"
+        }
+      }
+    }
+  }
+}

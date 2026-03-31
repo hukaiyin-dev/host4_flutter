@@ -1,0 +1,22 @@
+name: host4_flutter_module_onboarding
+description: "Platform-level onboarding flow module for host4 Flutter apps."
+version: 0.0.1
+homepage:
+
+environment:
+  sdk: ">=3.10.0 <4.0.0"
+  flutter: ">=1.17.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  host4_flutter_ui:
+    path: ../host4_flutter_ui
+  shared_preferences: ^2.3.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:

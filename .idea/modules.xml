@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/packages/host4_flutter_analytics/melos_host4_flutter_analytics.iml" filepath="$PROJECT_DIR$/packages/host4_flutter_analytics/melos_host4_flutter_analytics.iml" />
+      <module fileurl="file://$PROJECT_DIR$/packages/host4_flutter_bridge/melos_host4_flutter_bridge.iml" filepath="$PROJECT_DIR$/packages/host4_flutter_bridge/melos_host4_flutter_bridge.iml" />
+      <module fileurl="file://$PROJECT_DIR$/packages/host4_flutter_bridge/example/melos_host4_flutter_bridge_example.iml" filepath="$PROJECT_DIR$/packages/host4_flutter_bridge/example/melos_host4_flutter_bridge_example.iml" />
+      <module fileurl="file://$PROJECT_DIR$/packages/host4_flutter_core/melos_host4_flutter_core.iml" filepath="$PROJECT_DIR$/packages/host4_flutter_core/melos_host4_flutter_core.iml" />
+      <module fileurl="file://$PROJECT_DIR$/packages/host4_flutter_crypto/melos_host4_flutter_crypto.iml" filepath="$PROJECT_DIR$/packages/host4_flutter_crypto/melos_host4_flutter_crypto.iml" />
+      <module fileurl="file://$PROJECT_DIR$/examples/host4_flutter_demo/melos_host4_flutter_demo.iml" filepath="$PROJECT_DIR$/examples/host4_flutter_demo/melos_host4_flutter_demo.iml" />
+      <module fileurl="file://$PROJECT_DIR$/packages/host4_flutter_log/melos_host4_flutter_log.iml" filepath="$PROJECT_DIR$/packages/host4_flutter_log/melos_host4_flutter_log.iml" />
+      <module fileurl="file://$PROJECT_DIR$/packages/host4_flutter_ui/melos_host4_flutter_ui.iml" filepath="$PROJECT_DIR$/packages/host4_flutter_ui/melos_host4_flutter_ui.iml" />
+      <module fileurl="file://$PROJECT_DIR$/packages/host4_flutter_utils/melos_host4_flutter_utils.iml" filepath="$PROJECT_DIR$/packages/host4_flutter_utils/melos_host4_flutter_utils.iml" />
+      <module fileurl="file://$PROJECT_DIR$/melos_host4_flutter.iml" filepath="$PROJECT_DIR$/melos_host4_flutter.iml" />
+    </modules>
+  </component>
+</project>

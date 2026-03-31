@@ -32,13 +32,29 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
+  firebase_analytics: ^11.3.6
+  firebase_core: ^3.15.2
+  host4_flutter_analytics:
+    path: ../../packages/host4_flutter_analytics
+  host4_flutter_bridge:
+    path: ../../packages/host4_flutter_bridge
+  host4_flutter_core:
+    path: ../../packages/host4_flutter_core
+  host4_flutter_crypto:
+    path: ../../packages/host4_flutter_crypto
+  host4_flutter_module_onboarding:
+    path: ../../packages/host4_flutter_module_onboarding
   host4_flutter_ui:
     path: ../../packages/host4_flutter_ui
   host4_flutter_log:
     path: ../../packages/host4_flutter_log
+  host4_flutter_utils:
+    path: ../../packages/host4_flutter_utils
   share_plus: ^10.0.0
   intl: ^0.20.2
   shared_preferences: ^2.3.0
+  http: ^1.2.0
+  path_provider: ^2.1.0
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -70,9 +86,11 @@ flutter:
   assets:
     - assets/themes/default/manifest.json
     - assets/themes/default/tokens.json
+    - assets/themes/default/asset.json
     - assets/themes/default/images/
     - assets/themes/grassland/manifest.json
     - assets/themes/grassland/tokens.json
+    - assets/themes/grassland/asset.json
     - assets/themes/grassland/images/
 
   # An image asset can refer to one or more resolution-specific "variants", see

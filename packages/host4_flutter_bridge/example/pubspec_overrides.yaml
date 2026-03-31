@@ -1,0 +1,4 @@
+# melos_managed_dependency_overrides: host4_flutter_bridge
+dependency_overrides:
+  host4_flutter_bridge:
+    path: ..

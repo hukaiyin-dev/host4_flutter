@@ -1,0 +1,4 @@
+# melos_managed_dependency_overrides: host4_flutter_utils
+dependency_overrides:
+  host4_flutter_utils:
+    path: ../host4_flutter_utils
