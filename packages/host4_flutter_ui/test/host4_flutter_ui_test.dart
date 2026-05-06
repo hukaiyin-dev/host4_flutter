@@ -12,6 +12,7 @@ void main() {
       final bundle = _FakeAssetBundle({
         'assets/themes/default/manifest.json': _readThemeFile('manifest.json'),
         'assets/themes/default/tokens.json': _readThemeFile('tokens.json'),
+        'assets/themes/default/asset.json': _readThemeFile('asset.json'),
       });
 
       final theme = await Host4ThemeLoader.loadFromAsset(
@@ -45,6 +46,7 @@ void main() {
       final bundle = _FakeAssetBundle({
         'assets/themes/default/manifest.json': _readThemeFile('manifest.json'),
         'assets/themes/default/tokens.json': _readThemeFile('tokens.json'),
+        'assets/themes/default/asset.json': _readThemeFile('asset.json'),
       });
 
       final theme = await Host4ThemeLoader.loadFromAsset(

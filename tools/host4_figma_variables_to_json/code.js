@@ -33,7 +33,6 @@ async function exportVariables() {
     const col = collections.find(c => c.id === v.variableCollectionId);
     if (col) {
       const colPrefix = col.name.toLowerCase();
-      // 使用 split 和 join 确保所有段（包括数字段 .0）都被保留
       const dotPath = v.name.split('/').join('.');
       variableIdMap[v.id] = `{${colPrefix}.${dotPath}}`;
     }
@@ -47,23 +46,28 @@ async function exportVariables() {
     for (const v of variables) {
       const pathSegments = v.name.split('/');
       let currentLevel = result[colKey];
+      const description = v.description || "";
 
+      // 检查元数据标记
+      const forceModes = description.includes('[M]');
+      
       // 处理多模式 (仅 Semantic 支持模式分支)
       if (col.name === 'Semantic') {
         const modeValues = col.modes.map(mode => {
           let val = processValue(v.valuesByMode[mode.modeId], variableIdMap, v.resolvedType);
-          // 尝试从描述中还原 asset 引用
-          if (val === 0 && v.description && v.description.startsWith('{asset.')) {
-            val = v.description;
+          // 尝试从描述中还原 asset 引用 (清理标记后再检查)
+          const assetPath = description.replace('[M]', '');
+          if (val === 0 && assetPath.startsWith('{asset.')) {
+            val = assetPath;
           }
           return val;
         });
 
-        // 自动坍缩逻辑：如果所有模式的值完全一致，则直接返回标量
         const firstVal = modeValues[0];
         const allSame = modeValues.every(val => val === firstVal);
 
-        if (allSame) {
+        // 仅当没有 [M] 标记且值全相同时才坍缩
+        if (allSame && !forceModes) {
           buildNestedObject(currentLevel, pathSegments, firstVal);
         } else {
           const valueObj = {};
@@ -74,13 +78,12 @@ async function exportVariables() {
           buildNestedObject(currentLevel, pathSegments, valueObj);
         }
       } else {
-        // Primitive 和 Component 使用第一个模式的值 (单模式)
         const firstModeValue = v.valuesByMode[col.modes[0].modeId];
         let processedVal = processValue(firstModeValue, variableIdMap, v.resolvedType);
         
         // 尝试从描述中还原 asset 引用
-        if (processedVal === 0 && v.description && v.description.startsWith('{asset.')) {
-          processedVal = v.description;
+        if (processedVal === 0 && description.startsWith('{asset.')) {
+          processedVal = description;
         }
         
         buildNestedObject(currentLevel, pathSegments, processedVal);
@@ -92,22 +95,15 @@ async function exportVariables() {
 }
 
 function processValue(value, idMap, type) {
-  // 处理 Alias
   if (value && typeof value === 'object' && value.type === 'VARIABLE_ALIAS') {
-    const aliasStr = idMap[value.id];
-    return aliasStr || 0;
+    return idMap[value.id] || 0;
   }
-
-  // 处理颜色
   if (type === 'COLOR' && value && typeof value === 'object') {
     return rgbaToHex(value);
   }
-
-  // 处理数字：解决 JS 浮点数精度噪声 (如 0.119999... -> 0.12)
   if (typeof value === 'number') {
     return Math.round(value * 1000000) / 1000000;
   }
-
   return value;
 }
 
@@ -121,15 +117,7 @@ function buildNestedObject(obj, path, value) {
 }
 
 function rgbaToHex({ r, g, b, a }) {
-  const toHex = (v) => {
-    const hex = Math.round(v * 255).toString(16).toUpperCase();
-    return hex.length === 1 ? '0' + hex : hex;
-  };
-
-  const hexR = toHex(r);
-  const hexG = toHex(g);
-  const hexB = toHex(b);
-  const hexA = a < 1 ? toHex(a) : '';
-
-  return `#${hexR}${hexG}${hexB}${hexA}`;
+  const hex = (v) => Math.round(v * 255).toString(16).toUpperCase().padStart(2, '0');
+  const res = `#${hex(r)}${hex(g)}${hex(b)}`;
+  return a < 1 ? res + hex(a) : res;
 }

@@ -61,25 +61,16 @@ class ButtonsPage extends StatelessWidget {
         // ── Variants ──────────────────────────────────────────
         Host4SectionHeader(
           title: l10n.sectionVariants,
-          subtitle: 'primary · secondary · ghost',
+          subtitle: 'primary · secondary · tertiary · outline · ghost · danger · danger-soft',
         ),
         SizedBox(height: theme.spacing.md),
         Wrap(
           spacing: theme.spacing.sm,
           runSpacing: theme.spacing.sm,
-          children: const [
-            Host4Button(label: 'Primary', onPressed: _noOp),
-            Host4Button(
-              label: 'Secondary',
-              variant: Host4ButtonVariant.secondary,
-              onPressed: _noOp,
-            ),
-            Host4Button(
-              label: 'Ghost',
-              variant: Host4ButtonVariant.ghost,
-              onPressed: _noOp,
-            ),
-          ],
+          children: _variantButtons(
+            content: Host4ButtonContent.textOnly,
+            labels: _variantLabels,
+          ),
         ),
         SizedBox(height: theme.spacing.section),
 
@@ -92,28 +83,10 @@ class ButtonsPage extends StatelessWidget {
         Wrap(
           spacing: theme.spacing.sm,
           runSpacing: theme.spacing.sm,
-          children: const [
-            Host4Button(
-              label: 'Primary',
-              content: Host4ButtonContent.iconLeft,
-              icon: Icons.palette_outlined,
-              onPressed: _noOp,
-            ),
-            Host4Button(
-              label: 'Secondary',
-              variant: Host4ButtonVariant.secondary,
-              content: Host4ButtonContent.iconLeft,
-              icon: Icons.cloud_download_outlined,
-              onPressed: _noOp,
-            ),
-            Host4Button(
-              label: 'Ghost',
-              variant: Host4ButtonVariant.ghost,
-              content: Host4ButtonContent.iconLeft,
-              icon: Icons.info_outline_rounded,
-              onPressed: _noOp,
-            ),
-          ],
+          children: _variantButtons(
+            content: Host4ButtonContent.iconLeft,
+            labels: _variantLabels,
+          ),
         ),
         SizedBox(height: theme.spacing.section),
 
@@ -123,28 +96,10 @@ class ButtonsPage extends StatelessWidget {
         Wrap(
           spacing: theme.spacing.sm,
           runSpacing: theme.spacing.sm,
-          children: const [
-            Host4Button(
-              label: 'Primary',
-              content: Host4ButtonContent.iconTop,
-              icon: Icons.palette_outlined,
-              onPressed: _noOp,
-            ),
-            Host4Button(
-              label: 'Secondary',
-              variant: Host4ButtonVariant.secondary,
-              content: Host4ButtonContent.iconTop,
-              icon: Icons.cloud_download_outlined,
-              onPressed: _noOp,
-            ),
-            Host4Button(
-              label: 'Ghost',
-              variant: Host4ButtonVariant.ghost,
-              content: Host4ButtonContent.iconTop,
-              icon: Icons.info_outline_rounded,
-              onPressed: _noOp,
-            ),
-          ],
+          children: _variantButtons(
+            content: Host4ButtonContent.iconTop,
+            labels: _variantLabels,
+          ),
         ),
         SizedBox(height: theme.spacing.section),
 
@@ -157,28 +112,10 @@ class ButtonsPage extends StatelessWidget {
         Wrap(
           spacing: theme.spacing.sm,
           runSpacing: theme.spacing.sm,
-          children: const [
-            Host4Button(
-              label: 'Primary',
-              content: Host4ButtonContent.iconOnly,
-              icon: Icons.palette_outlined,
-              onPressed: _noOp,
-            ),
-            Host4Button(
-              label: 'Secondary',
-              variant: Host4ButtonVariant.secondary,
-              content: Host4ButtonContent.iconOnly,
-              icon: Icons.cloud_download_outlined,
-              onPressed: _noOp,
-            ),
-            Host4Button(
-              label: 'Ghost',
-              variant: Host4ButtonVariant.ghost,
-              content: Host4ButtonContent.iconOnly,
-              icon: Icons.info_outline_rounded,
-              onPressed: _noOp,
-            ),
-          ],
+          children: _variantButtons(
+            content: Host4ButtonContent.iconOnly,
+            labels: _variantLabels,
+          ),
         ),
         SizedBox(height: theme.spacing.section),
 
@@ -188,25 +125,7 @@ class ButtonsPage extends StatelessWidget {
           subtitle: 'expanded: true',
         ),
         SizedBox(height: theme.spacing.md),
-        const Host4Button(
-          label: 'Primary Expanded',
-          expanded: true,
-          onPressed: _noOp,
-        ),
-        SizedBox(height: theme.spacing.sm),
-        const Host4Button(
-          label: 'Secondary Expanded',
-          variant: Host4ButtonVariant.secondary,
-          expanded: true,
-          onPressed: _noOp,
-        ),
-        SizedBox(height: theme.spacing.sm),
-        const Host4Button(
-          label: 'Ghost Expanded',
-          variant: Host4ButtonVariant.ghost,
-          expanded: true,
-          onPressed: _noOp,
-        ),
+        ..._expandedButtons(theme),
         SizedBox(height: theme.spacing.section),
 
         // ── Disabled ──────────────────────────────────────────
@@ -218,26 +137,217 @@ class ButtonsPage extends StatelessWidget {
         Wrap(
           spacing: theme.spacing.sm,
           runSpacing: theme.spacing.sm,
-          children: const [
-            Host4Button(label: 'Primary', onPressed: null),
-            Host4Button(
-              label: 'Secondary',
-              variant: Host4ButtonVariant.secondary,
-              onPressed: null,
+          children: _disabledButtons(),
+        ),
+        SizedBox(height: theme.spacing.section),
+
+        // ── Loading ───────────────────────────────────────────
+        Host4SectionHeader(
+          title: 'Loading',
+          subtitle: 'component.button.loading + non-interactive',
+        ),
+        SizedBox(height: theme.spacing.md),
+        Wrap(
+          spacing: theme.spacing.sm,
+          runSpacing: theme.spacing.sm,
+          children: _loadingButtons(),
+        ),
+        SizedBox(height: theme.spacing.section),
+
+        // ── State Preview ─────────────────────────────────────
+        Host4SectionHeader(
+          title: 'State Preview',
+          subtitle: 'default · hover · pressed · focused',
+        ),
+        SizedBox(height: theme.spacing.md),
+        ..._statePreviewGroups(theme),
+      ],
+    );
+  }
+
+  List<Widget> _variantButtons({
+    required Host4ButtonContent content,
+    required Map<Host4ButtonVariant, String> labels,
+  }) {
+    return Host4ButtonVariant.values.map((variant) {
+      return Host4Button(
+        label: labels[variant]!,
+        variant: variant,
+        content: content,
+        icon: content == Host4ButtonContent.textOnly ? null : _variantIcon(variant),
+        onPressed: _noOp,
+      );
+    }).toList();
+  }
+
+  List<Widget> _expandedButtons(Host4RuntimeTheme theme) {
+    final widgets = <Widget>[];
+    for (final variant in Host4ButtonVariant.values) {
+      widgets.add(
+        Host4Button(
+          label: '${_variantLabels[variant]} Expanded',
+          variant: variant,
+          expanded: true,
+          onPressed: _noOp,
+        ),
+      );
+      if (variant != Host4ButtonVariant.values.last) {
+        widgets.add(SizedBox(height: theme.spacing.sm));
+      }
+    }
+    return widgets;
+  }
+
+  List<Widget> _disabledButtons() {
+    return Host4ButtonVariant.values.map((variant) {
+      return Host4Button(
+        label: _variantLabels[variant]!,
+        variant: variant,
+        onPressed: null,
+      );
+    }).toList();
+  }
+
+  List<Widget> _loadingButtons() {
+    return Host4ButtonVariant.values.map((variant) {
+      return Host4Button(
+        label: _variantLabels[variant]!,
+        variant: variant,
+        loading: true,
+        onPressed: _noOp,
+      );
+    }).toList();
+  }
+
+  List<Widget> _statePreviewGroups(Host4RuntimeTheme theme) {
+    return Host4ButtonVariant.values.map((variant) {
+      return Padding(
+        padding: EdgeInsets.only(bottom: theme.spacing.section),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              _variantLabels[variant]!,
+              style: theme.typography.heading.toTextStyle(theme.colors.textPrimary),
             ),
-            Host4Button(
-              label: 'Ghost',
-              variant: Host4ButtonVariant.ghost,
-              onPressed: null,
+            SizedBox(height: theme.spacing.md),
+            Wrap(
+              spacing: theme.spacing.sm,
+              runSpacing: theme.spacing.sm,
+              children: _ButtonPreviewState.values.map((state) {
+                return _ButtonStatePreview(
+                  label: _previewStateLabel(state),
+                  variant: variant,
+                  state: state,
+                );
+              }).toList(),
             ),
           ],
         ),
-      ],
-    );
+      );
+    }).toList();
   }
 }
 
 void _noOp() {}
+
+const Map<Host4ButtonVariant, String> _variantLabels = {
+  Host4ButtonVariant.primary: 'Primary',
+  Host4ButtonVariant.secondary: 'Secondary',
+  Host4ButtonVariant.tertiary: 'Tertiary',
+  Host4ButtonVariant.outline: 'Outline',
+  Host4ButtonVariant.ghost: 'Ghost',
+  Host4ButtonVariant.danger: 'Danger',
+  Host4ButtonVariant.dangerSoft: 'Danger Soft',
+};
+
+enum _ButtonPreviewState { defaultState, hover, pressed, focused }
+
+String _previewStateLabel(_ButtonPreviewState state) {
+  return switch (state) {
+    _ButtonPreviewState.defaultState => 'Default',
+    _ButtonPreviewState.hover => 'Hover',
+    _ButtonPreviewState.pressed => 'Pressed',
+    _ButtonPreviewState.focused => 'Focused',
+  };
+}
+
+IconData _variantIcon(Host4ButtonVariant variant) {
+  return switch (variant) {
+    Host4ButtonVariant.primary => Icons.palette_outlined,
+    Host4ButtonVariant.secondary => Icons.cloud_download_outlined,
+    Host4ButtonVariant.tertiary => Icons.tune_rounded,
+    Host4ButtonVariant.outline => Icons.dashboard_outlined,
+    Host4ButtonVariant.ghost => Icons.info_outline_rounded,
+    Host4ButtonVariant.danger => Icons.delete_outline_rounded,
+    Host4ButtonVariant.dangerSoft => Icons.warning_amber_rounded,
+  };
+}
+
+class _ButtonStatePreview extends StatelessWidget {
+  const _ButtonStatePreview({
+    required this.label,
+    required this.variant,
+    required this.state,
+  });
+
+  final String label;
+  final Host4ButtonVariant variant;
+  final _ButtonPreviewState state;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = context.host4Theme;
+    final buttonTokens = theme.components.button;
+    final variantTokens = switch (variant) {
+      Host4ButtonVariant.primary => buttonTokens.primary,
+      Host4ButtonVariant.secondary => buttonTokens.secondary,
+      Host4ButtonVariant.tertiary => buttonTokens.tertiary,
+      Host4ButtonVariant.outline => buttonTokens.outline,
+      Host4ButtonVariant.ghost => buttonTokens.ghost,
+      Host4ButtonVariant.danger => buttonTokens.danger,
+      Host4ButtonVariant.dangerSoft => buttonTokens.dangerSoft,
+    };
+    final stateTokens = switch (state) {
+      _ButtonPreviewState.defaultState => variantTokens.defaultState,
+      _ButtonPreviewState.hover => variantTokens.hoverState,
+      _ButtonPreviewState.pressed => variantTokens.pressedState,
+      _ButtonPreviewState.focused => variantTokens.focusedState,
+    };
+    final ring = buttonTokens.focusedRing;
+
+    return Container(
+      constraints: BoxConstraints(minHeight: buttonTokens.minHeight),
+      padding: EdgeInsets.symmetric(
+        horizontal: buttonTokens.spacing.horizontal,
+        vertical: buttonTokens.spacing.vertical,
+      ),
+      decoration: BoxDecoration(
+        color: stateTokens.background,
+        borderRadius: BorderRadius.circular(variantTokens.radius),
+        border: Border.all(color: stateTokens.border),
+        boxShadow: state == _ButtonPreviewState.focused
+            ? [
+                BoxShadow(
+                  color: ring.color,
+                  spreadRadius: ring.offsetWidth + ring.width,
+                  blurRadius: 0,
+                ),
+                BoxShadow(
+                  color: stateTokens.background,
+                  spreadRadius: ring.offsetWidth,
+                  blurRadius: 0,
+                ),
+              ]
+            : null,
+      ),
+      child: Text(
+        label,
+        style: buttonTokens.labelStyle.toTextStyle(stateTokens.foreground),
+      ),
+    );
+  }
+}
 
 /// Sub-page scaffold for component demo pages.
 /// Uses a plain surface color (no background image) so components

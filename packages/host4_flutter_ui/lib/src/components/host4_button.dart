@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import '../foundation/theme/host4_runtime_theme.dart';
 import '../foundation/theme/host4_theme_scope.dart';
 
-enum Host4ButtonVariant { primary, secondary, ghost }
+enum Host4ButtonVariant { primary, secondary, tertiary, outline, ghost, danger, dangerSoft }
 
 enum Host4ButtonContent { textOnly, iconLeft, iconTop, iconOnly }
+
+enum Host4ButtonSize { sm, md, lg }
 
 class Host4Button extends StatefulWidget {
   const Host4Button({
@@ -13,9 +15,11 @@ class Host4Button extends StatefulWidget {
     required this.onPressed,
     super.key,
     this.variant = Host4ButtonVariant.primary,
+    this.size = Host4ButtonSize.md,
     this.content = Host4ButtonContent.textOnly,
     this.icon,
     this.expanded = false,
+    this.loading = false,
   }) : assert(
          content == Host4ButtonContent.textOnly || icon != null,
          'icon must be provided when content is not textOnly',
@@ -24,15 +28,18 @@ class Host4Button extends StatefulWidget {
   final String label;
   final VoidCallback? onPressed;
   final Host4ButtonVariant variant;
+  final Host4ButtonSize size;
   final Host4ButtonContent content;
   final IconData? icon;
   final bool expanded;
+  final bool loading;
 
   @override
   State<Host4Button> createState() => _Host4ButtonState();
 }
 
 class _Host4ButtonState extends State<Host4Button> {
+  bool _hovered = false;
   bool _pressed = false;
   bool _focused = false;
 
@@ -40,9 +47,13 @@ class _Host4ButtonState extends State<Host4Button> {
   Widget build(BuildContext context) {
     final theme = context.host4Theme;
     final variantTokens = _variantTokens(theme, widget.variant);
-    final enabled = widget.onPressed != null;
+    final enabled = widget.onPressed != null && !widget.loading;
     final buttonTokens = theme.components.button;
-    final stateTokens = _stateTokens(variantTokens, enabled: enabled);
+    final stateTokens = _stateTokens(
+      variantTokens,
+      enabled: enabled,
+      loading: widget.loading,
+    );
     final radius = BorderRadius.circular(variantTokens.radius);
 
     final padding = widget.content == Host4ButtonContent.iconOnly
@@ -51,10 +62,11 @@ class _Host4ButtonState extends State<Host4Button> {
             vertical: buttonTokens.spacing.iconOnlyVertical,
           )
         : EdgeInsets.symmetric(
-            horizontal: buttonTokens.spacing.horizontal,
-            vertical: buttonTokens.spacing.vertical,
+            horizontal: _horizontalPadding(buttonTokens),
+            vertical: _verticalPadding(buttonTokens),
           );
 
+    final ringTokens = buttonTokens.focusedRing;
     final buttonChild = ConstrainedBox(
       constraints: BoxConstraints(minHeight: buttonTokens.minHeight),
       child: Material(
@@ -62,6 +74,7 @@ class _Host4ButtonState extends State<Host4Button> {
         borderRadius: radius,
         child: InkWell(
           onTap: enabled ? widget.onPressed : null,
+          onHover: enabled ? (value) => setState(() => _hovered = value) : null,
           onHighlightChanged: (value) => setState(() => _pressed = value),
           borderRadius: radius,
           child: AnimatedContainer(
@@ -70,8 +83,27 @@ class _Host4ButtonState extends State<Host4Button> {
             decoration: BoxDecoration(
               borderRadius: radius,
               border: Border.all(color: stateTokens.border),
+              boxShadow: _focused
+                  ? [
+                      BoxShadow(
+                        color: ringTokens.color,
+                        spreadRadius:
+                            ringTokens.offsetWidth + ringTokens.width,
+                        blurRadius: 0,
+                      ),
+                      BoxShadow(
+                        color: stateTokens.background,
+                        spreadRadius: ringTokens.offsetWidth,
+                        blurRadius: 0,
+                      ),
+                    ]
+                  : null,
             ),
-            child: _buildContent(theme, stateTokens),
+            child: AnimatedOpacity(
+              duration: const Duration(milliseconds: 160),
+              opacity: widget.loading ? buttonTokens.loading.opacity : 1,
+              child: _buildContent(theme, stateTokens),
+            ),
           ),
         ),
       ),
@@ -91,6 +123,31 @@ class _Host4ButtonState extends State<Host4Button> {
     Host4ButtonStateTokens stateTokens,
   ) {
     final buttonTokens = theme.components.button;
+
+    if (widget.loading) {
+      final spinner = SizedBox(
+        width: buttonTokens.loading.spinnerSize,
+        height: buttonTokens.loading.spinnerSize,
+        child: CircularProgressIndicator(
+          strokeWidth: 2,
+          valueColor: AlwaysStoppedAnimation<Color>(stateTokens.foreground),
+        ),
+      );
+
+      if (widget.content == Host4ButtonContent.iconOnly) {
+        return Center(child: spinner);
+      }
+
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: widget.expanded ? MainAxisSize.max : MainAxisSize.min,
+        children: [
+          spinner,
+          SizedBox(width: buttonTokens.loading.spinnerGap),
+          _label(theme, stateTokens),
+        ],
+      );
+    }
 
     switch (widget.content) {
       case Host4ButtonContent.textOnly:
@@ -151,13 +208,30 @@ class _Host4ButtonState extends State<Host4Button> {
     );
   }
 
+  double _horizontalPadding(Host4ButtonComponentTokens buttonTokens) =>
+      switch (widget.size) {
+        Host4ButtonSize.sm => buttonTokens.spacing.smHorizontal,
+        Host4ButtonSize.md => buttonTokens.spacing.mdHorizontal,
+        Host4ButtonSize.lg => buttonTokens.spacing.lgHorizontal,
+      };
+
+  double _verticalPadding(Host4ButtonComponentTokens buttonTokens) =>
+      switch (widget.size) {
+        Host4ButtonSize.sm => buttonTokens.spacing.smVertical,
+        Host4ButtonSize.md => buttonTokens.spacing.mdVertical,
+        Host4ButtonSize.lg => buttonTokens.spacing.lgVertical,
+      };
+
   Host4ButtonStateTokens _stateTokens(
     Host4ButtonVariantTokens tokens, {
     required bool enabled,
+    required bool loading,
   }) {
+    if (loading) return tokens.defaultState;
     if (!enabled) return tokens.disabledState;
     if (_pressed) return tokens.pressedState;
     if (_focused) return tokens.focusedState;
+    if (_hovered) return tokens.hoverState;
     return tokens.defaultState;
   }
 
@@ -168,7 +242,11 @@ class _Host4ButtonState extends State<Host4Button> {
     return switch (variant) {
       Host4ButtonVariant.primary => theme.components.button.primary,
       Host4ButtonVariant.secondary => theme.components.button.secondary,
+      Host4ButtonVariant.tertiary => theme.components.button.tertiary,
+      Host4ButtonVariant.outline => theme.components.button.outline,
       Host4ButtonVariant.ghost => theme.components.button.ghost,
+      Host4ButtonVariant.danger => theme.components.button.danger,
+      Host4ButtonVariant.dangerSoft => theme.components.button.dangerSoft,
     };
   }
 }

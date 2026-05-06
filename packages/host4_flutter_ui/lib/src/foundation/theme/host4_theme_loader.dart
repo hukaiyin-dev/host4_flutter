@@ -171,6 +171,14 @@ class Host4ThemeLoader {
           ),
         ),
         button: Host4ButtonComponentTokens(
+          focusedRing: Host4ButtonFocusedRingTokens(
+            color: _readColor(resolved, 'component.button.focused-ring.color'),
+            width: _readDouble(resolved, 'component.button.focused-ring.width'),
+            offsetWidth: _readDouble(
+              resolved,
+              'component.button.focused-ring.offset-width',
+            ),
+          ),
           spacing: Host4ButtonSpacingTokens(
             horizontal: _readDouble(
               resolved,
@@ -193,6 +201,30 @@ class Host4ThemeLoader {
               resolved,
               'component.button.spacing.stack-gap',
             ),
+            smHorizontal: _readDouble(
+              resolved,
+              'component.button.spacing.sm.horizontal',
+            ),
+            smVertical: _readDouble(
+              resolved,
+              'component.button.spacing.sm.vertical',
+            ),
+            mdHorizontal: _readDouble(
+              resolved,
+              'component.button.spacing.md.horizontal',
+            ),
+            mdVertical: _readDouble(
+              resolved,
+              'component.button.spacing.md.vertical',
+            ),
+            lgHorizontal: _readDouble(
+              resolved,
+              'component.button.spacing.lg.horizontal',
+            ),
+            lgVertical: _readDouble(
+              resolved,
+              'component.button.spacing.lg.vertical',
+            ),
           ),
           labelStyle: _readTextToken(resolved, 'component.button.label-style'),
           minHeight: _readDouble(resolved, 'component.button.min-height'),
@@ -207,7 +239,25 @@ class Host4ThemeLoader {
           ),
           primary: _readButtonVariant(resolved, 'component.button.primary'),
           secondary: _readButtonVariant(resolved, 'component.button.secondary'),
+          tertiary: _readButtonVariant(resolved, 'component.button.tertiary'),
+          outline: _readButtonVariant(resolved, 'component.button.outline'),
           ghost: _readButtonVariant(resolved, 'component.button.ghost'),
+          danger: _readButtonVariant(resolved, 'component.button.danger'),
+          dangerSoft: _readButtonVariant(
+            resolved,
+            'component.button.danger-soft',
+          ),
+          loading: Host4ButtonLoadingTokens(
+            spinnerSize: _readDouble(
+              resolved,
+              'component.button.loading.spinner-size',
+            ),
+            spinnerGap: _readDouble(
+              resolved,
+              'component.button.loading.spinner-gap',
+            ),
+            opacity: _readDouble(resolved, 'component.button.loading.opacity'),
+          ),
         ),
         card: Host4CardComponentTokens(
           padding: _readDouble(resolved, 'component.card.padding'),
@@ -587,6 +637,14 @@ class Host4ThemeLoader {
           ),
         ),
         button: Host4ButtonComponentTokens(
+          focusedRing: Host4ButtonFocusedRingTokens(
+            color: _readColor(resolved, 'component.button.focused-ring.color'),
+            width: _readDouble(resolved, 'component.button.focused-ring.width'),
+            offsetWidth: _readDouble(
+              resolved,
+              'component.button.focused-ring.offset-width',
+            ),
+          ),
           spacing: Host4ButtonSpacingTokens(
             horizontal: _readDouble(
               resolved,
@@ -609,6 +667,30 @@ class Host4ThemeLoader {
               resolved,
               'component.button.spacing.stack-gap',
             ),
+            smHorizontal: _readDouble(
+              resolved,
+              'component.button.spacing.sm.horizontal',
+            ),
+            smVertical: _readDouble(
+              resolved,
+              'component.button.spacing.sm.vertical',
+            ),
+            mdHorizontal: _readDouble(
+              resolved,
+              'component.button.spacing.md.horizontal',
+            ),
+            mdVertical: _readDouble(
+              resolved,
+              'component.button.spacing.md.vertical',
+            ),
+            lgHorizontal: _readDouble(
+              resolved,
+              'component.button.spacing.lg.horizontal',
+            ),
+            lgVertical: _readDouble(
+              resolved,
+              'component.button.spacing.lg.vertical',
+            ),
           ),
           labelStyle: _readTextToken(resolved, 'component.button.label-style'),
           minHeight: _readDouble(resolved, 'component.button.min-height'),
@@ -623,7 +705,25 @@ class Host4ThemeLoader {
           ),
           primary: _readButtonVariant(resolved, 'component.button.primary'),
           secondary: _readButtonVariant(resolved, 'component.button.secondary'),
+          tertiary: _readButtonVariant(resolved, 'component.button.tertiary'),
+          outline: _readButtonVariant(resolved, 'component.button.outline'),
           ghost: _readButtonVariant(resolved, 'component.button.ghost'),
+          danger: _readButtonVariant(resolved, 'component.button.danger'),
+          dangerSoft: _readButtonVariant(
+            resolved,
+            'component.button.danger-soft',
+          ),
+          loading: Host4ButtonLoadingTokens(
+            spinnerSize: _readDouble(
+              resolved,
+              'component.button.loading.spinner-size',
+            ),
+            spinnerGap: _readDouble(
+              resolved,
+              'component.button.loading.spinner-gap',
+            ),
+            opacity: _readDouble(resolved, 'component.button.loading.opacity'),
+          ),
         ),
         card: Host4CardComponentTokens(
           padding: _readDouble(resolved, 'component.card.padding'),
@@ -918,6 +1018,7 @@ class Host4ThemeLoader {
     return Host4ButtonVariantTokens(
       radius: _readDouble(json, '$path.radius'),
       defaultState: _readButtonState(json, '$path.state.default'),
+      hoverState: _readButtonState(json, '$path.state.hover'),
       pressedState: _readButtonState(json, '$path.state.pressed'),
       disabledState: _readButtonState(json, '$path.state.disabled'),
       focusedState: _readButtonState(json, '$path.state.focused'),
@@ -1044,7 +1145,9 @@ Map<String, dynamic> _normalizeTheme(
       selectedMode,
     ),
     'asset': _selectModeBranches(
-      readJsonMap(tokens, 'asset'),
+      tokens['asset'] is Map<String, dynamic>
+          ? tokens['asset'] as Map<String, dynamic>
+          : const <String, dynamic>{},
       supportedModes,
       selectedMode,
     ),
