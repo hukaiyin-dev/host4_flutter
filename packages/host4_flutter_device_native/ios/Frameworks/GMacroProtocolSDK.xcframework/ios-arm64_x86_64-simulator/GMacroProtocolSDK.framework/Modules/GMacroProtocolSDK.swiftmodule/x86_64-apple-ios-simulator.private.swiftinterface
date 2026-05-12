@@ -1,0 +1,955 @@
+// swift-interface-format-version: 1.0
+// swift-compiler-version: Apple Swift version 6.3.1 effective-5.10 (swiftlang-6.3.1.1.2 clang-2100.0.123.102)
+// swift-module-flags: -target x86_64-apple-ios13.0-simulator -enable-objc-interop -enable-library-evolution -swift-version 5 -Onone -enable-experimental-feature DebugDescriptionMacro -enable-bare-slash-regex -module-name GMacroProtocolSDK
+// swift-module-flags-ignorable:  -formal-cxx-interoperability-mode=off -interface-compiler-version 6.3.1
+import BluetoothKit
+import CoreBluetooth
+import Foundation
+import ObjectiveC
+import Swift
+import UIKit
+import _Concurrency
+import _StringProcessing
+import _SwiftConcurrencyShims
+@objc public enum KeyboardKey : Swift.UInt8, Swift.Sendable {
+  case Reserved = 0x00
+  case errorRollOver = 0x01
+  case postFail = 0x02
+  case errorUndefined = 0x03
+  case a = 0x04
+  case b = 0x05
+  case c = 0x06
+  case d = 0x07
+  case e = 0x08
+  case f = 0x09
+  case g = 0x0A
+  case h = 0x0B
+  case i = 0x0C
+  case j = 0x0D
+  case k = 0x0E
+  case l = 0x0F
+  case m = 0x10
+  case n = 0x11
+  case o = 0x12
+  case p = 0x13
+  case q = 0x14
+  case r = 0x15
+  case s = 0x16
+  case t = 0x17
+  case u = 0x18
+  case v = 0x19
+  case w = 0x1A
+  case x = 0x1B
+  case y = 0x1C
+  case z = 0x1D
+  case number1 = 0x1E
+  case number2 = 0x1F
+  case number3 = 0x20
+  case number4 = 0x21
+  case number5 = 0x22
+  case number6 = 0x23
+  case number7 = 0x24
+  case number8 = 0x25
+  case number9 = 0x26
+  case number10 = 0x27
+  case enter = 0x28
+  case escape = 0x29
+  case backspace = 0x2A
+  case tab = 0x2B
+  case spacebar = 0x2C
+  case minus = 0x2D
+  case equal = 0x2E
+  case bracketLeft = 0x2F
+  case bracketRight = 0x30
+  case backslash = 0x31
+  case semicolon = 0x33
+  case apostrophe = 0x34
+  case graveAccent = 0x35
+  case comma = 0x36
+  case period = 0x37
+  case slash = 0x38
+  case capsLock = 0x39
+  case f1 = 0x3A
+  case f2 = 0x3B
+  case f3 = 0x3C
+  case f4 = 0x3D
+  case f5 = 0x3E
+  case f6 = 0x3F
+  case f7 = 0x40
+  case f8 = 0x41
+  case f9 = 0x42
+  case f10 = 0x43
+  case f11 = 0x44
+  case f12 = 0x45
+  case printScreen = 0x46
+  case scrollLock = 0x47
+  case pause = 0x48
+  case insert = 0x49
+  case home = 0x4A
+  case pageUp = 0x4B
+  case deleteForward = 0x4C
+  case end = 0x4D
+  case pageDown = 0x4E
+  case rightArrow = 0x4F
+  case leftArrow = 0x50
+  case downArrow = 0x51
+  case upArrow = 0x52
+  case numLock = 0x53
+  case keypadDivide = 0x54
+  case keypadMultiply = 0x55
+  case keypadMinus = 0x56
+  case keypadPlus = 0x57
+  case keypadEnter = 0x58
+  case keypad1 = 0x59
+  case keypad2 = 0x5A
+  case keypad3 = 0x5B
+  case keypad4 = 0x5C
+  case keypad5 = 0x5D
+  case keypad6 = 0x5E
+  case keypad7 = 0x5F
+  case keypad8 = 0x60
+  case keypad9 = 0x61
+  case keypad0 = 0x62
+  case keypadPeriod = 0x63
+  case nonUSBackslash = 0x64
+  case application = 0x65
+  case power = 0x66
+  case keypadEqual = 0x67
+  case f13 = 0x68
+  case f14 = 0x69
+  case f15 = 0x6A
+  case f16 = 0x6B
+  case f17 = 0x6C
+  case f18 = 0x6D
+  case f19 = 0x6E
+  case f20 = 0x6F
+  case f21 = 0x70
+  case f22 = 0x71
+  case f23 = 0x72
+  case f24 = 0x73
+  case execute = 0x74
+  case help = 0x75
+  case menu = 0x76
+  case select = 0x77
+  case stop = 0x78
+  case again = 0x79
+  case undo = 0x7A
+  case cut = 0x7B
+  case copy = 0x7C
+  case paste = 0x7D
+  case find = 0x7E
+  case mute = 0x7F
+  case volumeUp = 0x80
+  case volumeDown = 0x81
+  case lockingCapsLock = 0x82
+  case lockingNumLock = 0x83
+  case lockingScrollLock = 0x84
+  case keypadComma = 0x85
+  case keypadEqualSign = 0x86
+  case international1 = 0x87
+  case international2 = 0x88
+  case international3 = 0x89
+  case international4 = 0x8A
+  case international5 = 0x8B
+  case international6 = 0x8C
+  case international7 = 0x8D
+  case international8 = 0x8E
+  case international9 = 0x8F
+  case lang1 = 0x90
+  case lang2 = 0x91
+  case lang3 = 0x92
+  case lang4 = 0x93
+  case lang5 = 0x94
+  case lang6 = 0x95
+  case lang7 = 0x96
+  case lang8 = 0x97
+  case lang9 = 0x98
+  case alternateErase = 0x99
+  case sysReqAttention = 0x9A
+  case cancel = 0x9B
+  case clear = 0x9C
+  case prior = 0x9D
+  case returnKey = 0x9E
+  case separator = 0x9F
+  case out = 0xA0
+  case oper = 0xA1
+  case clearAgain = 0xA2
+  case crSelProps = 0xA3
+  case exSel = 0xA4
+  case keypad00 = 0xB0
+  case keypad000 = 0xB1
+  case thousandsSeparator = 0xB2
+  case decimalSeparator = 0xB3
+  case currencyUnit = 0xB4
+  case currencySubUnit = 0xB5
+  case keypadLeftParen = 0xB6
+  case keypadRightParen = 0xB7
+  case keypadLeftBrace = 0xB8
+  case keypadRightBrace = 0xB9
+  case keypadTab = 0xBA
+  case keypadBackspace = 0xBB
+  case keypadA = 0xBC
+  case keypadB = 0xBD
+  case keypadC = 0xBE
+  case keypadD = 0xBF
+  case keypadE = 0xC0
+  case keypadF = 0xC1
+  case keypadXOR = 0xC2
+  case keypadCaret = 0xC3
+  case keypadPercent = 0xC4
+  case keypadLessThan = 0xC5
+  case keypadGreaterThan = 0xC6
+  case keypadAmpersand = 0xC7
+  case keypadDoubleAnd = 0xC8
+  case keypadPipe = 0xC9
+  case keypadDoublePipe = 0xCA
+  case keypadColon = 0xCB
+  case keypadHash = 0xCC
+  case keypadSpace = 0xCD
+  case keypadAt = 0xCE
+  case keypadExclamation = 0xCF
+  case keypadMemoryStore = 0xD0
+  case keypadMemoryRecall = 0xD1
+  case keypadMemoryClear = 0xD2
+  case keypadMemoryAdd = 0xD3
+  case keypadMemorySubtract = 0xD4
+  case keypadMemoryMultiply = 0xD5
+  case keypadMemoryDivide = 0xD6
+  case keypadPlusMinus = 0xD7
+  case keypadClear = 0xD8
+  case keypadClearEntry = 0xD9
+  case keypadBinary = 0xDA
+  case keypadOctal = 0xDB
+  case keypadDecimal = 0xDC
+  case keypadHexadecimal = 0xDD
+  case leftControl = 0xE0
+  case leftShift = 0xE1
+  case leftAlt = 0xE2
+  case leftGUI = 0xE3
+  case rightControl = 0xE4
+  case rightShift = 0xE5
+  case rightAlt = 0xE6
+  case rightGUI = 0xE7
+  public var description: Swift.String {
+    get
+  }
+  public init?(rawValue: Swift.UInt8)
+  public typealias RawValue = Swift.UInt8
+  public var rawValue: Swift.UInt8 {
+    get
+  }
+}
+@objc public enum MouseKey : Swift.UInt8, Swift.Sendable {
+  case leftButton = 0x01
+  case rightButton = 0x02
+  case middleButton = 0x03
+  case scrollUp = 0x04
+  case scrollDown = 0x05
+  case forward = 0x06
+  case backward = 0x07
+  public var description: Swift.String {
+    get
+  }
+  public init?(rawValue: Swift.UInt8)
+  public typealias RawValue = Swift.UInt8
+  public var rawValue: Swift.UInt8 {
+    get
+  }
+}
+@objc public enum GamepadKey : Swift.Int, Swift.CaseIterable, Swift.Sendable {
+  case none = 0
+  case m1 = 0x01, m2 = 0x02, m3 = 0x03, m4 = 0x04, m5 = 0x05, m6 = 0x06
+  case SL_L = 0x11, SR_L = 0x12, SL_R = 0x13, SR_R = 0x14
+  case SET_L = 0x21, SET_R = 0x22
+  case A = 0xA0, B = 0xA1, X = 0xA2, Y = 0xA3
+  case L1 = 0xA4, L2 = 0xA5, L3 = 0xA6
+  case R1 = 0xA7, R2 = 0xA8, R3 = 0xA9
+  case Back = 0xAA, Start = 0xAB, Menu = 0xAC, home = 0xAD, key_i = 0xAE
+  case select = 0xAF
+  case cross = 0xD0, Left = 0xD1, Right = 0xD2, Up = 0xD3, Down = 0xD4
+  case LeftUp = 0xD5, RightUp = 0xD6, LeftDown = 0xD7, RightDown = 0xD8
+  case J1 = 0xE0, lrLeft = 0xE1, lrRight = 0xE2, lrUp = 0xE3, lrDown = 0xE4
+  case lrLeftUp = 0xE5, lrRightUp = 0xE6, lrLeftDown = 0xE7, lrRightDown = 0xE8
+  case J2 = 0xF0, rrLeft = 0xF1, rrRight = 0xF2, rrUp = 0xF3, rrDown = 0xF4
+  case rrLeftUp = 0xF5, rrRightUp = 0xF6, rrLeftDown = 0xF7, rrRightDown = 0xF8
+  public var rawValue: Swift.Int {
+    get
+  }
+  public init?(rawValue: Swift.Int)
+  public typealias AllCases = [GMacroProtocolSDK.GamepadKey]
+  public typealias RawValue = Swift.Int
+  nonisolated public static var allCases: [GMacroProtocolSDK.GamepadKey] {
+    get
+  }
+}
+extension GMacroProtocolSDK.GMacroProtocolSession {
+  final public func fetchLight(response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func fetchLightPosition(response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func fetchSupportedLightEffects(response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func fetchCurrentLightEffect(response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func setLightColor(position: GMacroProtocolSDK.LightPosition, groupCount: Swift.Int, colors: [(red: Swift.UInt8, green: Swift.UInt8, blue: Swift.UInt8)], response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func setLightEffect(position: GMacroProtocolSDK.LightPosition, groupCount: Swift.Int, isOn: Swift.Bool, light: Swift.Int, speed: Swift.Int, mode: GMacroProtocolSDK.LightMajorMode, subMode: GMacroProtocolSDK.LightSubMode, colors: [(red: Swift.UInt8, green: Swift.UInt8, blue: Swift.UInt8)], response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+}
+extension GMacroProtocolSDK.GMacroProtocolSession {
+  final public func fetchCurrentLightConfig(response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func setLightConfig(effect: Swift.Int, colorR: Swift.UInt8, colorG: Swift.UInt8, colorB: Swift.UInt8, light: Swift.Int, speed: Swift.Int, profile: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+}
+extension GMacroProtocolSDK.GMacroProtocolSession {
+  final public func fetchDeviceVersion(_ response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func fetchMobapadDeviceInfo(profile: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func resetDevice(_ response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+}
+extension GMacroProtocolSDK.GMacroProtocolSession {
+  final public func switchToNormalMode(_ response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func switchToTestMode(_ response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func switchToConfigMode(_ response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+}
+extension GMacroProtocolSDK.GMacroProtocolSession {
+  final public func updateReportRate(_ rate: Swift.Int, finish: (() -> Swift.Void)? = nil, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func fetchReportRate(response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+}
+extension GMacroProtocolSDK.GMacroProtocolSession {
+  final public func fetchSupportCalibration(response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func fetchCalibrationKey(response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func updateSwitchLayout(isOpen: Swift.Bool, locking: Swift.Bool, exchange: Swift.Bool, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+}
+extension GMacroProtocolSDK.GMacroProtocolSession {
+  final public func updateKeyTurbo(_ values: [(GMacroProtocolSDK.GamepadKey, GMacroProtocolSDK.TurboMode, Swift.Int)], response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func querySupportedTurboKeys(profile: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+}
+extension GMacroProtocolSDK.GMacroProtocolSession {
+  final public func setSleepTime(time: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func getSleepTime(profile: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+}
+extension GMacroProtocolSDK.GMacroProtocolSession {
+  final public func queryCurrentMacro(profile: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func queryMacroKeys(profile: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func queryMacroRecordableKeys(profile: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func queryMacroTimeRange(profile: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func queryMacroMaxGroups(profile: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func setMacroKeys(_ macroKey: GMacroProtocolSDK.MacroKey, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func setMacroInterval(profile: Swift.Int, key: GMacroProtocolSDK.GamepadKey, intervalTime: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+}
+extension GMacroProtocolSDK.GMacroProtocolSession {
+  final public func startRecord(_ response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func endRecord(_ response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+}
+extension GMacroProtocolSDK.GMacroProtocolSession {
+  final public func trigger(leftMin: Swift.Int, leftMax: Swift.Int, rightMin: Swift.Int, rightMax: Swift.Int, finish: (() -> ())? = nil, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func leftTriggerCurve(cgPoints: [CoreFoundation.CGPoint], response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func rightTriggerCurve(cgPoints: [CoreFoundation.CGPoint], response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func triggerQuickSwitch(leftOn: Swift.Bool, rightOn: Swift.Bool, finish: (() -> ())? = nil, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func getTriggerQuickSwitch(finish: (() -> ())? = nil, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+}
+extension GMacroProtocolSDK.GMacroProtocolSession {
+  final public func startTriggerCalibration(_ response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func endTriggerCalibration(_ response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+}
+extension GMacroProtocolSDK.GMacroProtocolSession {
+  final public func triggerLinearOutput(leftMode: Swift.Int, leftThreshold: Swift.Int, rightMode: Swift.Int, rightThreshold: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+}
+extension GMacroProtocolSDK.GMacroProtocolSession {
+  final public func setVibrationLevel(left: Swift.Int, right: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func testVibration(left: Swift.Int, right: Swift.Int, position: GMacroProtocolSDK.VibrationPosition, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+}
+extension GMacroProtocolSDK.GMacroProtocolSession {
+  final public func queryMappableKeys(profile: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func queryMappableGamepadKeys(profile: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func setKeyMappings(_ keyMappings: [GMacroProtocolSDK.GamepadKeyMapping], response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func setMouseKeyMappings(_ keyMappings: [GMacroProtocolSDK.MouseKeyMapping], response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func setKeyboardKeyMappings(_ keyMappings: [GMacroProtocolSDK.KeyboardKeyMapping], response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func queryCurrentMapping(profile: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+}
+extension GMacroProtocolSDK.GMacroProtocolSession {
+  final public func setMultiKeyMapping(original: GMacroProtocolSDK.GamepadKey, mappedKeys: [GMacroProtocolSDK.MappedKey], finish: (() -> Swift.Void)? = nil, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func queryAllMultiMappings(finish: (() -> Swift.Void)? = nil, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func queryMultiMapping(for original: GMacroProtocolSDK.GamepadKey, finish: (() -> Swift.Void)? = nil, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+}
+extension GMacroProtocolSDK.GMacroProtocolSession {
+  final public func updateRockerLinear(leftMin: Swift.Int, leftMax: Swift.Int, leftXFlip: Swift.Bool, leftYFlip: Swift.Bool, rightMin: Swift.Int, rightMax: Swift.Int, rightXFlip: Swift.Bool, rightYFlip: Swift.Bool, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func updateLeftRocker3DCurve(cgPoints: [CoreFoundation.CGPoint], response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func updateRightRocker3DCurve(cgPoints: [CoreFoundation.CGPoint], response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func rockerDeadZoneCompensation(left: Swift.Int, right: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func rockerDeadZoneRegressionComp(left: Swift.Int, right: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func rockerTriggerType(leftRigger: GMacroProtocolSDK.CurveTriggerMode, leftGamepadKey: GMacroProtocolSDK.GamepadKey, rightRigger: GMacroProtocolSDK.CurveTriggerMode, rightGamepadKey: GMacroProtocolSDK.GamepadKey, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func rockerOutputGraphics(left: GMacroProtocolSDK.OutputGraphics, right: GMacroProtocolSDK.OutputGraphics, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+}
+extension GMacroProtocolSDK.GMacroProtocolSession {
+  final public func updateTriggerTestVibrationSwitch(triggerTestVibration: Swift.Bool, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func fetchTriggerTestVibrationSwitch(response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func updateTriggerVibration(triggerVibration: Swift.Bool, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func fetchTriggerVibration(response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func updategyroXYRatio(gyroXYRatio: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func fetchgyroXYRatio(response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func updateGyroMappingType(gyroMappingType: GMacroProtocolSDK.GyroMappingType, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func fetchGyroMappingType(response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func updateChargingDock(isOn: Swift.Bool, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func fetchChargingDock(response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+}
+extension GMacroProtocolSDK.GMacroProtocolSession {
+  final public func startRockerCalibration(_ response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func endRockerCalibration(_ response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+}
+extension GMacroProtocolSDK.GMacroProtocolSession {
+  final public func updateRockerAdditional(leftDeadZone: Swift.Int, leftOutMax: Swift.Int, leftCurveApply: Swift.Int, leftCurveApplyKey: Swift.Int, leftLineCorrection: Swift.Int, rightDeadZone: Swift.Int, rightOutMax: Swift.Int, rightCurveApply: Swift.Int, rightCurveApplyKey: Swift.Int, rightLineCorrection: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+}
+extension GMacroProtocolSDK.GMacroProtocolSession {
+  final public func queryGyroTriggerKeys(profile: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func queryGyroMappingModes(profile: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func setMotion(motionEnabled: Swift.Bool, mappingEnabled: Swift.Bool, triggerMode: GMacroProtocolSDK.MotionTriggerMode, triggerKey: GMacroProtocolSDK.GamepadKey, deadZone: Swift.Int, sensitivity: Swift.Int, mappingMode: GMacroProtocolSDK.MotionMappingMode, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func setMotionSecondary(isOn: Swift.Bool, triggerMode: GMacroProtocolSDK.MotionTriggerMode, triggerKey: GMacroProtocolSDK.GamepadKey, sensitivity: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func setMotionHorizontalAxis(axis: GMacroProtocolSDK.GyroAxis, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func fetchMotionHorizontalAxis(_ response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func fetchGyroDeadZoneComp(_ response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func fetchGyroSensitivityCurve(_ response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func fetchGyroSensitivity2(_ response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func setGyroXYInvert(xOn: Swift.Bool, yOn: Swift.Bool, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func fetchGyroXYInvert(response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func setGyroDeadZone(compensate: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+}
+extension GMacroProtocolSDK.GMacroProtocolSession {
+  final public func setGyroSensitivityCurve(x1: Swift.Int, y1: Swift.Int, x2: Swift.Int, y2: Swift.Int, x3: Swift.Int, y3: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+}
+extension GMacroProtocolSDK.GMacroProtocolSession {
+  final public func update(gyroOuterDeadZone: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func fetchGyroOuterDeadZone(response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+}
+extension GMacroProtocolSDK.GMacroProtocolSession {
+  final public func startGyroCalibration(_ response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func endGyroCalibration(_ response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func setMotionParam(mappingSwitch: Swift.Bool, mappingKey: Swift.Int, triggerMode: Swift.Int, triggerKey: Swift.Int, inputType: Swift.Int, inputMode: Swift.Int, rollReversal: Swift.Bool, pitchReversal: Swift.Bool, yawReversal: Swift.Bool, sensitivity: Swift.Int, deadZoneCompensation: Swift.Int, curveType: Swift.Int, curvature: Swift.Int, ratio: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+}
+@objc public enum MediaKey : Swift.UInt8, Swift.CaseIterable {
+  case none = 0x00
+  case volumeUp = 0xE9
+  case volumeDown = 0xEA
+  case mute = 0xE2
+  case play = 0xB0
+  case pause = 0xB1
+  case screenshot = 0xD3
+  case multitask = 0x40
+  case pageUp = 0x4B
+  case pageDown = 0x4E
+  public init?(rawValue: Swift.UInt8)
+  public typealias AllCases = [GMacroProtocolSDK.MediaKey]
+  public typealias RawValue = Swift.UInt8
+  nonisolated public static var allCases: [GMacroProtocolSDK.MediaKey] {
+    get
+  }
+  public var rawValue: Swift.UInt8 {
+    get
+  }
+}
+extension GMacroProtocolSDK.MediaKey : Swift.CustomStringConvertible {
+  public var description: Swift.String {
+    get
+  }
+}
+@objc public enum LightPosition : Swift.UInt8, Swift.Sendable {
+  case leftStickRing = 0x00
+  case rightStickRing = 0x01
+  case leftAmbient = 0x02
+  case rightAmbient = 0x03
+  case homeButton = 0x04
+  case backlight = 0x05
+  case chargingDock = 0x06
+  public var description: Swift.String {
+    get
+  }
+  public init?(rawValue: Swift.UInt8)
+  public typealias RawValue = Swift.UInt8
+  public var rawValue: Swift.UInt8 {
+    get
+  }
+}
+public struct GamepadKeyMapping : Swift.Sendable {
+  public var original: GMacroProtocolSDK.GamepadKey
+  public var mapped: GMacroProtocolSDK.GamepadKey
+  public init(original: GMacroProtocolSDK.GamepadKey, mapped: GMacroProtocolSDK.GamepadKey)
+}
+public struct MouseKeyMapping : Swift.Sendable {
+  public var original: GMacroProtocolSDK.GamepadKey
+  public var mapped: GMacroProtocolSDK.MouseKey
+  public init(original: GMacroProtocolSDK.GamepadKey, mapped: GMacroProtocolSDK.MouseKey)
+}
+public struct KeyboardKeyMapping : Swift.Sendable {
+  public var original: GMacroProtocolSDK.GamepadKey
+  public var mapped: GMacroProtocolSDK.KeyboardKey
+  public init(original: GMacroProtocolSDK.GamepadKey, mapped: GMacroProtocolSDK.KeyboardKey)
+}
+public enum MappedKeyType : Swift.Int, Swift.Sendable {
+  case gamepad
+  case mouse
+  case keyboard
+  public var description: Swift.String {
+    get
+  }
+  public init?(rawValue: Swift.Int)
+  public typealias RawValue = Swift.Int
+  public var rawValue: Swift.Int {
+    get
+  }
+}
+public enum MappedKey : Swift.Sendable {
+  case gamepad([GMacroProtocolSDK.GamepadKey])
+  case mouse([GMacroProtocolSDK.MouseKey])
+  case keyboard([GMacroProtocolSDK.KeyboardKey])
+  public var type: GMacroProtocolSDK.MappedKeyType {
+    get
+  }
+  public var values: [Swift.Int] {
+    get
+  }
+}
+public struct MultiKeyMapping : Swift.Sendable {
+  public var original: GMacroProtocolSDK.GamepadKey
+  public var mapped: [GMacroProtocolSDK.MappedKey]
+  public init(original: GMacroProtocolSDK.GamepadKey, mapped: [GMacroProtocolSDK.MappedKey])
+}
+@objc @objcMembers public class GamepadKeyMappingBridge : ObjectiveC.NSObject {
+  @objc final public let original: Swift.Int
+  @objc final public let mapped: Swift.Int
+  public init(mapping: GMacroProtocolSDK.GamepadKeyMapping)
+  @objc public init(original: Swift.Int, mapped: Swift.Int)
+  @objc deinit
+}
+@objc @objcMembers public class MouseKeyMappingBridge : ObjectiveC.NSObject {
+  @objc final public let original: Swift.Int
+  @objc final public let mapped: Swift.Int
+  public init(mapping: GMacroProtocolSDK.MouseKeyMapping)
+  @objc deinit
+}
+@objc @objcMembers public class KeyboardKeyMappingBridge : ObjectiveC.NSObject {
+  @objc final public let original: Swift.Int
+  @objc final public let mapped: Swift.Int
+  public init(mapping: GMacroProtocolSDK.KeyboardKeyMapping)
+  @objc deinit
+}
+@objc @objcMembers public class MappedKeyBridge : ObjectiveC.NSObject {
+  @objc final public let type: Swift.Int
+  @objc final public let values: [Swift.Int]
+  @objc public init(type: Swift.Int, values: [Swift.Int])
+  public init(mappedKey: GMacroProtocolSDK.MappedKey)
+  public func toMappedKey() -> GMacroProtocolSDK.MappedKey?
+  @objc deinit
+}
+@objc @objcMembers public class MultiKeyMappingBridge : ObjectiveC.NSObject {
+  @objc final public let original: GMacroProtocolSDK.GamepadKey
+  @objc final public let mapped: [GMacroProtocolSDK.MappedKeyBridge]
+  @objc public init(original: GMacroProtocolSDK.GamepadKey, mapped: [GMacroProtocolSDK.MappedKeyBridge])
+  @objc convenience public init(originalCode: Swift.Int, mapped: [GMacroProtocolSDK.MappedKeyBridge])
+  @objc public var originalCode: Swift.Int {
+    @objc get
+  }
+  @objc deinit
+}
+extension GMacroProtocolSDK.GamepadKey {
+  public var gamepadKeyString: Swift.String {
+    get
+  }
+}
+@objc public enum LightMajorMode : Swift.UInt8, Swift.Sendable {
+  case constant = 0x00
+  case breathing = 0x01
+  case gradient = 0x02
+  case wave = 0x03
+  case singleWave = 0x04
+  public var description: Swift.String {
+    get
+  }
+  public init?(rawValue: Swift.UInt8)
+  public typealias RawValue = Swift.UInt8
+  public var rawValue: Swift.UInt8 {
+    get
+  }
+}
+@objc public enum LightSubMode : Swift.Int, Swift.Sendable {
+  case fixedColor
+  case sequential
+  case random
+  case breathingFixedColor
+  case breathingSequential
+  case allLights
+  case centerLight
+  case outward
+  case inward
+  case leftToRight
+  case clockwise
+  case counterClockwise
+  case bounceLeftRight
+  case bounceCenter
+  public var description: Swift.String {
+    get
+  }
+  public init?(rawValue: Swift.Int)
+  public typealias RawValue = Swift.Int
+  public var rawValue: Swift.Int {
+    get
+  }
+}
+@objc public enum ModifierKey : Swift.UInt8, Swift.CaseIterable {
+  case none = 0x00
+  case leftControl = 0x01
+  case leftShift = 0x02
+  case leftAlt = 0x04
+  case leftGUI = 0x08
+  case rightControl = 0x10
+  case rightShift = 0x20
+  case rightAlt = 0x40
+  case rightGUI = 0x80
+  public init?(rawValue: Swift.UInt8)
+  public typealias AllCases = [GMacroProtocolSDK.ModifierKey]
+  public typealias RawValue = Swift.UInt8
+  nonisolated public static var allCases: [GMacroProtocolSDK.ModifierKey] {
+    get
+  }
+  public var rawValue: Swift.UInt8 {
+    get
+  }
+}
+extension GMacroProtocolSDK.ModifierKey : Swift.CustomStringConvertible {
+  public var description: Swift.String {
+    get
+  }
+}
+@objc public enum MouseCoreButton : Swift.UInt8, Swift.CaseIterable {
+  case none = 0x00
+  case leftButton = 0x01
+  case rightButton = 0x02
+  case middleButton = 0x04
+  case backButton = 0x08
+  case forwardButton = 0x10
+  public init?(rawValue: Swift.UInt8)
+  public typealias AllCases = [GMacroProtocolSDK.MouseCoreButton]
+  public typealias RawValue = Swift.UInt8
+  nonisolated public static var allCases: [GMacroProtocolSDK.MouseCoreButton] {
+    get
+  }
+  public var rawValue: Swift.UInt8 {
+    get
+  }
+}
+extension GMacroProtocolSDK.MouseCoreButton : Swift.CustomStringConvertible {
+  public var description: Swift.String {
+    get
+  }
+}
+@objc public enum MouseWheelButton : Swift.UInt8, Swift.CaseIterable {
+  case none = 0x00
+  case wheelUp = 0x01
+  case wheelDown = 0x02
+  case wheelLeft = 0x04
+  case wheelRight = 0x08
+  public init?(rawValue: Swift.UInt8)
+  public typealias AllCases = [GMacroProtocolSDK.MouseWheelButton]
+  public typealias RawValue = Swift.UInt8
+  nonisolated public static var allCases: [GMacroProtocolSDK.MouseWheelButton] {
+    get
+  }
+  public var rawValue: Swift.UInt8 {
+    get
+  }
+}
+extension GMacroProtocolSDK.MouseWheelButton : Swift.CustomStringConvertible {
+  public var description: Swift.String {
+    get
+  }
+}
+public protocol GMacroDataDelegate : AnyObject {
+  func progress(_ progress: CoreFoundation.CGFloat)
+  func success()
+  func error(_ message: Swift.String)
+  func onceByteCount() -> Swift.Int
+  func receiveTestKeys(_ keys: [GMacroProtocolSDK.GamepadKey], j1x: Swift.Int, j1y: Swift.Int, j2x: Swift.Int, j2y: Swift.Int, l2: Swift.Int, r2: Swift.Int)
+  func receiveConfigKeys(_ keys: [GMacroProtocolSDK.GamepadKey])
+  func receiveTestKeyboardMouse(_ modifierKeys: [GMacroProtocolSDK.ModifierKey], keyboardKeys: [GMacroProtocolSDK.KeyboardKey], mouseCores: [GMacroProtocolSDK.MouseCoreButton], mouseWheels: [GMacroProtocolSDK.MouseWheelButton], mouseX: Swift.Int8, mouseY: Swift.Int8, mediaKeys: [GMacroProtocolSDK.MediaKey])
+  func receiveRecordKeys(_ value: GMacroProtocolSDK.MacroComkeyBridge)
+  func endRecordKeys(_ code: Swift.Int)
+  func finishCalibration(_ type: Swift.Int, subId: Swift.Int, result: Swift.Int, param1: [Swift.Int], param2: [Swift.Int])
+  func devConnectState(_ state: Swift.Int)
+  func receiveDevKeysState(_ keys: [GMacroProtocolSDK.GamepadKey], j1x: Swift.Int, j1x_o: Swift.Int, j1y: Swift.Int, j1y_o: Swift.Int, j2x: Swift.Int, j2x_o: Swift.Int, j2y: Swift.Int, j2y_o: Swift.Int, l2: Swift.Int, l2_o: Swift.Int, r2: Swift.Int, r2_o: Swift.Int)
+}
+@objc @_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers public class DataHelper : ObjectiveC.NSObject, @unchecked Swift.Sendable {
+  public typealias SendPacketHandler = (_ data: Foundation.Data, _ totalCount: Swift.Int, _ sentCount: Swift.Int, _ uuidString: Swift.String, _ silent: Swift.Bool, _ finish: (() -> Swift.Void)?, _ response: ((Foundation.NSDictionary?, Foundation.NSError?) -> Swift.Void)?) -> Swift.Void
+  public func setup(with delegate: any GMacroProtocolSDK.GMacroDataDelegate)
+  @objc deinit
+}
+@objc public enum OutputGraphics : Swift.UInt8, Swift.Sendable {
+  case circle = 0
+  case square = 1
+  case roundedRect = 2
+  public var description: Swift.String {
+    get
+  }
+  public init?(rawValue: Swift.UInt8)
+  public typealias RawValue = Swift.UInt8
+  public var rawValue: Swift.UInt8 {
+    get
+  }
+}
+@objc public enum CurveTriggerMode : Swift.UInt8, Swift.Sendable {
+  case continuous = 0
+  case click = 1
+  case hold = 2
+  public var description: Swift.String {
+    get
+  }
+  public init?(rawValue: Swift.UInt8)
+  public typealias RawValue = Swift.UInt8
+  public var rawValue: Swift.UInt8 {
+    get
+  }
+}
+@objc public enum GyroMappingType : Swift.UInt8, Swift.Sendable {
+  case instant = 1
+  case continuous = 2
+  public var description: Swift.String {
+    get
+  }
+  public init?(rawValue: Swift.UInt8)
+  public typealias RawValue = Swift.UInt8
+  public var rawValue: Swift.UInt8 {
+    get
+  }
+}
+@objc public enum VibrationPosition : Swift.UInt8, Swift.Sendable {
+  case left = 0x01
+  case right = 0x02
+  case both = 0x03
+  public var description: Swift.String {
+    get
+  }
+  public init?(rawValue: Swift.UInt8)
+  public typealias RawValue = Swift.UInt8
+  public var rawValue: Swift.UInt8 {
+    get
+  }
+}
+@objc public enum MotionTriggerMode : Swift.UInt8, Swift.Sendable {
+  case continuous = 0
+  case click = 1
+  case hold = 2
+  public var description: Swift.String {
+    get
+  }
+  public init?(rawValue: Swift.UInt8)
+  public typealias RawValue = Swift.UInt8
+  public var rawValue: Swift.UInt8 {
+    get
+  }
+}
+@objc public enum MotionMappingMode : Swift.UInt8, Swift.Sendable {
+  case dPad = 0
+  case leftStick = 1
+  case rightStick = 2
+  case mouse = 3
+  public var description: Swift.String {
+    get
+  }
+  public init?(rawValue: Swift.UInt8)
+  public typealias RawValue = Swift.UInt8
+  public var rawValue: Swift.UInt8 {
+    get
+  }
+}
+@objc public enum GyroAxis : Swift.UInt8, Swift.Sendable {
+  case zAxis = 1
+  case yAxis = 2
+  case zAndYAxis = 3
+  public var description: Swift.String {
+    get
+  }
+  public init?(rawValue: Swift.UInt8)
+  public typealias RawValue = Swift.UInt8
+  public var rawValue: Swift.UInt8 {
+    get
+  }
+}
+@objc public enum MappingType : Swift.UInt8, Swift.Sendable {
+  case gamepad = 1
+  case mouse = 2
+  case keyboard = 4
+  case multimedia = 8
+  public var description: Swift.String {
+    get
+  }
+  public init?(rawValue: Swift.UInt8)
+  public typealias RawValue = Swift.UInt8
+  public var rawValue: Swift.UInt8 {
+    get
+  }
+}
+@objc public enum CycleMode : Swift.UInt8, Swift.Sendable {
+  case loop = 0
+  case once = 1
+  case hold = 2
+  public var description: Swift.String {
+    get
+  }
+  public init?(rawValue: Swift.UInt8)
+  public typealias RawValue = Swift.UInt8
+  public var rawValue: Swift.UInt8 {
+    get
+  }
+}
+@objc public enum TurboMode : Swift.UInt8, Swift.Sendable {
+  case semiAuto = 0x00
+  case fullAuto = 0x01
+  case disabled = 0x02
+  public var description: Swift.String {
+    get
+  }
+  public init?(rawValue: Swift.UInt8)
+  public typealias RawValue = Swift.UInt8
+  public var rawValue: Swift.UInt8 {
+    get
+  }
+}
+public struct MacroKey : Swift.Sendable {
+  public var value: GMacroProtocolSDK.GamepadKey
+  public var cycle: GMacroProtocolSDK.CycleMode
+  public var intervalTime: Swift.Int
+  public var comKeys: [GMacroProtocolSDK.MacroComkey]
+  public init(value: GMacroProtocolSDK.GamepadKey, cycle: GMacroProtocolSDK.CycleMode = .loop, intervalTime: Swift.Int, comKeys: [GMacroProtocolSDK.MacroComkey])
+  public var description: Swift.String {
+    get
+  }
+}
+public struct MacroComkey : Swift.Sendable {
+  public var keys: [GMacroProtocolSDK.GamepadKey]
+  public var keepTime: Swift.Int
+  public var intervalTime: Swift.Int
+  public init(keys: [GMacroProtocolSDK.GamepadKey], keepTime: Swift.Int = 100, intervalTime: Swift.Int = 0)
+  public var description: Swift.String {
+    get
+  }
+}
+@objc @objcMembers public class MacroComkeyBridge : ObjectiveC.NSObject, @unchecked Swift.Sendable {
+  @objc final public let keys: [Foundation.NSNumber]
+  @objc final public let keepTime: Swift.Int
+  @objc final public let intervalTime: Swift.Int
+  public init(comkey: GMacroProtocolSDK.MacroComkey)
+  @objc deinit
+}
+@objc @objcMembers public class MacroKeyBridge : ObjectiveC.NSObject, @unchecked Swift.Sendable {
+  @objc final public let value: Foundation.NSNumber?
+  @objc final public let cycle: GMacroProtocolSDK.CycleMode
+  @objc final public let comKeys: [GMacroProtocolSDK.MacroComkeyBridge]?
+  @objc final public let intervalTime: Swift.Int
+  public init(macroKey: GMacroProtocolSDK.MacroKey)
+  @objc deinit
+}
+public struct KeyTurbo {
+  public var key: GMacroProtocolSDK.GamepadKey
+  public var turbo: GMacroProtocolSDK.TurboMode
+  public var speed: Swift.Int
+  public init(key: GMacroProtocolSDK.GamepadKey, turbo: GMacroProtocolSDK.TurboMode, speed: Swift.Int = 10)
+}
+public enum GMacroProtocolEvent : @unchecked Swift.Sendable {
+  case progress(CoreFoundation.CGFloat)
+  case success
+  case failure(Swift.String)
+  case testKeys([GMacroProtocolSDK.GamepadKey], j1x: Swift.Int, j1y: Swift.Int, j2x: Swift.Int, j2y: Swift.Int, l2: Swift.Int, r2: Swift.Int)
+  case configKeys([GMacroProtocolSDK.GamepadKey])
+  case testKeyboardMouse(modifierKeys: [GMacroProtocolSDK.ModifierKey], keyboardKeys: [GMacroProtocolSDK.KeyboardKey], mouseCores: [GMacroProtocolSDK.MouseCoreButton], mouseWheels: [GMacroProtocolSDK.MouseWheelButton], mouseX: Swift.Int8, mouseY: Swift.Int8, mediaKeys: [GMacroProtocolSDK.MediaKey])
+  case recordKeys(GMacroProtocolSDK.MacroComkeyBridge)
+  case endRecord(Swift.Int)
+  case calibrationFinished(type: Swift.Int, subId: Swift.Int, result: Swift.Int, param1: [Swift.Int], param2: [Swift.Int])
+  case deviceConnected
+  case devKeysState([GMacroProtocolSDK.GamepadKey], j1x: Swift.Int, j1x_o: Swift.Int, j1y: Swift.Int, j1y_o: Swift.Int, j2x: Swift.Int, j2x_o: Swift.Int, j2y: Swift.Int, j2y_o: Swift.Int, l2: Swift.Int, l2_o: Swift.Int, r2: Swift.Int, r2_o: Swift.Int)
+}
+@objc final public class GMacroProtocolSession : ObjectiveC.NSObject, @unchecked Swift.Sendable {
+  final public let sessionId: Swift.String
+  final public var onceByteLimit: Swift.Int
+  final public var onEvent: ((GMacroProtocolSDK.GMacroProtocolEvent) -> Swift.Void)?
+  public typealias OTAWriteClosure = (_ data: Foundation.Data, _ completion: (() -> Swift.Void)?) -> Swift.Void
+  final public var otaCommandWriter: GMacroProtocolSDK.GMacroProtocolSession.OTAWriteClosure?
+  final public var otaDataWriter: GMacroProtocolSDK.GMacroProtocolSession.OTAWriteClosure?
+  public init(sessionId: Swift.String, transport: any BluetoothKit.ByteStreamTransport)
+  final public func close()
+  @objc deinit
+}
+extension GMacroProtocolSDK.GMacroProtocolSession : GMacroProtocolSDK.GMacroDataDelegate {
+  final public func onceByteCount() -> Swift.Int
+  final public func progress(_ progress: CoreFoundation.CGFloat)
+  final public func success()
+  final public func error(_ message: Swift.String)
+  final public func receiveTestKeys(_ keys: [GMacroProtocolSDK.GamepadKey], j1x: Swift.Int, j1y: Swift.Int, j2x: Swift.Int, j2y: Swift.Int, l2: Swift.Int, r2: Swift.Int)
+  final public func receiveConfigKeys(_ keys: [GMacroProtocolSDK.GamepadKey])
+  final public func receiveTestKeyboardMouse(_ modifierKeys: [GMacroProtocolSDK.ModifierKey], keyboardKeys: [GMacroProtocolSDK.KeyboardKey], mouseCores: [GMacroProtocolSDK.MouseCoreButton], mouseWheels: [GMacroProtocolSDK.MouseWheelButton], mouseX: Swift.Int8, mouseY: Swift.Int8, mediaKeys: [GMacroProtocolSDK.MediaKey])
+  final public func receiveRecordKeys(_ value: GMacroProtocolSDK.MacroComkeyBridge)
+  final public func endRecordKeys(_ code: Swift.Int)
+  final public func finishCalibration(_ type: Swift.Int, subId: Swift.Int, result: Swift.Int, param1: [Swift.Int], param2: [Swift.Int])
+  final public func devConnectState(_ state: Swift.Int)
+  final public func receiveDevKeysState(_ keys: [GMacroProtocolSDK.GamepadKey], j1x: Swift.Int, j1x_o: Swift.Int, j1y: Swift.Int, j1y_o: Swift.Int, j2x: Swift.Int, j2x_o: Swift.Int, j2y: Swift.Int, j2y_o: Swift.Int, l2: Swift.Int, l2_o: Swift.Int, r2: Swift.Int, r2_o: Swift.Int)
+}
+extension GMacroProtocolSDK.GMacroProtocolSession {
+  final public func startOTA(data: Foundation.Data)
+}
+extension BluetoothKit.NativeAdapterRuntime {
+  @discardableResult
+  final public func attachGMacroProtocol(transportSessionId: Swift.String, onceByteLimit: Swift.Int = 20, onEvent: @escaping (GMacroProtocolSDK.GMacroProtocolEvent) -> Swift.Void) -> GMacroProtocolSDK.GMacroProtocolSession?
+}
+extension GMacroProtocolSDK.KeyboardKey : Swift.Equatable {}
+extension GMacroProtocolSDK.KeyboardKey : Swift.Hashable {}
+extension GMacroProtocolSDK.KeyboardKey : Swift.RawRepresentable {}
+extension GMacroProtocolSDK.MouseKey : Swift.Equatable {}
+extension GMacroProtocolSDK.MouseKey : Swift.Hashable {}
+extension GMacroProtocolSDK.MouseKey : Swift.RawRepresentable {}
+extension GMacroProtocolSDK.GamepadKey : Swift.Equatable {}
+extension GMacroProtocolSDK.GamepadKey : Swift.Hashable {}
+extension GMacroProtocolSDK.GamepadKey : Swift.RawRepresentable {}
+extension GMacroProtocolSDK.MediaKey : Swift.Equatable {}
+extension GMacroProtocolSDK.MediaKey : Swift.Hashable {}
+extension GMacroProtocolSDK.MediaKey : Swift.RawRepresentable {}
+extension GMacroProtocolSDK.LightPosition : Swift.Equatable {}
+extension GMacroProtocolSDK.LightPosition : Swift.Hashable {}
+extension GMacroProtocolSDK.LightPosition : Swift.RawRepresentable {}
+extension GMacroProtocolSDK.MappedKeyType : Swift.Equatable {}
+extension GMacroProtocolSDK.MappedKeyType : Swift.Hashable {}
+extension GMacroProtocolSDK.MappedKeyType : Swift.RawRepresentable {}
+extension GMacroProtocolSDK.LightMajorMode : Swift.Equatable {}
+extension GMacroProtocolSDK.LightMajorMode : Swift.Hashable {}
+extension GMacroProtocolSDK.LightMajorMode : Swift.RawRepresentable {}
+extension GMacroProtocolSDK.LightSubMode : Swift.Equatable {}
+extension GMacroProtocolSDK.LightSubMode : Swift.Hashable {}
+extension GMacroProtocolSDK.LightSubMode : Swift.RawRepresentable {}
+extension GMacroProtocolSDK.ModifierKey : Swift.Equatable {}
+extension GMacroProtocolSDK.ModifierKey : Swift.Hashable {}
+extension GMacroProtocolSDK.ModifierKey : Swift.RawRepresentable {}
+extension GMacroProtocolSDK.MouseCoreButton : Swift.Equatable {}
+extension GMacroProtocolSDK.MouseCoreButton : Swift.Hashable {}
+extension GMacroProtocolSDK.MouseCoreButton : Swift.RawRepresentable {}
+extension GMacroProtocolSDK.MouseWheelButton : Swift.Equatable {}
+extension GMacroProtocolSDK.MouseWheelButton : Swift.Hashable {}
+extension GMacroProtocolSDK.MouseWheelButton : Swift.RawRepresentable {}
+extension GMacroProtocolSDK.OutputGraphics : Swift.Equatable {}
+extension GMacroProtocolSDK.OutputGraphics : Swift.Hashable {}
+extension GMacroProtocolSDK.OutputGraphics : Swift.RawRepresentable {}
+extension GMacroProtocolSDK.CurveTriggerMode : Swift.Equatable {}
+extension GMacroProtocolSDK.CurveTriggerMode : Swift.Hashable {}
+extension GMacroProtocolSDK.CurveTriggerMode : Swift.RawRepresentable {}
+extension GMacroProtocolSDK.GyroMappingType : Swift.Equatable {}
+extension GMacroProtocolSDK.GyroMappingType : Swift.Hashable {}
+extension GMacroProtocolSDK.GyroMappingType : Swift.RawRepresentable {}
+extension GMacroProtocolSDK.VibrationPosition : Swift.Equatable {}
+extension GMacroProtocolSDK.VibrationPosition : Swift.Hashable {}
+extension GMacroProtocolSDK.VibrationPosition : Swift.RawRepresentable {}
+extension GMacroProtocolSDK.MotionTriggerMode : Swift.Equatable {}
+extension GMacroProtocolSDK.MotionTriggerMode : Swift.Hashable {}
+extension GMacroProtocolSDK.MotionTriggerMode : Swift.RawRepresentable {}
+extension GMacroProtocolSDK.MotionMappingMode : Swift.Equatable {}
+extension GMacroProtocolSDK.MotionMappingMode : Swift.Hashable {}
+extension GMacroProtocolSDK.MotionMappingMode : Swift.RawRepresentable {}
+extension GMacroProtocolSDK.GyroAxis : Swift.Equatable {}
+extension GMacroProtocolSDK.GyroAxis : Swift.Hashable {}
+extension GMacroProtocolSDK.GyroAxis : Swift.RawRepresentable {}
+extension GMacroProtocolSDK.MappingType : Swift.Equatable {}
+extension GMacroProtocolSDK.MappingType : Swift.Hashable {}
+extension GMacroProtocolSDK.MappingType : Swift.RawRepresentable {}
+extension GMacroProtocolSDK.CycleMode : Swift.Equatable {}
+extension GMacroProtocolSDK.CycleMode : Swift.Hashable {}
+extension GMacroProtocolSDK.CycleMode : Swift.RawRepresentable {}
+extension GMacroProtocolSDK.TurboMode : Swift.Equatable {}
+extension GMacroProtocolSDK.TurboMode : Swift.Hashable {}
+extension GMacroProtocolSDK.TurboMode : Swift.RawRepresentable {}

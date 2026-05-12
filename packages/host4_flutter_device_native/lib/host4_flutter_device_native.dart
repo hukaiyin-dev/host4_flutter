@@ -1,0 +1,75 @@
+import 'host4_flutter_device_native_platform_interface.dart';
+import 'src/native_models.dart';
+export 'src/native_models.dart';
+
+class Host4FlutterDeviceNative {
+  Future<String?> getPlatformVersion() {
+    return Host4FlutterDeviceNativePlatform.instance.getPlatformVersion();
+  }
+
+  Stream<NativeDiscoveredDevice> scanBle({
+    List<String> serviceIds = const [],
+    Map<String, Object?> hints = const {},
+  }) {
+    return Host4FlutterDeviceNativePlatform.instance.scanBle(
+      serviceIds: serviceIds,
+      hints: hints,
+    );
+  }
+
+  Future<void> stopBleScan() {
+    return Host4FlutterDeviceNativePlatform.instance.stopBleScan();
+  }
+
+  Future<String> connectBle({
+    required String deviceId,
+    Map<String, Object?> options = const {},
+  }) {
+    return Host4FlutterDeviceNativePlatform.instance.connectBle(
+      deviceId: deviceId,
+      options: options,
+    );
+  }
+
+  Stream<NativeTransportEvent> transportEvents(String transportSessionId) {
+    return Host4FlutterDeviceNativePlatform.instance.transportEvents(
+      transportSessionId,
+    );
+  }
+
+  Future<void> disconnectTransport(String transportSessionId) {
+    return Host4FlutterDeviceNativePlatform.instance.disconnectTransport(
+      transportSessionId,
+    );
+  }
+
+  Future<String> attachGmacroProtocol(String transportSessionId) {
+    return Host4FlutterDeviceNativePlatform.instance.attachGmacroProtocol(
+      transportSessionId,
+    );
+  }
+
+  Stream<NativeProtocolEvent> protocolEvents(String protocolSessionId) {
+    return Host4FlutterDeviceNativePlatform.instance.protocolEvents(
+      protocolSessionId,
+    );
+  }
+
+  Future<Map<String, Object?>> invokeGmacroMethod({
+    required String protocolSessionId,
+    required String method,
+    Map<String, Object?> arguments = const {},
+  }) {
+    return Host4FlutterDeviceNativePlatform.instance.invokeGmacroMethod(
+      protocolSessionId: protocolSessionId,
+      method: method,
+      arguments: arguments,
+    );
+  }
+
+  Future<void> closeProtocol(String protocolSessionId) {
+    return Host4FlutterDeviceNativePlatform.instance.closeProtocol(
+      protocolSessionId,
+    );
+  }
+}

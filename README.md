@@ -15,7 +15,14 @@ host4_flutter/
 │  ├─ host4_flutter_crypto/
 │  ├─ host4_flutter_analytics/
 │  ├─ host4_flutter_ui/
-│  └─ host4_flutter_bridge/
+│  ├─ host4_flutter_bridge/
+│  ├─ host4_flutter_transport/
+│  ├─ host4_flutter_protocol/
+│  ├─ host4_flutter_device_native/
+│  ├─ host4_flutter_ble/
+│  ├─ host4_flutter_mfi/
+│  ├─ host4_flutter_usb/
+│  └─ host4_flutter_gmacro/
 ├─ examples/
 │  └─ host4_flutter_demo/
 ├─ hosts/
@@ -30,6 +37,13 @@ host4_flutter/
 
 - `packages/`：Flutter / Dart 共享包
 - `packages/host4_flutter_bridge/`：Flutter plugin 包
+- `packages/host4_flutter_transport/`：通信 transport 抽象
+- `packages/host4_flutter_protocol/`：通信 protocol 抽象
+- `packages/host4_flutter_device_native/`：原生桥接 plugin 骨架
+- `packages/host4_flutter_ble/`：BLE 入口骨架
+- `packages/host4_flutter_mfi/`：MFi 预留入口骨架
+- `packages/host4_flutter_usb/`：USB 预留入口骨架
+- `packages/host4_flutter_gmacro/`：GMacro 协议入口骨架
 - `examples/host4_flutter_demo/`：最小示例应用
 - `hosts/`：未来用于原生宿主接入示例
 - `tools/`：脚本和工程化工具

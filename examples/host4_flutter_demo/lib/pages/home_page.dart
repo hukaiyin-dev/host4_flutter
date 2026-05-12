@@ -4,6 +4,7 @@ import 'package:host4_flutter_ui/host4_flutter_ui.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../widgets/sub_page_scaffold.dart';
 import 'debug_inspector_page.dart';
+import 'gmacro/gmacro_entry_page.dart';
 import 'logs_page.dart';
 import 'tester_page.dart';
 import 'theme_playground_page.dart';
@@ -74,6 +75,14 @@ class HomePage extends StatelessWidget {
           subtitle: l10n.testerPageSubtitle,
           child: TesterPage(onResetToDefaults: onResetToDefaults),
         ),
+      ),
+      _LabEntry(
+        title: 'GMacro 调试',
+        subtitle: 'BLE / MFi 主链路 + OTA 测试',
+        icon: Icons.gamepad_outlined,
+        color: theme.colors.brandPrimary,
+        minHeight: 220,
+        builder: (_) => const GmacroEntryPage(),
       ),
     ];
 

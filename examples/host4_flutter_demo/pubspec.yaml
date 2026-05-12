@@ -50,6 +50,15 @@ dependencies:
     path: ../../packages/host4_flutter_log
   host4_flutter_utils:
     path: ../../packages/host4_flutter_utils
+  host4_flutter_transport:
+    path: ../../packages/host4_flutter_transport
+  host4_flutter_protocol:
+    path: ../../packages/host4_flutter_protocol
+  host4_flutter_ble:
+    path: ../../packages/host4_flutter_ble
+  host4_flutter_gmacro:
+    path: ../../packages/host4_flutter_gmacro
+  file_picker: ^8.1.7
   share_plus: ^10.0.0
   intl: ^0.20.2
   shared_preferences: ^2.3.0

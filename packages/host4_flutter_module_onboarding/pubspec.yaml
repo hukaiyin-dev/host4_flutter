@@ -1,6 +1,7 @@
 name: host4_flutter_module_onboarding
 description: "Platform-level onboarding flow module for host4 Flutter apps."
 version: 0.0.1
+publish_to: none
 homepage:
 
 environment:

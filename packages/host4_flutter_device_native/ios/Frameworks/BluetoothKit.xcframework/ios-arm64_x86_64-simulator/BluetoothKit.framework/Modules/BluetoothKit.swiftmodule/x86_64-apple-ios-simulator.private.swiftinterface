@@ -1,0 +1,215 @@
+// swift-interface-format-version: 1.0
+// swift-compiler-version: Apple Swift version 6.3.1 effective-5.10 (swiftlang-6.3.1.1.2 clang-2100.0.123.102)
+// swift-module-flags: -target x86_64-apple-ios13.0-simulator -enable-objc-interop -enable-library-evolution -swift-version 5 -O -enable-experimental-feature DebugDescriptionMacro -enable-bare-slash-regex -module-name BluetoothKit
+// swift-module-flags-ignorable:  -formal-cxx-interoperability-mode=off -interface-compiler-version 6.3.1
+import CoreBluetooth
+import CryptoKit
+import Foundation
+import Swift
+import UIKit
+import _Concurrency
+import _StringProcessing
+import _SwiftConcurrencyShims
+extension Dispatch.DispatchSource {
+  public class func pollingSchedule(interval: Dispatch.DispatchTimeInterval = DispatchTimeInterval.seconds(0), repeating: Swift.Double = 1, handler: @escaping ((any Dispatch.DispatchSourceTimer)?) -> Swift.Void) -> any Dispatch.DispatchSourceTimer
+}
+extension Foundation.Data {
+  public typealias bit_order_16 = (_ value: Swift.UInt16) -> Swift.UInt16
+  public typealias bit_order_8 = (_ value: Swift.UInt8) -> Swift.UInt8
+  public func straight_16(value: Swift.UInt16) -> Swift.UInt16
+  public func reverse_16(value: Swift.UInt16) -> Swift.UInt16
+  public func straight_8(value: Swift.UInt8) -> Swift.UInt8
+  public func reverse_8(value: Swift.UInt8) -> Swift.UInt8
+  public func crc16(data_order: (_ value: Swift.UInt8) -> Swift.UInt8, remainder_order: (_ value: Swift.UInt16) -> Swift.UInt16, remainder: Swift.UInt16, polynomial: Swift.UInt16) -> Swift.UInt16
+  public func crc16ccitt() -> Swift.UInt16
+  public func crc16ccitt_xmodem() -> Swift.UInt16
+  public func crc16ccitt_kermit() -> Swift.UInt16
+  public func crc16ccitt_1d0f() -> Swift.UInt16
+  public func crc16ibm() -> Swift.UInt16
+}
+extension Foundation.Data {
+  public static func timestampData() -> Foundation.Data
+  public static func random(count: Swift.Int) -> Foundation.Data
+}
+extension Swift.Bool {
+  public var int: Swift.Int {
+    get
+  }
+  public var string: Swift.String {
+    get
+  }
+}
+public enum BluetoothError : Swift.Error, Foundation.LocalizedError {
+  case timeout
+  case deviceReportedError(code: Swift.Int)
+  case outOfRange
+  case invalidInput
+  public var errorDescription: Swift.String? {
+    get
+  }
+}
+extension Foundation.Data {
+  public mutating func toLength(count: Swift.Int, left: Swift.Bool = false)
+  public mutating func toLength(count: Swift.Int, checkSum: Swift.Bool, left: Swift.Bool = false)
+  public mutating func addCheckSum()
+  public mutating func byteSwapped()
+  public func checkSum() -> Foundation.Data
+  public static func from(_ i: Swift.Int, count: Swift.Int) -> Foundation.Data
+  public static func from(_ i: Swift.UInt8) -> Foundation.Data
+  public func toBytes() -> [Swift.UInt8]
+  public func toInt() -> Swift.Int
+  public func toBool() -> Swift.Bool
+  public func toDictionary() -> Swift.Dictionary<Swift.String, Any>?
+  public func jsonString() -> Swift.String
+  public func nsDescription() -> Swift.String
+}
+extension Swift.Int {
+  public var data: Foundation.Data {
+    get
+  }
+  public func data(count: Swift.Int) -> Foundation.Data
+}
+extension Foundation.Data {
+  public static func bitsToData(bits: [Swift.UInt8]) -> Foundation.Data
+  public static func bitsToBytes(bits: [Swift.UInt8]) -> [Swift.UInt8]
+  public var bytes: [Swift.UInt8] {
+    get
+  }
+  public var bits: [Swift.UInt8] {
+    get
+  }
+}
+extension Foundation.Data {
+  public var hexadecimal: Swift.String {
+    get
+  }
+  public init?(hex: Swift.String)
+}
+extension Foundation.Data {
+  public func subdata(location: Swift.Int, length: Swift.Int) -> Foundation.Data?
+}
+extension Swift.Array where Element : Swift.Equatable {
+  public mutating func appendIfNotContains(_ element: Element)
+}
+@_hasMissingDesignatedInitializers final public class TransportSessionRegistry {
+  public static let shared: BluetoothKit.TransportSessionRegistry
+  final public func register(_ session: any BluetoothKit.ByteStreamTransport)
+  final public func unregister(_ sessionId: Swift.String)
+  final public func getSession(_ sessionId: Swift.String) -> (any BluetoothKit.ByteStreamTransport)?
+  @objc deinit
+}
+@_hasMissingDesignatedInitializers final public class ProtocolSessionRegistry {
+  public static let shared: BluetoothKit.ProtocolSessionRegistry
+  final public func register(_ sessionId: Swift.String, protocolSession: Any, transportSessionId: Swift.String, closeHandler: @escaping () -> Swift.Void)
+  final public func register(_ sessionId: Swift.String, protocolSession: Any)
+  final public func unregister(_ sessionId: Swift.String)
+  final public func getSession(_ sessionId: Swift.String) -> Any?
+  final public func invalidateSessions(boundTo transportSessionId: Swift.String)
+  @objc deinit
+}
+@_inheritsConvenienceInitializers @objc final public class NativeAdapterRuntime : ObjectiveC.NSObject, @unchecked Swift.Sendable {
+  @objc public static let shared: BluetoothKit.NativeAdapterRuntime
+  @objc final public func scan(onDiscovery: @escaping (_ deviceIdString: Swift.String, _ name: Swift.String, _ manufacturerData: Foundation.Data, _ rssi: Swift.Int) -> Swift.Void)
+  @objc final public func stopScan()
+  @discardableResult
+  @objc final public func connect(deviceIdString: Swift.String, onState: @escaping (_ stateRawValue: Swift.Int) -> Swift.Void) -> Swift.String?
+  @objc final public func disconnect(transportSessionId: Swift.String)
+  @discardableResult
+  final public func registerTransport(_ transport: any BluetoothKit.ByteStreamTransport) -> Swift.String
+  final public func unregisterTransport(_ transportSessionId: Swift.String)
+  @objc override dynamic public init()
+  @objc deinit
+}
+@objc @_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers final public class BluetoothCentralRuntime : ObjectiveC.NSObject, @unchecked Swift.Sendable {
+  public static let shared: BluetoothKit.BluetoothCentralRuntime
+  final public var onDiscovery: ((BluetoothKit.BluetoothDeviceDescriptor) -> Swift.Void)?
+  final public var onStateChanged: ((CoreBluetooth.CBManagerState) -> Swift.Void)?
+  final public var currentState: CoreBluetooth.CBManagerState {
+    get
+  }
+  final public func scan(serviceUUIDs: [CoreBluetooth.CBUUID]? = nil)
+  final public func stopScan()
+  final public func getPeripheral(with id: Foundation.UUID) -> CoreBluetooth.CBPeripheral?
+  final public func makeTransportSession(deviceId: Foundation.UUID) -> BluetoothKit.BluetoothTransportSession?
+  @objc deinit
+}
+extension BluetoothKit.BluetoothCentralRuntime : CoreBluetooth.CBCentralManagerDelegate {
+  @objc final public func centralManagerDidUpdateState(_ central: CoreBluetooth.CBCentralManager)
+  @objc final public func centralManager(_ central: CoreBluetooth.CBCentralManager, didDiscover peripheral: CoreBluetooth.CBPeripheral, advertisementData: [Swift.String : Any], rssi RSSI: Foundation.NSNumber)
+  @objc final public func centralManager(_ central: CoreBluetooth.CBCentralManager, didConnect peripheral: CoreBluetooth.CBPeripheral)
+  @objc final public func centralManager(_ central: CoreBluetooth.CBCentralManager, didFailToConnect peripheral: CoreBluetooth.CBPeripheral, error: (any Swift.Error)?)
+  @objc final public func centralManager(_ central: CoreBluetooth.CBCentralManager, didDisconnectPeripheral peripheral: CoreBluetooth.CBPeripheral, error: (any Swift.Error)?)
+}
+@objc final public class BluetoothTransportSession : ObjectiveC.NSObject, @unchecked Swift.Sendable, BluetoothKit.ByteStreamTransport {
+  final public var transportId: Swift.String {
+    get
+  }
+  final public let sessionId: Swift.String
+  final public var deviceId: Foundation.UUID {
+    get
+  }
+  final public var onStateChanged: ((BluetoothKit.TransportState) -> Swift.Void)?
+  final public var state: BluetoothKit.TransportState {
+    get
+  }
+  public init(sessionId: Swift.String, peripheral: CoreBluetooth.CBPeripheral)
+  final public func connect()
+  final public func disconnect()
+  final public func send(_ data: Foundation.Data) throws
+  final public func send(_ data: Foundation.Data, to uuidString: Swift.String) throws
+  final public func onReceive(_ handler: @escaping (Foundation.Data) -> Swift.Void)
+  @objc deinit
+}
+@objc final public class PeripheralConnection : ObjectiveC.NSObject, @unchecked Swift.Sendable {
+  final public let peripheral: CoreBluetooth.CBPeripheral
+  final public var onMessage: ((Foundation.Data, CoreBluetooth.CBCharacteristic) -> Swift.Void)?
+  final public var onReady: (() -> Swift.Void)?
+  final public var onConnectionError: (((any Swift.Error)?) -> Swift.Void)?
+  public init(peripheral: CoreBluetooth.CBPeripheral)
+  final public func discoverServices(_ serviceUUIDs: [CoreBluetooth.CBUUID]? = nil)
+  final public func writeValue(_ data: Foundation.Data, to uuidString: Swift.String, type: CoreBluetooth.CBCharacteristicWriteType = .withoutResponse, progress: ((Swift.Int, Swift.Int) -> Swift.Void)? = nil, completion: (() -> Swift.Void)? = nil) throws
+  final public func setNotify(for uuidString: Swift.String, enabled: Swift.Bool)
+  @objc deinit
+}
+extension BluetoothKit.PeripheralConnection : CoreBluetooth.CBPeripheralDelegate {
+  @objc final public func peripheral(_ peripheral: CoreBluetooth.CBPeripheral, didDiscoverServices error: (any Swift.Error)?)
+  @objc final public func peripheral(_ peripheral: CoreBluetooth.CBPeripheral, didDiscoverCharacteristicsFor service: CoreBluetooth.CBService, error: (any Swift.Error)?)
+  @objc final public func peripheral(_ peripheral: CoreBluetooth.CBPeripheral, didUpdateValueFor characteristic: CoreBluetooth.CBCharacteristic, error: (any Swift.Error)?)
+  @objc final public func peripheral(_ peripheral: CoreBluetooth.CBPeripheral, didUpdateNotificationStateFor characteristic: CoreBluetooth.CBCharacteristic, error: (any Swift.Error)?)
+  @objc final public func peripheral(_ peripheral: CoreBluetooth.CBPeripheral, didWriteValueFor characteristic: CoreBluetooth.CBCharacteristic, error: (any Swift.Error)?)
+  @objc final public func peripheralIsReady(toSendWriteWithoutResponse peripheral: CoreBluetooth.CBPeripheral)
+}
+@objc public enum TransportState : Swift.Int {
+  case connecting
+  case connected
+  case ready
+  case disconnected
+  case error
+  public init?(rawValue: Swift.Int)
+  public typealias RawValue = Swift.Int
+  public var rawValue: Swift.Int {
+    get
+  }
+}
+public protocol ByteStreamTransport : AnyObject {
+  var transportId: Swift.String { get }
+  func send(_ data: Foundation.Data) throws
+  func onReceive(_ handler: @escaping (Foundation.Data) -> Swift.Void)
+}
+public struct BluetoothDeviceDescriptor : Swift.Sendable {
+  public let deviceId: Foundation.UUID
+  public let name: Swift.String
+  public let manufacturerData: Foundation.Data
+  public let rssi: Swift.Int
+  public init(deviceId: Foundation.UUID, name: Swift.String, manufacturerData: Foundation.Data, rssi: Swift.Int)
+}
+final public class AnyByteStreamTransport : BluetoothKit.ByteStreamTransport, @unchecked Swift.Sendable {
+  final public let transportId: Swift.String
+  public init(id: Swift.String, send: @escaping (Foundation.Data) throws -> Swift.Void, onReceive: @escaping (@escaping (Foundation.Data) -> Swift.Void) -> Swift.Void)
+  final public func send(_ data: Foundation.Data) throws
+  final public func onReceive(_ handler: @escaping (Foundation.Data) -> Swift.Void)
+  @objc deinit
+}
+extension BluetoothKit.TransportState : Swift.Equatable {}
+extension BluetoothKit.TransportState : Swift.Hashable {}
+extension BluetoothKit.TransportState : Swift.RawRepresentable {}
