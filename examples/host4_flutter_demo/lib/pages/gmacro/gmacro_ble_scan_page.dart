@@ -24,6 +24,7 @@ class _GmacroBleScanPageState extends State<GmacroBleScanPage> {
 
   bool _isScanning = false;
   bool _isConnecting = false;
+  bool _hideUnnamed = true;
   StreamSubscription<DeviceDescriptor>? _scanSub;
 
   @override
@@ -102,7 +103,9 @@ class _GmacroBleScanPageState extends State<GmacroBleScanPage> {
   @override
   Widget build(BuildContext context) {
     final theme = context.host4Theme;
-    final devices = _seen.values.toList();
+    final devices = _seen.values
+        .where((d) => !_hideUnnamed || (d.name.isNotEmpty && d.name != 'Unknown'))
+        .toList();
 
     return SubPageScaffold(
       title: 'BLE 扫描',
@@ -133,6 +136,19 @@ class _GmacroBleScanPageState extends State<GmacroBleScanPage> {
                         : const Icon(Icons.search_rounded, size: 18),
                     label: Text(_isScanning ? '停止扫描' : '开始扫描'),
                   ),
+                ),
+                SizedBox(width: theme.spacing.sm),
+                Row(
+                  children: [
+                    Host4Text(
+                      '仅命名设备',
+                      colorRole: Host4TextColorRole.secondary,
+                    ),
+                    Switch(
+                      value: _hideUnnamed,
+                      onChanged: (v) => setState(() => _hideUnnamed = v),
+                    ),
+                  ],
                 ),
               ],
             ),

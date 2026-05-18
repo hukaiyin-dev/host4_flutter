@@ -87,7 +87,8 @@ iOSInjectionProject/
 *.mov
 *.mp4
 
-
+.code_runs
+.codeflow.yaml
 
 Pods/NIMSDK_LITE/NIMSDK/NIMSDK.framework/NIMSDK
 Pods/QY_iOS_SDK/SDK/QYSDK.framework/QYSDK

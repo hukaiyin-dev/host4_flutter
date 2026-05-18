@@ -38,6 +38,38 @@ private final class QueuedEventStreamHandler: NSObject, FlutterStreamHandler {
   }
 }
 
+// MARK: - Native Log Channel
+
+private final class NativeLogHandler: NSObject, FlutterStreamHandler {
+  static let shared = NativeLogHandler()
+
+  private var eventSink: FlutterEventSink?
+
+  func onListen(
+    withArguments arguments: Any?,
+    eventSink events: @escaping FlutterEventSink
+  ) -> FlutterError? {
+    eventSink = events
+    return nil
+  }
+
+  func onCancel(withArguments arguments: Any?) -> FlutterError? {
+    eventSink = nil
+    return nil
+  }
+
+  func log(_ message: String) {
+    print("[Native] \(message)")
+    DispatchQueue.main.async { [weak self] in
+      self?.eventSink?(message)
+    }
+  }
+}
+
+private func nativeLog(_ message: String) {
+  NativeLogHandler.shared.log(message)
+}
+
 private final class BleScanStreamHandler: NSObject, FlutterStreamHandler {
   private let runtime = BluetoothCentralRuntime.shared
   private var eventSink: FlutterEventSink?
@@ -180,6 +212,20 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
       binaryMessenger: messenger
     )
     bleScanChannel.setStreamHandler(bleScanHandler)
+
+    let logChannel = FlutterEventChannel(
+      name: "host4_flutter_device_native/native_log",
+      binaryMessenger: messenger
+    )
+    logChannel.setStreamHandler(NativeLogHandler.shared)
+
+    // 接管 BluetoothKit / GMacroProtocolSDK 内部的所有 print() 输出
+    let logForwarder: (_ items: [Any], _ separator: String, _ terminator: String) -> Void = { items, sep, _ in
+      let message = items.map { "\($0)" }.joined(separator: sep)
+      NativeLogHandler.shared.log(message)
+    }
+    BluetoothKitConstant.logHandler = logForwarder
+    GPDConstant.logHandler = logForwarder
   }
 
   public static func register(with registrar: FlutterPluginRegistrar) {
@@ -318,15 +364,28 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
         return
       }
       // 配置 OTA 写入通道（BLE 特征 FF11 / FF12）
-      // 通过 TransportSessionRegistry 拿回已连接的 BluetoothTransportSession，
-      // 调用 send(_:to:) 写到对应特征 UUID
       let bleTransport = TransportSessionRegistry.shared.getSession(transportSessionId) as? BluetoothTransportSession
+      if bleTransport == nil {
+        nativeLog("[GMacro] ⚠ attachGMacro: bleTransport cast failed, OTA writers will be no-op")
+      } else {
+        nativeLog("[GMacro] attachGMacro: bleTransport OK, OTA writers configured (FF11/FF12)")
+      }
       bleSession.otaCommandWriter = { data, completion in
-        try? bleTransport?.send(data, to: "FF11")
+        nativeLog("[OTA] commandWriter called, size=\(data.count)")
+        do {
+          try bleTransport?.send(data, to: "FF11")
+        } catch {
+          nativeLog("[OTA] commandWriter send error: \(error)")
+        }
         completion?()
       }
       bleSession.otaDataWriter = { data, completion in
-        try? bleTransport?.send(data, to: "FF12")
+        nativeLog("[OTA] dataWriter called, size=\(data.count)")
+        do {
+          try bleTransport?.send(data, to: "FF12")
+        } catch {
+          nativeLog("[OTA] dataWriter send error: \(error)")
+        }
         completion?()
       }
       session = bleSession
@@ -700,9 +759,10 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
       case "endGyroCalibration":
         invoke(result) { callback in session.endGyroCalibration(callback) }
       case "startOta":
-        // OTA 是 fire-and-forget，进度通过 onEvent 流推送，此处立即返回
         let firmwareData = (arguments["data"] as? FlutterStandardTypedData)?.data ?? Data()
+        nativeLog("[OTA] startOTA called, firmware=\(firmwareData.count) bytes, commandWriter=\(session.otaCommandWriter != nil), dataWriter=\(session.otaDataWriter != nil)")
         session.startOTA(data: firmwareData)
+        nativeLog("[OTA] startOTA dispatched")
         result([:] as [String: Any])
       default:
         result(

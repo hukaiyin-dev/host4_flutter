@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:host4_flutter_gmacro/host4_flutter_gmacro.dart';
 import 'package:host4_flutter_protocol/host4_flutter_protocol.dart';
 import 'package:host4_flutter_transport/host4_flutter_transport.dart';
@@ -25,14 +26,20 @@ class _GmacroSessionPageState extends State<GmacroSessionPage> {
   bool _isAttaching = true;
   bool _isBusy = false;
 
+  static const _nativeLogChannel = EventChannel(
+    'host4_flutter_device_native/native_log',
+  );
+
   final _logs = <_LogEntry>[];
   StreamSubscription<TransportEvent>? _transportSub;
   StreamSubscription<ProtocolEvent>? _protocolSub;
+  StreamSubscription<dynamic>? _nativeLogSub;
 
   @override
   void initState() {
     super.initState();
     _subscribeTransport();
+    _subscribeNativeLog();
     _attach();
   }
 
@@ -40,9 +47,17 @@ class _GmacroSessionPageState extends State<GmacroSessionPage> {
   void dispose() {
     _transportSub?.cancel();
     _protocolSub?.cancel();
+    _nativeLogSub?.cancel();
     _session?.close();
     widget.transport.disconnect();
     super.dispose();
+  }
+
+  void _subscribeNativeLog() {
+    _nativeLogSub = _nativeLogChannel.receiveBroadcastStream().listen((message) {
+      if (!mounted) return;
+      _addLog('[Native] $message');
+    });
   }
 
   void _subscribeTransport() {
