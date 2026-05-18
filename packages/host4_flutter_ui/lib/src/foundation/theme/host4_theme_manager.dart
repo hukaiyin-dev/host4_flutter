@@ -21,8 +21,8 @@ class Host4ThemeManager extends ChangeNotifier {
   Host4ThemeManager({
     required List<Host4ThemeCatalogEntry> catalog,
     required AssetBundle bundle,
-  }) : _catalog = List.unmodifiable(catalog),
-       _bundle = bundle;
+  })  : _catalog = List.unmodifiable(catalog),
+        _bundle = bundle;
 
   final List<Host4ThemeCatalogEntry> _catalog;
   final AssetBundle _bundle;

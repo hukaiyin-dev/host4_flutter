@@ -517,8 +517,7 @@ class Host4ThemeLoader {
     final normalized = _normalizeTheme(tokensMap, syntheticManifest, mode);
     final resolved = Host4ReferenceResolver(normalized).resolveMap(normalized);
 
-    final images =
-        fallbackImages ??
+    final images = fallbackImages ??
         const Host4ThemeImages(
           pageBackground: '',
           heroBanner: '',
@@ -624,8 +623,7 @@ class Host4ThemeLoader {
       components: Host4ThemeComponents(
         pageShell: Host4PageShellComponentTokens(
           pageColor: _readColor(resolved, 'component.page-shell.page-color'),
-          image:
-              fallbackImages?.pageBackground ??
+          image: fallbackImages?.pageBackground ??
               _readString(resolved, 'asset.image.page-background'),
           accentGlowColor: _readColor(
             resolved,

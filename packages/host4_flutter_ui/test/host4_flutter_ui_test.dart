@@ -6,6 +6,22 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:host4_flutter_ui/host4_flutter_ui.dart';
 
 void main() {
+  testWidgets('loads the packaged default JSON theme', (tester) async {
+    final theme = await Host4ThemeLoader.loadFromAsset(
+      rootBundle,
+      Host4ThemeAssets.defaultTokensAssetPath,
+    );
+
+    expect(theme.meta.id, Host4ThemeAssets.defaultThemeId);
+    expect(theme.meta.name, Host4ThemeAssets.defaultThemeName);
+    expect(theme.meta.supportedModes, ['light', 'dark']);
+    expect(
+      theme.images.pageBackground,
+      'packages/host4_flutter_ui/assets/themes/default/images/page_background_light.png',
+    );
+    expect(theme.components.button.minHeight, greaterThan(0));
+  });
+
   test(
     'loads runtime theme from manifest plus multi-mode tokens json',
     () async {
@@ -79,10 +95,8 @@ void main() {
   test('throws a clear error for circular token references', () async {
     final cyclicTheme =
         jsonDecode(_readThemeFile('tokens.json')) as Map<String, dynamic>;
-    final brand =
-        ((cyclicTheme['semantic'] as Map<String, dynamic>)['color']
-                as Map<String, dynamic>)['brand']
-            as Map<String, dynamic>;
+    final brand = ((cyclicTheme['semantic'] as Map<String, dynamic>)['color']
+        as Map<String, dynamic>)['brand'] as Map<String, dynamic>;
     brand['primary'] = {
       'light': '{semantic.color.brand.secondary}',
       'dark': '{semantic.color.brand.secondary}',

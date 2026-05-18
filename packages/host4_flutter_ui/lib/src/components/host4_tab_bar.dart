@@ -57,9 +57,8 @@ class Host4TabBar extends StatelessWidget {
     final hasFeatures = items.any((item) => item.featured);
     final maxIconSize = hasFeatures ? tokens.featuredIconSize : tokens.iconSize;
     final showLabels = items.any((item) => item.label.isNotEmpty);
-    final labelHeight = showLabels
-        ? tokens.labelStyle.lineHeight + tokens.labelGap
-        : 0.0;
+    final labelHeight =
+        showLabels ? tokens.labelStyle.lineHeight + tokens.labelGap : 0.0;
     final contentHeight = maxIconSize + labelHeight + tokens.bottomGap;
 
     // Total widget height: at least tokens.height so the background fills
@@ -184,16 +183,15 @@ class _Host4TabBarItemViewState extends State<_Host4TabBarItemView> {
     final tokens = widget.tokens;
     final item = widget.item;
     final iconSize = item.featured ? tokens.featuredIconSize : tokens.iconSize;
-    final images = item.index < tokens.items.length
-        ? tokens.items[item.index]
-        : null;
+    final images =
+        item.index < tokens.items.length ? tokens.items[item.index] : null;
     final imagePath = images != null
         ? (widget.selected ? images.selected : images.normal)
         : null;
     final lightFallbackPath = images != null
         ? (widget.selected
-              ? images.lightFallbackSelected
-              : images.lightFallbackNormal)
+            ? images.lightFallbackSelected
+            : images.lightFallbackNormal)
         : null;
     final fallback = widget.selected
         ? (item.fallbackSelectedIcon ?? item.fallbackIcon)

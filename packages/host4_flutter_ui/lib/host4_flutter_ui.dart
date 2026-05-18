@@ -9,6 +9,7 @@ export 'src/components/host4_section_header.dart';
 export 'src/components/host4_text.dart';
 export 'src/components/host4_tab_bar.dart';
 export 'src/components/host4_text_field.dart';
+export 'src/foundation/theme/host4_theme_assets.dart';
 export 'src/foundation/theme/host4_runtime_theme.dart';
 export 'src/foundation/theme/host4_theme_loader.dart';
 export 'src/foundation/theme/host4_theme_manager.dart';

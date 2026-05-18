@@ -1,39 +1,61 @@
-<!--
-This README describes the package. If you publish this package to pub.dev,
-this README's contents appear on the landing page for your package.
+# host4_flutter_ui
 
-For information about how to write a good package README, see the guide for
-[writing package pages](https://dart.dev/tools/pub/writing-package-pages).
+Shared UI foundation for Host4 Flutter apps.
 
-For general information about developing packages, see the Dart guide for
-[creating packages](https://dart.dev/guides/libraries/create-packages)
-and the Flutter guide for
-[developing packages and plugins](https://flutter.dev/to/develop-packages).
--->
+This package owns the reusable component set and the JSON-driven theme runtime.
+Business apps should keep feature pages and product data in their own
+repositories, then consume this package for common UI primitives and theme
+loading.
 
-TODO: Put a short description of the package here that helps potential users
-know whether this package might be useful for them.
+## Responsibilities
 
-## Features
+- JSON theme loading and mode switching.
+- Runtime theme scope and theme manager.
+- Base components such as buttons, cards, page scaffold, search field, list
+  cell, navigation bar, section header, and tab bar.
+- Packaged default theme assets that can be used as a template or fallback.
 
-TODO: List what your package can do. Maybe include images, gifs, or videos.
+## Theme Files
 
-## Getting started
+The default theme is included under:
 
-TODO: List prerequisites and provide or point to information on how to
-start using the package.
-
-## Usage
-
-TODO: Include short and useful examples for package users. Add longer examples
-to `/example` folder.
-
-```dart
-const like = 'sample';
+```text
+assets/themes/default/
+  manifest.json
+  tokens.json
+  asset.json
+  images/
 ```
 
-## Additional information
+Apps can load the packaged default theme:
 
-TODO: Tell users more about the package: where to find more information, how to
-contribute to the package, how to file issues, what response they can expect
-from the package authors, and more.
+```dart
+final manager = Host4ThemeManager(
+  catalog: Host4ThemeAssets.defaultCatalog,
+  bundle: rootBundle,
+);
+
+await manager.initialize(Host4ThemeAssets.defaultThemeId);
+```
+
+To customize a product theme, copy the same JSON structure into the app assets
+and register a catalog entry pointing at that app-owned `tokens.json`.
+
+## App Wiring
+
+Wrap the app with `Host4ThemeScope` after the manager is initialized:
+
+```dart
+Host4ThemeScope(
+  manager: manager,
+  child: const MaterialApp(home: HomePage()),
+);
+```
+
+Components read tokens from `context.host4Theme`, so colors, typography,
+spacing, radius, images, and component states can be changed by editing JSON.
+
+## Component Boundary
+
+Put stable, reusable UI primitives in this package. Keep launcher-specific
+screens, game data, API calls, and native feature flows in the business app.

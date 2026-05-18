@@ -3,7 +3,15 @@ import 'package:flutter/material.dart';
 import '../foundation/theme/host4_runtime_theme.dart';
 import '../foundation/theme/host4_theme_scope.dart';
 
-enum Host4ButtonVariant { primary, secondary, tertiary, outline, ghost, danger, dangerSoft }
+enum Host4ButtonVariant {
+  primary,
+  secondary,
+  tertiary,
+  outline,
+  ghost,
+  danger,
+  dangerSoft
+}
 
 enum Host4ButtonContent { textOnly, iconLeft, iconTop, iconOnly }
 
@@ -21,9 +29,9 @@ class Host4Button extends StatefulWidget {
     this.expanded = false,
     this.loading = false,
   }) : assert(
-         content == Host4ButtonContent.textOnly || icon != null,
-         'icon must be provided when content is not textOnly',
-       );
+          content == Host4ButtonContent.textOnly || icon != null,
+          'icon must be provided when content is not textOnly',
+        );
 
   final String label;
   final VoidCallback? onPressed;
@@ -87,8 +95,7 @@ class _Host4ButtonState extends State<Host4Button> {
                   ? [
                       BoxShadow(
                         color: ringTokens.color,
-                        spreadRadius:
-                            ringTokens.offsetWidth + ringTokens.width,
+                        spreadRadius: ringTokens.offsetWidth + ringTokens.width,
                         blurRadius: 0,
                       ),
                       BoxShadow(
