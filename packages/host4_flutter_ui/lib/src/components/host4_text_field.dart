@@ -10,6 +10,7 @@ class Host4TextField extends StatelessWidget {
     required this.hintText,
     super.key,
     this.controller,
+    this.onChanged,
     this.prefixIcon,
     this.suffix,
     this.maxLines = 1,
@@ -20,6 +21,7 @@ class Host4TextField extends StatelessWidget {
 
   final String hintText;
   final TextEditingController? controller;
+  final ValueChanged<String>? onChanged;
   final IconData? prefixIcon;
   final Widget? suffix;
   final int maxLines;
@@ -37,6 +39,7 @@ class Host4TextField extends StatelessWidget {
       constraints: BoxConstraints(minHeight: tokens.minHeight),
       child: TextField(
         controller: controller,
+        onChanged: onChanged,
         maxLines: maxLines,
         enabled: enabled,
         readOnly: readOnly,

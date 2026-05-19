@@ -4,10 +4,16 @@ import '../foundation/theme/host4_theme_scope.dart';
 import 'host4_text_field.dart';
 
 class Host4SearchBar extends StatelessWidget {
-  const Host4SearchBar({required this.hintText, super.key, this.controller});
+  const Host4SearchBar({
+    required this.hintText,
+    super.key,
+    this.controller,
+    this.onChanged,
+  });
 
   final String hintText;
   final TextEditingController? controller;
+  final ValueChanged<String>? onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -16,6 +22,7 @@ class Host4SearchBar extends StatelessWidget {
 
     return Host4TextField(
       controller: controller,
+      onChanged: onChanged,
       hintText: hintText,
       prefixIcon: Icons.search_rounded,
       suffix: Container(
