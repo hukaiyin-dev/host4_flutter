@@ -287,6 +287,7 @@ class Host4PageShellComponentTokens {
 class Host4ButtonComponentTokens {
   const Host4ButtonComponentTokens({
     required this.focusedRing,
+    required this.sizes,
     required this.spacing,
     required this.labelStyle,
     required this.minHeight,
@@ -295,15 +296,19 @@ class Host4ButtonComponentTokens {
     required this.iconOnlySize,
     required this.primary,
     required this.secondary,
+    required this.popoverPrimary,
+    required this.popoverSecondary,
     required this.tertiary,
     required this.outline,
     required this.ghost,
     required this.danger,
+    required this.dangerHigh,
     required this.dangerSoft,
     required this.loading,
   });
 
   final Host4ButtonFocusedRingTokens focusedRing;
+  final Host4ButtonSizeGroupTokens sizes;
   final Host4ButtonSpacingTokens spacing;
   final Host4TextToken labelStyle;
   final double minHeight;
@@ -312,12 +317,41 @@ class Host4ButtonComponentTokens {
   final double iconOnlySize;
   final Host4ButtonVariantTokens primary;
   final Host4ButtonVariantTokens secondary;
+  final Host4ButtonVariantTokens popoverPrimary;
+  final Host4ButtonVariantTokens popoverSecondary;
   final Host4ButtonVariantTokens tertiary;
   final Host4ButtonVariantTokens outline;
   final Host4ButtonVariantTokens ghost;
   final Host4ButtonVariantTokens danger;
+  final Host4ButtonVariantTokens dangerHigh;
   final Host4ButtonVariantTokens dangerSoft;
   final Host4ButtonLoadingTokens loading;
+}
+
+@immutable
+class Host4ButtonSizeGroupTokens {
+  const Host4ButtonSizeGroupTokens({
+    required this.xs,
+    required this.sm,
+    required this.md,
+    required this.lg,
+  });
+
+  final Host4ButtonSizeTokens xs;
+  final Host4ButtonSizeTokens sm;
+  final Host4ButtonSizeTokens md;
+  final Host4ButtonSizeTokens lg;
+}
+
+@immutable
+class Host4ButtonSizeTokens {
+  const Host4ButtonSizeTokens({
+    required this.minHeight,
+    required this.iconOnlyExtent,
+  });
+
+  final double minHeight;
+  final double iconOnlyExtent;
 }
 
 @immutable
@@ -355,6 +389,8 @@ class Host4ButtonSpacingTokens {
     required this.iconOnlyVertical,
     required this.iconGap,
     required this.stackGap,
+    required this.xsHorizontal,
+    required this.xsVertical,
     required this.smHorizontal,
     required this.smVertical,
     required this.mdHorizontal,
@@ -369,6 +405,8 @@ class Host4ButtonSpacingTokens {
   final double iconOnlyVertical;
   final double iconGap;
   final double stackGap;
+  final double xsHorizontal;
+  final double xsVertical;
   final double smHorizontal;
   final double smVertical;
   final double mdHorizontal;
@@ -386,6 +424,7 @@ class Host4ButtonVariantTokens {
     required this.pressedState,
     required this.disabledState,
     required this.focusedState,
+    this.selectedState,
   });
 
   final double radius;
@@ -394,6 +433,7 @@ class Host4ButtonVariantTokens {
   final Host4ButtonStateTokens pressedState;
   final Host4ButtonStateTokens disabledState;
   final Host4ButtonStateTokens focusedState;
+  final Host4ButtonStateTokens? selectedState;
 }
 
 @immutable

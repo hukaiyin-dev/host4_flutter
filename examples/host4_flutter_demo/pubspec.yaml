@@ -93,10 +93,6 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/themes/default/manifest.json
-    - assets/themes/default/tokens.json
-    - assets/themes/default/asset.json
-    - assets/themes/default/images/
     - assets/themes/grassland/manifest.json
     - assets/themes/grassland/tokens.json
     - assets/themes/grassland/asset.json

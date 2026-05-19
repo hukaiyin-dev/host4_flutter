@@ -21,21 +21,29 @@ void main() {
     await tester.pumpWidget(
       Host4DemoBootstrap(
         bundle: _FakeAssetBundle({
-          'assets/themes/default/manifest.json': _readThemeFile(
-            'default',
+          'packages/host4_flutter_ui/assets/themes/default/manifest.json':
+              _readPackageThemeFile(
             'manifest.json',
           ),
-          'assets/themes/default/tokens.json': _readThemeFile(
-            'default',
+          'packages/host4_flutter_ui/assets/themes/default/tokens.json':
+              _readPackageThemeFile(
             'tokens.json',
           ),
-          'assets/themes/grassland/manifest.json': _readThemeFile(
+          'packages/host4_flutter_ui/assets/themes/default/asset.json':
+              _readPackageThemeFile(
+            'asset.json',
+          ),
+          'assets/themes/grassland/manifest.json': _readExampleThemeFile(
             'grassland',
             'manifest.json',
           ),
-          'assets/themes/grassland/tokens.json': _readThemeFile(
+          'assets/themes/grassland/tokens.json': _readExampleThemeFile(
             'grassland',
             'tokens.json',
+          ),
+          'assets/themes/grassland/asset.json': _readExampleThemeFile(
+            'grassland',
+            'asset.json',
           ),
         }),
       ),
@@ -83,7 +91,14 @@ class _FakeAssetBundle extends CachingAssetBundle {
   }
 }
 
-String _readThemeFile(String themeId, String fileName) {
+String _readExampleThemeFile(String themeId, String fileName) {
   final file = File('assets/themes/$themeId/$fileName');
+  return file.readAsStringSync();
+}
+
+String _readPackageThemeFile(String fileName) {
+  final file = File(
+    '../../packages/host4_flutter_ui/assets/themes/default/$fileName',
+  );
   return file.readAsStringSync();
 }

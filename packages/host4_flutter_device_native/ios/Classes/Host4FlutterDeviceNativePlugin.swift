@@ -224,8 +224,6 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
       let message = items.map { "\($0)" }.joined(separator: sep)
       NativeLogHandler.shared.log(message)
     }
-    BluetoothKitConstant.logHandler = logForwarder
-    GPDConstant.logHandler = logForwarder
   }
 
   public static func register(with registrar: FlutterPluginRegistrar) {
@@ -798,7 +796,7 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
 
   private func invoke(
     _ flutterResult: @escaping FlutterResult,
-    body: (@escaping (Result<[String: Any], Error>) -> Void) throws -> Void
+    body: (@escaping @Sendable (Result<[String: Any], Error>) -> Void) throws -> Void
   ) {
     do {
       try body { result in
@@ -842,6 +840,14 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
         "failure": failureMap(
           code: "native-transport-error",
           message: "BLE transport reported an error state."
+        ),
+      ]
+    @unknown default:
+      return [
+        "type": "error",
+        "failure": failureMap(
+          code: "unknown-transport-state",
+          message: "BLE transport reported an unknown state."
         ),
       ]
     }
@@ -988,6 +994,14 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
           "r2": r2,
           "r2Original": r2Original,
         ],
+      ]
+    @unknown default:
+      return [
+        "type": "error",
+        "failure": failureMap(
+          code: "unknown-gmacro-event",
+          message: "GMacro protocol emitted an unknown event."
+        ),
       ]
     }
   }

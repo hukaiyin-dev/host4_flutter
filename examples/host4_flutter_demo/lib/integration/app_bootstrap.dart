@@ -97,9 +97,9 @@ bool _supportsNativeFirebase(TargetPlatform platform) {
 
 const defaultThemeCatalog = [
   Host4ThemeCatalogEntry(
-    id: 'default',
-    name: 'Default',
-    tokensAssetPath: 'assets/themes/default/tokens.json',
+    id: Host4ThemeAssets.defaultThemeId,
+    name: Host4ThemeAssets.defaultThemeName,
+    tokensAssetPath: Host4ThemeAssets.defaultTokensAssetPath,
   ),
   Host4ThemeCatalogEntry(
     id: 'grassland',

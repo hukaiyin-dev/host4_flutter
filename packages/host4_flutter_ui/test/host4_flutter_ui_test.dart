@@ -40,7 +40,7 @@ void main() {
       expect(theme.meta.name, 'Default Aurora');
       expect(theme.meta.mode, 'light');
       expect(theme.meta.supportedModes, ['light', 'dark']);
-      expect(theme.colors.brandPrimary, const Color(0xFF2F5BFF));
+      expect(theme.colors.brandPrimary, const Color(0xFF774FEF));
       expect(theme.spacing.page, 24.0);
       expect(theme.spacing.inputVertical, 12);
       expect(
@@ -50,6 +50,14 @@ void main() {
       expect(
         theme.components.button.labelStyle.fontSize,
         theme.typography.label.fontSize,
+      );
+      expect(theme.components.button.sizes.xs.minHeight, 34);
+      expect(theme.components.button.sizes.xs.iconOnlyExtent, 24);
+      expect(theme.components.button.spacing.xsHorizontal, 8);
+      expect(theme.components.button.ghost.selectedState, isNotNull);
+      expect(
+        theme.components.button.popoverPrimary.pressedState.foreground,
+        const Color(0xFFFFFFFF),
       );
       expect(theme.components.card.padding, theme.spacing.card);
       expect(theme.components.pageShell.image, theme.images.pageBackground);
@@ -84,6 +92,10 @@ void main() {
         theme.components.button.primary.defaultState.foreground,
         const Color(0xFFFFFFFF),
       );
+      expect(
+        theme.components.button.popoverSecondary.focusedState.foreground,
+        const Color(0xFFFFFFFF),
+      );
       expect(theme.components.tabBar.items.length, 3);
       expect(
         theme.components.pageShell.image,
@@ -95,8 +107,10 @@ void main() {
   test('throws a clear error for circular token references', () async {
     final cyclicTheme =
         jsonDecode(_readThemeFile('tokens.json')) as Map<String, dynamic>;
-    final brand = ((cyclicTheme['semantic'] as Map<String, dynamic>)['color']
-        as Map<String, dynamic>)['brand'] as Map<String, dynamic>;
+    final brand =
+        ((cyclicTheme['semantic'] as Map<String, dynamic>)['color']
+                as Map<String, dynamic>)['brand']
+            as Map<String, dynamic>;
     brand['primary'] = {
       'light': '{semantic.color.brand.secondary}',
       'dark': '{semantic.color.brand.secondary}',
@@ -157,7 +171,7 @@ class _FakeAssetBundle extends CachingAssetBundle {
 
 String _readThemeFile(String fileName) {
   final file = File(
-    '../../examples/host4_flutter_demo/assets/themes/default/$fileName',
+    'assets/themes/default/$fileName',
   );
   return file.readAsStringSync();
 }
