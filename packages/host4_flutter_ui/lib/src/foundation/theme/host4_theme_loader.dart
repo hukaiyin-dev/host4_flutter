@@ -179,6 +179,48 @@ class Host4ThemeLoader {
               'component.button.focused-ring.offset-width',
             ),
           ),
+          sizes: Host4ButtonSizeGroupTokens(
+            xs: Host4ButtonSizeTokens(
+              minHeight: _readDouble(
+                resolved,
+                'component.button.size.xs.min-height',
+              ),
+              iconOnlyExtent: _readDouble(
+                resolved,
+                'component.button.size.xs.icon-only-extent',
+              ),
+            ),
+            sm: Host4ButtonSizeTokens(
+              minHeight: _readDouble(
+                resolved,
+                'component.button.size.sm.min-height',
+              ),
+              iconOnlyExtent: _readDouble(
+                resolved,
+                'component.button.size.sm.icon-only-extent',
+              ),
+            ),
+            md: Host4ButtonSizeTokens(
+              minHeight: _readDouble(
+                resolved,
+                'component.button.size.md.min-height',
+              ),
+              iconOnlyExtent: _readDouble(
+                resolved,
+                'component.button.size.md.icon-only-extent',
+              ),
+            ),
+            lg: Host4ButtonSizeTokens(
+              minHeight: _readDouble(
+                resolved,
+                'component.button.size.lg.min-height',
+              ),
+              iconOnlyExtent: _readDouble(
+                resolved,
+                'component.button.size.lg.icon-only-extent',
+              ),
+            ),
+          ),
           spacing: Host4ButtonSpacingTokens(
             horizontal: _readDouble(
               resolved,
@@ -200,6 +242,22 @@ class Host4ThemeLoader {
             stackGap: _readDouble(
               resolved,
               'component.button.spacing.stack-gap',
+            ),
+            xsHorizontal: _readDouble(
+              resolved,
+              'component.button.spacing.xs.horizontal',
+              fallback: _readDouble(
+                resolved,
+                'component.button.spacing.sm.horizontal',
+              ),
+            ),
+            xsVertical: _readDouble(
+              resolved,
+              'component.button.spacing.xs.vertical',
+              fallback: _readDouble(
+                resolved,
+                'component.button.spacing.sm.vertical',
+              ),
             ),
             smHorizontal: _readDouble(
               resolved,
@@ -239,10 +297,25 @@ class Host4ThemeLoader {
           ),
           primary: _readButtonVariant(resolved, 'component.button.primary'),
           secondary: _readButtonVariant(resolved, 'component.button.secondary'),
+          popoverPrimary: _readButtonVariant(
+            resolved,
+            'component.button.popover-primary',
+            'component.button.tertiary',
+          ),
+          popoverSecondary: _readButtonVariant(
+            resolved,
+            'component.button.popover-secondary',
+            'component.button.secondary',
+          ),
           tertiary: _readButtonVariant(resolved, 'component.button.tertiary'),
           outline: _readButtonVariant(resolved, 'component.button.outline'),
           ghost: _readButtonVariant(resolved, 'component.button.ghost'),
           danger: _readButtonVariant(resolved, 'component.button.danger'),
+          dangerHigh: _readButtonVariant(
+            resolved,
+            'component.button.danger-high',
+            'component.button.danger',
+          ),
           dangerSoft: _readButtonVariant(
             resolved,
             'component.button.danger-soft',
@@ -517,7 +590,8 @@ class Host4ThemeLoader {
     final normalized = _normalizeTheme(tokensMap, syntheticManifest, mode);
     final resolved = Host4ReferenceResolver(normalized).resolveMap(normalized);
 
-    final images = fallbackImages ??
+    final images =
+        fallbackImages ??
         const Host4ThemeImages(
           pageBackground: '',
           heroBanner: '',
@@ -623,7 +697,8 @@ class Host4ThemeLoader {
       components: Host4ThemeComponents(
         pageShell: Host4PageShellComponentTokens(
           pageColor: _readColor(resolved, 'component.page-shell.page-color'),
-          image: fallbackImages?.pageBackground ??
+          image:
+              fallbackImages?.pageBackground ??
               _readString(resolved, 'asset.image.page-background'),
           accentGlowColor: _readColor(
             resolved,
@@ -641,6 +716,48 @@ class Host4ThemeLoader {
             offsetWidth: _readDouble(
               resolved,
               'component.button.focused-ring.offset-width',
+            ),
+          ),
+          sizes: Host4ButtonSizeGroupTokens(
+            xs: Host4ButtonSizeTokens(
+              minHeight: _readDouble(
+                resolved,
+                'component.button.size.xs.min-height',
+              ),
+              iconOnlyExtent: _readDouble(
+                resolved,
+                'component.button.size.xs.icon-only-extent',
+              ),
+            ),
+            sm: Host4ButtonSizeTokens(
+              minHeight: _readDouble(
+                resolved,
+                'component.button.size.sm.min-height',
+              ),
+              iconOnlyExtent: _readDouble(
+                resolved,
+                'component.button.size.sm.icon-only-extent',
+              ),
+            ),
+            md: Host4ButtonSizeTokens(
+              minHeight: _readDouble(
+                resolved,
+                'component.button.size.md.min-height',
+              ),
+              iconOnlyExtent: _readDouble(
+                resolved,
+                'component.button.size.md.icon-only-extent',
+              ),
+            ),
+            lg: Host4ButtonSizeTokens(
+              minHeight: _readDouble(
+                resolved,
+                'component.button.size.lg.min-height',
+              ),
+              iconOnlyExtent: _readDouble(
+                resolved,
+                'component.button.size.lg.icon-only-extent',
+              ),
             ),
           ),
           spacing: Host4ButtonSpacingTokens(
@@ -664,6 +781,22 @@ class Host4ThemeLoader {
             stackGap: _readDouble(
               resolved,
               'component.button.spacing.stack-gap',
+            ),
+            xsHorizontal: _readDouble(
+              resolved,
+              'component.button.spacing.xs.horizontal',
+              fallback: _readDouble(
+                resolved,
+                'component.button.spacing.sm.horizontal',
+              ),
+            ),
+            xsVertical: _readDouble(
+              resolved,
+              'component.button.spacing.xs.vertical',
+              fallback: _readDouble(
+                resolved,
+                'component.button.spacing.sm.vertical',
+              ),
             ),
             smHorizontal: _readDouble(
               resolved,
@@ -703,10 +836,25 @@ class Host4ThemeLoader {
           ),
           primary: _readButtonVariant(resolved, 'component.button.primary'),
           secondary: _readButtonVariant(resolved, 'component.button.secondary'),
+          popoverPrimary: _readButtonVariant(
+            resolved,
+            'component.button.popover-primary',
+            'component.button.tertiary',
+          ),
+          popoverSecondary: _readButtonVariant(
+            resolved,
+            'component.button.popover-secondary',
+            'component.button.secondary',
+          ),
           tertiary: _readButtonVariant(resolved, 'component.button.tertiary'),
           outline: _readButtonVariant(resolved, 'component.button.outline'),
           ghost: _readButtonVariant(resolved, 'component.button.ghost'),
           danger: _readButtonVariant(resolved, 'component.button.danger'),
+          dangerHigh: _readButtonVariant(
+            resolved,
+            'component.button.danger-high',
+            'component.button.danger',
+          ),
           dangerSoft: _readButtonVariant(
             resolved,
             'component.button.danger-soft',
@@ -968,10 +1116,7 @@ class Host4ThemeLoader {
     const slots = <String>['home', 'list', 'settings', 'slot3', 'slot4'];
     for (final slot in slots) {
       try {
-        final normal = _readString(
-          resolved,
-          'asset.image.tab.$slot.default',
-        );
+        final normal = _readString(resolved, 'asset.image.tab.$slot.default');
         final selected = _readString(
           resolved,
           'asset.image.tab.$slot.selected',
@@ -1011,15 +1156,23 @@ class Host4ThemeLoader {
 
   static Host4ButtonVariantTokens _readButtonVariant(
     Map<String, dynamic> json,
-    String path,
-  ) {
+    String path, [
+    String? fallbackPath,
+  ]) {
+    final resolvedPath = _hasTokenPath(json, path)
+        ? path
+        : (fallbackPath ?? path);
     return Host4ButtonVariantTokens(
-      radius: _readDouble(json, '$path.radius'),
-      defaultState: _readButtonState(json, '$path.state.default'),
-      hoverState: _readButtonState(json, '$path.state.hover'),
-      pressedState: _readButtonState(json, '$path.state.pressed'),
-      disabledState: _readButtonState(json, '$path.state.disabled'),
-      focusedState: _readButtonState(json, '$path.state.focused'),
+      radius: _readDouble(json, '$resolvedPath.radius'),
+      defaultState: _readButtonState(json, '$resolvedPath.state.default'),
+      hoverState: _readButtonState(json, '$resolvedPath.state.hover'),
+      pressedState: _readButtonState(json, '$resolvedPath.state.pressed'),
+      disabledState: _readButtonState(json, '$resolvedPath.state.disabled'),
+      focusedState: _readButtonState(json, '$resolvedPath.state.focused'),
+      selectedState: _readOptionalButtonState(
+        json,
+        '$resolvedPath.state.selected',
+      ),
     );
   }
 
@@ -1032,6 +1185,16 @@ class Host4ThemeLoader {
       foreground: _readColor(json, '$path.foreground'),
       border: _readColor(json, '$path.border'),
     );
+  }
+
+  static Host4ButtonStateTokens? _readOptionalButtonState(
+    Map<String, dynamic> json,
+    String path,
+  ) {
+    if (!_hasTokenPath(json, path)) {
+      return null;
+    }
+    return _readButtonState(json, path);
   }
 
   static Host4TextFieldStateTokens _readTextFieldState(
@@ -1226,6 +1389,15 @@ String _readString(Map<String, dynamic> json, String path) {
       throw FormatException('Missing token path: $path');
     }
     rethrow;
+  }
+}
+
+bool _hasTokenPath(Map<String, dynamic> json, String path) {
+  try {
+    readJsonPath(json, path);
+    return true;
+  } on FormatException {
+    return false;
   }
 }
 
