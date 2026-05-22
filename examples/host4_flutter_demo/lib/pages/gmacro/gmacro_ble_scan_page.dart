@@ -1,7 +1,10 @@
 import 'dart:async';
+import 'dart:io' show Platform;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:host4_flutter_ble/host4_flutter_ble.dart';
+import 'package:host4_flutter_device_native/host4_flutter_device_native.dart';
 import 'package:host4_flutter_transport/host4_flutter_transport.dart';
 import 'package:host4_flutter_ui/host4_flutter_ui.dart';
 
@@ -17,6 +20,7 @@ class GmacroBleScanPage extends StatefulWidget {
 
 class _GmacroBleScanPageState extends State<GmacroBleScanPage> {
   final _ble = Host4Ble();
+  final _deviceNative = Host4FlutterDeviceNative();
   late final DeviceDiscovery _discovery;
 
   // Map<id, device> 保证同一设备不重复出现（原生会持续上报 RSSI 更新）
@@ -42,6 +46,15 @@ class _GmacroBleScanPageState extends State<GmacroBleScanPage> {
 
   Future<void> _startScan() async {
     if (_isScanning) return;
+
+    if (!kIsWeb && Platform.isAndroid) {
+      final bool granted = await _deviceNative.ensureBleScanPermissions();
+      if (!granted) {
+        _showSnack('需要蓝牙和定位权限才能扫描 BLE 设备，请在系统设置中允许后重试。');
+        return;
+      }
+    }
+
     setState(() {
       _isScanning = true;
       _seen.clear();

@@ -129,4 +129,14 @@ class MethodChannelHost4FlutterDeviceNative
       'protocolSessionId': protocolSessionId,
     });
   }
+
+
+  /// 权限
+  @override
+  Future<bool> ensureBleScanPermissions() async {
+    final granted = await methodChannel.invokeMethod<bool>(
+      'ensureBleScanPermissions',
+    );
+    return granted ?? false;
+  }
 }

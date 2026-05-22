@@ -58,6 +58,9 @@ class MockHost4FlutterDeviceNativePlatform
   Stream<NativeTransportEvent> transportEvents(String transportSessionId) {
     return const Stream<NativeTransportEvent>.empty();
   }
+
+  @override
+  Future<bool> ensureBleScanPermissions() async => true;
 }
 
 void main() {

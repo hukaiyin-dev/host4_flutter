@@ -72,4 +72,10 @@ class Host4FlutterDeviceNative {
       protocolSessionId,
     );
   }
+
+  /// Android only: shows the system permission dialog for BLE scan (Bluetooth + location).
+  /// Returns `true` when all required permissions are granted.
+  Future<bool> ensureBleScanPermissions() {
+    return Host4FlutterDeviceNativePlatform.instance.ensureBleScanPermissions();
+  }
 }

@@ -1,8 +1,11 @@
 import 'dart:async';
+import 'dart:io' show Platform;
 
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:host4_flutter_device_native/host4_flutter_device_native.dart';
 import 'package:host4_flutter_gmacro/host4_flutter_gmacro.dart';
 import 'package:host4_flutter_protocol/host4_flutter_protocol.dart';
 import 'package:host4_flutter_transport/host4_flutter_transport.dart';
@@ -21,6 +24,7 @@ class GmacroSessionPage extends StatefulWidget {
 
 class _GmacroSessionPageState extends State<GmacroSessionPage> {
   final _gmacro = Host4Gmacro();
+  final _deviceNative = Host4FlutterDeviceNative();
 
   GmacroSession? _session;
   bool _isAttaching = true;
@@ -207,23 +211,32 @@ class _GmacroSessionPageState extends State<GmacroSessionPage> {
               horizontal: theme.spacing.page,
               vertical: theme.spacing.md,
             ),
-            child: Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed:
-                        (_session == null || _isBusy) ? null : _fetchDeviceVersion,
-                    icon: const Icon(Icons.info_outline_rounded, size: 16),
-                    label: const Text('Fetch Version'),
-                  ),
-                ),
-                SizedBox(width: theme.spacing.sm),
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: (_session == null || _isBusy) ? null : _startOta,
-                    icon: const Icon(Icons.system_update_alt_rounded, size: 16),
-                    label: const Text('OTA 测试'),
-                  ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: (_session == null || _isBusy)
+                            ? null
+                            : _fetchDeviceVersion,
+                        icon: const Icon(Icons.info_outline_rounded, size: 16),
+                        label: const Text('Fetch Version'),
+                      ),
+                    ),
+                    SizedBox(width: theme.spacing.sm),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: (_session == null || _isBusy) ? null : _startOta,
+                        icon: const Icon(
+                          Icons.system_update_alt_rounded,
+                          size: 16,
+                        ),
+                        label: const Text('OTA 测试'),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
