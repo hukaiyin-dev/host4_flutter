@@ -1,7 +1,10 @@
 import 'dart:async';
+import 'dart:io' show Platform;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:host4_flutter_ble/host4_flutter_ble.dart';
+import 'package:host4_flutter_device_native/host4_flutter_device_native.dart';
 import 'package:host4_flutter_transport/host4_flutter_transport.dart';
 
 import 'gmacro_session_page.dart';
@@ -15,6 +18,7 @@ class GmacroBleScanPage extends StatefulWidget {
 
 class _GmacroBleScanPageState extends State<GmacroBleScanPage> {
   final Host4Ble _ble = Host4Ble();
+  final Host4FlutterDeviceNative _deviceNative = Host4FlutterDeviceNative();
   late final DeviceDiscovery _discovery = _ble.discovery();
   final Map<String, DeviceDescriptor> _devicesById =
       <String, DeviceDescriptor>{};
@@ -41,6 +45,17 @@ class _GmacroBleScanPageState extends State<GmacroBleScanPage> {
 
     if (!mounted) {
       return;
+    }
+
+    if (!kIsWeb && Platform.isAndroid) {
+      final bool granted = await _deviceNative.ensureBleScanPermissions();
+      if (!granted) {
+        setState(() {
+          _scanError = '需要蓝牙和定位权限才能扫描，请在系统设置中允许后重试。';
+          _isScanning = false;
+        });
+        return;
+      }
     }
 
     setState(() {

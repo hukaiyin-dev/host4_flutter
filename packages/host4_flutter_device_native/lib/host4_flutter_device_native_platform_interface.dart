@@ -76,4 +76,9 @@ abstract class Host4FlutterDeviceNativePlatform extends PlatformInterface {
   Future<void> closeProtocol(String protocolSessionId) {
     throw UnimplementedError('closeProtocol() has not been implemented.');
   }
+
+  /// Android only: requests Bluetooth + location permissions required for BLE scan.
+  Future<bool> ensureBleScanPermissions() {
+    throw UnimplementedError('ensureBleScanPermissions() has not been implemented.');
+  }
 }

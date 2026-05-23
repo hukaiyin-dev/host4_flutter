@@ -1,7 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io' show Platform;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:host4_flutter_device_native/host4_flutter_device_native.dart';
 import 'package:host4_flutter_gmacro/host4_flutter_gmacro.dart';
 import 'package:host4_flutter_protocol/host4_flutter_protocol.dart';
 import 'package:host4_flutter_transport/host4_flutter_transport.dart';
@@ -17,6 +20,7 @@ class GmacroSessionPage extends StatefulWidget {
 
 class _GmacroSessionPageState extends State<GmacroSessionPage> {
   final Host4Gmacro _gmacro = Host4Gmacro();
+  final Host4FlutterDeviceNative _deviceNative = Host4FlutterDeviceNative();
   final List<_LogEntry> _logs = <_LogEntry>[];
 
   StreamSubscription<TransportEvent>? _transportSubscription;
@@ -164,6 +168,7 @@ class _GmacroSessionPageState extends State<GmacroSessionPage> {
       }
     }
   }
+
 
   void _showOtaPlaceholder() {
     _addLog('ota', 'OTA 按钮已预留，当前尚未接通原生 startOta 方法。');
