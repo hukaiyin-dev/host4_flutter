@@ -7,6 +7,7 @@ class Host4ThemeStorePage extends StatefulWidget {
   const Host4ThemeStorePage({
     super.key,
     this.manager,
+    this.onConfirm,
     this.onBack,
     this.onSearch,
     this.title = '主题商店',
@@ -17,6 +18,7 @@ class Host4ThemeStorePage extends StatefulWidget {
   });
 
   final Host4ThemeManager? manager;
+  final VoidCallback? onConfirm;
   final VoidCallback? onBack;
   final VoidCallback? onSearch;
   final String title;
@@ -50,8 +52,7 @@ class _Host4ThemeStorePageState extends State<Host4ThemeStorePage> {
       animation: manager,
       builder: (context, _) {
         return Scaffold(
-          backgroundColor: Colors.transparent,
-          extendBody: true,
+          backgroundColor: Colors.white,
           resizeToAvoidBottomInset: false,
           body: MediaQuery.removePadding(
             context: context,
@@ -74,6 +75,8 @@ class _Host4ThemeStorePageState extends State<Host4ThemeStorePage> {
                     backLabel: widget.backLabel,
                     timeLabel: widget.timeLabel,
                     showControllerHints: widget.showControllerHints,
+                    onConfirm:
+                        widget.onConfirm ?? () => Navigator.maybePop(context),
                     onBack: widget.onBack ?? () => Navigator.maybePop(context),
                     onSearch: widget.onSearch,
                     onApplyTheme: _applyTheme,
@@ -123,6 +126,7 @@ class _ThemeStoreScene extends StatelessWidget {
     required this.backLabel,
     required this.timeLabel,
     required this.showControllerHints,
+    required this.onConfirm,
     required this.onBack,
     required this.onApplyTheme,
     this.onSearch,
@@ -130,6 +134,7 @@ class _ThemeStoreScene extends StatelessWidget {
 
   static const designWidth = 844.0;
   static const designHeight = 390.0;
+  static const topBarHeight = 68.0;
 
   final Host4ThemeManager manager;
   final String? pendingThemeId;
@@ -138,6 +143,7 @@ class _ThemeStoreScene extends StatelessWidget {
   final String backLabel;
   final String timeLabel;
   final bool showControllerHints;
+  final VoidCallback onConfirm;
   final VoidCallback onBack;
   final VoidCallback? onSearch;
   final void Function(Host4ThemeManager, Host4ThemeCatalogEntry) onApplyTheme;
@@ -147,7 +153,10 @@ class _ThemeStoreScene extends StatelessWidget {
     return Stack(
       children: [
         Positioned.fill(
-          child: ColoredBox(color: Colors.white.withValues(alpha: 0.92)),
+          child: const ColoredBox(
+            key: ValueKey<String>('host4_theme_store_content_background'),
+            color: Color(0xFFF4F7FC),
+          ),
         ),
         _ThemeStoreHeader(
           title: title,
@@ -172,6 +181,8 @@ class _ThemeStoreScene extends StatelessWidget {
             child: _ThemeStoreControllerHints(
               confirmLabel: confirmLabel,
               backLabel: backLabel,
+              onConfirm: onConfirm,
+              onBack: onBack,
             ),
           ),
       ],
@@ -200,9 +211,10 @@ class _ThemeStoreHeader extends StatelessWidget {
       left: 0,
       top: 0,
       width: _ThemeStoreScene.designWidth,
-      height: 68,
+      height: _ThemeStoreScene.topBarHeight,
       child: ColoredBox(
-        color: Colors.white.withValues(alpha: 0.70),
+        key: const ValueKey<String>('host4_theme_store_top_bar'),
+        color: Colors.white,
         child: Padding(
           padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
           child: SizedBox(
@@ -279,16 +291,12 @@ class _HeaderIconButton extends StatelessWidget {
         key: ValueKey<String>(keyValue),
         onTap: onTap,
         radius: 22,
-        child: Container(
+        child: SizedBox(
           width: 40,
           height: 32,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: theme.colors.surfaceMuted,
-            borderRadius: BorderRadius.circular(999),
-            border: Border.all(color: theme.colors.borderDefault),
+          child: Center(
+            child: Icon(icon, size: 24, color: theme.colors.textPrimary),
           ),
-          child: Icon(icon, size: 24, color: theme.colors.textPrimary),
         ),
       ),
     );
@@ -545,10 +553,14 @@ class _ThemeStoreControllerHints extends StatelessWidget {
   const _ThemeStoreControllerHints({
     required this.confirmLabel,
     required this.backLabel,
+    required this.onConfirm,
+    required this.onBack,
   });
 
   final String confirmLabel;
   final String backLabel;
+  final VoidCallback onConfirm;
+  final VoidCallback onBack;
 
   @override
   Widget build(BuildContext context) {
@@ -572,15 +584,19 @@ class _ThemeStoreControllerHints extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           _ControllerHintButton(
+            keyValue: 'host4_theme_store_controller_hints_confirm',
             label: 'A',
             text: confirmLabel,
             color: const Color(0xFF32A565),
+            onTap: onConfirm,
           ),
           const SizedBox(width: 26),
           _ControllerHintButton(
+            keyValue: 'host4_theme_store_controller_hints_back',
             label: 'B',
             text: backLabel,
             color: const Color(0xFFD8474F),
+            onTap: onBack,
           ),
         ],
       ),
@@ -590,50 +606,68 @@ class _ThemeStoreControllerHints extends StatelessWidget {
 
 class _ControllerHintButton extends StatelessWidget {
   const _ControllerHintButton({
+    required this.keyValue,
     required this.label,
     required this.text,
     required this.color,
+    required this.onTap,
   });
 
+  final String keyValue;
   final String label;
   final String text;
   final Color color;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final theme = context.host4Theme;
 
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 20,
-          height: 20,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-          child: Text(
-            label,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 12.5,
-              height: 1,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 0,
+    return Semantics(
+      button: true,
+      child: GestureDetector(
+        key: ValueKey<String>(keyValue),
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: SizedBox(
+          height: 42,
+          child: Center(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 20,
+                  height: 20,
+                  alignment: Alignment.center,
+                  decoration:
+                      BoxDecoration(color: color, shape: BoxShape.circle),
+                  child: Text(
+                    label,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12.5,
+                      height: 1,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 0,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 7),
+                Text(
+                  text,
+                  style: TextStyle(
+                    color: theme.colors.textSecondary,
+                    fontSize: 13.6,
+                    height: 1.2,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0,
+                  ),
+                ),
+              ],
             ),
           ),
         ),
-        const SizedBox(width: 7),
-        Text(
-          text,
-          style: TextStyle(
-            color: theme.colors.textSecondary,
-            fontSize: 13.6,
-            height: 1.2,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 0,
-          ),
-        ),
-      ],
+      ),
     );
   }
 }
