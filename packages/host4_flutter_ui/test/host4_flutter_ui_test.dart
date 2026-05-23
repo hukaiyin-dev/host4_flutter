@@ -6,7 +6,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:host4_flutter_ui/host4_flutter_ui.dart';
 
 void main() {
-  testWidgets('loads the packaged default JSON theme', (tester) async {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  test('loads the packaged default JSON theme', () async {
     final theme = await Host4ThemeLoader.loadFromAsset(
       rootBundle,
       Host4ThemeAssets.defaultTokensAssetPath,
@@ -20,6 +22,30 @@ void main() {
       'packages/host4_flutter_ui/assets/themes/default/images/page_background_light.png',
     );
     expect(theme.components.button.minHeight, greaterThan(0));
+  });
+
+  test('loads packaged catalog JSON and applies every theme', () async {
+    final catalog = await Host4ThemeAssets.loadCatalog(rootBundle);
+
+    expect(catalog.map((entry) => entry.id), ['default', 'obsidian', 'mint']);
+    expect(catalog.first.name, '默认主题');
+    expect(
+      catalog.first.tokensAssetPath,
+      Host4ThemeAssets.defaultTokensAssetPath,
+    );
+    expect(
+      catalog.first.previewAssetPath,
+      'packages/host4_flutter_ui/assets/themes/default/images/hero_banner_light.png',
+    );
+
+    final manager = Host4ThemeManager(catalog: catalog, bundle: rootBundle);
+    addTearDown(manager.dispose);
+
+    for (final entry in catalog) {
+      await manager.applyTheme(entry.id);
+      expect(manager.currentThemeId, entry.id);
+      expect(manager.theme.meta.id, entry.id);
+    }
   });
 
   test(
@@ -107,10 +133,8 @@ void main() {
   test('throws a clear error for circular token references', () async {
     final cyclicTheme =
         jsonDecode(_readThemeFile('tokens.json')) as Map<String, dynamic>;
-    final brand =
-        ((cyclicTheme['semantic'] as Map<String, dynamic>)['color']
-                as Map<String, dynamic>)['brand']
-            as Map<String, dynamic>;
+    final brand = ((cyclicTheme['semantic'] as Map<String, dynamic>)['color']
+        as Map<String, dynamic>)['brand'] as Map<String, dynamic>;
     brand['primary'] = {
       'light': '{semantic.color.brand.secondary}',
       'dark': '{semantic.color.brand.secondary}',

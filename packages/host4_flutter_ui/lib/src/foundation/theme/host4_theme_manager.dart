@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
@@ -10,11 +12,65 @@ class Host4ThemeCatalogEntry {
     required this.id,
     required this.name,
     required this.tokensAssetPath,
+    this.previewAssetPath,
+    this.previewColor,
   });
 
   final String id;
   final String name;
   final String tokensAssetPath;
+  final String? previewAssetPath;
+  final String? previewColor;
+
+  factory Host4ThemeCatalogEntry.fromJson(
+    Map<String, dynamic> json, {
+    required String catalogAssetPath,
+  }) {
+    final id = _readCatalogString(json, 'id');
+    final name = _readCatalogString(json, 'name');
+    final tokens = _readCatalogString(json, 'tokens');
+    final preview = _readOptionalCatalogString(json, 'preview');
+
+    return Host4ThemeCatalogEntry(
+      id: id,
+      name: name,
+      tokensAssetPath: _resolveCatalogAssetPath(catalogAssetPath, tokens),
+      previewAssetPath: preview == null
+          ? null
+          : _resolveCatalogAssetPath(catalogAssetPath, preview),
+      previewColor: _readOptionalCatalogString(json, 'previewColor'),
+    );
+  }
+}
+
+class Host4ThemeCatalog {
+  const Host4ThemeCatalog._();
+
+  static Future<List<Host4ThemeCatalogEntry>> loadFromAsset(
+    AssetBundle bundle,
+    String catalogAssetPath,
+  ) async {
+    final jsonString = await bundle.loadString(catalogAssetPath);
+    final decoded = json.decode(jsonString);
+    if (decoded is! Map<String, dynamic>) {
+      throw const FormatException('Theme catalog root must be a JSON object.');
+    }
+
+    final themes = decoded['themes'];
+    if (themes is! List) {
+      throw const FormatException('Theme catalog must contain a themes list.');
+    }
+
+    return themes.map((item) {
+      if (item is! Map) {
+        throw const FormatException('Theme catalog entries must be objects.');
+      }
+      return Host4ThemeCatalogEntry.fromJson(
+        Map<String, dynamic>.from(item),
+        catalogAssetPath: catalogAssetPath,
+      );
+    }).toList(growable: false);
+  }
 }
 
 class Host4ThemeManager extends ChangeNotifier {
@@ -124,4 +180,26 @@ class Host4ThemeManager extends ChangeNotifier {
       throw StateError('Theme has not been initialized yet.');
     }
   }
+}
+
+String _readCatalogString(Map<String, dynamic> json, String key) {
+  final value = json[key];
+  if (value is String && value.isNotEmpty) return value;
+  throw FormatException('Theme catalog entry missing "$key".');
+}
+
+String? _readOptionalCatalogString(Map<String, dynamic> json, String key) {
+  final value = json[key];
+  if (value == null) return null;
+  if (value is String && value.isNotEmpty) return value;
+  throw FormatException('Theme catalog entry "$key" must be a string.');
+}
+
+String _resolveCatalogAssetPath(String catalogAssetPath, String value) {
+  if (value.startsWith('packages/') || value.startsWith('assets/')) {
+    return value;
+  }
+  final slashIndex = catalogAssetPath.lastIndexOf('/');
+  if (slashIndex == -1) return value;
+  return '${catalogAssetPath.substring(0, slashIndex + 1)}$value';
 }

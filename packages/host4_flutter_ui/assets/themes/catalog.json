@@ -1,0 +1,26 @@
+{
+  "schema": "1.0",
+  "themes": [
+    {
+      "id": "default",
+      "name": "默认主题",
+      "tokens": "default/tokens.json",
+      "preview": "default/images/hero_banner_light.png",
+      "previewColor": "#EEF3FF"
+    },
+    {
+      "id": "obsidian",
+      "name": "曜石主题",
+      "tokens": "obsidian/tokens.json",
+      "preview": "default/images/hero_banner_dark.png",
+      "previewColor": "#0A1020"
+    },
+    {
+      "id": "mint",
+      "name": "薄荷主题",
+      "tokens": "mint/tokens.json",
+      "preview": "default/images/spot_illustration_light.png",
+      "previewColor": "#E9FBF6"
+    }
+  ]
+}

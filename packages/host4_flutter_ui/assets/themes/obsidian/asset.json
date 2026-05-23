@@ -1,0 +1,48 @@
+{
+  "image": {
+    "page-background": {
+        "light": "packages/host4_flutter_ui/assets/themes/default/images/page_background_light.png",
+        "dark": "packages/host4_flutter_ui/assets/themes/default/images/page_background_dark.png"
+    },
+    "hero-banner": {
+        "light": "packages/host4_flutter_ui/assets/themes/default/images/hero_banner_light.png",
+        "dark": "packages/host4_flutter_ui/assets/themes/default/images/hero_banner_dark.png"
+    },
+    "spot-illustration": {
+        "light": "packages/host4_flutter_ui/assets/themes/default/images/spot_illustration_light.png",
+        "dark": "packages/host4_flutter_ui/assets/themes/default/images/spot_illustration_dark.png"
+    },
+    "tab": {
+      "home": {
+        "default": {
+          "light": "packages/host4_flutter_ui/assets/themes/default/images/tab_0.png",
+          "dark": "packages/host4_flutter_ui/assets/themes/default/images/tab_dark_0.png"
+        },
+        "selected": {
+          "light": "packages/host4_flutter_ui/assets/themes/default/images/tab_0_selected.png",
+          "dark": "packages/host4_flutter_ui/assets/themes/default/images/tab_dark_0_selected.png"
+        }
+      },
+      "list": {
+        "default": {
+          "light": "packages/host4_flutter_ui/assets/themes/default/images/tab_1.png",
+          "dark": "packages/host4_flutter_ui/assets/themes/default/images/tab_dark_1.png"
+        },
+        "selected": {
+          "light": "packages/host4_flutter_ui/assets/themes/default/images/tab_1_selected.png",
+          "dark": "packages/host4_flutter_ui/assets/themes/default/images/tab_dark_1_selected.png"
+        }
+      },
+      "settings": {
+        "default": {
+          "light": "packages/host4_flutter_ui/assets/themes/default/images/tab_2.png",
+          "dark": "packages/host4_flutter_ui/assets/themes/default/images/tab_dark_2.png"
+        },
+        "selected": {
+          "light": "packages/host4_flutter_ui/assets/themes/default/images/tab_2_selected.png",
+          "dark": "packages/host4_flutter_ui/assets/themes/default/images/tab_dark_2_selected.png"
+        }
+      }
+    }
+  }
+}
