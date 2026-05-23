@@ -49,26 +49,36 @@ class _Host4ThemeStorePageState extends State<Host4ThemeStorePage> {
     return AnimatedBuilder(
       animation: manager,
       builder: (context, _) {
-        final theme = context.host4Theme;
         return Scaffold(
-          backgroundColor: theme.colors.pageBackground,
-          body: FittedBox(
-            fit: BoxFit.fill,
-            child: SizedBox(
-              key: const ValueKey<String>('host4_theme_store_page'),
-              width: _ThemeStoreScene.designWidth,
-              height: _ThemeStoreScene.designHeight,
-              child: _ThemeStoreScene(
-                manager: manager,
-                pendingThemeId: _pendingThemeId,
-                title: widget.title,
-                confirmLabel: widget.confirmLabel,
-                backLabel: widget.backLabel,
-                timeLabel: widget.timeLabel,
-                showControllerHints: widget.showControllerHints,
-                onBack: widget.onBack ?? () => Navigator.maybePop(context),
-                onSearch: widget.onSearch,
-                onApplyTheme: _applyTheme,
+          backgroundColor: Colors.transparent,
+          extendBody: true,
+          resizeToAvoidBottomInset: false,
+          body: MediaQuery.removePadding(
+            context: context,
+            removeLeft: true,
+            removeTop: true,
+            removeRight: true,
+            removeBottom: true,
+            child: SizedBox.expand(
+              child: FittedBox(
+                fit: BoxFit.fill,
+                child: SizedBox(
+                  key: const ValueKey<String>('host4_theme_store_page'),
+                  width: _ThemeStoreScene.designWidth,
+                  height: _ThemeStoreScene.designHeight,
+                  child: _ThemeStoreScene(
+                    manager: manager,
+                    pendingThemeId: _pendingThemeId,
+                    title: widget.title,
+                    confirmLabel: widget.confirmLabel,
+                    backLabel: widget.backLabel,
+                    timeLabel: widget.timeLabel,
+                    showControllerHints: widget.showControllerHints,
+                    onBack: widget.onBack ?? () => Navigator.maybePop(context),
+                    onSearch: widget.onSearch,
+                    onApplyTheme: _applyTheme,
+                  ),
+                ),
               ),
             ),
           ),
@@ -134,19 +144,10 @@ class _ThemeStoreScene extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.host4Theme;
-
     return Stack(
       children: [
-        Positioned.fill(child: ColoredBox(color: theme.colors.pageBackground)),
         Positioned.fill(
-          child: Image.asset(
-            theme.images.pageBackground,
-            fit: BoxFit.fill,
-            errorBuilder: (context, error, stackTrace) {
-              return ColoredBox(color: theme.colors.pageBackground);
-            },
-          ),
+          child: ColoredBox(color: Colors.white.withValues(alpha: 0.92)),
         ),
         _ThemeStoreHeader(
           title: title,
@@ -201,7 +202,7 @@ class _ThemeStoreHeader extends StatelessWidget {
       width: _ThemeStoreScene.designWidth,
       height: 68,
       child: ColoredBox(
-        color: theme.colors.surface,
+        color: Colors.white.withValues(alpha: 0.70),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
           child: SizedBox(
@@ -418,9 +419,8 @@ class _ThemeCard extends StatelessWidget {
               Positioned.fill(
                 child: DecoratedBox(
                   decoration: BoxDecoration(
-                    color: selected
-                        ? theme.colors.brandPrimary.withValues(alpha: 0.08)
-                        : theme.colors.surfaceMuted,
+                    color:
+                        Colors.white.withValues(alpha: selected ? 0.88 : 0.68),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
                       color: selected

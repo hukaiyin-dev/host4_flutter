@@ -18,7 +18,7 @@ class Host4ThemeAssets {
       name: defaultThemeName,
       tokensAssetPath: defaultTokensAssetPath,
       previewAssetPath:
-          'packages/host4_flutter_ui/assets/themes/default/images/hero_banner_light.png',
+          'packages/host4_flutter_ui/assets/themes/default/images/theme_preview_default.png',
       previewColor: '#EEF3FF',
     ),
     Host4ThemeCatalogEntry(
@@ -27,8 +27,8 @@ class Host4ThemeAssets {
       tokensAssetPath:
           'packages/host4_flutter_ui/assets/themes/obsidian/tokens.json',
       previewAssetPath:
-          'packages/host4_flutter_ui/assets/themes/default/images/hero_banner_dark.png',
-      previewColor: '#0A1020',
+          'packages/host4_flutter_ui/assets/themes/default/images/theme_preview_obsidian.png',
+      previewColor: '#EEF8FF',
     ),
     Host4ThemeCatalogEntry(
       id: 'mint',
@@ -36,8 +36,8 @@ class Host4ThemeAssets {
       tokensAssetPath:
           'packages/host4_flutter_ui/assets/themes/mint/tokens.json',
       previewAssetPath:
-          'packages/host4_flutter_ui/assets/themes/default/images/spot_illustration_light.png',
-      previewColor: '#E9FBF6',
+          'packages/host4_flutter_ui/assets/themes/default/images/theme_preview_mint.png',
+      previewColor: '#FFF4E6',
     ),
   ];
 
