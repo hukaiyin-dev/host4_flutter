@@ -35,7 +35,7 @@ void main() {
     );
     expect(
       catalog.first.previewAssetPath,
-      'packages/host4_flutter_ui/assets/themes/default/images/hero_banner_light.png',
+      'packages/host4_flutter_ui/assets/themes/default/images/theme_preview_default.png',
     );
 
     final manager = Host4ThemeManager(catalog: catalog, bundle: rootBundle);
