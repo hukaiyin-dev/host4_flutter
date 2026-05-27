@@ -30,6 +30,8 @@ class _GmacroBleScanPageState extends State<GmacroBleScanPage> {
   bool _isConnecting = false;
   bool _hideUnnamed = true;
   StreamSubscription<DeviceDescriptor>? _scanSub;
+  static const List<String> _systemConnectServiceIds = ['FF00'];
+  static const List<String> _systemConnectDeviceNames = ['GameMacro'];
 
   @override
   void initState() {
@@ -90,7 +92,7 @@ class _GmacroBleScanPageState extends State<GmacroBleScanPage> {
     if (_isConnecting) return;
     setState(() => _isConnecting = true);
 
-    await _stopScan();
+    // await _stopScan();
 
     try {
       final transport = await _ble.connect(device);
@@ -109,6 +111,54 @@ class _GmacroBleScanPageState extends State<GmacroBleScanPage> {
     }
   }
 
+  Future<void> _connectSystemConnected() async {
+    if (_isConnecting) return;
+
+    setState(() => _isConnecting = true);
+
+    try {
+      Object? lastError;
+      TransportSession? transport;
+
+      for (var i = 0; i < 2; i++) {
+        try {
+          transport = await _ble.connectSystemConnected(
+            _systemConnectServiceIds,
+            deviceNames: _systemConnectDeviceNames,
+          );
+          break;
+        } catch (e) {
+          lastError = e;
+          if (i == 0) {
+            await Future<void>.delayed(const Duration(milliseconds: 400));
+          }
+        }
+      }
+
+      if (transport == null) {
+        throw lastError ??
+            Exception(
+              'Native system-connected BLE bridge returned null transport.',
+            );
+      }
+
+      if (!mounted) return;
+
+      await Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (_) => GmacroSessionPage(transport: transport!),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      _showSnack('连接已有设备失败: $e');
+    } finally {
+      if (mounted) {
+        setState(() => _isConnecting = false);
+      }
+    }
+  }
+
   void _showSnack(String msg) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
   }
@@ -117,7 +167,9 @@ class _GmacroBleScanPageState extends State<GmacroBleScanPage> {
   Widget build(BuildContext context) {
     final theme = context.host4Theme;
     final devices = _seen.values
-        .where((d) => !_hideUnnamed || (d.name.isNotEmpty && d.name != 'Unknown'))
+        .where(
+          (d) => !_hideUnnamed || (d.name.isNotEmpty && d.name != 'Unknown'),
+        )
         .toList();
 
     return SubPageScaffold(
@@ -130,38 +182,54 @@ class _GmacroBleScanPageState extends State<GmacroBleScanPage> {
               horizontal: theme.spacing.page,
               vertical: theme.spacing.md,
             ),
-            child: Row(
+            child: Column(
               children: [
-                Expanded(
-                  child: FilledButton.icon(
-                    onPressed: _isConnecting
-                        ? null
-                        : (_isScanning ? _stopScan : _startScan),
-                    icon: _isScanning
-                        ? SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: theme.colors.textInverse,
-                            ),
-                          )
-                        : const Icon(Icons.search_rounded, size: 18),
-                    label: Text(_isScanning ? '停止扫描' : '开始扫描'),
-                  ),
-                ),
-                SizedBox(width: theme.spacing.sm),
                 Row(
                   children: [
-                    Host4Text(
-                      '仅命名设备',
-                      colorRole: Host4TextColorRole.secondary,
+                    Expanded(
+                      child: FilledButton.icon(
+                        onPressed: _isConnecting
+                            ? null
+                            : (_isScanning ? _stopScan : _startScan),
+                        icon: _isScanning
+                            ? SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: theme.colors.textInverse,
+                                ),
+                              )
+                            : const Icon(Icons.search_rounded, size: 18),
+                        label: Text(_isScanning ? '停止扫描' : '开始扫描'),
+                      ),
                     ),
-                    Switch(
-                      value: _hideUnnamed,
-                      onChanged: (v) => setState(() => _hideUnnamed = v),
+                    SizedBox(width: theme.spacing.sm),
+                    Row(
+                      children: [
+                        Host4Text(
+                          '仅命名设备',
+                          colorRole: Host4TextColorRole.secondary,
+                        ),
+                        Switch(
+                          value: _hideUnnamed,
+                          onChanged: (v) => setState(() => _hideUnnamed = v),
+                        ),
+                      ],
                     ),
                   ],
+                ),
+                SizedBox(height: theme.spacing.sm),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    onPressed: _isConnecting ? null : _connectSystemConnected,
+                    icon: const Icon(
+                      Icons.bluetooth_connected_rounded,
+                      size: 18,
+                    ),
+                    label: const Text('连接已有设备'),
+                  ),
                 ),
               ],
             ),
@@ -178,8 +246,7 @@ class _GmacroBleScanPageState extends State<GmacroBleScanPage> {
                         SizedBox(height: theme.spacing.sm),
                     itemBuilder: (_, i) => _DeviceTile(
                       device: devices[i],
-                      isConnecting:
-                          _isConnecting,
+                      isConnecting: _isConnecting,
                       onTap: () => _connect(devices[i]),
                     ),
                   ),
@@ -279,8 +346,9 @@ class _DeviceTile extends StatelessWidget {
                 if (rssi != null)
                   Text(
                     '$rssi dBm',
-                    style: theme.typography.caption
-                        .toTextStyle(theme.colors.textSecondary),
+                    style: theme.typography.caption.toTextStyle(
+                      theme.colors.textSecondary,
+                    ),
                   ),
                 SizedBox(width: theme.spacing.sm),
                 Icon(

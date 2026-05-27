@@ -64,6 +64,30 @@ class MethodChannelHost4FlutterDeviceNative
   }
 
   @override
+  Future<String> connectSystemConnectedBle({
+    required List<String> serviceIds,
+    List<String> deviceNames = const [],
+    Map<String, Object?> options = const {},
+  }) async {
+    final sessionId = await methodChannel.invokeMethod<String>(
+      'connectSystemConnectedBle',
+      <String, Object?>{
+        'serviceIds': serviceIds,
+        'deviceNames': deviceNames,
+        'options': options,
+      },
+    );
+    if (sessionId == null || sessionId.isEmpty) {
+      throw PlatformException(
+        code: 'missing-transport-session-id',
+        message:
+            'Native system-connected BLE bridge returned an empty transport session id.',
+      );
+    }
+    return sessionId;
+  }
+
+  @override
   Stream<NativeTransportEvent> transportEvents(String transportSessionId) {
     return EventChannel(
       'host4_flutter_device_native/transport_events/$transportSessionId',

@@ -23,6 +23,31 @@ class Host4Ble {
       native: _native,
     );
   }
+
+  Future<TransportSession> connectSystemConnected(
+    List<String> serviceIds, {
+    List<String> deviceNames = const [],
+    Map<String, Object?> options = const <String, Object?>{},
+  }) async {
+    final sessionId = await _native.connectSystemConnectedBle(
+      serviceIds: serviceIds,
+      deviceNames: deviceNames,
+      options: options,
+    );
+
+    return Host4BleTransportSession(
+      id: sessionId,
+      device: DeviceDescriptor(
+        id: 'system-connected',
+        name: deviceNames.isNotEmpty
+            ? deviceNames.first
+            : 'System Connected BLE',
+        kind: TransportKind.ble,
+        metadata: <String, Object?>{'serviceIds': serviceIds},
+      ),
+      native: _native,
+    );
+  }
 }
 
 class Host4BleDiscovery implements DeviceDiscovery {

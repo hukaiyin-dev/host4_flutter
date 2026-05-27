@@ -5,6 +5,7 @@ import 'package:host4_flutter_ui/host4_flutter_ui.dart';
 
 import '../../widgets/sub_page_scaffold.dart';
 import 'gmacro_ble_scan_page.dart';
+import 'gmacro_api_test_page.dart';
 
 class GmacroEntryPage extends StatelessWidget {
   const GmacroEntryPage({super.key});
@@ -43,6 +44,9 @@ class GmacroEntryPage extends StatelessWidget {
                 const SnackBar(content: Text('MFi / USB 接入进行中，暂不可用')),
               );
             },
+            // onTap: () => Navigator.of(context).push(
+            //   MaterialPageRoute(builder: (_) => const GmacroApiTestPage()),
+            // ),
           ),
         ],
       ),
@@ -112,8 +116,9 @@ class _TransportTile extends StatelessWidget {
                               ),
                               decoration: BoxDecoration(
                                 color: theme.colors.surfaceMuted,
-                                borderRadius:
-                                    BorderRadius.circular(theme.radius.pill),
+                                borderRadius: BorderRadius.circular(
+                                  theme.radius.pill,
+                                ),
                               ),
                               child: Text(
                                 badge!,
