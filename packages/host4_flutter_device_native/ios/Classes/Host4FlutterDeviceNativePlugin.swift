@@ -219,16 +219,6 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
     )
     logChannel.setStreamHandler(NativeLogHandler.shared)
 
-    // 接管 BluetoothKit / GMacroProtocolSDK 内部的所有 print() 输出
-    let logForwarder: (_ items: [Any], _ separator: String, _ terminator: String) -> Void = { items, sep, _ in
-      let message = items.map { "\($0)" }.joined(separator: sep)
-      NativeLogHandler.shared.log(message)
-    }
-<<<<<<< HEAD
-=======
-//    BluetoothKitConstant.logHandler = logForwarder
-//    GPDConstant.logHandler = logForwarder
->>>>>>> 286d554c2ddaf534928847ae24f5b48114a55732
   }
 
   public static func register(with registrar: FlutterPluginRegistrar) {
@@ -335,7 +325,8 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
         nativeLog("[SystemConnected] stateRawValue=\(stateRawValue)")
         guard let self, let eventHandler else { return }
         eventHandler.emit(self.transportEventMap(fromBleState: stateRawValue))
-      }
+      },
+      onLog: { message in nativeLog(message) }
     )
 
     nativeLog("[SystemConnected] sessionId=\(String(describing: sessionId))")

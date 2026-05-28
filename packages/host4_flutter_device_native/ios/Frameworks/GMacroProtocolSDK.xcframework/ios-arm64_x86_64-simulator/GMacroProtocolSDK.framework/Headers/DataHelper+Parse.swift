@@ -60,15 +60,34 @@ extension DataHelper {
             }
             
             // 1️⃣ 精确匹配
-            if let callback = self.pendingResponses.removeValue(forKey: responseKey) {
+//            if let callback = self.pendingResponses.removeValue(forKey: responseKey) {
+//                switch responseResult {
+//                case .success(let dic): callback(.success(dic))
+//                case .failure(let err): callback(.failure(err))
+//                }
+//                print("✅ 精确匹配回调成功，移除 pendingResponses[\(responseKey)]")
+//                didCallback = true
+//            }
+            
+            //2026.5.21 Flutter修改：先尝试精确匹配，如果数据完整则触发回调；如果数据不完整，则不触发回调，等待后续数据包完成后再尝试匹配。
+            if let callback = self.pendingResponses[responseKey] {
                 switch responseResult {
-                case .success(let dic): callback(.success(dic))
-                case .failure(let err): callback(.failure(err))
-                }
-                print("✅ 精确匹配回调成功，移除 pendingResponses[\(responseKey)]")
-                didCallback = true
-            }
+                case .success(let dic):
+                    if isComplete {
+                        self.pendingResponses.removeValue(forKey: responseKey)
+                        callback(.success(dic))
+                        didCallback = true
+                    } else {
+                        // Multi-packet response is not complete yet.
+                        // Keep the pending callback and wait for the remaining packets.
+                    }
 
+                case .failure(let err):
+                    self.pendingResponses.removeValue(forKey: responseKey)
+                    callback(.failure(err))
+                    didCallback = true
+                }
+            }
    
 
             // 3️⃣ 数据完整但仍未匹配 → 最后保底执行
@@ -166,7 +185,7 @@ extension DataHelper {
                 isComplete = false
             }
         case .keyMacro:
-            responseDic = [:]
+            return analyzeResult(payload: payload)
         case .sleep:
             responseDic = analyzeSleep(payload)
         case .light:
@@ -486,4 +505,6 @@ extension DataHelper {
         
         return indices
     }
+    
+    
 }
