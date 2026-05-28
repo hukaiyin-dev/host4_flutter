@@ -47,6 +47,16 @@ abstract class Host4FlutterDeviceNativePlatform extends PlatformInterface {
     throw UnimplementedError('connectBle() has not been implemented.');
   }
 
+  Future<String> connectSystemConnectedBle({
+    required List<String> serviceIds,
+    List<String> deviceNames = const [],
+    Map<String, Object?> options = const {},
+  }) {
+    throw UnimplementedError(
+      'connectSystemConnectedBle() has not been implemented.',
+    );
+  }
+
   Stream<NativeTransportEvent> transportEvents(String transportSessionId) {
     throw UnimplementedError('transportEvents() has not been implemented.');
   }

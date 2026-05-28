@@ -31,6 +31,18 @@ class Host4FlutterDeviceNative {
     );
   }
 
+  Future<String> connectSystemConnectedBle({
+    required List<String> serviceIds,
+    List<String> deviceNames = const [],
+    Map<String, Object?> options = const {},
+  }) {
+    return Host4FlutterDeviceNativePlatform.instance.connectSystemConnectedBle(
+      serviceIds: serviceIds,
+      deviceNames: deviceNames,
+      options: options,
+    );
+  }
+
   Stream<NativeTransportEvent> transportEvents(String transportSessionId) {
     return Host4FlutterDeviceNativePlatform.instance.transportEvents(
       transportSessionId,

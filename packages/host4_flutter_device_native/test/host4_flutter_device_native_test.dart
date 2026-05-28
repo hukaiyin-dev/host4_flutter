@@ -27,6 +27,15 @@ class MockHost4FlutterDeviceNativePlatform
   }
 
   @override
+  Future<String> connectSystemConnectedBle({
+    required List<String> serviceIds,
+    List<String> deviceNames = const [],
+    Map<String, Object?> options = const {},
+  }) async {
+    return 'transport-system-1';
+  }
+
+  @override
   Future<void> disconnectTransport(String transportSessionId) async {}
 
   @override
