@@ -94,6 +94,23 @@ extension GMacroProtocolSession {
                                      response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
         dataHelper.rockerOutputGraphics(left: left, right: right, response: response)
     }
+
+    /// 设置摇杆反死区
+    /// - Parameters:
+    ///   - min: 起始值 (0-100)
+    ///   - max: 最大值 (0-100)
+    ///   - isLeft: 是否为左摇杆
+    public func updateRockerAntiDeadZone(min: Int,
+                                         max: Int,
+                                         isLeft: Bool,
+                                         response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
+        dataHelper.setRockerAntiDeadZone(min: min, max: max, isLeft: isLeft, response: response)
+    }
+
+    /// 查询摇杆反死区
+    public func fetchRockerAntiDeadZone(response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
+        dataHelper.fetchRockerAntiDeadZone(response: response)
+    }
 }
 
 

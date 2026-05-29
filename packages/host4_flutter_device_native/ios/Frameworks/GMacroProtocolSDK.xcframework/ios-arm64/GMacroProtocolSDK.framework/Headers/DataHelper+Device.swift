@@ -186,7 +186,11 @@ extension DataHelper {
         
         let subIDNum = parser.next(1).toInt()
         let subID = DeviceVersionSubID(rawValue: UInt8(subIDNum))
-        let _ = parser.next(1)
+        
+        // 防止 payload 只有 1 字节时越界
+        if parser.remaining >= 1 {
+            let _ = parser.next(1)
+        }
 
         var dic: [String: Any] = [:]
         switch subID {
@@ -204,10 +208,14 @@ extension DataHelper {
             let result = parser.next(1).toInt()
             dic = ["result": result]
         case .fetchReportRate:
+            guard parser.remaining >= 2 else {
+                return ["error": "Insufficient data for report rate"]
+            }
             let rate = parser.next(2).toInt()
             dic = ["rate": rate]
         case .setChargingDock:
-            break
+            let result = parser.next(1).toInt()
+            dic["result"] = result
         case .fetchChargingDock:
             // Param：1 为开启，2 为关闭
             let param = parser.next(1).toInt()
@@ -217,7 +225,10 @@ extension DataHelper {
             }
             dic["isOn"] = isOn
         default:
-            print("未处理的 DeviceVersionSubID  0x\(String(format: "%02X", subID!.rawValue))")
+            let rawHex = payload.map { String(format: "%02X", $0) }.joined(separator: " ")
+            print("未处理的完整数据: [\(rawHex)]")
+            dic["error"] = "unhandled_subID_0x\(String(format: "%02X", subIDNum))"
+            dic["rawData"] = payload.map { String(format: "%02X", $0) }.joined(separator: " ")
         }
         return dic
     }

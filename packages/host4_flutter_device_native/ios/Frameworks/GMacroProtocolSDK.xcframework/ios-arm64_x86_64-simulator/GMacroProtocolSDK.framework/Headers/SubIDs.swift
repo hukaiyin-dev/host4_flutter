@@ -59,6 +59,8 @@ enum RockerSubID: UInt8 {
     case deadZoneRegressionComp     = 0x13 // 设置摇杆死区回归补偿
     case triggerModeAndButton       = 0x14 // 设置摇杆曲线触发方式及触发按键
     case rockerOutputGraphics       = 0x15 // 设置摇杆输出轨迹
+    case setAntiDeadZone            = 0x1D // 设置摇杆反死区
+    case fetchAntiDeadZone          = 0x1E // 获取摇杆反死区
     
    var description: String {
         switch self {
@@ -74,6 +76,10 @@ enum RockerSubID: UInt8 {
             return "设置摇杆曲线触发方式及触发按键"
         case .rockerOutputGraphics:
             return "设置摇杆输出轨迹"
+        case .setAntiDeadZone:
+            return "设置摇杆反死区"
+        case .fetchAntiDeadZone:
+            return "获取摇杆反死区"
         }
     }
     
@@ -168,6 +174,8 @@ enum GyroSubID: UInt8 {
     case fetchGyroXYRatio           = 0x23 // 查询陀螺仪XY轴比例
     case setGyroOuterDeadZone       = 0x24 // 设置陀螺仪外圈死区
     case fetchGyroOuterDeadZone     = 0x25 // 查询陀螺仪外圈死区
+    case setGyroAxisSwap            = 0x29 // 设置体感轴向交换
+    case fetchGyroAxisSwap          = 0x2A // 获取体感轴向交换
     case setGyroParam     = 0x28 // 体感参数设置
 
     var description: String {
@@ -200,6 +208,10 @@ enum GyroSubID: UInt8 {
             return "设置陀螺仪外圈死区"
         case .fetchGyroOuterDeadZone:
             return "查询陀螺仪外圈死区"
+        case .setGyroAxisSwap:
+            return "设置体感轴向交换"
+        case .fetchGyroAxisSwap:
+            return "获取体感轴向交换"
         case .fetchGyroDeadZoneComp:
             return "查询陀螺仪死区补偿（仅适用于陀螺仪模拟摇杆）"
         case .fetchGyroXYInvert:
@@ -257,6 +269,31 @@ enum LightSubID: UInt8 {
     
     var proID: GMacroProtocolID {
         return GMacroProtocolID.light
+    }
+}
+
+/// 通道灯亮度 SubID 70
+enum ChannelLightSubID: UInt8 {
+    case setChannelSwitch        = 0x08 // 设置通道灯开关
+    case fetchChannelSwitch      = 0x09 // 获取通道灯开关
+    case setChannelBrightness    = 0x0A // 设置通道灯亮度
+    case fetchChannelBrightness  = 0x0B // 获取通道灯亮度
+
+   var description: String {
+        switch self {
+        case .setChannelSwitch:
+            return "设置通道灯开关"
+        case .fetchChannelSwitch:
+            return "获取通道灯开关"
+        case .setChannelBrightness:
+            return "设置通道灯亮度"
+        case .fetchChannelBrightness:
+            return "获取通道灯亮度"
+        }
+    }
+    
+    var proID: GMacroProtocolID {
+        return GMacroProtocolID.channelLight
     }
 }
 

@@ -2871,6 +2871,120 @@
           },
           {
             "kind": "Function",
+            "name": "writeValue",
+            "printedName": "writeValue(_:to:type:sleepTime:progress:completion:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Data",
+                "printedName": "Foundation.Data",
+                "usr": "s:10Foundation4DataV"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "String",
+                "printedName": "Swift.String",
+                "usr": "s:SS"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "CBCharacteristicWriteType",
+                "printedName": "CoreBluetooth.CBCharacteristicWriteType",
+                "hasDefaultArg": true,
+                "usr": "c:@E@CBCharacteristicWriteType"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Double",
+                "printedName": "Swift.Double",
+                "hasDefaultArg": true,
+                "usr": "s:Sd"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "((Swift.Int, Swift.Int) -> ())?",
+                "children": [
+                  {
+                    "kind": "TypeFunc",
+                    "name": "Function",
+                    "printedName": "(Swift.Int, Swift.Int) -> ()",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Void",
+                        "printedName": "()"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Tuple",
+                        "printedName": "(Swift.Int, Swift.Int)",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Int",
+                            "printedName": "Swift.Int",
+                            "usr": "s:Si"
+                          },
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Int",
+                            "printedName": "Swift.Int",
+                            "usr": "s:Si"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "hasDefaultArg": true,
+                "usr": "s:Sq"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "(() -> ())?",
+                "children": [
+                  {
+                    "kind": "TypeFunc",
+                    "name": "Function",
+                    "printedName": "() -> ()",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Void",
+                        "printedName": "()"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Void",
+                        "printedName": "()"
+                      }
+                    ]
+                  }
+                ],
+                "hasDefaultArg": true,
+                "usr": "s:Sq"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "s:12BluetoothKit0A16TransportSessionC10writeValue_2to4type9sleepTime8progress10completiony10Foundation4DataV_SSSo25CBCharacteristicWriteTypeVSdySi_SitcSgyycSgtKF",
+            "mangledName": "$s12BluetoothKit0A16TransportSessionC10writeValue_2to4type9sleepTime8progress10completiony10Foundation4DataV_SSSo25CBCharacteristicWriteTypeVSdySi_SitcSgyycSgtKF",
+            "moduleName": "BluetoothKit",
+            "declAttributes": [
+              "Final",
+              "AccessControl"
+            ],
+            "throwing": true,
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
             "name": "onReceive",
             "printedName": "onReceive(_:)",
             "children": [
@@ -3704,7 +3818,7 @@
           {
             "kind": "Function",
             "name": "writeValue",
-            "printedName": "writeValue(_:to:type:progress:completion:)",
+            "printedName": "writeValue(_:to:type:sleepTime:progress:completion:)",
             "children": [
               {
                 "kind": "TypeNominal",
@@ -3729,6 +3843,13 @@
                 "printedName": "CoreBluetooth.CBCharacteristicWriteType",
                 "hasDefaultArg": true,
                 "usr": "c:@E@CBCharacteristicWriteType"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Double",
+                "printedName": "Swift.Double",
+                "hasDefaultArg": true,
+                "usr": "s:Sd"
               },
               {
                 "kind": "TypeNominal",
@@ -3798,8 +3919,8 @@
               }
             ],
             "declKind": "Func",
-            "usr": "s:12BluetoothKit20PeripheralConnectionC10writeValue_2to4type8progress10completiony10Foundation4DataV_SSSo25CBCharacteristicWriteTypeVySi_SitcSgyycSgtKF",
-            "mangledName": "$s12BluetoothKit20PeripheralConnectionC10writeValue_2to4type8progress10completiony10Foundation4DataV_SSSo25CBCharacteristicWriteTypeVySi_SitcSgyycSgtKF",
+            "usr": "s:12BluetoothKit20PeripheralConnectionC10writeValue_2to4type9sleepTime8progress10completiony10Foundation4DataV_SSSo25CBCharacteristicWriteTypeVSdySi_SitcSgyycSgtKF",
+            "mangledName": "$s12BluetoothKit20PeripheralConnectionC10writeValue_2to4type9sleepTime8progress10completiony10Foundation4DataV_SSSo25CBCharacteristicWriteTypeVSdySi_SitcSgyycSgtKF",
             "moduleName": "BluetoothKit",
             "declAttributes": [
               "Final",
@@ -8624,6 +8745,13 @@
       "value": "\"com.host4.bluetooth.didDisconnect\""
     },
     {
+      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/BluetoothKit\/BluetoothKit\/BluetoothKit\/BluetoothCore\/BluetoothTransportSession.swift",
+      "kind": "IntegerLiteral",
+      "offset": 2801,
+      "length": 1,
+      "value": "0"
+    },
+    {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/BluetoothKit\/BluetoothKit\/BluetoothKit\/BluetoothCore\/PeripheralConnection.swift",
       "kind": "StringLiteral",
       "offset": 198,
@@ -8669,6 +8797,20 @@
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/BluetoothKit\/BluetoothKit\/BluetoothKit\/BluetoothCore\/PeripheralConnection.swift",
       "kind": "IntegerLiteral",
       "offset": 754,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/BluetoothKit\/BluetoothKit\/BluetoothKit\/BluetoothCore\/PeripheralConnection.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1040,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/BluetoothKit\/BluetoothKit\/BluetoothKit\/BluetoothCore\/PeripheralConnection.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1777,
       "length": 1,
       "value": "0"
     },

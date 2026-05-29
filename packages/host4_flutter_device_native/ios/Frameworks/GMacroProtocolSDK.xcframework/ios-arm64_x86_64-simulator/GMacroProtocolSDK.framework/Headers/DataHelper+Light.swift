@@ -151,6 +151,104 @@ extension DataHelper {
     }
 }
 
+// MARK: - 通道灯亮度 0x70
+extension DataHelper {
+    /// 设置通道灯开关 0x70 0x08
+    func setChannelLightSwitch(isOn: Bool,
+                               finish: (() -> Void)? = nil,
+                               response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
+        let subID = ChannelLightSubID.setChannelSwitch
+        let protocolID = subID.proID
+
+        var payload = Data()
+        payload.append(Data.from(subID.rawValue))
+        payload.append(Data.from(0x05))
+        payload.append(Data.from(isOn ? 0x02 : 0x01)) // 1 关, 2 开
+
+        let all = dataFrom(protocolID: protocolID, payload: payload)
+        self.write(protocolID: protocolID, data: all, finish: finish, response: response)
+    }
+
+    /// 获取通道灯开关 0x70 0x09
+    func fetchChannelLightSwitch(finish: (() -> Void)? = nil,
+                                 response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
+        let subID = ChannelLightSubID.fetchChannelSwitch
+        let protocolID = subID.proID
+
+        var payload = Data()
+        payload.append(Data.from(subID.rawValue))
+        payload.append(Data.from(0x05))
+
+        let all = dataFrom(protocolID: protocolID, payload: payload)
+        self.write(protocolID: protocolID, data: all, finish: finish, response: response)
+    }
+
+    /// 设置通道灯亮度 0x70 0x0A
+    func setChannelLightBrightness(brightness: Int,
+                                   finish: (() -> Void)? = nil,
+                                   response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
+        if !(0...100).contains(brightness) {
+            response(.failure(BluetoothError.outOfRange))
+            return
+        }
+
+        let subID = ChannelLightSubID.setChannelBrightness
+        let protocolID = subID.proID
+
+        var payload = Data()
+        payload.append(Data.from(subID.rawValue))
+        payload.append(Data.from(0x05))
+        payload.append(Data.from(brightness, count: 1))
+
+        let all = dataFrom(protocolID: protocolID, payload: payload)
+        self.write(protocolID: protocolID, data: all, finish: finish, response: response)
+    }
+
+    /// 获取通道灯亮度 0x70 0x0B
+    func fetchChannelLightBrightness(finish: (() -> Void)? = nil,
+                                     response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
+        let subID = ChannelLightSubID.fetchChannelBrightness
+        let protocolID = subID.proID
+
+        var payload = Data()
+        payload.append(Data.from(subID.rawValue))
+        payload.append(Data.from(0x05))
+
+        let all = dataFrom(protocolID: protocolID, payload: payload)
+        self.write(protocolID: protocolID, data: all, finish: finish, response: response)
+    }
+
+    func analyzeChannelLight(_ data: Data) -> [String: Any] {
+        var dic: [String: Any] = [:]
+        var parser = DataParser(data)
+
+        let subIDValue = parser.next(1).toInt()
+        let subID = ChannelLightSubID(rawValue: UInt8(subIDValue))
+        _ = parser.next(1) // Dev
+
+        switch subID {
+        case .setChannelSwitch, .setChannelBrightness:
+            if parser.remaining >= 1 {
+                dic["result"] = parser.next(1).toInt()
+            }
+        case .fetchChannelSwitch:
+            if parser.remaining >= 1 {
+                let rawValue = parser.next(1).toInt()
+                dic["switch"] = rawValue
+                dic["isOn"] = rawValue == 2
+            }
+        case .fetchChannelBrightness:
+            if parser.remaining >= 1 {
+                dic["brightness"] = parser.next(1).toInt()
+            }
+        case .none:
+            print("未处理的 ChannelLightSubID 0x\(String(format: "%02X", subIDValue))")
+        }
+
+        return dic
+    }
+}
+
 extension DataHelper {
     
     func analyzeLight(_ data: Data, _ subID: UInt8, _ sn: UInt8) -> [String: Any] {

@@ -82,4 +82,27 @@ extension GMacroProtocolSession {
         
         dataHelper.setLightConfig(effect: effect, colorR: colorR, colorG: colorG, colorB: colorB, light: light, speed: speed, profile: profile, response: response)
     }
+
+    /// 设置通道灯开关
+    public func setChannelLightSwitch(isOn: Bool,
+                                      response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
+        dataHelper.setChannelLightSwitch(isOn: isOn, response: response)
+    }
+
+    /// 查询通道灯开关
+    public func fetchChannelLightSwitch(response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
+        dataHelper.fetchChannelLightSwitch(response: response)
+    }
+
+    /// 设置通道灯亮度
+    /// - Parameter brightness: 亮度 0-100
+    public func setChannelLightBrightness(brightness: Int,
+                                          response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
+        dataHelper.setChannelLightBrightness(brightness: brightness, response: response)
+    }
+
+    /// 查询通道灯亮度
+    public func fetchChannelLightBrightness(response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
+        dataHelper.fetchChannelLightBrightness(response: response)
+    }
 }

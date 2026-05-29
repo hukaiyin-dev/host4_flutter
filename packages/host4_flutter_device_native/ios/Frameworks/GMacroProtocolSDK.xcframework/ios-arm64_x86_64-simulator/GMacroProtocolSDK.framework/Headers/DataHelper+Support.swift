@@ -29,8 +29,27 @@ extension DataHelper {
             return
         }
 
+        // 2026.5.28 修改：新增 subID 区分同一 protocolID 下不同的命令响应，确保 responseKey 唯一性
         let snData = Data([snByte])
-        let responseKey = ResponseKey(protocolID: protocolID, sn: snByte)
+        _ = snData // 如未使用可删掉 snData 变量
+
+        var subID: UInt8? = nil
+        if protocolID.hasSubID {
+            guard data.count >= 4 else { // [len][pid][subID][sn] 最短
+                response(.failure(NSError(
+                    domain: "InvalidPacket",
+                    code: -4,
+                    userInfo: [NSLocalizedDescriptionKey:
+                        "Protocol 0x\(String(format: "%02X", protocolID.rawValue)) requires subID, but packet is too short"]
+                )))
+                finish?()
+                return
+            }
+            subID = data[2]
+        }
+        
+//        let responseKey = ResponseKey(protocolID: protocolID, sn: snByte)
+        let responseKey = ResponseKey(protocolID: protocolID, subID: subID, sn: snByte)
 
         callbackQueue.async(flags: .barrier) { [weak self] in
             guard let self else { return }
@@ -46,12 +65,14 @@ extension DataHelper {
                 dispatchPrecondition(condition: .onQueue(self.callbackQueue))
 
                 guard let cb = self.pendingResponses[responseKey] else {
-                    print("已收到回应，超时取消 protocolID \(responseKey)")
+//                    print("已收到回应，超时取消 protocolID \(responseKey)")
+                    print("已收到回应，超时取消 pid=0x\(String(format: "%02X", responseKey.protocolID.rawValue)) key=\(responseKey)")
                     return
                 }
 
                 let sn = Data([snByte])
-                print("触发超时 \(Date()) data.sn \(sn.nsDescription()) protocolID \(protocolID)")
+//                print("触发超时 \(Date()) data.sn \(sn.nsDescription()) protocolID \(protocolID)")
+                print("触发超时 \(Date()) data.sn \(sn.nsDescription()) pid=0x\(String(format: "%02X", protocolID.rawValue)) key=\(responseKey)")
 
                 cb(.failure(BluetoothError.timeout))
                 self.callbackQueue.async(flags: .barrier) {

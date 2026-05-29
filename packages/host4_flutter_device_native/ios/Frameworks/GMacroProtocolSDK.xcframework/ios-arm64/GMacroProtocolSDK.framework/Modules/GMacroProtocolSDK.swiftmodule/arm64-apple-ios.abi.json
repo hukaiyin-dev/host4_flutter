@@ -2120,6 +2120,48 @@
           },
           {
             "kind": "Var",
+            "name": "shap",
+            "printedName": "shap",
+            "children": [
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "(GMacroProtocolSDK.KeyboardKey.Type) -> GMacroProtocolSDK.KeyboardKey",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "KeyboardKey",
+                    "printedName": "GMacroProtocolSDK.KeyboardKey",
+                    "usr": "c:@M@GMacroProtocolSDK@E@KeyboardKey"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Metatype",
+                    "printedName": "GMacroProtocolSDK.KeyboardKey.Type",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "KeyboardKey",
+                        "printedName": "GMacroProtocolSDK.KeyboardKey",
+                        "usr": "c:@M@GMacroProtocolSDK@E@KeyboardKey"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "declKind": "EnumElement",
+            "usr": "c:@M@GMacroProtocolSDK@E@KeyboardKey@KeyboardKeyShap",
+            "mangledName": "$s17GMacroProtocolSDK11KeyboardKeyO4shapyA2CmF",
+            "moduleName": "GMacroProtocolSDK",
+            "declAttributes": [
+              "RawDocComment",
+              "ObjC"
+            ],
+            "fixedbinaryorder": 50
+          },
+          {
+            "kind": "Var",
             "name": "semicolon",
             "printedName": "semicolon",
             "children": [
@@ -2158,7 +2200,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 50
+            "fixedbinaryorder": 51
           },
           {
             "kind": "Var",
@@ -2200,7 +2242,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 51
+            "fixedbinaryorder": 52
           },
           {
             "kind": "Var",
@@ -2242,7 +2284,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 52
+            "fixedbinaryorder": 53
           },
           {
             "kind": "Var",
@@ -2284,7 +2326,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 53
+            "fixedbinaryorder": 54
           },
           {
             "kind": "Var",
@@ -2326,7 +2368,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 54
+            "fixedbinaryorder": 55
           },
           {
             "kind": "Var",
@@ -2368,7 +2410,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 55
+            "fixedbinaryorder": 56
           },
           {
             "kind": "Var",
@@ -2410,7 +2452,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 56
+            "fixedbinaryorder": 57
           },
           {
             "kind": "Var",
@@ -2452,7 +2494,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 57
+            "fixedbinaryorder": 58
           },
           {
             "kind": "Var",
@@ -2494,7 +2536,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 58
+            "fixedbinaryorder": 59
           },
           {
             "kind": "Var",
@@ -2536,7 +2578,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 59
+            "fixedbinaryorder": 60
           },
           {
             "kind": "Var",
@@ -2578,7 +2620,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 60
+            "fixedbinaryorder": 61
           },
           {
             "kind": "Var",
@@ -2620,7 +2662,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 61
+            "fixedbinaryorder": 62
           },
           {
             "kind": "Var",
@@ -2662,7 +2704,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 62
+            "fixedbinaryorder": 63
           },
           {
             "kind": "Var",
@@ -2704,7 +2746,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 63
+            "fixedbinaryorder": 64
           },
           {
             "kind": "Var",
@@ -2746,7 +2788,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 64
+            "fixedbinaryorder": 65
           },
           {
             "kind": "Var",
@@ -2788,7 +2830,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 65
+            "fixedbinaryorder": 66
           },
           {
             "kind": "Var",
@@ -2830,7 +2872,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 66
+            "fixedbinaryorder": 67
           },
           {
             "kind": "Var",
@@ -2872,7 +2914,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 67
+            "fixedbinaryorder": 68
           },
           {
             "kind": "Var",
@@ -2914,7 +2956,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 68
+            "fixedbinaryorder": 69
           },
           {
             "kind": "Var",
@@ -2956,7 +2998,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 69
+            "fixedbinaryorder": 70
           },
           {
             "kind": "Var",
@@ -2998,7 +3040,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 70
+            "fixedbinaryorder": 71
           },
           {
             "kind": "Var",
@@ -3040,7 +3082,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 71
+            "fixedbinaryorder": 72
           },
           {
             "kind": "Var",
@@ -3082,7 +3124,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 72
+            "fixedbinaryorder": 73
           },
           {
             "kind": "Var",
@@ -3124,7 +3166,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 73
+            "fixedbinaryorder": 74
           },
           {
             "kind": "Var",
@@ -3166,7 +3208,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 74
+            "fixedbinaryorder": 75
           },
           {
             "kind": "Var",
@@ -3208,7 +3250,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 75
+            "fixedbinaryorder": 76
           },
           {
             "kind": "Var",
@@ -3250,7 +3292,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 76
+            "fixedbinaryorder": 77
           },
           {
             "kind": "Var",
@@ -3292,7 +3334,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 77
+            "fixedbinaryorder": 78
           },
           {
             "kind": "Var",
@@ -3334,7 +3376,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 78
+            "fixedbinaryorder": 79
           },
           {
             "kind": "Var",
@@ -3376,7 +3418,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 79
+            "fixedbinaryorder": 80
           },
           {
             "kind": "Var",
@@ -3418,7 +3460,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 80
+            "fixedbinaryorder": 81
           },
           {
             "kind": "Var",
@@ -3460,7 +3502,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 81
+            "fixedbinaryorder": 82
           },
           {
             "kind": "Var",
@@ -3502,7 +3544,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 82
+            "fixedbinaryorder": 83
           },
           {
             "kind": "Var",
@@ -3544,7 +3586,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 83
+            "fixedbinaryorder": 84
           },
           {
             "kind": "Var",
@@ -3586,7 +3628,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 84
+            "fixedbinaryorder": 85
           },
           {
             "kind": "Var",
@@ -3628,7 +3670,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 85
+            "fixedbinaryorder": 86
           },
           {
             "kind": "Var",
@@ -3670,7 +3712,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 86
+            "fixedbinaryorder": 87
           },
           {
             "kind": "Var",
@@ -3712,7 +3754,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 87
+            "fixedbinaryorder": 88
           },
           {
             "kind": "Var",
@@ -3754,7 +3796,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 88
+            "fixedbinaryorder": 89
           },
           {
             "kind": "Var",
@@ -3796,7 +3838,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 89
+            "fixedbinaryorder": 90
           },
           {
             "kind": "Var",
@@ -3838,7 +3880,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 90
+            "fixedbinaryorder": 91
           },
           {
             "kind": "Var",
@@ -3880,7 +3922,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 91
+            "fixedbinaryorder": 92
           },
           {
             "kind": "Var",
@@ -3922,7 +3964,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 92
+            "fixedbinaryorder": 93
           },
           {
             "kind": "Var",
@@ -3964,7 +4006,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 93
+            "fixedbinaryorder": 94
           },
           {
             "kind": "Var",
@@ -4006,7 +4048,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 94
+            "fixedbinaryorder": 95
           },
           {
             "kind": "Var",
@@ -4048,7 +4090,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 95
+            "fixedbinaryorder": 96
           },
           {
             "kind": "Var",
@@ -4090,7 +4132,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 96
+            "fixedbinaryorder": 97
           },
           {
             "kind": "Var",
@@ -4132,7 +4174,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 97
+            "fixedbinaryorder": 98
           },
           {
             "kind": "Var",
@@ -4174,7 +4216,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 98
+            "fixedbinaryorder": 99
           },
           {
             "kind": "Var",
@@ -4216,7 +4258,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 99
+            "fixedbinaryorder": 100
           },
           {
             "kind": "Var",
@@ -4258,7 +4300,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 100
+            "fixedbinaryorder": 101
           },
           {
             "kind": "Var",
@@ -4300,7 +4342,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 101
+            "fixedbinaryorder": 102
           },
           {
             "kind": "Var",
@@ -4342,7 +4384,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 102
+            "fixedbinaryorder": 103
           },
           {
             "kind": "Var",
@@ -4384,7 +4426,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 103
+            "fixedbinaryorder": 104
           },
           {
             "kind": "Var",
@@ -4426,7 +4468,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 104
+            "fixedbinaryorder": 105
           },
           {
             "kind": "Var",
@@ -4468,7 +4510,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 105
+            "fixedbinaryorder": 106
           },
           {
             "kind": "Var",
@@ -4510,7 +4552,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 106
+            "fixedbinaryorder": 107
           },
           {
             "kind": "Var",
@@ -4552,7 +4594,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 107
+            "fixedbinaryorder": 108
           },
           {
             "kind": "Var",
@@ -4594,7 +4636,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 108
+            "fixedbinaryorder": 109
           },
           {
             "kind": "Var",
@@ -4636,7 +4678,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 109
+            "fixedbinaryorder": 110
           },
           {
             "kind": "Var",
@@ -4678,7 +4720,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 110
+            "fixedbinaryorder": 111
           },
           {
             "kind": "Var",
@@ -4720,7 +4762,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 111
+            "fixedbinaryorder": 112
           },
           {
             "kind": "Var",
@@ -4762,7 +4804,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 112
+            "fixedbinaryorder": 113
           },
           {
             "kind": "Var",
@@ -4804,7 +4846,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 113
+            "fixedbinaryorder": 114
           },
           {
             "kind": "Var",
@@ -4846,7 +4888,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 114
+            "fixedbinaryorder": 115
           },
           {
             "kind": "Var",
@@ -4888,7 +4930,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 115
+            "fixedbinaryorder": 116
           },
           {
             "kind": "Var",
@@ -4930,7 +4972,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 116
+            "fixedbinaryorder": 117
           },
           {
             "kind": "Var",
@@ -4972,7 +5014,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 117
+            "fixedbinaryorder": 118
           },
           {
             "kind": "Var",
@@ -5014,7 +5056,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 118
+            "fixedbinaryorder": 119
           },
           {
             "kind": "Var",
@@ -5056,7 +5098,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 119
+            "fixedbinaryorder": 120
           },
           {
             "kind": "Var",
@@ -5098,7 +5140,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 120
+            "fixedbinaryorder": 121
           },
           {
             "kind": "Var",
@@ -5140,7 +5182,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 121
+            "fixedbinaryorder": 122
           },
           {
             "kind": "Var",
@@ -5182,7 +5224,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 122
+            "fixedbinaryorder": 123
           },
           {
             "kind": "Var",
@@ -5224,7 +5266,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 123
+            "fixedbinaryorder": 124
           },
           {
             "kind": "Var",
@@ -5266,7 +5308,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 124
+            "fixedbinaryorder": 125
           },
           {
             "kind": "Var",
@@ -5308,7 +5350,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 125
+            "fixedbinaryorder": 126
           },
           {
             "kind": "Var",
@@ -5350,7 +5392,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 126
+            "fixedbinaryorder": 127
           },
           {
             "kind": "Var",
@@ -5392,7 +5434,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 127
+            "fixedbinaryorder": 128
           },
           {
             "kind": "Var",
@@ -5434,7 +5476,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 128
+            "fixedbinaryorder": 129
           },
           {
             "kind": "Var",
@@ -5476,7 +5518,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 129
+            "fixedbinaryorder": 130
           },
           {
             "kind": "Var",
@@ -5518,7 +5560,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 130
+            "fixedbinaryorder": 131
           },
           {
             "kind": "Var",
@@ -5560,7 +5602,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 131
+            "fixedbinaryorder": 132
           },
           {
             "kind": "Var",
@@ -5602,7 +5644,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 132
+            "fixedbinaryorder": 133
           },
           {
             "kind": "Var",
@@ -5644,7 +5686,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 133
+            "fixedbinaryorder": 134
           },
           {
             "kind": "Var",
@@ -5686,7 +5728,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 134
+            "fixedbinaryorder": 135
           },
           {
             "kind": "Var",
@@ -5728,7 +5770,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 135
+            "fixedbinaryorder": 136
           },
           {
             "kind": "Var",
@@ -5770,7 +5812,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 136
+            "fixedbinaryorder": 137
           },
           {
             "kind": "Var",
@@ -5812,7 +5854,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 137
+            "fixedbinaryorder": 138
           },
           {
             "kind": "Var",
@@ -5854,7 +5896,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 138
+            "fixedbinaryorder": 139
           },
           {
             "kind": "Var",
@@ -5896,7 +5938,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 139
+            "fixedbinaryorder": 140
           },
           {
             "kind": "Var",
@@ -5938,7 +5980,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 140
+            "fixedbinaryorder": 141
           },
           {
             "kind": "Var",
@@ -5980,7 +6022,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 141
+            "fixedbinaryorder": 142
           },
           {
             "kind": "Var",
@@ -6022,7 +6064,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 142
+            "fixedbinaryorder": 143
           },
           {
             "kind": "Var",
@@ -6064,7 +6106,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 143
+            "fixedbinaryorder": 144
           },
           {
             "kind": "Var",
@@ -6106,7 +6148,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 144
+            "fixedbinaryorder": 145
           },
           {
             "kind": "Var",
@@ -6148,7 +6190,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 145
+            "fixedbinaryorder": 146
           },
           {
             "kind": "Var",
@@ -6190,7 +6232,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 146
+            "fixedbinaryorder": 147
           },
           {
             "kind": "Var",
@@ -6232,7 +6274,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 147
+            "fixedbinaryorder": 148
           },
           {
             "kind": "Var",
@@ -6274,7 +6316,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 148
+            "fixedbinaryorder": 149
           },
           {
             "kind": "Var",
@@ -6316,7 +6358,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 149
+            "fixedbinaryorder": 150
           },
           {
             "kind": "Var",
@@ -6358,7 +6400,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 150
+            "fixedbinaryorder": 151
           },
           {
             "kind": "Var",
@@ -6400,7 +6442,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 151
+            "fixedbinaryorder": 152
           },
           {
             "kind": "Var",
@@ -6442,7 +6484,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 152
+            "fixedbinaryorder": 153
           },
           {
             "kind": "Var",
@@ -6484,7 +6526,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 153
+            "fixedbinaryorder": 154
           },
           {
             "kind": "Var",
@@ -6526,7 +6568,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 154
+            "fixedbinaryorder": 155
           },
           {
             "kind": "Var",
@@ -6568,7 +6610,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 155
+            "fixedbinaryorder": 156
           },
           {
             "kind": "Var",
@@ -6610,7 +6652,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 156
+            "fixedbinaryorder": 157
           },
           {
             "kind": "Var",
@@ -6652,7 +6694,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 157
+            "fixedbinaryorder": 158
           },
           {
             "kind": "Var",
@@ -6694,7 +6736,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 158
+            "fixedbinaryorder": 159
           },
           {
             "kind": "Var",
@@ -6736,7 +6778,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 159
+            "fixedbinaryorder": 160
           },
           {
             "kind": "Var",
@@ -6778,7 +6820,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 160
+            "fixedbinaryorder": 161
           },
           {
             "kind": "Var",
@@ -6820,7 +6862,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 161
+            "fixedbinaryorder": 162
           },
           {
             "kind": "Var",
@@ -6862,7 +6904,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 162
+            "fixedbinaryorder": 163
           },
           {
             "kind": "Var",
@@ -6904,7 +6946,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 163
+            "fixedbinaryorder": 164
           },
           {
             "kind": "Var",
@@ -6946,7 +6988,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 164
+            "fixedbinaryorder": 165
           },
           {
             "kind": "Var",
@@ -6988,7 +7030,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 165
+            "fixedbinaryorder": 166
           },
           {
             "kind": "Var",
@@ -7030,7 +7072,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 166
+            "fixedbinaryorder": 167
           },
           {
             "kind": "Var",
@@ -7072,7 +7114,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 167
+            "fixedbinaryorder": 168
           },
           {
             "kind": "Var",
@@ -7114,7 +7156,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 168
+            "fixedbinaryorder": 169
           },
           {
             "kind": "Var",
@@ -7156,7 +7198,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 169
+            "fixedbinaryorder": 170
           },
           {
             "kind": "Var",
@@ -7198,7 +7240,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 170
+            "fixedbinaryorder": 171
           },
           {
             "kind": "Var",
@@ -7240,7 +7282,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 171
+            "fixedbinaryorder": 172
           },
           {
             "kind": "Var",
@@ -7282,7 +7324,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 172
+            "fixedbinaryorder": 173
           },
           {
             "kind": "Var",
@@ -7324,7 +7366,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 173
+            "fixedbinaryorder": 174
           },
           {
             "kind": "Var",
@@ -7366,7 +7408,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 174
+            "fixedbinaryorder": 175
           },
           {
             "kind": "Var",
@@ -7408,7 +7450,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 175
+            "fixedbinaryorder": 176
           },
           {
             "kind": "Var",
@@ -7450,7 +7492,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 176
+            "fixedbinaryorder": 177
           },
           {
             "kind": "Var",
@@ -7492,7 +7534,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 177
+            "fixedbinaryorder": 178
           },
           {
             "kind": "Var",
@@ -7534,7 +7576,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 178
+            "fixedbinaryorder": 179
           },
           {
             "kind": "Var",
@@ -7576,7 +7618,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 179
+            "fixedbinaryorder": 180
           },
           {
             "kind": "Var",
@@ -7618,7 +7660,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 180
+            "fixedbinaryorder": 181
           },
           {
             "kind": "Var",
@@ -7660,7 +7702,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 181
+            "fixedbinaryorder": 182
           },
           {
             "kind": "Var",
@@ -7702,7 +7744,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 182
+            "fixedbinaryorder": 183
           },
           {
             "kind": "Var",
@@ -7744,7 +7786,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 183
+            "fixedbinaryorder": 184
           },
           {
             "kind": "Var",
@@ -7786,7 +7828,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 184
+            "fixedbinaryorder": 185
           },
           {
             "kind": "Var",
@@ -7828,7 +7870,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 185
+            "fixedbinaryorder": 186
           },
           {
             "kind": "Var",
@@ -7870,7 +7912,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 186
+            "fixedbinaryorder": 187
           },
           {
             "kind": "Var",
@@ -7912,7 +7954,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 187
+            "fixedbinaryorder": 188
           },
           {
             "kind": "Var",
@@ -7954,7 +7996,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 188
+            "fixedbinaryorder": 189
           },
           {
             "kind": "Var",
@@ -7996,7 +8038,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 189
+            "fixedbinaryorder": 190
           },
           {
             "kind": "Var",
@@ -8038,7 +8080,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 190
+            "fixedbinaryorder": 191
           },
           {
             "kind": "Var",
@@ -8080,7 +8122,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 191
+            "fixedbinaryorder": 192
           },
           {
             "kind": "Var",
@@ -8122,7 +8164,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 192
+            "fixedbinaryorder": 193
           },
           {
             "kind": "Var",
@@ -8164,7 +8206,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 193
+            "fixedbinaryorder": 194
           },
           {
             "kind": "Var",
@@ -8206,7 +8248,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 194
+            "fixedbinaryorder": 195
           },
           {
             "kind": "Var",
@@ -8248,7 +8290,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 195
+            "fixedbinaryorder": 196
           },
           {
             "kind": "Var",
@@ -8290,7 +8332,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 196
+            "fixedbinaryorder": 197
           },
           {
             "kind": "Var",
@@ -8332,7 +8374,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 197
+            "fixedbinaryorder": 198
           },
           {
             "kind": "Var",
@@ -8374,7 +8416,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 198
+            "fixedbinaryorder": 199
           },
           {
             "kind": "Var",
@@ -8416,7 +8458,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 199
+            "fixedbinaryorder": 200
           },
           {
             "kind": "Var",
@@ -8458,7 +8500,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 200
+            "fixedbinaryorder": 201
           },
           {
             "kind": "Var",
@@ -8500,7 +8542,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 201
+            "fixedbinaryorder": 202
           },
           {
             "kind": "Var",
@@ -8542,7 +8584,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 202
+            "fixedbinaryorder": 203
           },
           {
             "kind": "Var",
@@ -8584,7 +8626,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 203
+            "fixedbinaryorder": 204
           },
           {
             "kind": "Var",
@@ -8626,7 +8668,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 204
+            "fixedbinaryorder": 205
           },
           {
             "kind": "Var",
@@ -8668,7 +8710,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 205
+            "fixedbinaryorder": 206
           },
           {
             "kind": "Var",
@@ -8710,7 +8752,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 206
+            "fixedbinaryorder": 207
           },
           {
             "kind": "Var",
@@ -8752,7 +8794,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 207
+            "fixedbinaryorder": 208
           },
           {
             "kind": "Var",
@@ -8794,7 +8836,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 208
+            "fixedbinaryorder": 209
           },
           {
             "kind": "Var",
@@ -8836,7 +8878,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 209
+            "fixedbinaryorder": 210
           },
           {
             "kind": "Var",
@@ -8878,7 +8920,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 210
+            "fixedbinaryorder": 211
           },
           {
             "kind": "Var",
@@ -8920,7 +8962,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 211
+            "fixedbinaryorder": 212
           },
           {
             "kind": "Var",
@@ -8962,7 +9004,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 212
+            "fixedbinaryorder": 213
           },
           {
             "kind": "Var",
@@ -9004,7 +9046,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 213
+            "fixedbinaryorder": 214
           },
           {
             "kind": "Var",
@@ -9046,7 +9088,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 214
+            "fixedbinaryorder": 215
           },
           {
             "kind": "Var",
@@ -9088,7 +9130,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 215
+            "fixedbinaryorder": 216
           },
           {
             "kind": "Var",
@@ -9130,7 +9172,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 216
+            "fixedbinaryorder": 217
           },
           {
             "kind": "Var",
@@ -9172,7 +9214,7 @@
               "RawDocComment",
               "ObjC"
             ],
-            "fixedbinaryorder": 217
+            "fixedbinaryorder": 218
           },
           {
             "kind": "Var",
@@ -28558,6 +28600,290 @@
           },
           {
             "kind": "Function",
+            "name": "setChannelLightSwitch",
+            "printedName": "setChannelLightSwitch(isOn:response:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Bool",
+                "printedName": "Swift.Bool",
+                "usr": "s:Sb"
+              },
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "(Swift.Result<[Swift.String : Any], any Swift.Error>) -> ()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Result",
+                    "printedName": "Swift.Result<[Swift.String : Any], any Swift.Error>",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Dictionary",
+                        "printedName": "[Swift.String : Any]",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "String",
+                            "printedName": "Swift.String",
+                            "usr": "s:SS"
+                          },
+                          {
+                            "kind": "TypeNominal",
+                            "name": "ProtocolComposition",
+                            "printedName": "Any"
+                          }
+                        ],
+                        "usr": "s:SD"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Error",
+                        "printedName": "any Swift.Error",
+                        "usr": "s:s5ErrorP"
+                      }
+                    ],
+                    "usr": "s:s6ResultO"
+                  }
+                ]
+              }
+            ],
+            "declKind": "Func",
+            "usr": "s:17GMacroProtocolSDK0aB7SessionC21setChannelLightSwitch4isOn8responseySb_ys6ResultOySDySSypGs5Error_pGYbctF",
+            "mangledName": "$s17GMacroProtocolSDK0aB7SessionC21setChannelLightSwitch4isOn8responseySb_ys6ResultOySDySSypGs5Error_pGYbctF",
+            "moduleName": "GMacroProtocolSDK",
+            "declAttributes": [
+              "Final",
+              "AccessControl",
+              "RawDocComment"
+            ],
+            "isFromExtension": true,
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "fetchChannelLightSwitch",
+            "printedName": "fetchChannelLightSwitch(response:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "(Swift.Result<[Swift.String : Any], any Swift.Error>) -> ()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Result",
+                    "printedName": "Swift.Result<[Swift.String : Any], any Swift.Error>",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Dictionary",
+                        "printedName": "[Swift.String : Any]",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "String",
+                            "printedName": "Swift.String",
+                            "usr": "s:SS"
+                          },
+                          {
+                            "kind": "TypeNominal",
+                            "name": "ProtocolComposition",
+                            "printedName": "Any"
+                          }
+                        ],
+                        "usr": "s:SD"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Error",
+                        "printedName": "any Swift.Error",
+                        "usr": "s:s5ErrorP"
+                      }
+                    ],
+                    "usr": "s:s6ResultO"
+                  }
+                ]
+              }
+            ],
+            "declKind": "Func",
+            "usr": "s:17GMacroProtocolSDK0aB7SessionC23fetchChannelLightSwitch8responseyys6ResultOySDySSypGs5Error_pGYbc_tF",
+            "mangledName": "$s17GMacroProtocolSDK0aB7SessionC23fetchChannelLightSwitch8responseyys6ResultOySDySSypGs5Error_pGYbc_tF",
+            "moduleName": "GMacroProtocolSDK",
+            "declAttributes": [
+              "Final",
+              "AccessControl",
+              "RawDocComment"
+            ],
+            "isFromExtension": true,
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "setChannelLightBrightness",
+            "printedName": "setChannelLightBrightness(brightness:response:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Int",
+                "printedName": "Swift.Int",
+                "usr": "s:Si"
+              },
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "(Swift.Result<[Swift.String : Any], any Swift.Error>) -> ()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Result",
+                    "printedName": "Swift.Result<[Swift.String : Any], any Swift.Error>",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Dictionary",
+                        "printedName": "[Swift.String : Any]",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "String",
+                            "printedName": "Swift.String",
+                            "usr": "s:SS"
+                          },
+                          {
+                            "kind": "TypeNominal",
+                            "name": "ProtocolComposition",
+                            "printedName": "Any"
+                          }
+                        ],
+                        "usr": "s:SD"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Error",
+                        "printedName": "any Swift.Error",
+                        "usr": "s:s5ErrorP"
+                      }
+                    ],
+                    "usr": "s:s6ResultO"
+                  }
+                ]
+              }
+            ],
+            "declKind": "Func",
+            "usr": "s:17GMacroProtocolSDK0aB7SessionC25setChannelLightBrightness10brightness8responseySi_ys6ResultOySDySSypGs5Error_pGYbctF",
+            "mangledName": "$s17GMacroProtocolSDK0aB7SessionC25setChannelLightBrightness10brightness8responseySi_ys6ResultOySDySSypGs5Error_pGYbctF",
+            "moduleName": "GMacroProtocolSDK",
+            "declAttributes": [
+              "Final",
+              "AccessControl",
+              "RawDocComment"
+            ],
+            "isFromExtension": true,
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "fetchChannelLightBrightness",
+            "printedName": "fetchChannelLightBrightness(response:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "(Swift.Result<[Swift.String : Any], any Swift.Error>) -> ()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Result",
+                    "printedName": "Swift.Result<[Swift.String : Any], any Swift.Error>",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Dictionary",
+                        "printedName": "[Swift.String : Any]",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "String",
+                            "printedName": "Swift.String",
+                            "usr": "s:SS"
+                          },
+                          {
+                            "kind": "TypeNominal",
+                            "name": "ProtocolComposition",
+                            "printedName": "Any"
+                          }
+                        ],
+                        "usr": "s:SD"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Error",
+                        "printedName": "any Swift.Error",
+                        "usr": "s:s5ErrorP"
+                      }
+                    ],
+                    "usr": "s:s6ResultO"
+                  }
+                ]
+              }
+            ],
+            "declKind": "Func",
+            "usr": "s:17GMacroProtocolSDK0aB7SessionC27fetchChannelLightBrightness8responseyys6ResultOySDySSypGs5Error_pGYbc_tF",
+            "mangledName": "$s17GMacroProtocolSDK0aB7SessionC27fetchChannelLightBrightness8responseyys6ResultOySDySSypGs5Error_pGYbc_tF",
+            "moduleName": "GMacroProtocolSDK",
+            "declAttributes": [
+              "Final",
+              "AccessControl",
+              "RawDocComment"
+            ],
+            "isFromExtension": true,
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
             "name": "fetchDeviceVersion",
             "printedName": "fetchDeviceVersion(_:)",
             "children": [
@@ -32609,6 +32935,160 @@
           },
           {
             "kind": "Function",
+            "name": "updateRockerAntiDeadZone",
+            "printedName": "updateRockerAntiDeadZone(min:max:isLeft:response:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Int",
+                "printedName": "Swift.Int",
+                "usr": "s:Si"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Int",
+                "printedName": "Swift.Int",
+                "usr": "s:Si"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Bool",
+                "printedName": "Swift.Bool",
+                "usr": "s:Sb"
+              },
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "(Swift.Result<[Swift.String : Any], any Swift.Error>) -> ()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Result",
+                    "printedName": "Swift.Result<[Swift.String : Any], any Swift.Error>",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Dictionary",
+                        "printedName": "[Swift.String : Any]",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "String",
+                            "printedName": "Swift.String",
+                            "usr": "s:SS"
+                          },
+                          {
+                            "kind": "TypeNominal",
+                            "name": "ProtocolComposition",
+                            "printedName": "Any"
+                          }
+                        ],
+                        "usr": "s:SD"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Error",
+                        "printedName": "any Swift.Error",
+                        "usr": "s:s5ErrorP"
+                      }
+                    ],
+                    "usr": "s:s6ResultO"
+                  }
+                ]
+              }
+            ],
+            "declKind": "Func",
+            "usr": "s:17GMacroProtocolSDK0aB7SessionC24updateRockerAntiDeadZone3min3max6isLeft8responseySi_SiSbys6ResultOySDySSypGs5Error_pGYbctF",
+            "mangledName": "$s17GMacroProtocolSDK0aB7SessionC24updateRockerAntiDeadZone3min3max6isLeft8responseySi_SiSbys6ResultOySDySSypGs5Error_pGYbctF",
+            "moduleName": "GMacroProtocolSDK",
+            "declAttributes": [
+              "Final",
+              "AccessControl",
+              "RawDocComment"
+            ],
+            "isFromExtension": true,
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "fetchRockerAntiDeadZone",
+            "printedName": "fetchRockerAntiDeadZone(response:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "(Swift.Result<[Swift.String : Any], any Swift.Error>) -> ()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Result",
+                    "printedName": "Swift.Result<[Swift.String : Any], any Swift.Error>",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Dictionary",
+                        "printedName": "[Swift.String : Any]",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "String",
+                            "printedName": "Swift.String",
+                            "usr": "s:SS"
+                          },
+                          {
+                            "kind": "TypeNominal",
+                            "name": "ProtocolComposition",
+                            "printedName": "Any"
+                          }
+                        ],
+                        "usr": "s:SD"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Error",
+                        "printedName": "any Swift.Error",
+                        "usr": "s:s5ErrorP"
+                      }
+                    ],
+                    "usr": "s:s6ResultO"
+                  }
+                ]
+              }
+            ],
+            "declKind": "Func",
+            "usr": "s:17GMacroProtocolSDK0aB7SessionC23fetchRockerAntiDeadZone8responseyys6ResultOySDySSypGs5Error_pGYbc_tF",
+            "mangledName": "$s17GMacroProtocolSDK0aB7SessionC23fetchRockerAntiDeadZone8responseyys6ResultOySDySSypGs5Error_pGYbc_tF",
+            "moduleName": "GMacroProtocolSDK",
+            "declAttributes": [
+              "Final",
+              "AccessControl",
+              "RawDocComment"
+            ],
+            "isFromExtension": true,
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
             "name": "updateTriggerTestVibrationSwitch",
             "printedName": "updateTriggerTestVibrationSwitch(triggerTestVibration:response:)",
             "children": [
@@ -34746,6 +35226,148 @@
           },
           {
             "kind": "Function",
+            "name": "updateGyroAxisSwap",
+            "printedName": "updateGyroAxisSwap(isSwap:response:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Bool",
+                "printedName": "Swift.Bool",
+                "usr": "s:Sb"
+              },
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "(Swift.Result<[Swift.String : Any], any Swift.Error>) -> ()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Result",
+                    "printedName": "Swift.Result<[Swift.String : Any], any Swift.Error>",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Dictionary",
+                        "printedName": "[Swift.String : Any]",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "String",
+                            "printedName": "Swift.String",
+                            "usr": "s:SS"
+                          },
+                          {
+                            "kind": "TypeNominal",
+                            "name": "ProtocolComposition",
+                            "printedName": "Any"
+                          }
+                        ],
+                        "usr": "s:SD"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Error",
+                        "printedName": "any Swift.Error",
+                        "usr": "s:s5ErrorP"
+                      }
+                    ],
+                    "usr": "s:s6ResultO"
+                  }
+                ]
+              }
+            ],
+            "declKind": "Func",
+            "usr": "s:17GMacroProtocolSDK0aB7SessionC18updateGyroAxisSwap02isH08responseySb_ys6ResultOySDySSypGs5Error_pGYbctF",
+            "mangledName": "$s17GMacroProtocolSDK0aB7SessionC18updateGyroAxisSwap02isH08responseySb_ys6ResultOySDySSypGs5Error_pGYbctF",
+            "moduleName": "GMacroProtocolSDK",
+            "declAttributes": [
+              "Final",
+              "AccessControl",
+              "RawDocComment"
+            ],
+            "isFromExtension": true,
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "fetchGyroAxisSwap",
+            "printedName": "fetchGyroAxisSwap(response:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "(Swift.Result<[Swift.String : Any], any Swift.Error>) -> ()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Result",
+                    "printedName": "Swift.Result<[Swift.String : Any], any Swift.Error>",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Dictionary",
+                        "printedName": "[Swift.String : Any]",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "String",
+                            "printedName": "Swift.String",
+                            "usr": "s:SS"
+                          },
+                          {
+                            "kind": "TypeNominal",
+                            "name": "ProtocolComposition",
+                            "printedName": "Any"
+                          }
+                        ],
+                        "usr": "s:SD"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Error",
+                        "printedName": "any Swift.Error",
+                        "usr": "s:s5ErrorP"
+                      }
+                    ],
+                    "usr": "s:s6ResultO"
+                  }
+                ]
+              }
+            ],
+            "declKind": "Func",
+            "usr": "s:17GMacroProtocolSDK0aB7SessionC17fetchGyroAxisSwap8responseyys6ResultOySDySSypGs5Error_pGYbc_tF",
+            "mangledName": "$s17GMacroProtocolSDK0aB7SessionC17fetchGyroAxisSwap8responseyys6ResultOySDySSypGs5Error_pGYbc_tF",
+            "moduleName": "GMacroProtocolSDK",
+            "declAttributes": [
+              "Final",
+              "AccessControl",
+              "RawDocComment"
+            ],
+            "isFromExtension": true,
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
             "name": "startGyroCalibration",
             "printedName": "startGyroCalibration(_:)",
             "children": [
@@ -36268,1176 +36890,1183 @@
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 2773,
+      "offset": 2768,
       "length": 4,
-      "value": "0x33"
+      "value": "0x32"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
       "offset": 2823,
       "length": 4,
+      "value": "0x33"
+    },
+    {
+      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
+      "kind": "IntegerLiteral",
+      "offset": 2873,
+      "length": 4,
       "value": "0x34"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 2877,
+      "offset": 2927,
       "length": 4,
       "value": "0x35"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 2942,
+      "offset": 2992,
       "length": 4,
       "value": "0x36"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 2992,
+      "offset": 3042,
       "length": 4,
       "value": "0x37"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 3042,
+      "offset": 3092,
       "length": 4,
       "value": "0x38"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 3092,
+      "offset": 3142,
       "length": 4,
       "value": "0x39"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 3149,
+      "offset": 3199,
       "length": 4,
       "value": "0x3A"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 3194,
+      "offset": 3244,
       "length": 4,
       "value": "0x3B"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 3239,
+      "offset": 3289,
       "length": 4,
       "value": "0x3C"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 3284,
+      "offset": 3334,
       "length": 4,
       "value": "0x3D"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 3329,
+      "offset": 3379,
       "length": 4,
       "value": "0x3E"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 3374,
+      "offset": 3424,
       "length": 4,
       "value": "0x3F"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 3419,
+      "offset": 3469,
       "length": 4,
       "value": "0x40"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 3464,
+      "offset": 3514,
       "length": 4,
       "value": "0x41"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 3509,
+      "offset": 3559,
       "length": 4,
       "value": "0x42"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 3554,
+      "offset": 3604,
       "length": 4,
       "value": "0x43"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 3600,
+      "offset": 3650,
       "length": 4,
       "value": "0x44"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 3646,
+      "offset": 3696,
       "length": 4,
       "value": "0x45"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 3697,
+      "offset": 3747,
       "length": 4,
       "value": "0x46"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 3751,
+      "offset": 3801,
       "length": 4,
       "value": "0x47"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 3805,
+      "offset": 3855,
       "length": 4,
       "value": "0x48"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 3853,
+      "offset": 3903,
       "length": 4,
       "value": "0x49"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 3902,
+      "offset": 3952,
       "length": 4,
       "value": "0x4A"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 3949,
+      "offset": 3999,
       "length": 4,
       "value": "0x4B"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 3998,
+      "offset": 4048,
       "length": 4,
       "value": "0x4C"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 4055,
+      "offset": 4105,
       "length": 4,
       "value": "0x4D"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 4101,
+      "offset": 4151,
       "length": 4,
       "value": "0x4E"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 4157,
+      "offset": 4207,
       "length": 4,
       "value": "0x4F"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 4210,
+      "offset": 4260,
       "length": 4,
       "value": "0x50"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 4262,
+      "offset": 4312,
       "length": 4,
       "value": "0x51"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 4314,
+      "offset": 4364,
       "length": 4,
       "value": "0x52"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 4365,
+      "offset": 4415,
       "length": 4,
       "value": "0x53"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 4433,
+      "offset": 4483,
       "length": 4,
       "value": "0x54"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 4484,
+      "offset": 4534,
       "length": 4,
       "value": "0x55"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 4535,
+      "offset": 4585,
       "length": 4,
       "value": "0x56"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 4586,
+      "offset": 4636,
       "length": 4,
       "value": "0x57"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 4637,
+      "offset": 4687,
       "length": 4,
       "value": "0x58"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 4702,
+      "offset": 4752,
       "length": 4,
       "value": "0x59"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 4761,
+      "offset": 4811,
       "length": 4,
       "value": "0x5A"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 4827,
+      "offset": 4877,
       "length": 4,
       "value": "0x5B"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 4889,
+      "offset": 4939,
       "length": 4,
       "value": "0x5C"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 4955,
+      "offset": 5005,
       "length": 4,
       "value": "0x5D"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 5006,
+      "offset": 5056,
       "length": 4,
       "value": "0x5E"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 5073,
+      "offset": 5123,
       "length": 4,
       "value": "0x5F"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 5133,
+      "offset": 5183,
       "length": 4,
       "value": "0x60"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 5197,
+      "offset": 5247,
       "length": 4,
       "value": "0x61"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 5259,
+      "offset": 5309,
       "length": 4,
       "value": "0x62"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 5331,
+      "offset": 5381,
       "length": 4,
       "value": "0x63"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 5393,
+      "offset": 5443,
       "length": 4,
       "value": "0x64"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 5450,
+      "offset": 5500,
       "length": 4,
       "value": "0x65"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 5504,
+      "offset": 5554,
       "length": 4,
       "value": "0x66"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 5552,
+      "offset": 5602,
       "length": 4,
       "value": "0x67"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 5608,
+      "offset": 5658,
       "length": 4,
       "value": "0x68"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 5654,
+      "offset": 5704,
       "length": 4,
       "value": "0x69"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 5700,
+      "offset": 5750,
       "length": 4,
       "value": "0x6A"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 5746,
+      "offset": 5796,
       "length": 4,
       "value": "0x6B"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 5792,
+      "offset": 5842,
       "length": 4,
       "value": "0x6C"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 5838,
+      "offset": 5888,
       "length": 4,
       "value": "0x6D"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 5884,
+      "offset": 5934,
       "length": 4,
       "value": "0x6E"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 5930,
+      "offset": 5980,
       "length": 4,
       "value": "0x6F"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 5976,
+      "offset": 6026,
       "length": 4,
       "value": "0x70"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 6022,
+      "offset": 6072,
       "length": 4,
       "value": "0x71"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 6068,
+      "offset": 6118,
       "length": 4,
       "value": "0x72"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 6114,
+      "offset": 6164,
       "length": 4,
       "value": "0x73"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 6165,
+      "offset": 6215,
       "length": 4,
       "value": "0x74"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 6215,
+      "offset": 6265,
       "length": 4,
       "value": "0x75"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 6262,
+      "offset": 6312,
       "length": 4,
       "value": "0x76"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 6309,
+      "offset": 6359,
       "length": 4,
       "value": "0x77"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 6358,
+      "offset": 6408,
       "length": 4,
       "value": "0x78"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 6405,
+      "offset": 6455,
       "length": 4,
       "value": "0x79"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 6453,
+      "offset": 6503,
       "length": 4,
       "value": "0x7A"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 6500,
+      "offset": 6550,
       "length": 4,
       "value": "0x7B"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 6546,
+      "offset": 6596,
       "length": 4,
       "value": "0x7C"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 6593,
+      "offset": 6643,
       "length": 4,
       "value": "0x7D"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 6641,
+      "offset": 6691,
       "length": 4,
       "value": "0x7E"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 6688,
+      "offset": 6738,
       "length": 4,
       "value": "0x7F"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 6740,
+      "offset": 6790,
       "length": 4,
       "value": "0x80"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 6792,
+      "offset": 6842,
       "length": 4,
       "value": "0x81"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 6851,
+      "offset": 6901,
       "length": 4,
       "value": "0x82"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 6911,
+      "offset": 6961,
       "length": 4,
       "value": "0x83"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 6970,
+      "offset": 7020,
       "length": 4,
       "value": "0x84"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 7032,
+      "offset": 7082,
       "length": 4,
       "value": "0x85"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 7087,
+      "offset": 7137,
       "length": 4,
       "value": "0x86"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 7152,
+      "offset": 7202,
       "length": 4,
       "value": "0x87"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 7209,
+      "offset": 7259,
       "length": 4,
       "value": "0x88"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 7266,
+      "offset": 7316,
       "length": 4,
       "value": "0x89"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 7323,
+      "offset": 7373,
       "length": 4,
       "value": "0x8A"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 7380,
+      "offset": 7430,
       "length": 4,
       "value": "0x8B"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 7437,
+      "offset": 7487,
       "length": 4,
       "value": "0x8C"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 7494,
+      "offset": 7544,
       "length": 4,
       "value": "0x8D"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 7551,
+      "offset": 7601,
       "length": 4,
       "value": "0x8E"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 7608,
+      "offset": 7658,
       "length": 4,
       "value": "0x8F"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 7670,
+      "offset": 7720,
       "length": 4,
       "value": "0x90"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 7718,
+      "offset": 7768,
       "length": 4,
       "value": "0x91"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 7766,
+      "offset": 7816,
       "length": 4,
       "value": "0x92"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 7814,
+      "offset": 7864,
       "length": 4,
       "value": "0x93"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 7862,
+      "offset": 7912,
       "length": 4,
       "value": "0x94"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 7910,
+      "offset": 7960,
       "length": 4,
       "value": "0x95"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 7958,
+      "offset": 8008,
       "length": 4,
       "value": "0x96"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 8006,
+      "offset": 8056,
       "length": 4,
       "value": "0x97"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 8054,
+      "offset": 8104,
       "length": 4,
       "value": "0x98"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 8107,
+      "offset": 8157,
       "length": 4,
       "value": "0x99"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 8165,
+      "offset": 8215,
       "length": 4,
       "value": "0x9A"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 8234,
+      "offset": 8284,
       "length": 4,
       "value": "0x9B"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 8283,
+      "offset": 8333,
       "length": 4,
       "value": "0x9C"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 8331,
+      "offset": 8381,
       "length": 4,
       "value": "0x9D"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 8379,
+      "offset": 8429,
       "length": 4,
       "value": "0x9E"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 8428,
+      "offset": 8478,
       "length": 4,
       "value": "0x9F"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 8480,
+      "offset": 8530,
       "length": 4,
       "value": "0xA0"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 8526,
+      "offset": 8576,
       "length": 4,
       "value": "0xA1"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 8573,
+      "offset": 8623,
       "length": 4,
       "value": "0xA2"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 8627,
+      "offset": 8677,
       "length": 4,
       "value": "0xA3"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 8681,
+      "offset": 8731,
       "length": 4,
       "value": "0xA4"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 8801,
+      "offset": 8851,
       "length": 4,
       "value": "0xB0"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 8853,
+      "offset": 8903,
       "length": 4,
       "value": "0xB1"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 8906,
+      "offset": 8956,
       "length": 4,
       "value": "0xB2"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 8968,
+      "offset": 9018,
       "length": 4,
       "value": "0xB3"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 9028,
+      "offset": 9078,
       "length": 4,
       "value": "0xB4"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 9084,
+      "offset": 9134,
       "length": 4,
       "value": "0xB5"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 9144,
+      "offset": 9194,
       "length": 4,
       "value": "0xB6"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 9195,
+      "offset": 9245,
       "length": 4,
       "value": "0xB7"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 9246,
+      "offset": 9296,
       "length": 4,
       "value": "0xB8"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 9297,
+      "offset": 9347,
       "length": 4,
       "value": "0xB9"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 9348,
+      "offset": 9398,
       "length": 4,
       "value": "0xBA"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 9401,
+      "offset": 9451,
       "length": 4,
       "value": "0xBB"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 9465,
+      "offset": 9515,
       "length": 4,
       "value": "0xBC"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 9516,
+      "offset": 9566,
       "length": 4,
       "value": "0xBD"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 9567,
+      "offset": 9617,
       "length": 4,
       "value": "0xBE"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 9618,
+      "offset": 9668,
       "length": 4,
       "value": "0xBF"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 9669,
+      "offset": 9719,
       "length": 4,
       "value": "0xC0"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 9720,
+      "offset": 9770,
       "length": 4,
       "value": "0xC1"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 9776,
+      "offset": 9826,
       "length": 4,
       "value": "0xC2"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 9829,
+      "offset": 9879,
       "length": 4,
       "value": "0xC3"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 9888,
+      "offset": 9938,
       "length": 4,
       "value": "0xC4"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 9939,
+      "offset": 9989,
       "length": 4,
       "value": "0xC5"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 9990,
+      "offset": 10040,
       "length": 4,
       "value": "0xC6"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 10041,
+      "offset": 10091,
       "length": 4,
       "value": "0xC7"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 10092,
+      "offset": 10142,
       "length": 4,
       "value": "0xC8"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 10144,
+      "offset": 10194,
       "length": 4,
       "value": "0xC9"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 10195,
+      "offset": 10245,
       "length": 4,
       "value": "0xCA"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 10247,
+      "offset": 10297,
       "length": 4,
       "value": "0xCB"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 10298,
+      "offset": 10348,
       "length": 4,
       "value": "0xCC"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 10349,
+      "offset": 10399,
       "length": 4,
       "value": "0xCD"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 10404,
+      "offset": 10454,
       "length": 4,
       "value": "0xCE"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 10455,
+      "offset": 10505,
       "length": 4,
       "value": "0xCF"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 10507,
+      "offset": 10557,
       "length": 4,
       "value": "0xD0"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 10569,
+      "offset": 10619,
       "length": 4,
       "value": "0xD1"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 10632,
+      "offset": 10682,
       "length": 4,
       "value": "0xD2"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 10694,
+      "offset": 10744,
       "length": 4,
       "value": "0xD3"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 10754,
+      "offset": 10804,
       "length": 4,
       "value": "0xD4"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 10819,
+      "offset": 10869,
       "length": 4,
       "value": "0xD5"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 10884,
+      "offset": 10934,
       "length": 4,
       "value": "0xD6"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 10947,
+      "offset": 10997,
       "length": 4,
       "value": "0xD7"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 11000,
+      "offset": 11050,
       "length": 4,
       "value": "0xD8"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 11055,
+      "offset": 11105,
       "length": 4,
       "value": "0xD9"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 11116,
+      "offset": 11166,
       "length": 4,
       "value": "0xDA"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 11172,
+      "offset": 11222,
       "length": 4,
       "value": "0xDB"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 11227,
+      "offset": 11277,
       "length": 4,
       "value": "0xDC"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 11284,
+      "offset": 11334,
       "length": 4,
       "value": "0xDD"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 11401,
+      "offset": 11451,
       "length": 4,
       "value": "0xE0"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 11455,
+      "offset": 11505,
       "length": 4,
       "value": "0xE1"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 11507,
+      "offset": 11557,
       "length": 4,
       "value": "0xE2"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 11557,
+      "offset": 11607,
       "length": 4,
       "value": "0xE3"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 11608,
+      "offset": 11658,
       "length": 4,
       "value": "0xE4"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 11663,
+      "offset": 11713,
       "length": 4,
       "value": "0xE5"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 11716,
+      "offset": 11766,
       "length": 4,
       "value": "0xE6"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/KeyboardKey.swift",
       "kind": "IntegerLiteral",
-      "offset": 11767,
+      "offset": 11817,
       "length": 4,
       "value": "0xE7"
     },
@@ -38298,7 +38927,7 @@
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/DataHelper\/DataHelper+Parse.swift",
       "kind": "IntegerLiteral",
-      "offset": 14988,
+      "offset": 23334,
       "length": 1,
       "value": "0"
     },
@@ -39082,308 +39711,315 @@
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 3046,
+      "offset": 3063,
       "length": 4,
       "value": "0x59"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 3109,
+      "offset": 3126,
       "length": 4,
       "value": "0x41"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 3169,
+      "offset": 3186,
       "length": 4,
       "value": "0x42"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 3229,
+      "offset": 3246,
       "length": 4,
       "value": "0x55"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 3313,
+      "offset": 3330,
       "length": 4,
       "value": "0x56"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 3401,
+      "offset": 3418,
       "length": 4,
       "value": "0x44"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 3452,
+      "offset": 3469,
       "length": 4,
       "value": "0x45"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 3506,
+      "offset": 3523,
       "length": 4,
       "value": "0x46"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 3569,
+      "offset": 3586,
       "length": 4,
       "value": "0x47"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 3632,
+      "offset": 3649,
       "length": 4,
       "value": "0x58"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 3712,
+      "offset": 3729,
       "length": 4,
       "value": "0x4C"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 3781,
+      "offset": 3825,
       "length": 4,
       "value": "0x4D"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 3847,
+      "offset": 3888,
       "length": 4,
       "value": "0x4E"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 3904,
+      "offset": 3962,
       "length": 4,
       "value": "0x4F"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 3961,
+      "offset": 4036,
       "length": 4,
       "value": "0x82"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 4039,
+      "offset": 4131,
       "length": 4,
       "value": "0x4A"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 4125,
+      "offset": 4217,
       "length": 4,
       "value": "0x71"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 4195,
+      "offset": 4304,
       "length": 4,
       "value": "0x72"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 4287,
+      "offset": 4383,
+      "length": 4,
+      "value": "0x70"
+    },
+    {
+      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
+      "kind": "IntegerLiteral",
+      "offset": 4484,
       "length": 4,
       "value": "0x43"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 4347,
+      "offset": 4544,
       "length": 4,
       "value": "0x57"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 4432,
+      "offset": 4629,
       "length": 4,
       "value": "0x40"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 4483,
+      "offset": 4680,
       "length": 4,
       "value": "0x48"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 4549,
+      "offset": 4746,
       "length": 4,
       "value": "0x49"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 4626,
+      "offset": 4823,
       "length": 4,
       "value": "0x84"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 4689,
+      "offset": 4886,
       "length": 4,
       "value": "0x77"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 4757,
+      "offset": 4971,
       "length": 4,
       "value": "0x79"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 4909,
+      "offset": 5140,
       "length": 4,
       "value": "0x80"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 4975,
+      "offset": 5223,
       "length": 4,
       "value": "0x85"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 5026,
+      "offset": 5274,
       "length": 4,
       "value": "0x86"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 5090,
+      "offset": 5338,
       "length": 4,
       "value": "0x5B"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 5149,
+      "offset": 5397,
       "length": 4,
       "value": "0x67"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 5200,
+      "offset": 5448,
       "length": 4,
       "value": "0x6A"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 5248,
+      "offset": 5496,
       "length": 4,
       "value": "0x6C"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 5305,
+      "offset": 5553,
       "length": 4,
       "value": "0x00"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 5356,
+      "offset": 5604,
       "length": 4,
       "value": "0x75"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 5469,
+      "offset": 5717,
       "length": 4,
       "value": "0x04"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 5496,
+      "offset": 5744,
       "length": 4,
       "value": "0x01"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 5523,
+      "offset": 5771,
       "length": 4,
       "value": "0x02"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 5550,
+      "offset": 5798,
       "length": 4,
       "value": "0x10"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 5600,
+      "offset": 5848,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 5624,
+      "offset": 5872,
       "length": 1,
       "value": "1"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 5683,
+      "offset": 5931,
       "length": 4,
       "value": "0x00"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 5726,
+      "offset": 5974,
       "length": 4,
       "value": "0x01"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 5763,
+      "offset": 6011,
       "length": 4,
       "value": "0x02"
     },
@@ -39474,427 +40110,483 @@
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
       "kind": "IntegerLiteral",
-      "offset": 2581,
-      "length": 4,
-      "value": "0x03"
-    },
-    {
-      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
-      "kind": "IntegerLiteral",
-      "offset": 2643,
-      "length": 4,
-      "value": "0x04"
-    },
-    {
-      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
-      "kind": "IntegerLiteral",
-      "offset": 2707,
-      "length": 4,
-      "value": "0x07"
-    },
-    {
-      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
-      "kind": "IntegerLiteral",
-      "offset": 2771,
-      "length": 4,
-      "value": "0x08"
-    },
-    {
-      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
-      "kind": "IntegerLiteral",
-      "offset": 2845,
-      "length": 4,
-      "value": "0x11"
-    },
-    {
-      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
-      "kind": "IntegerLiteral",
-      "offset": 3488,
-      "length": 4,
-      "value": "0x01"
-    },
-    {
-      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
-      "kind": "IntegerLiteral",
-      "offset": 3571,
-      "length": 4,
-      "value": "0x02"
-    },
-    {
-      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
-      "kind": "IntegerLiteral",
-      "offset": 3645,
-      "length": 4,
-      "value": "0x03"
-    },
-    {
-      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
-      "kind": "IntegerLiteral",
-      "offset": 3716,
-      "length": 4,
-      "value": "0x04"
-    },
-    {
-      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
-      "kind": "IntegerLiteral",
-      "offset": 3799,
-      "length": 4,
-      "value": "0x05"
-    },
-    {
-      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
-      "kind": "IntegerLiteral",
-      "offset": 3876,
-      "length": 4,
-      "value": "0x06"
-    },
-    {
-      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
-      "kind": "IntegerLiteral",
-      "offset": 3956,
-      "length": 4,
-      "value": "0x07"
-    },
-    {
-      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
-      "kind": "IntegerLiteral",
-      "offset": 4036,
-      "length": 4,
-      "value": "0x08"
-    },
-    {
-      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
-      "kind": "IntegerLiteral",
-      "offset": 4116,
-      "length": 4,
-      "value": "0x09"
-    },
-    {
-      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
-      "kind": "IntegerLiteral",
-      "offset": 5205,
-      "length": 4,
-      "value": "0x09"
-    },
-    {
-      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
-      "kind": "IntegerLiteral",
-      "offset": 5279,
-      "length": 4,
-      "value": "0x0A"
-    },
-    {
-      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
-      "kind": "IntegerLiteral",
-      "offset": 5353,
-      "length": 4,
-      "value": "0x1A"
-    },
-    {
-      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
-      "kind": "IntegerLiteral",
-      "offset": 5480,
-      "length": 4,
-      "value": "0x1B"
-    },
-    {
-      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
-      "kind": "IntegerLiteral",
-      "offset": 5557,
-      "length": 4,
-      "value": "0x1C"
-    },
-    {
-      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
-      "kind": "IntegerLiteral",
-      "offset": 5634,
+      "offset": 1891,
       "length": 4,
       "value": "0x1D"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
       "kind": "IntegerLiteral",
-      "offset": 5711,
-      "length": 4,
-      "value": "0x0F"
-    },
-    {
-      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
-      "kind": "IntegerLiteral",
-      "offset": 5791,
-      "length": 4,
-      "value": "0x10"
-    },
-    {
-      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
-      "kind": "IntegerLiteral",
-      "offset": 5877,
-      "length": 4,
-      "value": "0x13"
-    },
-    {
-      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
-      "kind": "IntegerLiteral",
-      "offset": 5987,
-      "length": 4,
-      "value": "0x14"
-    },
-    {
-      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
-      "kind": "IntegerLiteral",
-      "offset": 6100,
+      "offset": 1959,
       "length": 4,
       "value": "0x1E"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
       "kind": "IntegerLiteral",
-      "offset": 6228,
-      "length": 4,
-      "value": "0x1F"
-    },
-    {
-      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
-      "kind": "IntegerLiteral",
-      "offset": 6356,
-      "length": 4,
-      "value": "0x22"
-    },
-    {
-      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
-      "kind": "IntegerLiteral",
-      "offset": 6429,
-      "length": 4,
-      "value": "0x23"
-    },
-    {
-      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
-      "kind": "IntegerLiteral",
-      "offset": 6502,
-      "length": 4,
-      "value": "0x24"
-    },
-    {
-      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
-      "kind": "IntegerLiteral",
-      "offset": 6576,
-      "length": 4,
-      "value": "0x25"
-    },
-    {
-      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
-      "kind": "IntegerLiteral",
-      "offset": 6640,
-      "length": 4,
-      "value": "0x28"
-    },
-    {
-      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
-      "kind": "IntegerLiteral",
-      "offset": 8592,
-      "length": 4,
-      "value": "0x10"
-    },
-    {
-      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
-      "kind": "IntegerLiteral",
-      "offset": 8659,
-      "length": 4,
-      "value": "0x11"
-    },
-    {
-      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
-      "kind": "IntegerLiteral",
-      "offset": 8732,
-      "length": 4,
-      "value": "0x12"
-    },
-    {
-      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
-      "kind": "IntegerLiteral",
-      "offset": 9254,
-      "length": 4,
-      "value": "0x01"
-    },
-    {
-      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
-      "kind": "IntegerLiteral",
-      "offset": 9382,
-      "length": 4,
-      "value": "0x04"
-    },
-    {
-      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
-      "kind": "IntegerLiteral",
-      "offset": 9456,
-      "length": 4,
-      "value": "0x05"
-    },
-    {
-      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
-      "kind": "IntegerLiteral",
-      "offset": 9539,
-      "length": 4,
-      "value": "0x06"
-    },
-    {
-      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
-      "kind": "IntegerLiteral",
-      "offset": 10247,
-      "length": 4,
-      "value": "0x01"
-    },
-    {
-      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
-      "kind": "IntegerLiteral",
-      "offset": 10320,
-      "length": 4,
-      "value": "0x02"
-    },
-    {
-      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
-      "kind": "IntegerLiteral",
-      "offset": 10393,
+      "offset": 2867,
       "length": 4,
       "value": "0x03"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
       "kind": "IntegerLiteral",
-      "offset": 10472,
+      "offset": 2929,
       "length": 4,
       "value": "0x04"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
       "kind": "IntegerLiteral",
-      "offset": 10551,
-      "length": 4,
-      "value": "0x05"
-    },
-    {
-      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
-      "kind": "IntegerLiteral",
-      "offset": 10630,
-      "length": 4,
-      "value": "0x06"
-    },
-    {
-      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
-      "kind": "IntegerLiteral",
-      "offset": 10709,
+      "offset": 2993,
       "length": 4,
       "value": "0x07"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
       "kind": "IntegerLiteral",
-      "offset": 10788,
+      "offset": 3057,
       "length": 4,
       "value": "0x08"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
       "kind": "IntegerLiteral",
-      "offset": 10867,
+      "offset": 3131,
       "length": 4,
-      "value": "0x09"
+      "value": "0x11"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
       "kind": "IntegerLiteral",
-      "offset": 10946,
-      "length": 4,
-      "value": "0x0A"
-    },
-    {
-      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
-      "kind": "IntegerLiteral",
-      "offset": 11025,
-      "length": 4,
-      "value": "0x0B"
-    },
-    {
-      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
-      "kind": "IntegerLiteral",
-      "offset": 11116,
-      "length": 4,
-      "value": "0x0C"
-    },
-    {
-      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
-      "kind": "IntegerLiteral",
-      "offset": 11207,
-      "length": 4,
-      "value": "0x0D"
-    },
-    {
-      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
-      "kind": "IntegerLiteral",
-      "offset": 11286,
-      "length": 4,
-      "value": "0x0E"
-    },
-    {
-      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
-      "kind": "IntegerLiteral",
-      "offset": 12717,
+      "offset": 3774,
       "length": 4,
       "value": "0x01"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
       "kind": "IntegerLiteral",
-      "offset": 12782,
+      "offset": 3857,
       "length": 4,
       "value": "0x02"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
       "kind": "IntegerLiteral",
-      "offset": 12841,
+      "offset": 3931,
       "length": 4,
       "value": "0x03"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
       "kind": "IntegerLiteral",
-      "offset": 12898,
+      "offset": 4002,
       "length": 4,
       "value": "0x04"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
       "kind": "IntegerLiteral",
-      "offset": 12963,
+      "offset": 4085,
       "length": 4,
       "value": "0x05"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
       "kind": "IntegerLiteral",
-      "offset": 13595,
+      "offset": 4162,
+      "length": 4,
+      "value": "0x06"
+    },
+    {
+      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
+      "kind": "IntegerLiteral",
+      "offset": 4242,
+      "length": 4,
+      "value": "0x07"
+    },
+    {
+      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
+      "kind": "IntegerLiteral",
+      "offset": 4322,
+      "length": 4,
+      "value": "0x08"
+    },
+    {
+      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
+      "kind": "IntegerLiteral",
+      "offset": 4402,
+      "length": 4,
+      "value": "0x09"
+    },
+    {
+      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
+      "kind": "IntegerLiteral",
+      "offset": 5491,
+      "length": 4,
+      "value": "0x09"
+    },
+    {
+      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
+      "kind": "IntegerLiteral",
+      "offset": 5565,
+      "length": 4,
+      "value": "0x0A"
+    },
+    {
+      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
+      "kind": "IntegerLiteral",
+      "offset": 5639,
+      "length": 4,
+      "value": "0x1A"
+    },
+    {
+      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
+      "kind": "IntegerLiteral",
+      "offset": 5766,
+      "length": 4,
+      "value": "0x1B"
+    },
+    {
+      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
+      "kind": "IntegerLiteral",
+      "offset": 5843,
+      "length": 4,
+      "value": "0x1C"
+    },
+    {
+      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
+      "kind": "IntegerLiteral",
+      "offset": 5920,
+      "length": 4,
+      "value": "0x1D"
+    },
+    {
+      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
+      "kind": "IntegerLiteral",
+      "offset": 5997,
+      "length": 4,
+      "value": "0x0F"
+    },
+    {
+      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
+      "kind": "IntegerLiteral",
+      "offset": 6077,
+      "length": 4,
+      "value": "0x10"
+    },
+    {
+      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
+      "kind": "IntegerLiteral",
+      "offset": 6163,
+      "length": 4,
+      "value": "0x13"
+    },
+    {
+      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
+      "kind": "IntegerLiteral",
+      "offset": 6273,
+      "length": 4,
+      "value": "0x14"
+    },
+    {
+      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
+      "kind": "IntegerLiteral",
+      "offset": 6386,
+      "length": 4,
+      "value": "0x1E"
+    },
+    {
+      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
+      "kind": "IntegerLiteral",
+      "offset": 6514,
+      "length": 4,
+      "value": "0x1F"
+    },
+    {
+      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
+      "kind": "IntegerLiteral",
+      "offset": 6642,
+      "length": 4,
+      "value": "0x22"
+    },
+    {
+      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
+      "kind": "IntegerLiteral",
+      "offset": 6715,
+      "length": 4,
+      "value": "0x23"
+    },
+    {
+      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
+      "kind": "IntegerLiteral",
+      "offset": 6788,
+      "length": 4,
+      "value": "0x24"
+    },
+    {
+      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
+      "kind": "IntegerLiteral",
+      "offset": 6862,
+      "length": 4,
+      "value": "0x25"
+    },
+    {
+      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
+      "kind": "IntegerLiteral",
+      "offset": 6936,
+      "length": 4,
+      "value": "0x29"
+    },
+    {
+      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
+      "kind": "IntegerLiteral",
+      "offset": 7007,
+      "length": 4,
+      "value": "0x2A"
+    },
+    {
+      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
+      "kind": "IntegerLiteral",
+      "offset": 7068,
+      "length": 4,
+      "value": "0x28"
+    },
+    {
+      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
+      "kind": "IntegerLiteral",
+      "offset": 9176,
+      "length": 4,
+      "value": "0x10"
+    },
+    {
+      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
+      "kind": "IntegerLiteral",
+      "offset": 9243,
+      "length": 4,
+      "value": "0x11"
+    },
+    {
+      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
+      "kind": "IntegerLiteral",
+      "offset": 9316,
+      "length": 4,
+      "value": "0x12"
+    },
+    {
+      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
+      "kind": "IntegerLiteral",
+      "offset": 9838,
       "length": 4,
       "value": "0x01"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
       "kind": "IntegerLiteral",
-      "offset": 13660,
+      "offset": 9966,
+      "length": 4,
+      "value": "0x04"
+    },
+    {
+      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
+      "kind": "IntegerLiteral",
+      "offset": 10040,
+      "length": 4,
+      "value": "0x05"
+    },
+    {
+      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
+      "kind": "IntegerLiteral",
+      "offset": 10123,
+      "length": 4,
+      "value": "0x06"
+    },
+    {
+      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
+      "kind": "IntegerLiteral",
+      "offset": 10828,
+      "length": 4,
+      "value": "0x08"
+    },
+    {
+      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
+      "kind": "IntegerLiteral",
+      "offset": 10893,
+      "length": 4,
+      "value": "0x09"
+    },
+    {
+      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
+      "kind": "IntegerLiteral",
+      "offset": 10958,
+      "length": 4,
+      "value": "0x0A"
+    },
+    {
+      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
+      "kind": "IntegerLiteral",
+      "offset": 11023,
+      "length": 4,
+      "value": "0x0B"
+    },
+    {
+      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
+      "kind": "IntegerLiteral",
+      "offset": 11625,
+      "length": 4,
+      "value": "0x01"
+    },
+    {
+      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
+      "kind": "IntegerLiteral",
+      "offset": 11698,
       "length": 4,
       "value": "0x02"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
       "kind": "IntegerLiteral",
-      "offset": 13719,
+      "offset": 11771,
       "length": 4,
       "value": "0x03"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
       "kind": "IntegerLiteral",
-      "offset": 14199,
+      "offset": 11850,
+      "length": 4,
+      "value": "0x04"
+    },
+    {
+      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
+      "kind": "IntegerLiteral",
+      "offset": 11929,
+      "length": 4,
+      "value": "0x05"
+    },
+    {
+      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
+      "kind": "IntegerLiteral",
+      "offset": 12008,
+      "length": 4,
+      "value": "0x06"
+    },
+    {
+      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
+      "kind": "IntegerLiteral",
+      "offset": 12087,
+      "length": 4,
+      "value": "0x07"
+    },
+    {
+      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
+      "kind": "IntegerLiteral",
+      "offset": 12166,
+      "length": 4,
+      "value": "0x08"
+    },
+    {
+      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
+      "kind": "IntegerLiteral",
+      "offset": 12245,
+      "length": 4,
+      "value": "0x09"
+    },
+    {
+      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
+      "kind": "IntegerLiteral",
+      "offset": 12324,
+      "length": 4,
+      "value": "0x0A"
+    },
+    {
+      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
+      "kind": "IntegerLiteral",
+      "offset": 12403,
+      "length": 4,
+      "value": "0x0B"
+    },
+    {
+      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
+      "kind": "IntegerLiteral",
+      "offset": 12494,
+      "length": 4,
+      "value": "0x0C"
+    },
+    {
+      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
+      "kind": "IntegerLiteral",
+      "offset": 12585,
+      "length": 4,
+      "value": "0x0D"
+    },
+    {
+      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
+      "kind": "IntegerLiteral",
+      "offset": 12664,
+      "length": 4,
+      "value": "0x0E"
+    },
+    {
+      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
+      "kind": "IntegerLiteral",
+      "offset": 14095,
+      "length": 4,
+      "value": "0x01"
+    },
+    {
+      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
+      "kind": "IntegerLiteral",
+      "offset": 14160,
+      "length": 4,
+      "value": "0x02"
+    },
+    {
+      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
+      "kind": "IntegerLiteral",
+      "offset": 14219,
+      "length": 4,
+      "value": "0x03"
+    },
+    {
+      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
+      "kind": "IntegerLiteral",
+      "offset": 14276,
+      "length": 4,
+      "value": "0x04"
+    },
+    {
+      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
+      "kind": "IntegerLiteral",
+      "offset": 14341,
+      "length": 4,
+      "value": "0x05"
+    },
+    {
+      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
+      "kind": "IntegerLiteral",
+      "offset": 14973,
+      "length": 4,
+      "value": "0x01"
+    },
+    {
+      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
+      "kind": "IntegerLiteral",
+      "offset": 15038,
+      "length": 4,
+      "value": "0x02"
+    },
+    {
+      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
+      "kind": "IntegerLiteral",
+      "offset": 15097,
+      "length": 4,
+      "value": "0x03"
+    },
+    {
+      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/SubIDs.swift",
+      "kind": "IntegerLiteral",
+      "offset": 15577,
       "length": 4,
       "value": "0x06"
     },

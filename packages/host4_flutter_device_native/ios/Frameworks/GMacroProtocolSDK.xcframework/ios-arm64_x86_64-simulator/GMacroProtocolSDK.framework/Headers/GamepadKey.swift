@@ -85,9 +85,8 @@ extension DataHelper {
         let L2 = parser.next(1).toInt()    // L2 0-255
         let R2 = parser.next(1).toInt()    // R2 0-255
 
-        var funcKeysData = parser.next(1) //用 bit 表示多个特殊按键的按下/抬起状态
-        funcKeysData.byteSwapped() // 高低位转换
-        keys.append(contentsOf: GamepadKey.keys(funcKeysData))
+        let funcKeysData = parser.next(1) // 用 bit 表示多个特殊按键的按下/抬起状态
+        keys.append(contentsOf: GamepadKey.functionKeys(funcKeysData))
         
         
 //        // 摇杆值转四方向按键
@@ -298,6 +297,24 @@ extension GamepadKey {
         }
 
         return keys
+    }
+
+    /// 0x07 测试模式中的功能键字节，对应 SL/SR/设置键。
+    static func functionKeys(_ data: Data) -> [GamepadKey] {
+        guard let bitmask = data.first else { return [] }
+
+        let mappings: [(UInt8, GamepadKey)] = [
+            (0x01, .SL_L),
+            (0x02, .SR_L),
+            (0x04, .SL_R),
+            (0x08, .SR_R),
+            (0x20, .SET_L),
+            (0x40, .SET_R),
+        ]
+
+        return mappings.compactMap { mask, key in
+            (bitmask & mask) != 0 ? key : nil
+        }
     }
 }
 

@@ -43,73 +43,167 @@ extension DataHelper {
         
         let protocolID: UInt8 = protocolIdData.toBytes()[0]
         let pId: GMacroProtocolID = GMacroProtocolID(rawValue: protocolID) ?? .error
-        let responseKey = ResponseKey(protocolID: pId, sn: sn)
+        
+        //2026.5.58 新增：部分协议需要 subID 来区分不同的命令响应，因此在解析时尝试提取 subID 以构建更准确的 responseKey
+        // 提取 subID
+        var subID: UInt8? = nil
+        if pId.hasSubID {
+            if let first = payload.first {
+                subID = first // first 本身就是 UInt8
+            } else {
+                print("⚠️ pid=0x\(String(format: "%02X", pId.rawValue)) 声明 hasSubID，但 payload 为空，sn=\(sn)")
+            }
+        }
+//        let responseKey = ResponseKey(protocolID: pId, sn: sn)
+        let responseKey = ResponseKey(protocolID: pId, subID: subID, sn: sn)
+        
         
         print("📥 响应解析 responseKey: \(responseKey)")
         
+//        callbackQueue.async { [unowned self] in
+//            dispatchPrecondition(condition: .onQueue(self.callbackQueue))
+//            
+//            let (responseResult, isComplete) = parse(protocolID: pId, all: data, payload: payload, sn: snData)
+//            var didCallback = false
+//            
+//            // 打印当前 pendingResponses 列表
+//            print("📌 当前 pendingResponses keys:")
+//            for key in self.pendingResponses.keys {
+//                print("    • \(key)")
+//            }
+//            
+//            // 1️⃣ 精确匹配
+////            if let callback = self.pendingResponses.removeValue(forKey: responseKey) {
+////                switch responseResult {
+////                case .success(let dic): callback(.success(dic))
+////                case .failure(let err): callback(.failure(err))
+////                }
+////                print("✅ 精确匹配回调成功，移除 pendingResponses[\(responseKey)]")
+////                didCallback = true
+////            }
+//            
+//            //2026.5.21 Flutter修改：先尝试精确匹配，如果数据完整则触发回调；如果数据不完整，则不触发回调，等待后续数据包完成后再尝试匹配。
+//            if let callback = self.pendingResponses[responseKey] {
+//                switch responseResult {
+//                case .success(let dic):
+//                    if isComplete {
+//                        self.pendingResponses.removeValue(forKey: responseKey)
+//                        callback(.success(dic))
+//                        didCallback = true
+//                    } else {
+//                        // Multi-packet response is not complete yet.
+//                        // Keep the pending callback and wait for the remaining packets.
+//                    }
+//
+//                case .failure(let err):
+//                    self.pendingResponses.removeValue(forKey: responseKey)
+//                    callback(.failure(err))
+//                    didCallback = true
+//                }
+//            }
+//   
+//
+//            // 3️⃣ 数据完整但仍未匹配 → 最后保底执行
+//            else if isComplete {
+//                if let (anyKey, anyCallback) = self.pendingResponses
+//                        .first(where: { $0.key.protocolID == pId }) {
+//                    self.pendingResponses.removeValue(forKey: anyKey)
+//                    switch responseResult {
+//                    case .success(let dic): anyCallback(.success(dic))
+//                    case .failure(let err): anyCallback(.failure(err))
+//                    }
+//                    print("🟡 强制触发挂起回调（数据完整但无匹配）: \(anyKey)")
+//                    didCallback = true
+//                } else {
+//                    print("✅ 数据完整，但无回调可触发，仅移除 pendingResponses[\(responseKey)]")
+//                    self.pendingResponses.removeValue(forKey: responseKey)
+//                }
+//            }
+//
+//            // 4️⃣ 未完整也未回调
+//            if !didCallback && !isComplete {
+//                print("⚠️ 数据未完整，且无匹配回调，保留 pendingResponses[\(responseKey)]")
+//            }
+//        }
+        
+        //2026.5.28 新增：严格区分有 subID 和无 subID 的协议的匹配策略：
         callbackQueue.async { [unowned self] in
             dispatchPrecondition(condition: .onQueue(self.callbackQueue))
             
             let (responseResult, isComplete) = parse(protocolID: pId, all: data, payload: payload, sn: snData)
             var didCallback = false
             
-            // 打印当前 pendingResponses 列表
+            // 🔑 核心逻辑：严格按 hasSubID 区分匹配策略
             print("📌 当前 pendingResponses keys:")
             for key in self.pendingResponses.keys {
                 print("    • \(key)")
             }
             
-            // 1️⃣ 精确匹配
-//            if let callback = self.pendingResponses.removeValue(forKey: responseKey) {
-//                switch responseResult {
-//                case .success(let dic): callback(.success(dic))
-//                case .failure(let err): callback(.failure(err))
-//                }
-//                print("✅ 精确匹配回调成功，移除 pendingResponses[\(responseKey)]")
-//                didCallback = true
-//            }
-            
-            //2026.5.21 Flutter修改：先尝试精确匹配，如果数据完整则触发回调；如果数据不完整，则不触发回调，等待后续数据包完成后再尝试匹配。
-            if let callback = self.pendingResponses[responseKey] {
-                switch responseResult {
-                case .success(let dic):
-                    if isComplete {
+            if pId.hasSubID {
+                // ✅ 对有 subID 的协议：必须精确匹配 (protocolID, subID, sn)
+                if let callback = self.pendingResponses[responseKey] {
+                    switch responseResult {
+                    case .success(let dic):
+                        if isComplete {
+                            self.pendingResponses.removeValue(forKey: responseKey)
+                            callback(.success(dic))
+                            didCallback = true
+                            print("✅ [hasSubID] 精确匹配成功，触发回调并移除: \(responseKey)")
+                        } else {
+                            print("⏳ [hasSubID] 数据未完整，保留等待后续包: \(responseKey)")
+                        }
+
+                    case .failure(let err):
                         self.pendingResponses.removeValue(forKey: responseKey)
-                        callback(.success(dic))
+                        callback(.failure(err))
+                        didCallback = true
+                        print("✅ [hasSubID] 精确匹配成功（失败），触发回调并移除: \(responseKey)")
+                    }
+                } else {
+                    // 对于有 subID 的协议，如果无精确匹配，直接忽略，等待超时或正确包
+                    print("❌ [hasSubID] 无精确匹配的待处理回调，丢弃该包并等待超时: \(responseKey)")
+                    // 不触发任何兜底逻辑
+                }
+            } else {
+                // ✅ 对无 subID 的协议：先尝试精确匹配，再兜底
+                if let callback = self.pendingResponses[responseKey] {
+                    switch responseResult {
+                    case .success(let dic):
+                        if isComplete {
+                            self.pendingResponses.removeValue(forKey: responseKey)
+                            callback(.success(dic))
+                            didCallback = true
+                            print("✅ [noSubID] 精确匹配成功，触发回调并移除: \(responseKey)")
+                        } else {
+                            print("⏳ [noSubID] 数据未完整，保留等待后续包: \(responseKey)")
+                        }
+
+                    case .failure(let err):
+                        self.pendingResponses.removeValue(forKey: responseKey)
+                        callback(.failure(err))
+                        didCallback = true
+                        print("✅ [noSubID] 精确匹配成功（失败），触发回调并移除: \(responseKey)")
+                    }
+                } else if isComplete {
+                    // 数据完整但精确匹配失败 → 按 protocolID 尝试兜底（仅对无 subID 协议）
+                    if let (anyKey, anyCallback) = self.pendingResponses
+                            .first(where: { $0.key.protocolID == pId && $0.key.subID == nil }) {
+                        self.pendingResponses.removeValue(forKey: anyKey)
+                        switch responseResult {
+                        case .success(let dic): anyCallback(.success(dic))
+                        case .failure(let err): anyCallback(.failure(err))
+                        }
+                        print("🟡 [noSubID] 兜底匹配成功，触发回调: \(anyKey)")
                         didCallback = true
                     } else {
-                        // Multi-packet response is not complete yet.
-                        // Keep the pending callback and wait for the remaining packets.
+                        print("✅ [noSubID] 数据完整但无回调可触发，忽略")
+                        self.pendingResponses.removeValue(forKey: responseKey)
                     }
-
-                case .failure(let err):
-                    self.pendingResponses.removeValue(forKey: responseKey)
-                    callback(.failure(err))
-                    didCallback = true
                 }
-            }
-   
 
-            // 3️⃣ 数据完整但仍未匹配 → 最后保底执行
-            else if isComplete {
-                if let (anyKey, anyCallback) = self.pendingResponses
-                        .first(where: { $0.key.protocolID == pId }) {
-                    self.pendingResponses.removeValue(forKey: anyKey)
-                    switch responseResult {
-                    case .success(let dic): anyCallback(.success(dic))
-                    case .failure(let err): anyCallback(.failure(err))
-                    }
-                    print("🟡 强制触发挂起回调（数据完整但无匹配）: \(anyKey)")
-                    didCallback = true
-                } else {
-                    print("✅ 数据完整，但无回调可触发，仅移除 pendingResponses[\(responseKey)]")
-                    self.pendingResponses.removeValue(forKey: responseKey)
+                if !didCallback && !isComplete {
+                    print("⏳ [noSubID] 数据未完整，保留待后续包: \(responseKey)")
                 }
-            }
-
-            // 4️⃣ 未完整也未回调
-            if !didCallback && !isComplete {
-                print("⚠️ 数据未完整，且无匹配回调，保留 pendingResponses[\(responseKey)]")
             }
         }
     }
@@ -139,12 +233,19 @@ extension DataHelper {
         case .rocker:
             return analyzeResult(payload: payload)
         case .rocker3D:
-            let subID = RockerSubID(rawValue: all[2])
+//            let subID = RockerSubID(rawValue: all[2])
+            //2026.5.28 新增：rocker3D 协议需要 subID 来区分左右摇杆曲线和其他设置，因此在解析时尝试提取 subID 以构建更准确的 responseKey
+            guard let subIDRaw = extractSubID(from: all, protocolID: protocolID),
+                let subID = RockerSubID(rawValue: subIDRaw) else {
+                return (.failure(invalidSubIDPacketError(protocolID, packet: all)), true)
+            }
             switch subID {
             case .leftCurve:
                 return analyzeResultWithSubId(payload: payload, isSubID: true, isDev: false)
             case .rightCurve:
                 return analyzeResultWithSubId(payload: payload, isSubID: true, isDev: false)
+            case .fetchAntiDeadZone:
+                responseDic = analyzeRockerAntiDeadZone(payload)
             default:
                 return analyzeResultWithSubId(payload: payload, isSubID: true, isDev: true)
             }
@@ -154,7 +255,11 @@ extension DataHelper {
             return analyzeResult(payload: payload)
         case .supportKey:
             // 多包数据（有 subID）
-            let subID = SupportKeySubID(rawValue: all[2])
+//            let subID = SupportKeySubID(rawValue: all[2])
+            //2026.5.28 新增：supportKey 协议需要 subID 来区分不同的查询类型，因此在解析时尝试提取 subID 以构建更准确的 responseKey
+            guard let subIDRaw = extractSubID(from: all, protocolID: protocolID), let subID = SupportKeySubID(rawValue: subIDRaw) else {
+                return (.failure(invalidSubIDPacketError(protocolID, packet: all)), true)
+            }
             switch subID {
             case .queryMacroTimeRange:
                 responseDic = analyzeMacroTimeRange(payload)
@@ -201,7 +306,12 @@ extension DataHelper {
         case .gptest:
             responseDic = analyzeGamePadTestKeys(payload)
         case .gpDeviceKeysState:
-            let subID = DeviceKeysStateSubID(rawValue: all[2])
+//            let subID = DeviceKeysStateSubID(rawValue: all[2])
+            //2026.5.28 新增：gpDeviceKeysState 协议需要 subID 来区分不同的状态上报类型，因此在解析时尝试提取 subID 以构建更准确的 responseKey
+            guard let subIDRaw = extractSubID(from: all, protocolID: protocolID),
+                      let subID = DeviceKeysStateSubID(rawValue: subIDRaw) else {
+                return (.failure(invalidSubIDPacketError(protocolID, packet: all)), true)
+            }
             
             if subID == .state_06{
                 responseDic = analyzeGamePadKeysState(all)
@@ -211,7 +321,12 @@ extension DataHelper {
         case .vibration:
             responseDic = analyzeVibration(payload)
         case .gyro:
-            let subID = GyroSubID(rawValue: all[2])
+//            let subID = GyroSubID(rawValue: all[2])
+            //2026.5.28 新增：gyro 协议需要 subID 来区分不同的查询类型，因此在解析时尝试提取 subID 以构建更准确的 responseKey
+            guard let subIDRaw = extractSubID(from: all, protocolID: protocolID),
+                      let subID = GyroSubID(rawValue: subIDRaw) else {
+                return (.failure(invalidSubIDPacketError(protocolID, packet: all)), true)
+            }
             if subID == .setGyroParam{
                 return analyzeResultWithSubId(payload: payload, isSubID: true, isDev: true)
             }else{
@@ -219,7 +334,12 @@ extension DataHelper {
             }
         case .mapping:
             // 多包数据（有 subID）
-            let subID = MappingSubID(rawValue: all[2])
+//            let subID = MappingSubID(rawValue: all[2])
+            //2026.5.28 新增：mapping 协议需要 subID 来区分不同的查询类型，因此在解析时尝试提取 subID 以构建更准确的 responseKey
+            guard let subIDRaw = extractSubID(from: all, protocolID: protocolID),
+                      let subID = MappingSubID(rawValue: subIDRaw) else {
+                return (.failure(invalidSubIDPacketError(protocolID, packet: all)), true)
+            }
             switch subID {
             case .fetchOneMapping:
                 responseDic = analyzeMappings(payload)
@@ -233,7 +353,7 @@ extension DataHelper {
                 }
                 
             default:
-                print("未处理的 MappingSubID 0x\(String(format: "%02X", subID!.rawValue))")
+                print("未处理的 MappingSubID 0x\(String(format: "%02X", subID.rawValue))")
             }
         case .startMacro:
             return analyzeResult(payload: payload)
@@ -254,7 +374,12 @@ extension DataHelper {
         case .finishCheck:
             responseDic = analyzeFinishCalibration(payload, protocolID: protocolID)
         case .beginCalibration:
-            let subID = CalibrationStartSubID(rawValue: all[2])
+//            let subID = CalibrationStartSubID(rawValue: all[2])
+            //2026.5.28 新增：beginCalibration 协议需要 subID 来区分不同的校准类型，因此在解析时尝试提取 subID 以构建更准确的 responseKey
+            guard let subIDRaw = extractSubID(from: all, protocolID: protocolID),
+                      let subID = CalibrationStartSubID(rawValue: subIDRaw) else {
+                return (.failure(invalidSubIDPacketError(protocolID, packet: all)), true)
+            }
             switch subID {
             case .quitCalibration:
                 return analyzeCalibrationResult(payload: payload)
@@ -280,8 +405,15 @@ extension DataHelper {
             responseDic = analyzeCurrentLightConfig(payload)
         case .setLightConfig:
             return analyzeResultWithSubId(payload: payload, isSubID: true, isDev: true)
+        case .channelLight:
+            responseDic = analyzeChannelLight(payload)
         case .trigger3D:
-            let subID = TriggerSubID(rawValue: all[2])
+//            let subID = TriggerSubID(rawValue: all[2])
+            //2026.5.28 新增：trigger3D 协议需要 subID 来区分不同的查询类型，因此在解析时尝试提取 subID 以构建更准确的 responseKey
+            guard let subIDRaw = extractSubID(from: all, protocolID: protocolID),
+                     let subID = TriggerSubID(rawValue: subIDRaw) else {
+                return (.failure(invalidSubIDPacketError(protocolID, packet: all)), true)
+            }
             switch subID {
             case .linearOutput:
                 return analyzeResultWithSubId(payload: payload, isSubID: true, isDev: true)
@@ -505,6 +637,17 @@ extension DataHelper {
         
         return indices
     }
-    
-    
+}
+
+private extension DataHelper {
+    func extractSubID(from packet: Data, protocolID: GMacroProtocolID) -> UInt8? {
+        guard protocolID.hasSubID else { return nil }
+        guard packet.count > 2 else { return nil } // [len][pid][subID]...
+        return packet[2]
+    }
+
+    func invalidSubIDPacketError(_ protocolID: GMacroProtocolID, packet: Data) -> BluetoothError {
+        print("⚠️ 协议 0x\(String(format: "%02X", protocolID.rawValue)) 需要 subID，但数据长度不足: \(packet.count)")
+        return .deviceReportedError(code: -1)
+    }
 }

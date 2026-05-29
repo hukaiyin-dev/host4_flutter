@@ -165,6 +165,82 @@ extension DataHelper {
                    finish: finish,
                    response: response)
     }
+
+    // 设置摇杆反死区 0x3F 0x1D
+    func setRockerAntiDeadZone(min: Int,
+                               max: Int,
+                               isLeft: Bool,
+                               finish:(()->())? = nil,
+                               response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
+        let subID = RockerSubID.setAntiDeadZone
+        let protocolID = subID.proID
+
+        if !(0...100).contains(min) || !(0...100).contains(max) || min >= max {
+            response(.failure(BluetoothError.outOfRange))
+            return
+        }
+
+        var payload = Data()
+        payload.append(Data.from(Int(subID.rawValue), count: 1)) // subID
+        payload.append(Data.from(isLeft ? 3 : 4, count: 1)) // Dev 3:L 4:R
+        payload.append(Data.from(min, count: 1))
+        payload.append(Data.from(max, count: 1))
+
+        let all = dataFrom(protocolID: protocolID, payload: payload)
+        self.write(protocolID: protocolID,
+                   data: all,
+                   finish: finish,
+                   response: response)
+    }
+
+    // 获取摇杆反死区 0x3F 0x1E
+    func fetchRockerAntiDeadZone(finish:(()->())? = nil,
+                                 response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
+        let subID = RockerSubID.fetchAntiDeadZone
+        let protocolID = subID.proID
+
+        var payload = Data()
+        payload.append(Data.from(Int(subID.rawValue), count: 1)) // subID
+        payload.append(Data.from(Int(0x05), count: 1)) // Dev 值固定 0x05
+
+        let all = dataFrom(protocolID: protocolID, payload: payload)
+        self.write(protocolID: protocolID,
+                   data: all,
+                   finish: finish,
+                   response: response)
+    }
+
+    func analyzeRockerAntiDeadZone(_ payload: Data) -> [String: Any] {
+        guard let rawSubID = payload.first,
+              let subID = RockerSubID(rawValue: rawSubID) else {
+            return [:]
+        }
+
+        var parser = DataParser(payload)
+        _ = parser.next(1) // subID
+        let dev = parser.next(1).toInt()
+
+        var responseDic: [String: Any] = [
+            "subID": Int(subID.rawValue),
+            "device": dev
+        ]
+
+        switch dev {
+        case 0x05 where parser.remaining >= 4:
+            responseDic["leftMin"] = parser.next(1).toInt()
+            responseDic["leftMax"] = parser.next(1).toInt()
+            responseDic["rightMin"] = parser.next(1).toInt()
+            responseDic["rightMax"] = parser.next(1).toInt()
+        case 0x03 where parser.remaining >= 2, 0x04 where parser.remaining >= 2:
+            responseDic["isLeft"] = (dev == 0x03)
+            responseDic["min"] = parser.next(1).toInt()
+            responseDic["max"] = parser.next(1).toInt()
+        default:
+            responseDic["raw"] = parser.trimmed()
+        }
+
+        return responseDic
+    }
 }
 
 

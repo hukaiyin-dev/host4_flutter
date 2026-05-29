@@ -97,9 +97,15 @@ public class DataHelper: NSObject, @unchecked Sendable {
 } 
 struct ResponseKey: Hashable, CustomStringConvertible {
     let protocolID: GMacroProtocolID
+    //2026.5.28 新增 subID 区分同一 protocolID 下不同的命令响应
+    let subID: UInt8?  // 可选，某些命令没有 subID
     let sn: UInt8
 
     var description: String {
+        //2026.5.28新增subID区分同一protocolID下不同的命令响应，格式化输出方便调试
+        if let subID = subID {
+            return "(\(protocolID):0x\(String(format: "%02X", subID)), sn: \(sn))"
+        }
         return "(\(protocolID), sn: \(sn))"
     }
 }

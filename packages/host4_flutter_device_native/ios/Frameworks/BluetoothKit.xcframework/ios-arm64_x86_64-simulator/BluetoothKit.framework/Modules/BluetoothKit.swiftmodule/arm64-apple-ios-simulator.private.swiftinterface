@@ -161,6 +161,7 @@ extension BluetoothKit.BluetoothCentralRuntime : CoreBluetooth.CBCentralManagerD
   final public func disconnect()
   final public func send(_ data: Foundation.Data) throws
   final public func send(_ data: Foundation.Data, to uuidString: Swift.String) throws
+  final public func writeValue(_ data: Foundation.Data, to uuidString: Swift.String, type: CoreBluetooth.CBCharacteristicWriteType = .withoutResponse, sleepTime: Foundation.TimeInterval = 0, progress: ((Swift.Int, Swift.Int) -> Swift.Void)? = nil, completion: (() -> Swift.Void)? = nil) throws
   final public func onReceive(_ handler: @escaping (Foundation.Data) -> Swift.Void)
   @objc deinit
 }
@@ -171,7 +172,7 @@ extension BluetoothKit.BluetoothCentralRuntime : CoreBluetooth.CBCentralManagerD
   final public var onConnectionError: (((any Swift.Error)?) -> Swift.Void)?
   public init(peripheral: CoreBluetooth.CBPeripheral)
   final public func discoverServices(_ serviceUUIDs: [CoreBluetooth.CBUUID]? = nil)
-  final public func writeValue(_ data: Foundation.Data, to uuidString: Swift.String, type: CoreBluetooth.CBCharacteristicWriteType = .withoutResponse, progress: ((Swift.Int, Swift.Int) -> Swift.Void)? = nil, completion: (() -> Swift.Void)? = nil) throws
+  final public func writeValue(_ data: Foundation.Data, to uuidString: Swift.String, type: CoreBluetooth.CBCharacteristicWriteType = .withoutResponse, sleepTime: Foundation.TimeInterval = 0, progress: ((Swift.Int, Swift.Int) -> Swift.Void)? = nil, completion: (() -> Swift.Void)? = nil) throws
   final public func setNotify(for uuidString: Swift.String, enabled: Swift.Bool)
   @objc deinit
 }

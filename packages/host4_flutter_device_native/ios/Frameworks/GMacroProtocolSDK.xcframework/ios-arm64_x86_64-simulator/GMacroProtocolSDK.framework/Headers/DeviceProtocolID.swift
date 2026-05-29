@@ -61,7 +61,7 @@ enum GMacroProtocolID: UInt8 {
     case currentMapping     = 0x50 // 查询按键映射当前配置
 
     case rocker             = 0x3E // 摇杆线性设置
-    case rocker3D           = 0x3F // 摇杆 3D 设置
+    case rocker3D           = 0x3F // 摇杆 3D 设置（支持subid）
     case rockerAdditional = 0x59 // 摇杆附加功能设置
     case beginCheck         = 0x41 // 陀螺仪开启自校
     case stopCheck          = 0x42 // 陀螺仪结束自校
@@ -75,16 +75,17 @@ enum GMacroProtocolID: UInt8 {
     case switchLayout       = 0x58 // ABXY 按键 Switch 布局开关
     
     
-    case isAllowColor       = 0x4C // 查询设备支持设置颜色
-    case colorDevice        = 0x4D // 设置颜色的设备类型
-    case setLightColor      = 0x4E // 设置灯组颜色
-    case setLightEffect     = 0x4F // 设置灯组灯效
-    case light              = 0x82 // 查询设备支持灯效及当前灯效
+    case isAllowColor       = 0x4C // 查询设备支持设置颜色（可支持可不支持）
+    case colorDevice        = 0x4D // 查询支持宏的按键
+    case setLightColor      = 0x4E // 设置灯组颜色（支持subid）
+    case setLightEffect     = 0x4F // 设置灯组灯效（支持subid）
+    case light              = 0x82 // 查询设备支持灯效及当前灯效（支持subid）
     case lightGroup         = 0x4A // 查询设备支持灯效及当前灯效
     case getLightConfig     =
-        0x71 //查询设备当前灯效
+        0x71 //查询设备当前灯效（支持subid）
     case setLightConfig     =
-        0x72 //设置当前灯效配置
+        0x72 //设置当前灯效配置（支持subid）
+    case channelLight       = 0x70 // 通道灯亮度（支持subid）
     
     // 宏 设备 -> APP
     case finishCheck        = 0x43 // 陀螺仪完成自校
@@ -94,11 +95,11 @@ enum GMacroProtocolID: UInt8 {
     case endRecordValue     = 0x49 // 结束上报录制的宏子按键
     
     case deviceVersion      = 0x84 // 获取设备版本信息
-    case deviceInfo         = 0x77 // 获取设备版本信息
+    case deviceInfo         = 0x77 // 获取设备版本信息（支持subid）
     
-    case currentMacro       = 0x79 // 查询宏定义当前配置（分包发送）
+    case currentMacro       = 0x79 // 查询宏定义当前配置（分包发送）（支持subid）
 //    case currentMacro       = 0x52 // 查询宏定义当前配置
-    case macroInterval      = 0x80 // 设置宏定义循环间隔
+    case macroInterval      = 0x80 // 设置宏定义循环间隔（支持subid）
     case trigger3D          = 0x85 // 扳机曲线
     case supportKey         = 0x86 // 支持的按键
     
@@ -140,5 +141,35 @@ enum GMacroDeviceType: UInt8 {
         case .dongle:
             return "Dongle"
         }
+    }
+}
+
+//2026.5.28新增 判断当前协议 ID 是否包含子 ID（SubID）
+extension GMacroProtocolID {
+    /// 判断当前协议 ID 是否包含子 ID（SubID）
+    static func hasSubID(_ pid: GMacroProtocolID) -> Bool {
+        switch pid {
+        case .deviceVersion,      // 0x84
+             .deviceInfo,         // 0x77
+             .rocker3D,           // 0x3F
+             .trigger3D,          // 0x85
+             .supportKey,         // 0x86
+             .gyro,               // 0x6A
+             .mapping,            // 0x6C
+             .light,              // 0x82
+             .channelLight,       // 0x70
+             .vibration,          // 0x67
+             .beginCalibration,   // 0x55
+             .stopCalibration,    // 0x56
+             .gpDeviceKeysState:  // 0x74
+            return true
+        default:
+            return false
+        }
+    }
+
+    /// 便捷实例写法：pid.hasSubID
+    var hasSubID: Bool {
+        return Self.hasSubID(self)
     }
 }

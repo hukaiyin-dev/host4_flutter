@@ -64,6 +64,7 @@ enum KeyboardKey: UInt8, Sendable {
     case bracketLeft            = 0x2F // [ and {
     case bracketRight           = 0x30 // ] and }
     case backslash              = 0x31 // \ and |
+    case shap                   = 0x32 // # and ~
     
     case semicolon              = 0x33 // ; and :
     case apostrophe             = 0x34 // ‘ and “
@@ -508,6 +509,19 @@ enum KeyboardKey: UInt8, Sendable {
         case .rightShift: return "RightShift"
         case .rightAlt: return "RightAlt"
         case .rightGUI: return "Right GUI"
+        case .shap: return "# and ~"
         }
+    }
+}
+
+extension KeyboardKey {
+    static func keys(from data: Data) -> [KeyboardKey] {
+        var result: [KeyboardKey] = []
+        for byte in data {
+            if let key = KeyboardKey(rawValue: byte), key != KeyboardKey.Reserved {
+                result.append(key)
+            }
+        }
+        return result
     }
 }

@@ -62,6 +62,7 @@ import _SwiftConcurrencyShims
   case bracketLeft = 0x2F
   case bracketRight = 0x30
   case backslash = 0x31
+  case shap = 0x32
   case semicolon = 0x33
   case apostrophe = 0x34
   case graveAccent = 0x35
@@ -293,6 +294,10 @@ extension GMacroProtocolSDK.GMacroProtocolSession {
 extension GMacroProtocolSDK.GMacroProtocolSession {
   final public func fetchCurrentLightConfig(response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
   final public func setLightConfig(effect: Swift.Int, colorR: Swift.UInt8, colorG: Swift.UInt8, colorB: Swift.UInt8, light: Swift.Int, speed: Swift.Int, profile: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func setChannelLightSwitch(isOn: Swift.Bool, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func fetchChannelLightSwitch(response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func setChannelLightBrightness(brightness: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func fetchChannelLightBrightness(response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
 }
 extension GMacroProtocolSDK.GMacroProtocolSession {
   final public func fetchDeviceVersion(_ response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
@@ -373,6 +378,8 @@ extension GMacroProtocolSDK.GMacroProtocolSession {
   final public func rockerDeadZoneRegressionComp(left: Swift.Int, right: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
   final public func rockerTriggerType(leftRigger: GMacroProtocolSDK.CurveTriggerMode, leftGamepadKey: GMacroProtocolSDK.GamepadKey, rightRigger: GMacroProtocolSDK.CurveTriggerMode, rightGamepadKey: GMacroProtocolSDK.GamepadKey, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
   final public func rockerOutputGraphics(left: GMacroProtocolSDK.OutputGraphics, right: GMacroProtocolSDK.OutputGraphics, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func updateRockerAntiDeadZone(min: Swift.Int, max: Swift.Int, isLeft: Swift.Bool, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func fetchRockerAntiDeadZone(response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
 }
 extension GMacroProtocolSDK.GMacroProtocolSession {
   final public func updateTriggerTestVibrationSwitch(triggerTestVibration: Swift.Bool, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
@@ -413,6 +420,8 @@ extension GMacroProtocolSDK.GMacroProtocolSession {
 extension GMacroProtocolSDK.GMacroProtocolSession {
   final public func update(gyroOuterDeadZone: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
   final public func fetchGyroOuterDeadZone(response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func updateGyroAxisSwap(isSwap: Swift.Bool, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func fetchGyroAxisSwap(response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
 }
 extension GMacroProtocolSDK.GMacroProtocolSession {
   final public func startGyroCalibration(_ response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)

@@ -373,6 +373,44 @@ extension DataHelper {
                    response: response)
     }
     
+    // MARK: - 6A29
+    /// 设置体感轴向交换 6A29
+    func setGyroAxisSwap(isSwap: Bool,
+                         finish: (() -> Void)? = nil,
+                         response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
+        let subID = GyroSubID.setGyroAxisSwap
+        let protocolID = subID.proID
+        
+        var payload = Data()
+        payload.append(Data.from(Int(subID.rawValue), count: 1))
+        payload.append(Data.from(Int(0x05), count: 1))
+        payload.append(Data.from(isSwap ? 1 : 0, count: 1))
+        
+        let all = dataFrom(protocolID: protocolID, payload: payload)
+        self.write(protocolID: protocolID,
+                   data: all,
+                   finish: finish,
+                   response: response)
+    }
+
+    // MARK: - 6A2A
+    /// 获取体感轴向交换 6A2A
+    func fetchGyroAxisSwap(finish: (() -> Void)? = nil,
+                           response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
+        let subID = GyroSubID.fetchGyroAxisSwap
+        let protocolID = subID.proID
+        
+        var payload = Data()
+        payload.append(Data.from(Int(subID.rawValue), count: 1))
+        payload.append(Data.from(Int(0x05), count: 1))
+        
+        let all = dataFrom(protocolID: protocolID, payload: payload)
+        self.write(protocolID: protocolID,
+                   data: all,
+                   finish: finish,
+                   response: response)
+    }
+    
     // MARK: - 6A22
     /// 设置陀螺仪X/Y轴比例 6A22
     func update(gyroXYRatio: Int,
@@ -627,6 +665,9 @@ extension DataHelper {
             }
             dic["x"] = x
             dic["y"] = y
+        case .fetchGyroAxisSwap:
+            let value = parser.next(1).toInt()
+            dic["isSwap"] = value == 1
 
         default:
             print("未处理的 GyroSubID 0x\(String(format: "%02X", subID!.rawValue))")

@@ -167,6 +167,18 @@ extension GMacroProtocolSession {
     public func fetchGyroOuterDeadZone(response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
         dataHelper.fetchGyroOuterDeadZone(response: response)
     }
+    
+    /// 设置体感轴向交换
+    /// - Parameter isSwap: 是否交换（翻滚与偏航交换）
+    public func updateGyroAxisSwap(isSwap: Bool,
+                                   response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
+        dataHelper.setGyroAxisSwap(isSwap: isSwap, response: response)
+    }
+
+    /// 获取体感轴向交换
+    public func fetchGyroAxisSwap(response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
+        dataHelper.fetchGyroAxisSwap(response: response)
+    }
 }
 
 extension GMacroProtocolSession {
