@@ -127,6 +127,37 @@ class _GmacroSessionPageState extends State<GmacroSessionPage> {
     }
   }
 
+  Future<void> _setVibrationLevel() async {
+    final session = _session;
+    if (session == null) return;
+    _addLog('▶ invoke: ${GmacroMethods.setVibrationLevel} (left: 50, right: 50)');
+    try {
+      final result = await session.setVibrationLevel(left: 50, right: 50);
+      _addLog('◀ result: $result');
+    } catch (e) {
+      _addLog('◀ error: $e', isError: true);
+    }
+  }
+
+  Future<void> _testVibration() async {
+    final session = _session;
+    if (session == null) return;
+    _addLog(
+      '▶ invoke: ${GmacroMethods.testVibration} '
+      '(left: 128, right: 128, position: both)',
+    );
+    try {
+      final result = await session.testVibration(
+        left: 128,
+        right: 128,
+        position: VibrationPosition.both,
+      );
+      _addLog('◀ result: $result');
+    } catch (e) {
+      _addLog('◀ error: $e', isError: true);
+    }
+  }
+
   Future<void> _startOta() async {
     final session = _session;
     if (session == null) return;
@@ -234,6 +265,30 @@ class _GmacroSessionPageState extends State<GmacroSessionPage> {
                           size: 16,
                         ),
                         label: const Text('OTA 测试'),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: theme.spacing.sm),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: (_session == null || _isBusy)
+                            ? null
+                            : _setVibrationLevel,
+                        icon: const Icon(Icons.vibration_rounded, size: 16),
+                        label: const Text('设置震动等级'),
+                      ),
+                    ),
+                    SizedBox(width: theme.spacing.sm),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: (_session == null || _isBusy)
+                            ? null
+                            : _testVibration,
+                        icon: const Icon(Icons.speaker_rounded, size: 16),
+                        label: const Text('测试震动'),
                       ),
                     ),
                   ],

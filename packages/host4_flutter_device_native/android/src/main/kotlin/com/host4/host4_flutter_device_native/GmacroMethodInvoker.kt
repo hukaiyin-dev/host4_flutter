@@ -405,12 +405,14 @@ internal object GmacroMethodInvoker {
                     GmacroCallbackBridge.message(result),
                 )
 
+                //设置振动
                 Host4FlutterGmacroConstants.setVibrationLevel -> commands.setVibrationLevel(
                     GmacroArgParser.intArg(arguments, "left"),
                     GmacroArgParser.intArg(arguments, "right"),
                     GmacroCallbackBridge.message(result),
                 )
 
+                //测试振动
                 Host4FlutterGmacroConstants.testVibration -> commands.forceVibrationTest(
                     GmacroArgParser.intArg(arguments, "left"),
                     GmacroArgParser.intArg(arguments, "right"),
