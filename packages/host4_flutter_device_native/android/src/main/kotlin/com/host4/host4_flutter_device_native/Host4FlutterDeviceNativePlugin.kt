@@ -18,6 +18,7 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
+import java.util.Collections.emptyMap
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
@@ -73,7 +74,6 @@ class Host4FlutterDeviceNativePlugin :
             "attachGmacroProtocol" -> handleAttachGmacroProtocol(call, result)
             "invokeGmacroMethod" -> handleInvokeGmacroMethod(call, result)
             "closeProtocol" -> handleCloseProtocol(call, result)
-            "queryDeviceInfo" -> handleQueryDeviceInfo(call, result)
             "ensureBleScanPermissions" -> handleEnsureBleScanPermissions(result)
             else -> result.notImplemented()
         }
@@ -292,17 +292,6 @@ class Host4FlutterDeviceNativePlugin :
             arguments = invokeArguments,
             result = result,
         )
-    }
-
-    private fun handleQueryDeviceInfo(call: MethodCall, result: Result) {
-        val arguments = call.arguments as? Map<*, *>
-        val deviceMac = arguments?.get("deviceMac") as? String
-        if (deviceMac.isNullOrEmpty()) {
-            result.error("invalid-arguments", "deviceMac is required.", null)
-            return
-        }
-
-        KrDeviceInfoQuery.query(deviceMac, result)
     }
 
     private fun handleCloseProtocol(call: MethodCall, result: Result) {
