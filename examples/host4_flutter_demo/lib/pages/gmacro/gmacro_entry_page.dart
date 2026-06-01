@@ -5,7 +5,7 @@ import 'package:host4_flutter_ui/host4_flutter_ui.dart';
 
 import '../../widgets/sub_page_scaffold.dart';
 import 'gmacro_ble_scan_page.dart';
-import 'gmacro_api_test_page.dart';
+import 'gmacro_usb_scan_page.dart';
 
 class GmacroEntryPage extends StatelessWidget {
   const GmacroEntryPage({super.key});
@@ -35,18 +35,21 @@ class GmacroEntryPage extends StatelessWidget {
             label: isMfiPlatform ? 'MFi 连接' : 'USB 连接',
             description: isMfiPlatform
                 ? '通过 MFi 有线连接设备，需完成 iAP2 握手后测试 GMacro'
-                : 'USB 有线连接（Android），暂未接入',
+                : 'USB 有线连接（Android），自动连接已插入设备后测试 GMacro',
             icon: isMfiPlatform ? Icons.cable_rounded : Icons.usb_rounded,
             color: theme.colors.brandSecondary,
-            badge: '即将支持',
+            badge: isMfiPlatform ? '即将支持' : null,
             onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('MFi / USB 接入进行中，暂不可用')),
+              if (isMfiPlatform) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('MFi 接入进行中，暂不可用')),
+                );
+                return;
+              }
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const GmacroUsbScanPage()),
               );
             },
-            // onTap: () => Navigator.of(context).push(
-            //   MaterialPageRoute(builder: (_) => const GmacroApiTestPage()),
-            // ),
           ),
         ],
       ),

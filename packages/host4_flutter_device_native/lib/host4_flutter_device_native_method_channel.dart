@@ -17,6 +17,10 @@ class MethodChannelHost4FlutterDeviceNative
     'host4_flutter_device_native/ble_scan',
   );
 
+  static const EventChannel _usbScanChannel = EventChannel(
+    'host4_flutter_device_native/usb_scan',
+  );
+
   @override
   Future<String?> getPlatformVersion() async {
     final version = await methodChannel.invokeMethod<String>(
@@ -48,6 +52,24 @@ class MethodChannelHost4FlutterDeviceNative
   }
 
   @override
+  Stream<NativeDiscoveredDevice> scanUsb({
+    Map<String, Object?> hints = const {},
+  }) {
+    return _usbScanChannel
+        .receiveBroadcastStream(<String, Object?>{'hints': hints})
+        .map(
+          (dynamic event) => NativeDiscoveredDevice.fromMap(
+            Map<String, Object?>.from(event as Map),
+          ),
+        );
+  }
+
+  @override
+  Future<void> stopUsbScan() {
+    return methodChannel.invokeMethod<void>('stopUsbScan');
+  }
+
+  @override
   Future<String> connectBle({
     required String deviceId,
     Map<String, Object?> options = const {},
@@ -63,6 +85,37 @@ class MethodChannelHost4FlutterDeviceNative
       );
     }
     return sessionId;
+  }
+
+  @override
+  Future<String> connectUsb({
+    String? deviceId,
+    Map<String, Object?> options = const {},
+  }) async {
+    final sessionId = await methodChannel.invokeMethod<String>(
+      'connectUsb',
+      <String, Object?>{
+        if (deviceId != null) 'deviceId': deviceId,
+        'options': options,
+      },
+    );
+    if (sessionId == null || sessionId.isEmpty) {
+      throw PlatformException(
+        code: 'missing-transport-session-id',
+        message: 'Native USB bridge returned an empty transport session id.',
+      );
+    }
+    return sessionId;
+  }
+
+  @override
+  Future<void> reconnectUsb() {
+    return methodChannel.invokeMethod<void>('reconnectUsb');
+  }
+
+  @override
+  Future<void> releaseUsb() {
+    return methodChannel.invokeMethod<void>('releaseUsb');
   }
 
   @override

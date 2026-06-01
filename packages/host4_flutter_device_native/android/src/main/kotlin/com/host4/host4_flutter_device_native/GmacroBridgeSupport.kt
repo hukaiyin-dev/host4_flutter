@@ -10,10 +10,23 @@ import io.flutter.plugin.common.MethodChannel
 import java.util.Collections.emptyMap
 
 internal object GmacroSdkAccess {
+    const val USB_DEVICE_KEY = "__usb__"
+
     private val fullSdk: FullPlatformSdk
         get() = PlatformSdkFactory.full()
 
-    fun commands(mac: String): V2KrCmdController = fullSdk.commands(mac)
+    fun commands(deviceKey: String, transportKind: String): V2KrCmdController {
+        return if (transportKind == Host4FlutterTransportKinds.USB) {
+            fullSdk.usb().commands()
+        } else {
+            fullSdk.commands(deviceKey)
+        }
+    }
+}
+
+internal object Host4FlutterTransportKinds {
+    const val BLE = "ble"
+    const val USB = "usb"
 }
 
 internal object GmacroCallbackBridge {

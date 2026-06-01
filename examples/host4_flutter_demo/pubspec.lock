@@ -273,7 +273,7 @@ packages:
     source: path
     version: "0.0.1"
   host4_flutter_device_native:
-    dependency: transitive
+    dependency: "direct main"
     description:
       path: "../../packages/host4_flutter_device_native"
       relative: true
@@ -318,6 +318,13 @@ packages:
     dependency: "direct main"
     description:
       path: "../../packages/host4_flutter_ui"
+      relative: true
+    source: path
+    version: "0.0.1"
+  host4_flutter_usb:
+    dependency: "direct main"
+    description:
+      path: "../../packages/host4_flutter_usb"
       relative: true
     source: path
     version: "0.0.1"

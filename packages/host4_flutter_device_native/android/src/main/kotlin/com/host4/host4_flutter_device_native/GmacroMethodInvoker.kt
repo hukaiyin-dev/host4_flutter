@@ -15,17 +15,19 @@ internal object GmacroMethodInvoker {
     private const val SIDE_RIGHT = 1
 
     fun invoke(
-        mac: String,
+        deviceKey: String,
+        transportKind: String,
         method: String,
         arguments: Map<String, Any?>,
         result: MethodChannel.Result,
     ) {
-        val commands = GmacroSdkAccess.commands(mac)
+        val commands = GmacroSdkAccess.commands(deviceKey, transportKind)
 
         try {
             when (method) {
                 //手柄信息
-                Host4FlutterGmacroConstants.fetchDeviceVersion -> KrDeviceInfoQuery.query(mac, result)
+                Host4FlutterGmacroConstants.fetchDeviceVersion ->
+                    KrDeviceInfoQuery.query(deviceKey, transportKind, result)
 
                 Host4FlutterGmacroConstants.fetchMobapadDeviceInfo -> {
                     val profile = GmacroArgParser.intArg(arguments, "profile")

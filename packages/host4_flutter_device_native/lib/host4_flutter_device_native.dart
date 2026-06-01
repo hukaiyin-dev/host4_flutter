@@ -23,6 +23,16 @@ class Host4FlutterDeviceNative {
     return Host4FlutterDeviceNativePlatform.instance.stopBleScan();
   }
 
+  Stream<NativeDiscoveredDevice> scanUsb({
+    Map<String, Object?> hints = const {},
+  }) {
+    return Host4FlutterDeviceNativePlatform.instance.scanUsb(hints: hints);
+  }
+
+  Future<void> stopUsbScan() {
+    return Host4FlutterDeviceNativePlatform.instance.stopUsbScan();
+  }
+
   Future<String> connectBle({
     required String deviceId,
     Map<String, Object?> options = const {},
@@ -31,6 +41,26 @@ class Host4FlutterDeviceNative {
       deviceId: deviceId,
       options: options,
     );
+  }
+
+  Future<String> connectUsb({
+    String? deviceId,
+    Map<String, Object?> options = const {},
+  }) {
+    return Host4FlutterDeviceNativePlatform.instance.connectUsb(
+      deviceId: deviceId,
+      options: options,
+    );
+  }
+
+  /// Re-triggers SDK [ReliableUsbCommManager.searchAndConnectAsync] after replug.
+  Future<void> reconnectUsb() {
+    return Host4FlutterDeviceNativePlatform.instance.reconnectUsb();
+  }
+
+  /// Tears down the USB host stack initialized by [connectUsb].
+  Future<void> releaseUsb() {
+    return Host4FlutterDeviceNativePlatform.instance.releaseUsb();
   }
 
   Future<String> connectSystemConnectedBle({

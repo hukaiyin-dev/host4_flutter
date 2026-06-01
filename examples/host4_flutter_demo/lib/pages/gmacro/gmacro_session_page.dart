@@ -30,9 +30,17 @@ class _Section {
 // ─── page ────────────────────────────────────────────────────────────────────
 
 class GmacroSessionPage extends StatefulWidget {
-  const GmacroSessionPage({required this.transport, super.key});
+  const GmacroSessionPage({
+    required this.transport,
+    this.transportInitiallyReady = false,
+    super.key,
+  });
 
   final TransportSession transport;
+
+  /// When true (e.g. USB connect page already reached [TransportReady]),
+  /// transport events will not replay on a new listener.
+  final bool transportInitiallyReady;
 
   @override
   State<GmacroSessionPage> createState() => _GmacroSessionPageState();
@@ -45,6 +53,7 @@ class _GmacroSessionPageState extends State<GmacroSessionPage> {
   GmacroSession? _session;
   bool _isAttaching = true;
   bool _isConnected = false;
+  bool _isProtocolReady = false;
 
   // OTA
   bool _isOtaRunning = false;
@@ -69,6 +78,9 @@ class _GmacroSessionPageState extends State<GmacroSessionPage> {
   void initState() {
     super.initState();
     _log.info('Init session for transport: ${widget.transport.id}');
+    if (widget.transportInitiallyReady) {
+      _isConnected = true;
+    }
     _subscribeTransport();
     _subscribeNativeLog();
     _attach();
@@ -84,7 +96,9 @@ class _GmacroSessionPageState extends State<GmacroSessionPage> {
     _protocolSub?.cancel();
     _nativeLogSub?.cancel();
     _session?.close();
-    widget.transport.disconnect();
+    if (widget.transport.device.kind != TransportKind.usb) {
+      widget.transport.disconnect();
+    }
     super.dispose();
   }
 
@@ -283,7 +297,10 @@ class _GmacroSessionPageState extends State<GmacroSessionPage> {
       _setTip('✅ GMacro 协议已挂载 (id: ${session.id})');
       _subscribeProtocol(session);
 
-      Future.delayed(const Duration(seconds: 5), () {
+      final attachTimeout = widget.transport.device.kind == TransportKind.usb
+          ? const Duration(seconds: 30)
+          : const Duration(seconds: 5);
+      Future.delayed(attachTimeout, () {
         if (mounted && _isAttaching && _session?.id == session.id) {
           _log.error('Protocol attachment timeout');
           setState(() => _isAttaching = false);
@@ -307,6 +324,7 @@ class _GmacroSessionPageState extends State<GmacroSessionPage> {
           _log.info('Protocol Ready');
           if (mounted) {
             setState(() {
+              _isProtocolReady = true;
               _isAttaching = false;
               if (_isOtaRunning) {
                 _isOtaRunning = false;
@@ -362,7 +380,14 @@ class _GmacroSessionPageState extends State<GmacroSessionPage> {
     Future<Map<String, Object?>> Function() call,
   ) async {
     final session = _session;
-    if (session == null) return;
+    if (session == null) {
+      _setTip('⚠ 协议未挂载，请稍候或返回重连');
+      return;
+    }
+    if (!_canOperate) {
+      _setTip('⚠ 尚未就绪（传输或协议未 Ready），请稍候');
+      return;
+    }
     _setTip('▶ $label');
     try {
       final result = await call();
@@ -826,7 +851,10 @@ class _GmacroSessionPageState extends State<GmacroSessionPage> {
   // ── build ────────────────────────────────────────────────────────────────
 
   bool get _canOperate =>
-      _isConnected && _session != null && !_isAttaching && !_isOtaRunning;
+      _session != null &&
+      !_isAttaching &&
+      !_isOtaRunning &&
+      (_isProtocolReady || _isConnected);
 
   @override
   Widget build(BuildContext context) {

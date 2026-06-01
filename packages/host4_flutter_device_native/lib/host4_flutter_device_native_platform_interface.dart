@@ -42,11 +42,36 @@ abstract class Host4FlutterDeviceNativePlatform extends PlatformInterface {
     throw UnimplementedError('stopBleScan() has not been implemented.');
   }
 
+  Stream<NativeDiscoveredDevice> scanUsb({
+    Map<String, Object?> hints = const {},
+  }) {
+    throw UnimplementedError('scanUsb() has not been implemented.');
+  }
+
+  Future<void> stopUsbScan() {
+    throw UnimplementedError('stopUsbScan() has not been implemented.');
+  }
+
   Future<String> connectBle({
     required String deviceId,
     Map<String, Object?> options = const {},
   }) {
     throw UnimplementedError('connectBle() has not been implemented.');
+  }
+
+  Future<String> connectUsb({
+    String? deviceId,
+    Map<String, Object?> options = const {},
+  }) {
+    throw UnimplementedError('connectUsb() has not been implemented.');
+  }
+
+  Future<void> reconnectUsb() {
+    throw UnimplementedError('reconnectUsb() has not been implemented.');
+  }
+
+  Future<void> releaseUsb() {
+    throw UnimplementedError('releaseUsb() has not been implemented.');
   }
 
   Future<String> connectSystemConnectedBle({

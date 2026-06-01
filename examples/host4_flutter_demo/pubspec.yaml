@@ -56,6 +56,10 @@ dependencies:
     path: ../../packages/host4_flutter_protocol
   host4_flutter_ble:
     path: ../../packages/host4_flutter_ble
+  host4_flutter_usb:
+    path: ../../packages/host4_flutter_usb
+  host4_flutter_device_native:
+    path: ../../packages/host4_flutter_device_native
   host4_flutter_gmacro:
     path: ../../packages/host4_flutter_gmacro
   file_picker: ^8.1.7

@@ -32,6 +32,14 @@ class MockHost4FlutterDeviceNativePlatform
   }
 
   @override
+  Future<String> connectUsb({
+    String? deviceId,
+    Map<String, Object?> options = const {},
+  }) async {
+    return 'transport-usb-1';
+  }
+
+  @override
   Future<String> connectSystemConnectedBle({
     required List<String> serviceIds,
     List<String> deviceNames = const [],
@@ -67,6 +75,22 @@ class MockHost4FlutterDeviceNativePlatform
 
   @override
   Future<void> stopBleScan() async {}
+
+  @override
+  Stream<NativeDiscoveredDevice> scanUsb({
+    Map<String, Object?> hints = const {},
+  }) {
+    return const Stream<NativeDiscoveredDevice>.empty();
+  }
+
+  @override
+  Future<void> stopUsbScan() async {}
+
+  @override
+  Future<void> reconnectUsb() async {}
+
+  @override
+  Future<void> releaseUsb() async {}
 
   @override
   Stream<NativeTransportEvent> transportEvents(String transportSessionId) {

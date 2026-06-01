@@ -1,10 +1,15 @@
 package com.host4.host4_flutter_device_native
 
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import com.host4.platform.listener.BluetoothStateListener
 import com.host4.platform.listener.MessageCallBack
 import com.host4.platform.util.Constants
+import com.host4.platform.listener.UsbConnectListener
+import com.host4.platform.manager.ReliableUsbCommManager
 import com.host4.platform.v2.api.FullPlatformSdk
+import com.host4.platform.v2.api.UsbDeviceSessionHandle
 import com.host4.platform.v2.ble.BleMacUtils
 import com.host4.platform.v2.ble.RxBleCommManager
 import android.app.Activity
@@ -32,10 +37,19 @@ class Host4FlutterDeviceNativePlugin :
     private lateinit var binaryMessenger: BinaryMessenger
     private lateinit var applicationContext: Context
     private lateinit var bleScanHandler: BleScanStreamHandler
+    private lateinit var usbScanHandler: UsbScanStreamHandler
+
+    private val mainHandler = Handler(Looper.getMainLooper())
 
     private var activity: Activity? = null
     private var activityBinding: ActivityPluginBinding? = null
     private var pendingPermissionResult: Result? = null
+
+    @Volatile
+    private var usbHostInitialized = false
+
+    @Volatile
+    private var activeUsbTransport: TransportSessionRecord? = null
 
     private val transportSessions = ConcurrentHashMap<String, TransportSessionRecord>()
     private val protocolSessions = ConcurrentHashMap<String, ProtocolSessionRecord>()
@@ -47,6 +61,7 @@ class Host4FlutterDeviceNativePlugin :
         applicationContext = flutterPluginBinding.applicationContext
         binaryMessenger = flutterPluginBinding.binaryMessenger
         bleScanHandler = BleScanStreamHandler(applicationContext)
+        usbScanHandler = UsbScanStreamHandler(applicationContext)
 
         methodChannel = MethodChannel(
             flutterPluginBinding.binaryMessenger,
@@ -58,6 +73,11 @@ class Host4FlutterDeviceNativePlugin :
             flutterPluginBinding.binaryMessenger,
             "host4_flutter_device_native/ble_scan",
         ).setStreamHandler(bleScanHandler)
+
+        EventChannel(
+            flutterPluginBinding.binaryMessenger,
+            "host4_flutter_device_native/usb_scan",
+        ).setStreamHandler(usbScanHandler)
     }
 
     override fun onMethodCall(call: MethodCall, result: Result) {
@@ -69,7 +89,14 @@ class Host4FlutterDeviceNativePlugin :
                 bleScanHandler.stopScan()
                 result.success(null)
             }
+            "stopUsbScan" -> {
+                usbScanHandler.stopScan()
+                result.success(null)
+            }
             "connectBle" -> handleConnectBle(call, result)
+            "connectUsb" -> handleConnectUsb(call, result)
+            "reconnectUsb" -> handleReconnectUsb(result)
+            "releaseUsb" -> handleReleaseUsb(result)
             "disconnectTransport" -> handleDisconnectTransport(call, result)
             "attachGmacroProtocol" -> handleAttachGmacroProtocol(call, result)
             "invokeGmacroMethod" -> handleInvokeGmacroMethod(call, result)
@@ -160,6 +187,8 @@ class Host4FlutterDeviceNativePlugin :
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         methodChannel.setMethodCallHandler(null)
         bleScanHandler.stopScan()
+        usbScanHandler.stopScan()
+        handleReleaseUsbInternal()
         protocolSessions.clear()
         transportSessions.values.forEach { it.eventChannel.setStreamHandler(null) }
         transportSessions.clear()
@@ -185,7 +214,8 @@ class Host4FlutterDeviceNativePlugin :
 
         val record = TransportSessionRecord(
             sessionId = sessionId,
-            mac = mac,
+            transportKind = Host4FlutterTransportKinds.BLE,
+            deviceKey = mac,
             eventChannel = eventChannel,
             eventHandler = eventHandler,
         )
@@ -211,6 +241,185 @@ class Host4FlutterDeviceNativePlugin :
         result.success(sessionId)
     }
 
+    private fun handleConnectUsb(call: MethodCall, result: Result) {
+        val arguments = call.arguments as? Map<*, *>
+        val deviceId = arguments?.get("deviceId") as? String
+
+        val sessionId = UUID.randomUUID().toString()
+        val eventHandler = QueuedEventStreamHandler()
+        val eventChannel = EventChannel(
+            binaryMessenger,
+            "host4_flutter_device_native/transport_events/$sessionId",
+        )
+        eventChannel.setStreamHandler(eventHandler)
+
+        val usbHandle: UsbDeviceSessionHandle = platformSdk.usb()
+        val record = TransportSessionRecord(
+            sessionId = sessionId,
+            transportKind = Host4FlutterTransportKinds.USB,
+            deviceKey = usbHandle.deviceId,
+            eventChannel = eventChannel,
+            eventHandler = eventHandler,
+        )
+        transportSessions[sessionId] = record
+        activeUsbTransport = record
+
+        // Return sessionId first so Flutter can subscribe to transport_events
+        // before SDK init() runs (init triggers permission UI + connect).
+        result.success(sessionId)
+
+        mainHandler.post {
+            startUsbHostConnection(usbHandle, deviceId, record)
+        }
+    }
+
+    private fun startUsbHostConnection(
+        usbHandle: UsbDeviceSessionHandle,
+        deviceId: String?,
+        record: TransportSessionRecord,
+    ) {
+        val wasInitialized = usbHostInitialized
+        ensureUsbHostInitialized(usbHandle, deviceId)
+
+        val usbManager = ReliableUsbCommManager.getInstance()
+        when {
+            usbManager.isConnected -> {
+                record.lastTransportStatus = ReliableUsbCommManager.CONNECT_COMPLETED
+                record.eventHandler.emit(mapOf("type" to "ready"))
+            }
+            !wasInitialized -> {
+                // init() already calls searchAndConnectAsync(); do not duplicate.
+                record.eventHandler.emit(mapOf("type" to "connecting"))
+                scheduleUsbPermissionWatchdog(record)
+            }
+            else -> {
+                record.eventHandler.emit(mapOf("type" to "connecting"))
+                usbManager.searchAndConnectAsync()
+            }
+        }
+    }
+
+    /**
+     * Manual reconnect after a failed attempt. Clears stale USB handles (same as
+     * unplug/replug) then searches again — required when the device was already
+     * plugged before [UsbDeviceSessionHandle.init].
+     */
+    private fun recoverUsbHostConnection(
+        usbHandle: UsbDeviceSessionHandle,
+        deviceId: String?,
+        record: TransportSessionRecord,
+    ) {
+        ensureUsbHostInitialized(usbHandle, deviceId)
+        val usbManager = ReliableUsbCommManager.getInstance()
+        if (usbManager.isConnected) {
+            record.lastTransportStatus = ReliableUsbCommManager.CONNECT_COMPLETED
+            record.eventHandler.emit(mapOf("type" to "ready"))
+            return
+        }
+        record.usbRecoverScheduled = false
+        runCatching { usbManager.close() }
+        record.eventHandler.emit(mapOf("type" to "connecting"))
+        usbManager.searchAndConnectAsync()
+    }
+
+    private fun scheduleUsbPermissionWatchdog(record: TransportSessionRecord) {
+        mainHandler.postDelayed({
+            if (activeUsbTransport !== record) return@postDelayed
+            val usbManager = ReliableUsbCommManager.getInstance()
+            if (usbManager.isConnected) return@postDelayed
+            usbManager.searchAndConnectAsync()
+        }, USB_PERMISSION_WATCHDOG_MS)
+    }
+
+    private fun scheduleUsbRecoverAfterFailure(record: TransportSessionRecord) {
+        if (record.usbRecoverScheduled) return
+        record.usbRecoverScheduled = true
+        mainHandler.postDelayed({
+            if (activeUsbTransport !== record) return@postDelayed
+            val usbManager = ReliableUsbCommManager.getInstance()
+            if (usbManager.isConnected) return@postDelayed
+            runCatching { usbManager.close() }
+            record.eventHandler.emit(mapOf("type" to "connecting"))
+            usbManager.searchAndConnectAsync()
+        }, USB_RECOVER_AFTER_FAIL_MS)
+    }
+
+    private fun handleReconnectUsb(result: Result) {
+        val record = activeUsbTransport
+        if (record == null) {
+            result.error(
+                "usb-session-missing",
+                "No active USB transport session. Open the USB connect page first.",
+                null,
+            )
+            return
+        }
+
+        val usbHandle = platformSdk.usb()
+        mainHandler.post {
+            recoverUsbHostConnection(usbHandle, null, record)
+        }
+        result.success(null)
+    }
+
+    private fun handleReleaseUsb(result: Result) {
+        handleReleaseUsbInternal()
+        result.success(null)
+    }
+
+    private fun handleReleaseUsbInternal() {
+        val usbSessionIds = transportSessions.filterValues {
+            it.transportKind == Host4FlutterTransportKinds.USB
+        }.keys.toList()
+
+        for (sessionId in usbSessionIds) {
+            transportSessions.remove(sessionId)?.eventChannel?.setStreamHandler(null)
+            removeProtocolSessionsForTransport(sessionId)
+        }
+
+        activeUsbTransport = null
+        if (usbHostInitialized) {
+            runCatching { platformSdk.usb().disconnect() }
+            usbHostInitialized = false
+        }
+    }
+
+    /**
+     * Delegates permission, attach/detach broadcasts, and connect retries to
+     * [ReliableUsbCommManager] inside bluetooth_communication JAR.
+     */
+    private fun ensureUsbHostInitialized(usbHandle: UsbDeviceSessionHandle, deviceId: String?) {
+        usbHandle.setUsbConnectListener(usbConnectListener)
+        if (usbHostInitialized) {
+            return
+        }
+
+        val vidPid = deviceId?.let { UsbDeviceIds.parse(it) }
+        if (vidPid != null) {
+            usbHandle.init(applicationContext, vidPid.second, vidPid.first)
+        } else {
+            usbHandle.init(applicationContext)
+        }
+        usbHostInitialized = true
+    }
+
+    private val usbConnectListener = UsbConnectListener { status ->
+        val record = activeUsbTransport ?: return@UsbConnectListener
+        record.lastTransportStatus = status
+        when (status) {
+            ReliableUsbCommManager.CONNECT_COMPLETED -> {
+                record.usbRecoverScheduled = false
+            }
+            ReliableUsbCommManager.CONNECT_FAIL -> {
+                scheduleUsbRecoverAfterFailure(record)
+            }
+        }
+        record.eventHandler.emit(UsbTransportEventMapper.mapTransportEvent(status))
+        if (status == ReliableUsbCommManager.CONNECT_COMPLETED) {
+            emitProtocolReadyForTransport(record.sessionId)
+        }
+    }
+
     private fun handleDisconnectTransport(call: MethodCall, result: Result) {
         val arguments = call.arguments as? Map<*, *>
         val transportSessionId = arguments?.get("transportSessionId") as? String
@@ -225,7 +434,14 @@ class Host4FlutterDeviceNativePlugin :
         }
 
         record.eventChannel.setStreamHandler(null)
-        platformSdk.disconnectBle(record.mac)
+        when (record.transportKind) {
+            Host4FlutterTransportKinds.USB -> {
+                if (activeUsbTransport?.sessionId == transportSessionId) {
+                    activeUsbTransport = null
+                }
+            }
+            else -> platformSdk.disconnectBle(record.deviceKey)
+        }
         removeProtocolSessionsForTransport(transportSessionId)
         result.success(null)
     }
@@ -254,14 +470,23 @@ class Host4FlutterDeviceNativePlugin :
         protocolSessions[protocolSessionId] = ProtocolSessionRecord(
             protocolSessionId = protocolSessionId,
             transportSessionId = transportSessionId,
-            mac = transportRecord.mac,
+            deviceKey = transportRecord.deviceKey,
+            transportKind = transportRecord.transportKind,
             eventChannel = eventChannel,
             eventHandler = eventHandler,
         )
 
-        platformSdk.setActiveBleDevice(transportRecord.mac)
+        if (transportRecord.transportKind == Host4FlutterTransportKinds.BLE) {
+            platformSdk.setActiveBleDevice(transportRecord.deviceKey)
+        }
 
-        if (transportRecord.lastTransportStatus == Constants.COMPLETE_CONNECT) {
+        val isTransportReady = when (transportRecord.transportKind) {
+            Host4FlutterTransportKinds.USB ->
+                transportRecord.lastTransportStatus == ReliableUsbCommManager.CONNECT_COMPLETED
+            else ->
+                transportRecord.lastTransportStatus == Constants.COMPLETE_CONNECT
+        }
+        if (isTransportReady) {
             eventHandler.emit(mapOf("type" to "ready"))
         }
 
@@ -287,7 +512,8 @@ class Host4FlutterDeviceNativePlugin :
         val invokeArguments = (payload["arguments"] as? Map<String, Any?>) ?: emptyMap()
 
         GmacroMethodInvoker.invoke(
-            mac = protocolRecord.mac,
+            deviceKey = protocolRecord.deviceKey,
+            transportKind = protocolRecord.transportKind,
             method = method,
             arguments = invokeArguments,
             result = result,
@@ -326,16 +552,27 @@ class Host4FlutterDeviceNativePlugin :
 
     private data class TransportSessionRecord(
         val sessionId: String,
-        val mac: String,
+        val transportKind: String,
+        val deviceKey: String,
         val eventChannel: EventChannel,
         val eventHandler: QueuedEventStreamHandler,
         @Volatile var lastTransportStatus: Int = Constants.CONNECTING,
+        @Volatile var usbRecoverScheduled: Boolean = false,
     )
+
+    private companion object {
+        /** Retry search if permission was granted but the first open did not complete. */
+        const val USB_PERMISSION_WATCHDOG_MS = 1500L
+
+        /** Delay before auto-recovering from CONNECT_FAIL (mirrors replug). */
+        const val USB_RECOVER_AFTER_FAIL_MS = 400L
+    }
 
     private data class ProtocolSessionRecord(
         val protocolSessionId: String,
         val transportSessionId: String,
-        val mac: String,
+        val deviceKey: String,
+        val transportKind: String,
         val eventChannel: EventChannel,
         val eventHandler: QueuedEventStreamHandler,
     )
