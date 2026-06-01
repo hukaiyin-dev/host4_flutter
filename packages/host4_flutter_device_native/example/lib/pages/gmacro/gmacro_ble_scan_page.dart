@@ -7,6 +7,8 @@ import 'package:host4_flutter_ble/host4_flutter_ble.dart';
 import 'package:host4_flutter_device_native/host4_flutter_device_native.dart';
 import 'package:host4_flutter_transport/host4_flutter_transport.dart';
 
+import 'package:host4_flutter_log/host4_flutter_log.dart';
+
 import 'gmacro_session_page.dart';
 
 class GmacroBleScanPage extends StatefulWidget {
@@ -17,6 +19,7 @@ class GmacroBleScanPage extends StatefulWidget {
 }
 
 class _GmacroBleScanPageState extends State<GmacroBleScanPage> {
+  final Host4Logger _log = Host4Logger('GMacroScan');
   final Host4Ble _ble = Host4Ble();
   final Host4FlutterDeviceNative _deviceNative = Host4FlutterDeviceNative();
   late final DeviceDiscovery _discovery = _ble.discovery();
@@ -50,6 +53,7 @@ class _GmacroBleScanPageState extends State<GmacroBleScanPage> {
     if (!kIsWeb && Platform.isAndroid) {
       final bool granted = await _deviceNative.ensureBleScanPermissions();
       if (!granted) {
+        _log.warn('Need BLE and Location permissions to scan.');
         setState(() {
           _scanError = '需要蓝牙和定位权限才能扫描，请在系统设置中允许后重试。';
           _isScanning = false;
@@ -66,12 +70,12 @@ class _GmacroBleScanPageState extends State<GmacroBleScanPage> {
       _scanError = null;
     });
 
-    print('[GMacro BLE Scan] Starting scan...');
+    _log.info('Starting scan...');
     _scanSubscription = _discovery
         .scan(const DeviceScanQuery(serviceIds: <String>[]))
         .listen(
           (DeviceDescriptor device) {
-            print('[GMacro BLE Scan] Device discovered: ${device.name} (${device.id})');
+            _log.debug('Device discovered: ${device.name} (${device.id})');
             if (!mounted) {
               return;
             }
@@ -81,8 +85,7 @@ class _GmacroBleScanPageState extends State<GmacroBleScanPage> {
             });
           },
           onError: (Object error, StackTrace stackTrace) {
-            print('[GMacro BLE Scan] Error: $error');
-            print(stackTrace);
+            _log.error('Scan error', error: error, stackTrace: stackTrace);
             if (!mounted) {
               return;
             }
@@ -110,6 +113,7 @@ class _GmacroBleScanPageState extends State<GmacroBleScanPage> {
   }
 
   Future<void> _connectToDevice(DeviceDescriptor device) async {
+    _log.info('Connecting to device: ${device.name} (${device.id})');
     setState(() {
       _connectingDeviceId = device.id;
       _scanError = null;
@@ -119,6 +123,7 @@ class _GmacroBleScanPageState extends State<GmacroBleScanPage> {
 
     try {
       final TransportSession transport = await _ble.connect(device);
+      _log.info('Successfully connected to device: ${device.id}');
       if (!mounted) {
         await transport.disconnect();
         return;
@@ -129,7 +134,8 @@ class _GmacroBleScanPageState extends State<GmacroBleScanPage> {
           builder: (_) => GmacroSessionPage(transport: transport),
         ),
       );
-    } catch (error) {
+    } catch (error, stackTrace) {
+      _log.error('Connection failed for ${device.id}', error: error, stackTrace: stackTrace);
       if (!mounted) {
         return;
       }

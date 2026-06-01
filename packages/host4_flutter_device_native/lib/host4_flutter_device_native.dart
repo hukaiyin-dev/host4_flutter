@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'host4_flutter_device_native_platform_interface.dart';
 import 'src/native_models.dart';
 export 'src/native_models.dart';
@@ -55,9 +57,13 @@ class Host4FlutterDeviceNative {
     );
   }
 
-  Future<String> attachGmacroProtocol(String transportSessionId) {
+  Future<String> attachGmacroProtocol(
+    String transportSessionId, {
+    Map<String, Object?> options = const {},
+  }) {
     return Host4FlutterDeviceNativePlatform.instance.attachGmacroProtocol(
       transportSessionId,
+      options: options,
     );
   }
 
@@ -82,6 +88,16 @@ class Host4FlutterDeviceNative {
   Future<void> closeProtocol(String protocolSessionId) {
     return Host4FlutterDeviceNativePlatform.instance.closeProtocol(
       protocolSessionId,
+    );
+  }
+
+  Future<void> startOta({
+    required String protocolSessionId,
+    required Uint8List firmwareData,
+  }) {
+    return Host4FlutterDeviceNativePlatform.instance.startOta(
+      protocolSessionId: protocolSessionId,
+      firmwareData: firmwareData,
     );
   }
 

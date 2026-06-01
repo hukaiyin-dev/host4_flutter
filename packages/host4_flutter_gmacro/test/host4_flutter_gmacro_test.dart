@@ -18,7 +18,10 @@ void main() {
 
 class _FakeDeviceNative extends Host4FlutterDeviceNative {
   @override
-  Future<String> attachGmacroProtocol(String transportSessionId) async {
+  Future<String> attachGmacroProtocol(
+    String transportSessionId, {
+    Map<String, Object?> options = const {},
+  }) async {
     return 'protocol-1';
   }
 }

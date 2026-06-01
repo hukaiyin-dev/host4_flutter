@@ -4,6 +4,7 @@ export 'src/Models/gmacro_gamepad_key.dart';
 export 'src/Models/gmacro_macro_models.dart';
 export 'src/Models/gmacro_curve_point.dart';
 export 'src/Models/gmacro_methods.dart';
+export 'src/Models/gmacro_config.dart';
 export 'src/Models/gmacro_light_models.dart';
 export 'src/Models/gmacro_support_enums.dart';
 export 'src/Models/gmacro_turbo_models.dart';

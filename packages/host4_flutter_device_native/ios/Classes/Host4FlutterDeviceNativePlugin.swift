@@ -245,9 +245,36 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
       handleInvokeGmacroMethod(call, result: result)
     case "closeProtocol":
       handleCloseProtocol(call, result: result)
+    case "startOta":
+      handleStartOta(call, result: result)
     default:
       result(FlutterMethodNotImplemented)
     }
+  }
+
+  private func handleStartOta(
+    _ call: FlutterMethodCall,
+    result: @escaping FlutterResult
+  ) {
+    guard
+      let arguments = call.arguments as? [String: Any],
+      let protocolSessionId = arguments["protocolSessionId"] as? String,
+      let firmwareData = arguments["firmwareData"] as? FlutterStandardTypedData,
+      let protocolRecord = gmacroProtocolSessions[protocolSessionId]
+    else {
+      result(
+        flutterError(
+          code: "invalid-arguments",
+          message: "protocolSessionId and firmwareData are required."
+        )
+      )
+      return
+    }
+
+    let data = firmwareData.data
+    nativeLog("[GMacro] startOta requested, protocolSessionId=\(protocolSessionId), size=\(data.count)")
+    protocolRecord.session.startOTA(data: data)
+    result(nil)
   }
 
   private func handleConnectBle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -402,7 +429,10 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
       return
     }
 
-    nativeLog("[GMacro] attachGMacro requested, transportSessionId=\(transportSessionId)")
+    let otaCommandChar = arguments["otaCommandCharacteristic"] as? String ?? "FF11"
+    let otaDataChar = arguments["otaDataCharacteristic"] as? String ?? "FF12"
+
+    nativeLog("[GMacro] attachGMacro requested, transportSessionId=\(transportSessionId), otaCmd=\(otaCommandChar), otaData=\(otaDataChar)")
 
     let eventHandler = QueuedEventStreamHandler()
     let session: GMacroProtocolSession
@@ -426,17 +456,17 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
         )
         return
       }
-      // 配置 OTA 写入通道（BLE 特征 FF11 / FF12）
+      // 配置 OTA 写入通道
       let bleTransport = TransportSessionRegistry.shared.getSession(transportSessionId) as? BluetoothTransportSession
       if bleTransport == nil {
         nativeLog("[GMacro] ⚠ attachGMacro: bleTransport cast failed, OTA writers will be no-op")
       } else {
-        nativeLog("[GMacro] attachGMacro: bleTransport OK, OTA writers configured (FF11/FF12)")
+        nativeLog("[GMacro] attachGMacro: bleTransport OK, OTA writers configured (\(otaCommandChar)/\(otaDataChar))")
       }
       bleSession.otaCommandWriter = { data, completion in
         nativeLog("[OTA] commandWriter called, size=\(data.count)")
         do {
-          try bleTransport?.send(data, to: "FF11")
+          try bleTransport?.send(data, to: otaCommandChar)
         } catch {
           nativeLog("[OTA] commandWriter send error: \(error)")
         }
@@ -445,7 +475,7 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
       bleSession.otaDataWriter = { data, completion in
         nativeLog("[OTA] dataWriter called, size=\(data.count)")
         do {
-          try bleTransport?.send(data, to: "FF12")
+          try bleTransport?.send(data, to: otaDataChar)
         } catch {
           nativeLog("[OTA] dataWriter send error: \(error)")
         }

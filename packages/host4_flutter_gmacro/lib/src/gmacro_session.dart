@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:host4_flutter_device_native/host4_flutter_device_native.dart';
 import 'package:host4_flutter_protocol/host4_flutter_protocol.dart';
 import 'package:host4_flutter_transport/host4_flutter_transport.dart';
@@ -30,6 +32,13 @@ class GmacroSession implements ProtocolSession {
     return _native.closeProtocol(id);
   }
 
+  Future<void> startOta(Uint8List firmwareData) {
+    return _native.startOta(
+      protocolSessionId: id,
+      firmwareData: firmwareData,
+    );
+  }
+
   Future<Map<String, Object?>> invoke(
     String method, {
     Map<String, Object?> arguments = const <String, Object?>{},
@@ -46,7 +55,10 @@ class GmacroSession implements ProtocolSession {
       case NativeProtocolEventType.ready:
         return const ProtocolReady();
       case NativeProtocolEventType.busy:
-        return ProtocolBusy(event.reason ?? 'busy');
+        return ProtocolBusy(
+          event.reason ?? 'busy',
+          payload: event.payload,
+        );
       case NativeProtocolEventType.error:
         final failure = event.failure;
         return ProtocolError(

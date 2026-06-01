@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
@@ -106,10 +108,16 @@ class MethodChannelHost4FlutterDeviceNative
   }
 
   @override
-  Future<String> attachGmacroProtocol(String transportSessionId) async {
+  Future<String> attachGmacroProtocol(
+    String transportSessionId, {
+    Map<String, Object?> options = const {},
+  }) async {
     final sessionId = await methodChannel.invokeMethod<String>(
       'attachGmacroProtocol',
-      <String, Object?>{'transportSessionId': transportSessionId},
+      <String, Object?>{
+        'transportSessionId': transportSessionId,
+        ...options,
+      },
     );
     if (sessionId == null || sessionId.isEmpty) {
       throw PlatformException(
@@ -154,6 +162,16 @@ class MethodChannelHost4FlutterDeviceNative
     });
   }
 
+  @override
+  Future<void> startOta({
+    required String protocolSessionId,
+    required Uint8List firmwareData,
+  }) {
+    return methodChannel.invokeMethod<void>('startOta', <String, Object?>{
+      'protocolSessionId': protocolSessionId,
+      'firmwareData': firmwareData,
+    });
+  }
 
   /// 权限
   @override

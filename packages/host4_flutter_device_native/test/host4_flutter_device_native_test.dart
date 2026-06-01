@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:host4_flutter_device_native/host4_flutter_device_native.dart';
 import 'package:host4_flutter_device_native/host4_flutter_device_native_platform_interface.dart';
@@ -11,7 +13,10 @@ class MockHost4FlutterDeviceNativePlatform
   Future<String?> getPlatformVersion() => Future.value('42');
 
   @override
-  Future<String> attachGmacroProtocol(String transportSessionId) async {
+  Future<String> attachGmacroProtocol(
+    String transportSessionId, {
+    Map<String, Object?> options = const {},
+  }) async {
     return 'protocol-1';
   }
 
@@ -67,6 +72,12 @@ class MockHost4FlutterDeviceNativePlatform
   Stream<NativeTransportEvent> transportEvents(String transportSessionId) {
     return const Stream<NativeTransportEvent>.empty();
   }
+
+  @override
+  Future<void> startOta({
+    required String protocolSessionId,
+    required Uint8List firmwareData,
+  }) async {}
 
   @override
   Future<bool> ensureBleScanPermissions() async => true;

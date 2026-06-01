@@ -51,6 +51,7 @@ Future<void> configureLogger() async {
   await Host4Logger.configure(
     Host4LoggerConfig(
       minimumLevel: Host4LogLevel.debug,
+      consoleEnabled: true,
       fileEnabled: true,
     ),
   );

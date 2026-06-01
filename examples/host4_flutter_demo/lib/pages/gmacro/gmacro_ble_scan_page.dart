@@ -7,8 +7,11 @@ import 'package:host4_flutter_ble/host4_flutter_ble.dart';
 import 'package:host4_flutter_device_native/host4_flutter_device_native.dart';
 import 'package:host4_flutter_transport/host4_flutter_transport.dart';
 import 'package:host4_flutter_ui/host4_flutter_ui.dart';
+import 'package:host4_flutter_log/host4_flutter_log.dart';
+import 'package:host4_flutter_gmacro/host4_flutter_gmacro.dart';
 
 import '../../widgets/sub_page_scaffold.dart';
+import 'gmacro_placeholder_values.dart';
 import 'gmacro_session_page.dart';
 
 class GmacroBleScanPage extends StatefulWidget {
@@ -19,6 +22,7 @@ class GmacroBleScanPage extends StatefulWidget {
 }
 
 class _GmacroBleScanPageState extends State<GmacroBleScanPage> {
+  final _log = Host4Logger('GMacroScan');
   final _ble = Host4Ble();
   final _deviceNative = Host4FlutterDeviceNative();
   late final DeviceDiscovery _discovery;
@@ -30,7 +34,9 @@ class _GmacroBleScanPageState extends State<GmacroBleScanPage> {
   bool _isConnecting = false;
   bool _hideUnnamed = true;
   StreamSubscription<DeviceDescriptor>? _scanSub;
-  static const List<String> _systemConnectServiceIds = ['FF00'];
+  static const List<String> _systemConnectServiceIds = [
+    GmacroPlaceholderValues.service,
+  ];
   static const List<String> _systemConnectDeviceNames = ['GameMacro'];
 
   @override
@@ -52,6 +58,7 @@ class _GmacroBleScanPageState extends State<GmacroBleScanPage> {
     if (!kIsWeb && Platform.isAndroid) {
       final bool granted = await _deviceNative.ensureBleScanPermissions();
       if (!granted) {
+        _log.warn('Need BLE and Location permissions to scan.');
         _showSnack('需要蓝牙和定位权限才能扫描 BLE 设备，请在系统设置中允许后重试。');
         return;
       }
@@ -62,20 +69,23 @@ class _GmacroBleScanPageState extends State<GmacroBleScanPage> {
       _seen.clear();
     });
 
-    // serviceIds 传空列表表示扫描全部设备。
-    // 生产场景建议填入 GMacro 设备的真实 Service UUID 以提高效率。
+    _log.info('Starting BLE scan...');
+    // 只扫描 GMacro 设备的 Service UUID
     final stream = _discovery.scan(const DeviceScanQuery(serviceIds: []));
     _scanSub = stream.listen(
       (device) {
+        _log.debug('Device discovered: ${device.name} (${device.id})');
         if (!mounted) return;
         setState(() => _seen[device.id] = device);
       },
-      onError: (Object err) {
+      onError: (Object err, StackTrace stack) {
+        _log.error('Scan error', error: err, stackTrace: stack);
         if (!mounted) return;
         setState(() => _isScanning = false);
         _showSnack('扫描错误: $err');
       },
       onDone: () {
+        _log.info('Scan done');
         if (mounted) setState(() => _isScanning = false);
       },
     );
@@ -90,12 +100,14 @@ class _GmacroBleScanPageState extends State<GmacroBleScanPage> {
 
   Future<void> _connect(DeviceDescriptor device) async {
     if (_isConnecting) return;
+    _log.info('Connecting to device: ${device.name} (${device.id})');
     setState(() => _isConnecting = true);
 
     // await _stopScan();
 
     try {
       final transport = await _ble.connect(device);
+      _log.info('Successfully connected to ${device.id}');
       if (!mounted) return;
       // replace 当前页，返回时直接回到 Entry
       await Navigator.of(context).pushReplacement(
@@ -103,7 +115,8 @@ class _GmacroBleScanPageState extends State<GmacroBleScanPage> {
           builder: (_) => GmacroSessionPage(transport: transport),
         ),
       );
-    } catch (e) {
+    } catch (e, s) {
+      _log.error('Connection failed for ${device.id}', error: e, stackTrace: s);
       if (!mounted) return;
       _showSnack('连接失败: $e');
     } finally {
@@ -114,6 +127,7 @@ class _GmacroBleScanPageState extends State<GmacroBleScanPage> {
   Future<void> _connectSystemConnected() async {
     if (_isConnecting) return;
 
+    _log.info('Connecting to system connected devices...');
     setState(() => _isConnecting = true);
 
     try {
@@ -122,12 +136,14 @@ class _GmacroBleScanPageState extends State<GmacroBleScanPage> {
 
       for (var i = 0; i < 2; i++) {
         try {
+          _log.debug('Attempt ${i + 1} to connect to system devices');
           transport = await _ble.connectSystemConnected(
             _systemConnectServiceIds,
             deviceNames: _systemConnectDeviceNames,
           );
           break;
-        } catch (e) {
+        } catch (e, s) {
+          _log.warn('Attempt ${i + 1} failed', error: e, stackTrace: s);
           lastError = e;
           if (i == 0) {
             await Future<void>.delayed(const Duration(milliseconds: 400));
@@ -142,6 +158,7 @@ class _GmacroBleScanPageState extends State<GmacroBleScanPage> {
             );
       }
 
+      _log.info('Successfully connected to system device: ${transport.id}');
       if (!mounted) return;
 
       await Navigator.of(context).pushReplacement(
@@ -149,12 +166,15 @@ class _GmacroBleScanPageState extends State<GmacroBleScanPage> {
           builder: (_) => GmacroSessionPage(transport: transport!),
         ),
       );
-    } catch (e) {
+    } catch (e, s) {
+      _log.error('Failed to connect to system device', error: e, stackTrace: s);
       if (!mounted) return;
       _showSnack('连接已有设备失败: $e');
     } finally {
       if (mounted) {
-        setState(() => _isConnecting = false);
+        setState(() {
+          _isConnecting = false;
+        });
       }
     }
   }

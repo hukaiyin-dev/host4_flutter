@@ -9,9 +9,13 @@ class ProtocolReady extends ProtocolEvent {
 }
 
 class ProtocolBusy extends ProtocolEvent {
-  const ProtocolBusy(this.reason);
+  const ProtocolBusy(
+    this.reason, {
+    this.payload = const <String, Object?>{},
+  });
 
   final String reason;
+  final Map<String, Object?> payload;
 }
 
 class ProtocolError extends ProtocolEvent {

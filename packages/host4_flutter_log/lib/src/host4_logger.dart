@@ -81,7 +81,7 @@ class Host4Logger implements Host4LogSink {
     final line = _format(level, tag, message, error, stackTrace);
 
     if (_config.consoleEnabled) {
-      debugPrint(line);
+      print(line);
     }
 
     if (_config.fileEnabled && _logFilePath != null) {

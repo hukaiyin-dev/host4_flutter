@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 import 'host4_flutter_device_native_method_channel.dart';
@@ -65,7 +67,10 @@ abstract class Host4FlutterDeviceNativePlatform extends PlatformInterface {
     throw UnimplementedError('disconnectTransport() has not been implemented.');
   }
 
-  Future<String> attachGmacroProtocol(String transportSessionId) {
+  Future<String> attachGmacroProtocol(
+    String transportSessionId, {
+    Map<String, Object?> options = const {},
+  }) {
     throw UnimplementedError(
       'attachGmacroProtocol() has not been implemented.',
     );
@@ -85,6 +90,13 @@ abstract class Host4FlutterDeviceNativePlatform extends PlatformInterface {
 
   Future<void> closeProtocol(String protocolSessionId) {
     throw UnimplementedError('closeProtocol() has not been implemented.');
+  }
+
+  Future<void> startOta({
+    required String protocolSessionId,
+    required Uint8List firmwareData,
+  }) {
+    throw UnimplementedError('startOta() has not been implemented.');
   }
 
   /// Android only: requests Bluetooth + location permissions required for BLE scan.
