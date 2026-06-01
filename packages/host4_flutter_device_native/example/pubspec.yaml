@@ -32,6 +32,8 @@ dependencies:
     path: ../../host4_flutter_ble
   host4_flutter_gmacro:
     path: ../../host4_flutter_gmacro
+  host4_flutter_log:
+    path: ../../host4_flutter_log
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
