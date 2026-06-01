@@ -7,11 +7,11 @@
 
 import Foundation
 
-struct BluetoothKitConstant {
+public struct BluetoothKitConstant {
     nonisolated(unsafe) static var deviceNames: [String] = [
         "LED", "Pixely", "macro",
     ]
-    
+
     static let simulateDeviceName = "SHZJ"
     static let simulateService = "FFFF"
     // 数据服务与特征
@@ -23,7 +23,7 @@ struct BluetoothKitConstant {
     nonisolated(unsafe) static var otaService = "FF10"
     nonisolated(unsafe) static var otaCommandCharacteristic = "FF11"
     nonisolated(unsafe) static var otaDataCharacteristic = "FF12"
-    
+
     // 可用特征
     nonisolated(unsafe) static var availableCharacteristics: [String] = [
         commandCharacteristic,
@@ -31,24 +31,23 @@ struct BluetoothKitConstant {
         otaCommandCharacteristic,
         otaDataCharacteristic
     ]
-    
+
     nonisolated(unsafe) static var characteristics: [String] = [
         commandCharacteristic,
         dataCharacteristic
     ]
-    
+
     nonisolated(unsafe) static var otaCharacteristics: [String] = [
         otaCommandCharacteristic,
         otaDataCharacteristic
     ]
-    
-    nonisolated(unsafe) static var responseTimeout: TimeInterval = 5
-    
+
+    public nonisolated(unsafe) static var responseTimeout: TimeInterval = 5
+
     /// 多条消息之间的发送间隔
-    nonisolated(unsafe) static var messageInterval: TimeInterval = 0.05
-    
-    
-    nonisolated(unsafe) static var logHandler: ((_ items: [Any], _ separator: String, _ terminator: String) -> Void)?
+    public nonisolated(unsafe) static var messageInterval: TimeInterval = 0.05
+
+    public nonisolated(unsafe) static var logHandler: ((_ items: [Any], _ separator: String, _ terminator: String) -> Void)?
 }
 
 

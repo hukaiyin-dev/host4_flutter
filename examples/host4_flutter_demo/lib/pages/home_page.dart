@@ -21,6 +21,14 @@ class HomePage extends StatelessWidget {
     final theme = context.host4Theme;
     final entries = <_LabEntry>[
       _LabEntry(
+        title: 'GMacro 调试',
+        subtitle: 'BLE / MFi 主链路 + OTA 测试',
+        icon: Icons.gamepad_outlined,
+        color: theme.colors.brandPrimary,
+        minHeight: 220,
+        builder: (_) => const GmacroEntryPage(),
+      ),
+      _LabEntry(
         title: l10n.labThemePlaygroundTitle,
         subtitle: l10n.labThemePlaygroundSubtitle,
         icon: Icons.palette_outlined,
@@ -75,14 +83,6 @@ class HomePage extends StatelessWidget {
           subtitle: l10n.testerPageSubtitle,
           child: TesterPage(onResetToDefaults: onResetToDefaults),
         ),
-      ),
-      _LabEntry(
-        title: 'GMacro 调试',
-        subtitle: 'BLE / MFi 主链路 + OTA 测试',
-        icon: Icons.gamepad_outlined,
-        color: theme.colors.brandPrimary,
-        minHeight: 220,
-        builder: (_) => const GmacroEntryPage(),
       ),
     ];
 
@@ -173,8 +173,9 @@ class _LabCard extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         borderRadius: BorderRadius.circular(theme.radius.card),
-        onTap: () =>
-            Navigator.of(context).push(MaterialPageRoute(builder: entry.builder)),
+        onTap: () => Navigator.of(
+          context,
+        ).push(MaterialPageRoute(builder: entry.builder)),
         child: Ink(
           decoration: BoxDecoration(
             color: theme.colors.surface.withValues(alpha: 0.92),
@@ -222,7 +223,9 @@ class _LabCard extends StatelessWidget {
                         ),
                         decoration: BoxDecoration(
                           color: theme.colors.surfaceMuted,
-                          borderRadius: BorderRadius.circular(theme.radius.pill),
+                          borderRadius: BorderRadius.circular(
+                            theme.radius.pill,
+                          ),
                         ),
                         child: Text(
                           l10n.inspectButton,

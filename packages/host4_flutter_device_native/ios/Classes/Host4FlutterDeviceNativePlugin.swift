@@ -434,6 +434,16 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
 
     nativeLog("[GMacro] attachGMacro requested, transportSessionId=\(transportSessionId), otaCmd=\(otaCommandChar), otaData=\(otaDataChar)")
 
+    // 注入 BLE 底层日志转发，使 Release 构建也能在 Flutter 侧看到收发数据
+    BluetoothKitConstant.logHandler = { items, separator, terminator in
+      let message = items.map { "\($0)" }.joined(separator: separator)
+      nativeLog("[BLE] \(message)")
+    }
+    GPDConstant.logHandler = { items, separator, terminator in
+      let message = items.map { "\($0)" }.joined(separator: separator)
+      nativeLog("[GPD] \(message)")
+    }
+
     let eventHandler = QueuedEventStreamHandler()
     let session: GMacroProtocolSession
 

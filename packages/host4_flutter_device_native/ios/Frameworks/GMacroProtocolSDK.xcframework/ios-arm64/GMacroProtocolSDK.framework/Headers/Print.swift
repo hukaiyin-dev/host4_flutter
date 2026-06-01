@@ -8,15 +8,15 @@
 import Foundation
 
 func print(_ items: Any..., separator: String = " ", terminator: String = "\n") {
-    #if !DEBUG
-    return
-    #endif
+    // logHandler 优先级最高，无论 Debug/Release 均转发
     if let handler = GPDConstant.logHandler {
         handler(items, separator, terminator)
         return
     }
-    
-    // 主项目未注入时默认输出
+    #if !DEBUG
+    return
+    #endif
+    // 未注入 logHandler 时，Debug 模式默认输出到控制台
     let prefix = "GPD"
     let message = items.map { "\($0)" }.joined(separator: separator)
     let formatter = DateFormatter()

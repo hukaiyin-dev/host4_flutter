@@ -25716,6 +25716,448 @@
         ]
       },
       {
+        "kind": "TypeDecl",
+        "name": "GPDConstant",
+        "printedName": "GPDConstant",
+        "children": [
+          {
+            "kind": "Var",
+            "name": "logHandler",
+            "printedName": "logHandler",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "(([Any], Swift.String, Swift.String) -> ())?",
+                "children": [
+                  {
+                    "kind": "TypeFunc",
+                    "name": "Function",
+                    "printedName": "([Any], Swift.String, Swift.String) -> ()",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Void",
+                        "printedName": "()"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Tuple",
+                        "printedName": "([Any], Swift.String, Swift.String)",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Array",
+                            "printedName": "[Any]",
+                            "children": [
+                              {
+                                "kind": "TypeNominal",
+                                "name": "ProtocolComposition",
+                                "printedName": "Any"
+                              }
+                            ],
+                            "usr": "s:Sa"
+                          },
+                          {
+                            "kind": "TypeNominal",
+                            "name": "String",
+                            "printedName": "Swift.String",
+                            "usr": "s:SS"
+                          },
+                          {
+                            "kind": "TypeNominal",
+                            "name": "String",
+                            "printedName": "Swift.String",
+                            "usr": "s:SS"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "usr": "s:Sq"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "s:17GMacroProtocolSDK11GPDConstantV10logHandlerySayypG_S2StcSgvpZ",
+            "mangledName": "$s17GMacroProtocolSDK11GPDConstantV10logHandlerySayypG_S2StcSgvpZ",
+            "moduleName": "GMacroProtocolSDK",
+            "static": true,
+            "declAttributes": [
+              "HasInitialValue",
+              "HasStorage",
+              "Nonisolated",
+              "AccessControl"
+            ],
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Optional",
+                    "printedName": "(([Any], Swift.String, Swift.String) -> ())?",
+                    "children": [
+                      {
+                        "kind": "TypeFunc",
+                        "name": "Function",
+                        "printedName": "([Any], Swift.String, Swift.String) -> ()",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Void",
+                            "printedName": "()"
+                          },
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Tuple",
+                            "printedName": "([Any], Swift.String, Swift.String)",
+                            "children": [
+                              {
+                                "kind": "TypeNominal",
+                                "name": "Array",
+                                "printedName": "[Any]",
+                                "children": [
+                                  {
+                                    "kind": "TypeNominal",
+                                    "name": "ProtocolComposition",
+                                    "printedName": "Any"
+                                  }
+                                ],
+                                "usr": "s:Sa"
+                              },
+                              {
+                                "kind": "TypeNominal",
+                                "name": "String",
+                                "printedName": "Swift.String",
+                                "usr": "s:SS"
+                              },
+                              {
+                                "kind": "TypeNominal",
+                                "name": "String",
+                                "printedName": "Swift.String",
+                                "usr": "s:SS"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ],
+                    "usr": "s:Sq"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:17GMacroProtocolSDK11GPDConstantV10logHandlerySayypG_S2StcSgvgZ",
+                "mangledName": "$s17GMacroProtocolSDK11GPDConstantV10logHandlerySayypG_S2StcSgvgZ",
+                "moduleName": "GMacroProtocolSDK",
+                "static": true,
+                "implicit": true,
+                "accessorKind": "get"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Set",
+                "printedName": "Set()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Optional",
+                    "printedName": "(([Any], Swift.String, Swift.String) -> ())?",
+                    "children": [
+                      {
+                        "kind": "TypeFunc",
+                        "name": "Function",
+                        "printedName": "([Any], Swift.String, Swift.String) -> ()",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Void",
+                            "printedName": "()"
+                          },
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Tuple",
+                            "printedName": "([Any], Swift.String, Swift.String)",
+                            "children": [
+                              {
+                                "kind": "TypeNominal",
+                                "name": "Array",
+                                "printedName": "[Any]",
+                                "children": [
+                                  {
+                                    "kind": "TypeNominal",
+                                    "name": "ProtocolComposition",
+                                    "printedName": "Any"
+                                  }
+                                ],
+                                "usr": "s:Sa"
+                              },
+                              {
+                                "kind": "TypeNominal",
+                                "name": "String",
+                                "printedName": "Swift.String",
+                                "usr": "s:SS"
+                              },
+                              {
+                                "kind": "TypeNominal",
+                                "name": "String",
+                                "printedName": "Swift.String",
+                                "usr": "s:SS"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ],
+                    "usr": "s:Sq"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:17GMacroProtocolSDK11GPDConstantV10logHandlerySayypG_S2StcSgvsZ",
+                "mangledName": "$s17GMacroProtocolSDK11GPDConstantV10logHandlerySayypG_S2StcSgvsZ",
+                "moduleName": "GMacroProtocolSDK",
+                "static": true,
+                "implicit": true,
+                "accessorKind": "set"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Modify",
+                "printedName": "Modify()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:17GMacroProtocolSDK11GPDConstantV10logHandlerySayypG_S2StcSgvMZ",
+                "mangledName": "$s17GMacroProtocolSDK11GPDConstantV10logHandlerySayypG_S2StcSgvMZ",
+                "moduleName": "GMacroProtocolSDK",
+                "static": true,
+                "implicit": true,
+                "accessorKind": "_modify"
+              }
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "responseTimeout",
+            "printedName": "responseTimeout",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Double",
+                "printedName": "Swift.Double",
+                "usr": "s:Sd"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "s:17GMacroProtocolSDK11GPDConstantV15responseTimeoutSdvpZ",
+            "mangledName": "$s17GMacroProtocolSDK11GPDConstantV15responseTimeoutSdvpZ",
+            "moduleName": "GMacroProtocolSDK",
+            "static": true,
+            "declAttributes": [
+              "HasInitialValue",
+              "HasStorage",
+              "Nonisolated",
+              "AccessControl"
+            ],
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Double",
+                    "printedName": "Swift.Double",
+                    "usr": "s:Sd"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:17GMacroProtocolSDK11GPDConstantV15responseTimeoutSdvgZ",
+                "mangledName": "$s17GMacroProtocolSDK11GPDConstantV15responseTimeoutSdvgZ",
+                "moduleName": "GMacroProtocolSDK",
+                "static": true,
+                "implicit": true,
+                "accessorKind": "get"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Set",
+                "printedName": "Set()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Double",
+                    "printedName": "Swift.Double",
+                    "usr": "s:Sd"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:17GMacroProtocolSDK11GPDConstantV15responseTimeoutSdvsZ",
+                "mangledName": "$s17GMacroProtocolSDK11GPDConstantV15responseTimeoutSdvsZ",
+                "moduleName": "GMacroProtocolSDK",
+                "static": true,
+                "implicit": true,
+                "accessorKind": "set"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Modify",
+                "printedName": "Modify()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:17GMacroProtocolSDK11GPDConstantV15responseTimeoutSdvMZ",
+                "mangledName": "$s17GMacroProtocolSDK11GPDConstantV15responseTimeoutSdvMZ",
+                "moduleName": "GMacroProtocolSDK",
+                "static": true,
+                "implicit": true,
+                "accessorKind": "_modify"
+              }
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "messageInterval",
+            "printedName": "messageInterval",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Double",
+                "printedName": "Swift.Double",
+                "usr": "s:Sd"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "s:17GMacroProtocolSDK11GPDConstantV15messageIntervalSdvpZ",
+            "mangledName": "$s17GMacroProtocolSDK11GPDConstantV15messageIntervalSdvpZ",
+            "moduleName": "GMacroProtocolSDK",
+            "static": true,
+            "declAttributes": [
+              "HasInitialValue",
+              "HasStorage",
+              "Nonisolated",
+              "AccessControl",
+              "RawDocComment"
+            ],
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Double",
+                    "printedName": "Swift.Double",
+                    "usr": "s:Sd"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:17GMacroProtocolSDK11GPDConstantV15messageIntervalSdvgZ",
+                "mangledName": "$s17GMacroProtocolSDK11GPDConstantV15messageIntervalSdvgZ",
+                "moduleName": "GMacroProtocolSDK",
+                "static": true,
+                "implicit": true,
+                "accessorKind": "get"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Set",
+                "printedName": "Set()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Double",
+                    "printedName": "Swift.Double",
+                    "usr": "s:Sd"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:17GMacroProtocolSDK11GPDConstantV15messageIntervalSdvsZ",
+                "mangledName": "$s17GMacroProtocolSDK11GPDConstantV15messageIntervalSdvsZ",
+                "moduleName": "GMacroProtocolSDK",
+                "static": true,
+                "implicit": true,
+                "accessorKind": "set"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Modify",
+                "printedName": "Modify()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:17GMacroProtocolSDK11GPDConstantV15messageIntervalSdvMZ",
+                "mangledName": "$s17GMacroProtocolSDK11GPDConstantV15messageIntervalSdvMZ",
+                "moduleName": "GMacroProtocolSDK",
+                "static": true,
+                "implicit": true,
+                "accessorKind": "_modify"
+              }
+            ]
+          }
+        ],
+        "declKind": "Struct",
+        "usr": "s:17GMacroProtocolSDK11GPDConstantV",
+        "mangledName": "$s17GMacroProtocolSDK11GPDConstantV",
+        "moduleName": "GMacroProtocolSDK",
+        "declAttributes": [
+          "AccessControl"
+        ],
+        "conformances": [
+          {
+            "kind": "Conformance",
+            "name": "Copyable",
+            "printedName": "Copyable",
+            "usr": "s:s8CopyableP",
+            "mangledName": "$ss8CopyableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Escapable",
+            "printedName": "Escapable",
+            "usr": "s:s9EscapableP",
+            "mangledName": "$ss9EscapableP"
+          }
+        ]
+      },
+      {
         "kind": "Import",
         "name": "Foundation",
         "printedName": "Foundation",
@@ -39256,35 +39698,35 @@
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/GPDConstant.swift",
       "kind": "Array",
-      "offset": 293,
+      "offset": 299,
       "length": 8,
       "value": "[\"FF00\"]"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/GPDConstant.swift",
       "kind": "StringLiteral",
-      "offset": 361,
+      "offset": 367,
       "length": 6,
       "value": "\"FF01\""
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/GPDConstant.swift",
       "kind": "StringLiteral",
-      "offset": 424,
+      "offset": 430,
       "length": 6,
       "value": "\"FF02\""
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/GPDConstant.swift",
       "kind": "IntegerLiteral",
-      "offset": 508,
+      "offset": 513,
       "length": 1,
       "value": "5"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/GPDConstant.swift",
       "kind": "FloatLiteral",
-      "offset": 624,
+      "offset": 632,
       "length": 4,
       "value": "0.05"
     },

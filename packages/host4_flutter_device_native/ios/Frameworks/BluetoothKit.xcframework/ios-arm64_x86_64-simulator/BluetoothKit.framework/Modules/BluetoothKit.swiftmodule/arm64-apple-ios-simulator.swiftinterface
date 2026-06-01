@@ -39,6 +39,11 @@ extension Swift.Bool {
     get
   }
 }
+public struct BluetoothKitConstant {
+  nonisolated(unsafe) public static var responseTimeout: Swift.Double
+  nonisolated(unsafe) public static var messageInterval: Swift.Double
+  nonisolated(unsafe) public static var logHandler: ((_ items: [Any], _ separator: Swift.String, _ terminator: Swift.String) -> Swift.Void)?
+}
 public enum BluetoothError : Swift.Error, Foundation.LocalizedError {
   case timeout
   case deviceReportedError(code: Swift.Int)

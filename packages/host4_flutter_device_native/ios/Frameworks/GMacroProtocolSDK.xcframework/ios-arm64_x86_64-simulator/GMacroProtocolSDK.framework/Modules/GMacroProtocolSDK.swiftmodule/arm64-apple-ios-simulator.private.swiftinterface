@@ -848,6 +848,11 @@ public struct MacroComkey : Swift.Sendable {
   public init(macroKey: GMacroProtocolSDK.MacroKey)
   @objc deinit
 }
+public struct GPDConstant {
+  nonisolated(unsafe) public static var logHandler: ((_ items: [Any], _ separator: Swift.String, _ terminator: Swift.String) -> Swift.Void)?
+  nonisolated(unsafe) public static var responseTimeout: Swift.Double
+  nonisolated(unsafe) public static var messageInterval: Swift.Double
+}
 public struct KeyTurbo {
   public var key: GMacroProtocolSDK.GamepadKey
   public var turbo: GMacroProtocolSDK.TurboMode

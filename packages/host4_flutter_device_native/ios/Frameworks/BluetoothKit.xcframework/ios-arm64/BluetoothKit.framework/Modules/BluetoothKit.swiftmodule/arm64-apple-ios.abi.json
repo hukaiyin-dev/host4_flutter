@@ -103,6 +103,448 @@
       },
       {
         "kind": "TypeDecl",
+        "name": "BluetoothKitConstant",
+        "printedName": "BluetoothKitConstant",
+        "children": [
+          {
+            "kind": "Var",
+            "name": "responseTimeout",
+            "printedName": "responseTimeout",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Double",
+                "printedName": "Swift.Double",
+                "usr": "s:Sd"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "s:12BluetoothKit0aB8ConstantV15responseTimeoutSdvpZ",
+            "mangledName": "$s12BluetoothKit0aB8ConstantV15responseTimeoutSdvpZ",
+            "moduleName": "BluetoothKit",
+            "static": true,
+            "declAttributes": [
+              "HasInitialValue",
+              "HasStorage",
+              "Nonisolated",
+              "AccessControl"
+            ],
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Double",
+                    "printedName": "Swift.Double",
+                    "usr": "s:Sd"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:12BluetoothKit0aB8ConstantV15responseTimeoutSdvgZ",
+                "mangledName": "$s12BluetoothKit0aB8ConstantV15responseTimeoutSdvgZ",
+                "moduleName": "BluetoothKit",
+                "static": true,
+                "implicit": true,
+                "accessorKind": "get"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Set",
+                "printedName": "Set()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Double",
+                    "printedName": "Swift.Double",
+                    "usr": "s:Sd"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:12BluetoothKit0aB8ConstantV15responseTimeoutSdvsZ",
+                "mangledName": "$s12BluetoothKit0aB8ConstantV15responseTimeoutSdvsZ",
+                "moduleName": "BluetoothKit",
+                "static": true,
+                "implicit": true,
+                "accessorKind": "set"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Modify",
+                "printedName": "Modify()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:12BluetoothKit0aB8ConstantV15responseTimeoutSdvMZ",
+                "mangledName": "$s12BluetoothKit0aB8ConstantV15responseTimeoutSdvMZ",
+                "moduleName": "BluetoothKit",
+                "static": true,
+                "implicit": true,
+                "accessorKind": "_modify"
+              }
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "messageInterval",
+            "printedName": "messageInterval",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Double",
+                "printedName": "Swift.Double",
+                "usr": "s:Sd"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "s:12BluetoothKit0aB8ConstantV15messageIntervalSdvpZ",
+            "mangledName": "$s12BluetoothKit0aB8ConstantV15messageIntervalSdvpZ",
+            "moduleName": "BluetoothKit",
+            "static": true,
+            "declAttributes": [
+              "HasInitialValue",
+              "HasStorage",
+              "Nonisolated",
+              "AccessControl",
+              "RawDocComment"
+            ],
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Double",
+                    "printedName": "Swift.Double",
+                    "usr": "s:Sd"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:12BluetoothKit0aB8ConstantV15messageIntervalSdvgZ",
+                "mangledName": "$s12BluetoothKit0aB8ConstantV15messageIntervalSdvgZ",
+                "moduleName": "BluetoothKit",
+                "static": true,
+                "implicit": true,
+                "accessorKind": "get"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Set",
+                "printedName": "Set()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Double",
+                    "printedName": "Swift.Double",
+                    "usr": "s:Sd"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:12BluetoothKit0aB8ConstantV15messageIntervalSdvsZ",
+                "mangledName": "$s12BluetoothKit0aB8ConstantV15messageIntervalSdvsZ",
+                "moduleName": "BluetoothKit",
+                "static": true,
+                "implicit": true,
+                "accessorKind": "set"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Modify",
+                "printedName": "Modify()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:12BluetoothKit0aB8ConstantV15messageIntervalSdvMZ",
+                "mangledName": "$s12BluetoothKit0aB8ConstantV15messageIntervalSdvMZ",
+                "moduleName": "BluetoothKit",
+                "static": true,
+                "implicit": true,
+                "accessorKind": "_modify"
+              }
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "logHandler",
+            "printedName": "logHandler",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "(([Any], Swift.String, Swift.String) -> ())?",
+                "children": [
+                  {
+                    "kind": "TypeFunc",
+                    "name": "Function",
+                    "printedName": "([Any], Swift.String, Swift.String) -> ()",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Void",
+                        "printedName": "()"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Tuple",
+                        "printedName": "([Any], Swift.String, Swift.String)",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Array",
+                            "printedName": "[Any]",
+                            "children": [
+                              {
+                                "kind": "TypeNominal",
+                                "name": "ProtocolComposition",
+                                "printedName": "Any"
+                              }
+                            ],
+                            "usr": "s:Sa"
+                          },
+                          {
+                            "kind": "TypeNominal",
+                            "name": "String",
+                            "printedName": "Swift.String",
+                            "usr": "s:SS"
+                          },
+                          {
+                            "kind": "TypeNominal",
+                            "name": "String",
+                            "printedName": "Swift.String",
+                            "usr": "s:SS"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "usr": "s:Sq"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "s:12BluetoothKit0aB8ConstantV10logHandlerySayypG_S2StcSgvpZ",
+            "mangledName": "$s12BluetoothKit0aB8ConstantV10logHandlerySayypG_S2StcSgvpZ",
+            "moduleName": "BluetoothKit",
+            "static": true,
+            "declAttributes": [
+              "HasInitialValue",
+              "HasStorage",
+              "Nonisolated",
+              "AccessControl"
+            ],
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Optional",
+                    "printedName": "(([Any], Swift.String, Swift.String) -> ())?",
+                    "children": [
+                      {
+                        "kind": "TypeFunc",
+                        "name": "Function",
+                        "printedName": "([Any], Swift.String, Swift.String) -> ()",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Void",
+                            "printedName": "()"
+                          },
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Tuple",
+                            "printedName": "([Any], Swift.String, Swift.String)",
+                            "children": [
+                              {
+                                "kind": "TypeNominal",
+                                "name": "Array",
+                                "printedName": "[Any]",
+                                "children": [
+                                  {
+                                    "kind": "TypeNominal",
+                                    "name": "ProtocolComposition",
+                                    "printedName": "Any"
+                                  }
+                                ],
+                                "usr": "s:Sa"
+                              },
+                              {
+                                "kind": "TypeNominal",
+                                "name": "String",
+                                "printedName": "Swift.String",
+                                "usr": "s:SS"
+                              },
+                              {
+                                "kind": "TypeNominal",
+                                "name": "String",
+                                "printedName": "Swift.String",
+                                "usr": "s:SS"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ],
+                    "usr": "s:Sq"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:12BluetoothKit0aB8ConstantV10logHandlerySayypG_S2StcSgvgZ",
+                "mangledName": "$s12BluetoothKit0aB8ConstantV10logHandlerySayypG_S2StcSgvgZ",
+                "moduleName": "BluetoothKit",
+                "static": true,
+                "implicit": true,
+                "accessorKind": "get"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Set",
+                "printedName": "Set()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Optional",
+                    "printedName": "(([Any], Swift.String, Swift.String) -> ())?",
+                    "children": [
+                      {
+                        "kind": "TypeFunc",
+                        "name": "Function",
+                        "printedName": "([Any], Swift.String, Swift.String) -> ()",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Void",
+                            "printedName": "()"
+                          },
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Tuple",
+                            "printedName": "([Any], Swift.String, Swift.String)",
+                            "children": [
+                              {
+                                "kind": "TypeNominal",
+                                "name": "Array",
+                                "printedName": "[Any]",
+                                "children": [
+                                  {
+                                    "kind": "TypeNominal",
+                                    "name": "ProtocolComposition",
+                                    "printedName": "Any"
+                                  }
+                                ],
+                                "usr": "s:Sa"
+                              },
+                              {
+                                "kind": "TypeNominal",
+                                "name": "String",
+                                "printedName": "Swift.String",
+                                "usr": "s:SS"
+                              },
+                              {
+                                "kind": "TypeNominal",
+                                "name": "String",
+                                "printedName": "Swift.String",
+                                "usr": "s:SS"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ],
+                    "usr": "s:Sq"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:12BluetoothKit0aB8ConstantV10logHandlerySayypG_S2StcSgvsZ",
+                "mangledName": "$s12BluetoothKit0aB8ConstantV10logHandlerySayypG_S2StcSgvsZ",
+                "moduleName": "BluetoothKit",
+                "static": true,
+                "implicit": true,
+                "accessorKind": "set"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Modify",
+                "printedName": "Modify()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:12BluetoothKit0aB8ConstantV10logHandlerySayypG_S2StcSgvMZ",
+                "mangledName": "$s12BluetoothKit0aB8ConstantV10logHandlerySayypG_S2StcSgvMZ",
+                "moduleName": "BluetoothKit",
+                "static": true,
+                "implicit": true,
+                "accessorKind": "_modify"
+              }
+            ]
+          }
+        ],
+        "declKind": "Struct",
+        "usr": "s:12BluetoothKit0aB8ConstantV",
+        "mangledName": "$s12BluetoothKit0aB8ConstantV",
+        "moduleName": "BluetoothKit",
+        "declAttributes": [
+          "AccessControl"
+        ],
+        "conformances": [
+          {
+            "kind": "Conformance",
+            "name": "Copyable",
+            "printedName": "Copyable",
+            "usr": "s:s8CopyableP",
+            "mangledName": "$ss8CopyableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Escapable",
+            "printedName": "Escapable",
+            "usr": "s:s9EscapableP",
+            "mangledName": "$ss9EscapableP"
+          }
+        ]
+      },
+      {
+        "kind": "TypeDecl",
         "name": "BluetoothError",
         "printedName": "BluetoothError",
         "children": [
@@ -8544,77 +8986,77 @@
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/BluetoothKit\/BluetoothKit\/BluetoothKit\/BluetoothKitConstant.swift",
       "kind": "Array",
-      "offset": 188,
+      "offset": 195,
       "length": 41,
       "value": "[\"LED\", \"Pixely\", \"macro\"]"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/BluetoothKit\/BluetoothKit\/BluetoothKit\/BluetoothKitConstant.swift",
       "kind": "StringLiteral",
-      "offset": 271,
+      "offset": 274,
       "length": 6,
       "value": "\"SHZJ\""
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/BluetoothKit\/BluetoothKit\/BluetoothKit\/BluetoothKitConstant.swift",
       "kind": "StringLiteral",
-      "offset": 311,
+      "offset": 314,
       "length": 6,
       "value": "\"FFFF\""
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/BluetoothKit\/BluetoothKit\/BluetoothKit\/BluetoothKitConstant.swift",
       "kind": "Array",
-      "offset": 392,
+      "offset": 395,
       "length": 8,
       "value": "[\"FF00\"]"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/BluetoothKit\/BluetoothKit\/BluetoothKit\/BluetoothKitConstant.swift",
       "kind": "StringLiteral",
-      "offset": 460,
+      "offset": 463,
       "length": 6,
       "value": "\"FF01\""
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/BluetoothKit\/BluetoothKit\/BluetoothKit\/BluetoothKitConstant.swift",
       "kind": "StringLiteral",
-      "offset": 523,
+      "offset": 526,
       "length": 6,
       "value": "\"FF02\""
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/BluetoothKit\/BluetoothKit\/BluetoothKit\/BluetoothKitConstant.swift",
       "kind": "StringLiteral",
-      "offset": 606,
+      "offset": 609,
       "length": 6,
       "value": "\"FF10\""
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/BluetoothKit\/BluetoothKit\/BluetoothKit\/BluetoothKitConstant.swift",
       "kind": "StringLiteral",
-      "offset": 675,
+      "offset": 678,
       "length": 6,
       "value": "\"FF11\""
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/BluetoothKit\/BluetoothKit\/BluetoothKit\/BluetoothKitConstant.swift",
       "kind": "StringLiteral",
-      "offset": 741,
+      "offset": 744,
       "length": 6,
       "value": "\"FF12\""
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/BluetoothKit\/BluetoothKit\/BluetoothKit\/BluetoothKitConstant.swift",
       "kind": "IntegerLiteral",
-      "offset": 1325,
+      "offset": 1319,
       "length": 1,
       "value": "5"
     },
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/BluetoothKit\/BluetoothKit\/BluetoothKit\/BluetoothKitConstant.swift",
       "kind": "FloatLiteral",
-      "offset": 1441,
+      "offset": 1438,
       "length": 4,
       "value": "0.05"
     },
@@ -8747,7 +9189,7 @@
     {
       "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/BluetoothKit\/BluetoothKit\/BluetoothKit\/BluetoothCore\/BluetoothTransportSession.swift",
       "kind": "IntegerLiteral",
-      "offset": 2801,
+      "offset": 3083,
       "length": 1,
       "value": "0"
     },
