@@ -135,7 +135,6 @@ class _GmacroUsbScanPageState extends State<GmacroUsbScanPage> {
       MaterialPageRoute(
         builder: (_) => GmacroSessionPage(
           transport: session,
-          transportInitiallyReady: _isConnected,
         ),
       ),
     );
