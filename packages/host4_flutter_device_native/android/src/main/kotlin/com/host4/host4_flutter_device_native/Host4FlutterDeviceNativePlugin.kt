@@ -281,84 +281,13 @@ class Host4FlutterDeviceNativePlugin :
         result.success(sessionId)
 
         mainHandler.post {
-            startUsbHostConnection(usbHandle, deviceId, record)
+            ensureUsbHostInitialized(usbHandle, deviceId)
+            syncUsbTransportStateIfConnected(record)
         }
-    }
-
-    private fun startUsbHostConnection(
-        usbHandle: UsbDeviceSessionHandle,
-        deviceId: String?,
-        record: TransportSessionRecord,
-    ) {
-        val wasInitialized = usbHostInitialized
-        ensureUsbHostInitialized(usbHandle, deviceId)
-
-        val usbManager = ReliableUsbCommManager.getInstance()
-        when {
-            usbManager.isConnected -> {
-                record.lastTransportStatus = ReliableUsbCommManager.CONNECT_COMPLETED
-                record.eventHandler.emit(mapOf("type" to "ready"))
-            }
-            !wasInitialized -> {
-                // init() already calls searchAndConnectAsync(); do not duplicate.
-                record.eventHandler.emit(mapOf("type" to "connecting"))
-                scheduleUsbPermissionWatchdog(record)
-            }
-            else -> {
-                record.eventHandler.emit(mapOf("type" to "connecting"))
-                usbManager.searchAndConnectAsync()
-            }
-        }
-    }
-
-    /**
-     * Manual reconnect after a failed attempt. Clears stale USB handles (same as
-     * unplug/replug) then searches again — required when the device was already
-     * plugged before [UsbDeviceSessionHandle.init].
-     */
-    private fun recoverUsbHostConnection(
-        usbHandle: UsbDeviceSessionHandle,
-        deviceId: String?,
-        record: TransportSessionRecord,
-    ) {
-        ensureUsbHostInitialized(usbHandle, deviceId)
-        val usbManager = ReliableUsbCommManager.getInstance()
-        if (usbManager.isConnected) {
-            record.lastTransportStatus = ReliableUsbCommManager.CONNECT_COMPLETED
-            record.eventHandler.emit(mapOf("type" to "ready"))
-            return
-        }
-        record.usbRecoverScheduled = false
-        runCatching { usbManager.close() }
-        record.eventHandler.emit(mapOf("type" to "connecting"))
-        usbManager.searchAndConnectAsync()
-    }
-
-    private fun scheduleUsbPermissionWatchdog(record: TransportSessionRecord) {
-        mainHandler.postDelayed({
-            if (activeUsbTransport !== record) return@postDelayed
-            val usbManager = ReliableUsbCommManager.getInstance()
-            if (usbManager.isConnected) return@postDelayed
-            usbManager.searchAndConnectAsync()
-        }, USB_PERMISSION_WATCHDOG_MS)
-    }
-
-    private fun scheduleUsbRecoverAfterFailure(record: TransportSessionRecord) {
-        if (record.usbRecoverScheduled) return
-        record.usbRecoverScheduled = true
-        mainHandler.postDelayed({
-            if (activeUsbTransport !== record) return@postDelayed
-            val usbManager = ReliableUsbCommManager.getInstance()
-            if (usbManager.isConnected) return@postDelayed
-            runCatching { usbManager.close() }
-            record.eventHandler.emit(mapOf("type" to "connecting"))
-            usbManager.searchAndConnectAsync()
-        }, USB_RECOVER_AFTER_FAIL_MS)
     }
 
     private fun handleReconnectUsb(result: Result) {
-        val record = activeUsbTransport
-        if (record == null) {
+        if (activeUsbTransport == null) {
             result.error(
                 "usb-session-missing",
                 "No active USB transport session. Open the USB connect page first.",
@@ -366,10 +295,20 @@ class Host4FlutterDeviceNativePlugin :
             )
             return
         }
+        if (!usbHostInitialized) {
+            result.error(
+                "usb-not-initialized",
+                "Call connectUsb() first to initialize the USB host stack.",
+                null,
+            )
+            return
+        }
 
         val usbHandle = platformSdk.usb()
         mainHandler.post {
-            recoverUsbHostConnection(usbHandle, null, record)
+            usbHandle.setUsbConnectListener(usbConnectListener)
+            usbHandle.registerAllEscalationListener(usbAllEscalationListener)
+            ReliableUsbCommManager.getInstance().searchAndConnectAsync()
         }
         result.success(null)
     }
@@ -400,8 +339,9 @@ class Host4FlutterDeviceNativePlugin :
     }
 
     /**
-     * Delegates permission, attach/detach broadcasts, and connect retries to
-     * [ReliableUsbCommManager] inside bluetooth_communication JAR.
+     * Registers SDK listeners and calls [UsbDeviceSessionHandle.init] once.
+     * Permission, attach/detach, and connect are handled inside
+     * [ReliableUsbCommManager] (init → registerReceiver + searchAndConnectAsync).
      */
     private fun ensureUsbHostInitialized(usbHandle: UsbDeviceSessionHandle, deviceId: String?) {
         usbHandle.setUsbConnectListener(usbConnectListener)
@@ -419,6 +359,15 @@ class Host4FlutterDeviceNativePlugin :
         usbHostInitialized = true
     }
 
+    /** Replays ready if connect completed before Flutter subscribed to transport events. */
+    private fun syncUsbTransportStateIfConnected(record: TransportSessionRecord) {
+        if (!ReliableUsbCommManager.getInstance().isConnected) {
+            return
+        }
+        record.lastTransportStatus = ReliableUsbCommManager.CONNECT_COMPLETED
+        record.eventHandler.emit(mapOf("type" to "ready"))
+    }
+
     private val usbAllEscalationListener = OnEscalationListener<EscalationRsp> { message ->
         if (message !is DPKeyEventRsp) return@OnEscalationListener
         val modeEvent = message.modeEvent ?: return@OnEscalationListener
@@ -429,14 +378,6 @@ class Host4FlutterDeviceNativePlugin :
     private val usbConnectListener = UsbConnectListener { status ->
         val record = activeUsbTransport ?: return@UsbConnectListener
         record.lastTransportStatus = status
-        when (status) {
-            ReliableUsbCommManager.CONNECT_COMPLETED -> {
-                record.usbRecoverScheduled = false
-            }
-            ReliableUsbCommManager.CONNECT_FAIL -> {
-                scheduleUsbRecoverAfterFailure(record)
-            }
-        }
         record.eventHandler.emit(UsbTransportEventMapper.mapTransportEvent(status))
         if (status == ReliableUsbCommManager.CONNECT_COMPLETED) {
             emitProtocolReadyForTransport(record.sessionId)
@@ -583,16 +524,7 @@ class Host4FlutterDeviceNativePlugin :
         val dpKeyEventChannel: EventChannel? = null,
         val dpKeyEventHandler: QueuedEventStreamHandler? = null,
         @Volatile var lastTransportStatus: Int = Constants.CONNECTING,
-        @Volatile var usbRecoverScheduled: Boolean = false,
     )
-
-    private companion object {
-        /** Retry search if permission was granted but the first open did not complete. */
-        const val USB_PERMISSION_WATCHDOG_MS = 1500L
-
-        /** Delay before auto-recovering from CONNECT_FAIL (mirrors replug). */
-        const val USB_RECOVER_AFTER_FAIL_MS = 400L
-    }
 
     private data class ProtocolSessionRecord(
         val protocolSessionId: String,

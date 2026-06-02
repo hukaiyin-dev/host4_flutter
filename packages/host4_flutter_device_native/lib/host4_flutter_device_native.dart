@@ -53,7 +53,7 @@ class Host4FlutterDeviceNative {
     );
   }
 
-  /// Re-triggers SDK [ReliableUsbCommManager.searchAndConnectAsync] after replug.
+  /// Re-triggers SDK [ReliableUsbCommManager.searchAndConnectAsync].
   Future<void> reconnectUsb() {
     return Host4FlutterDeviceNativePlatform.instance.reconnectUsb();
   }
