@@ -8,6 +8,7 @@ import 'package:host4_flutter_protocol/host4_flutter_protocol.dart';
 import 'package:host4_flutter_transport/host4_flutter_transport.dart';
 import 'package:host4_flutter_ui/host4_flutter_ui.dart';
 import 'package:host4_flutter_log/host4_flutter_log.dart';
+import 'package:host4_flutter_usb/host4_flutter_usb.dart';
 
 import '../../widgets/sub_page_scaffold.dart';
 import 'gmacro_placeholder_values.dart';
@@ -70,6 +71,7 @@ class _GmacroSessionPageState extends State<GmacroSessionPage> {
   StreamSubscription<TransportEvent>? _transportSub;
   StreamSubscription<ProtocolEvent>? _protocolSub;
   StreamSubscription<dynamic>? _nativeLogSub;
+  StreamSubscription<NativeDpKeyEvent>? _dpKeySub;
 
   late List<_Section> _sections;
   String? _selectedTitle;
@@ -83,6 +85,7 @@ class _GmacroSessionPageState extends State<GmacroSessionPage> {
     }
     _subscribeTransport();
     _subscribeNativeLog();
+    _subscribeUsbDpKeyEvents();
     _attach();
     // sections depend on _session — rebuild when session is ready
     _sections = _buildSections();
@@ -95,6 +98,7 @@ class _GmacroSessionPageState extends State<GmacroSessionPage> {
     _transportSub?.cancel();
     _protocolSub?.cancel();
     _nativeLogSub?.cancel();
+    _dpKeySub?.cancel();
     _session?.close();
     if (widget.transport.device.kind != TransportKind.usb) {
       widget.transport.disconnect();
@@ -113,6 +117,7 @@ class _GmacroSessionPageState extends State<GmacroSessionPage> {
           _Action('查询设备信息', _fetchMobapadDeviceInfo),
           _Action('恢复默认设置', _resetDevice),
           _Action('切换普通模式', _switchToNormalMode),
+          _Action('切换测试模式', _switchToTestMode),
           _Action('切换配置模式', _switchToConfigMode),
           _Action('查询上报率', _fetchReportRate),
           _Action('设置上报率 (1000Hz)', _updateReportRate),
@@ -247,6 +252,28 @@ class _GmacroSessionPageState extends State<GmacroSessionPage> {
       if (!mounted) return;
       _log.debug('[Native] $message');
     });
+  }
+
+  void _subscribeUsbDpKeyEvents() {
+    if (widget.transport.device.kind != TransportKind.usb) return;
+    final usbSession = widget.transport;
+    if (usbSession is! Host4UsbTransportSession) return;
+
+    _dpKeySub = usbSession.dpKeyEvents.listen(
+      (event) {
+        if (!mounted) return;
+        _log.info('DPKeyEventRsp: $event');
+        _setTip(
+          '🎮 DPKey key=${event.keys} '
+          'LX=${event.leftRockerXValue} LY=${event.leftRockerYValue} '
+          'RX=${event.rightRockerXValue} RY=${event.rightRockerYValue}',
+        );
+      },
+      onError: (Object err, StackTrace stack) {
+        _log.error('DPKey event stream error', error: err, stackTrace: stack);
+      },
+    );
+    _log.info('Subscribed to USB DPKeyEventRsp escalation stream');
   }
 
   void _subscribeTransport() {
@@ -411,6 +438,9 @@ class _GmacroSessionPageState extends State<GmacroSessionPage> {
 
   Future<void> _switchToNormalMode() =>
       _invoke('切换普通模式', () => _session!.switchToNormalMode());
+
+  Future<void> _switchToTestMode() =>
+      _invoke('切换测试模式', () => _session!.switchToTestMode());
 
   Future<void> _switchToConfigMode() =>
       _invoke('切换配置模式', () => _session!.switchToConfigMode());

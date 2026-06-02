@@ -153,6 +153,16 @@ class MethodChannelHost4FlutterDeviceNative
   }
 
   @override
+  Stream<NativeDpKeyEvent> usbDpKeyEvents(String transportSessionId) {
+    return EventChannel(
+      'host4_flutter_device_native/usb_dp_key_events/$transportSessionId',
+    ).receiveBroadcastStream().map(
+      (dynamic event) =>
+          NativeDpKeyEvent.fromMap(Map<String, Object?>.from(event as Map)),
+    );
+  }
+
+  @override
   Future<void> disconnectTransport(String transportSessionId) {
     return methodChannel.invokeMethod<void>(
       'disconnectTransport',

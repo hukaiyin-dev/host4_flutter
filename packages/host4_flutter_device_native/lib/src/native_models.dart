@@ -95,6 +95,90 @@ class NativeTransportEvent {
 
 enum NativeProtocolEventType { ready, busy, error }
 
+/// USB device key / test-mode input from [DPKeyEventRsp] escalation callbacks.
+class NativeDpKeyEvent {
+  const NativeDpKeyEvent({
+    required this.keyValue,
+    this.keys = const <int>[],
+    this.leftRockerXValue = 0,
+    this.leftRockerYValue = 0,
+    this.rightRockerXValue = 0,
+    this.rightRockerYValue = 0,
+    this.leftKeyLTwoValue = 0,
+    this.rightKeyRTwoValue = 0,
+    this.leftRockerXOriginalValue = 0,
+    this.leftRockerYOriginalValue = 0,
+    this.rightRockerXOriginalValue = 0,
+    this.rightRockerYOriginalValue = 0,
+    this.leftKeyLTOriginalValue = 0,
+    this.rightKeyRTOriginalValue = 0,
+  });
+
+  factory NativeDpKeyEvent.fromMap(Map<String, Object?> map) {
+    final rawKeys = map['keys'];
+    return NativeDpKeyEvent(
+      keyValue: _readInt(map['keyValue']),
+      keys: rawKeys is List
+          ? rawKeys.map((value) => _readInt(value)).toList(growable: false)
+          : const <int>[],
+      leftRockerXValue: _readInt(map['leftRockerXValue']),
+      leftRockerYValue: _readInt(map['leftRockerYValue']),
+      rightRockerXValue: _readInt(map['rightRockerXValue']),
+      rightRockerYValue: _readInt(map['rightRockerYValue']),
+      leftKeyLTwoValue: _readInt(map['leftKeyLTwoValue']),
+      rightKeyRTwoValue: _readInt(map['rightKeyRTwoValue']),
+      leftRockerXOriginalValue: _readInt(map['leftRockerXOriginalValue']),
+      leftRockerYOriginalValue: _readInt(map['leftRockerYOriginalValue']),
+      rightRockerXOriginalValue: _readInt(map['rightRockerXOriginalValue']),
+      rightRockerYOriginalValue: _readInt(map['rightRockerYOriginalValue']),
+      leftKeyLTOriginalValue: _readInt(map['leftKeyLTOriginalValue']),
+      rightKeyRTOriginalValue: _readInt(map['rightKeyRTOriginalValue']),
+    );
+  }
+
+  final int keyValue;
+  final List<int> keys;
+  final int leftRockerXValue;
+  final int leftRockerYValue;
+  final int rightRockerXValue;
+  final int rightRockerYValue;
+  final int leftKeyLTwoValue;
+  final int rightKeyRTwoValue;
+  final int leftRockerXOriginalValue;
+  final int leftRockerYOriginalValue;
+  final int rightRockerXOriginalValue;
+  final int rightRockerYOriginalValue;
+  final int leftKeyLTOriginalValue;
+  final int rightKeyRTOriginalValue;
+
+  Map<String, Object?> toMap() {
+    return <String, Object?>{
+      'type': 'dpKeyEvent',
+      'keyValue': keyValue,
+      'keys': keys,
+      'leftRockerXValue': leftRockerXValue,
+      'leftRockerYValue': leftRockerYValue,
+      'rightRockerXValue': rightRockerXValue,
+      'rightRockerYValue': rightRockerYValue,
+      'leftKeyLTwoValue': leftKeyLTwoValue,
+      'rightKeyRTwoValue': rightKeyRTwoValue,
+      'leftRockerXOriginalValue': leftRockerXOriginalValue,
+      'leftRockerYOriginalValue': leftRockerYOriginalValue,
+      'rightRockerXOriginalValue': rightRockerXOriginalValue,
+      'rightRockerYOriginalValue': rightRockerYOriginalValue,
+      'leftKeyLTOriginalValue': leftKeyLTOriginalValue,
+      'rightKeyRTOriginalValue': rightKeyRTOriginalValue,
+    };
+  }
+
+  @override
+  String toString() {
+    return 'NativeDpKeyEvent(keyValue: $keyValue, keys: $keys, '
+        'LX: $leftRockerXValue, LY: $leftRockerYValue, '
+        'RX: $rightRockerXValue, RY: $rightRockerYValue)';
+  }
+}
+
 class NativeProtocolEvent {
   const NativeProtocolEvent({
     required this.type,
@@ -151,4 +235,10 @@ NativeProtocolEventType _nativeProtocolEventTypeFromName(String? value) {
     (eventType) => eventType.name == value,
     orElse: () => NativeProtocolEventType.error,
   );
+}
+
+int _readInt(Object? value) {
+  if (value is int) return value;
+  if (value is num) return value.toInt();
+  return 0;
 }

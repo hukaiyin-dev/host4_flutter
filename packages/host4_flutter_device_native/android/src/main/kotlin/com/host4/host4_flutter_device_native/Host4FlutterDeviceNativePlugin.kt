@@ -5,8 +5,11 @@ import android.os.Handler
 import android.os.Looper
 import com.host4.platform.listener.BluetoothStateListener
 import com.host4.platform.listener.MessageCallBack
+import com.host4.platform.listener.OnEscalationListener
 import com.host4.platform.util.Constants
 import com.host4.platform.listener.UsbConnectListener
+import com.host4.platform.kr.response.DPKeyEventRsp
+import com.host4.platform.kr.response.EscalationRsp
 import com.host4.platform.manager.ReliableUsbCommManager
 import com.host4.platform.v2.api.FullPlatformSdk
 import com.host4.platform.v2.api.UsbDeviceSessionHandle
@@ -253,6 +256,13 @@ class Host4FlutterDeviceNativePlugin :
         )
         eventChannel.setStreamHandler(eventHandler)
 
+        val dpKeyEventHandler = QueuedEventStreamHandler()
+        val dpKeyEventChannel = EventChannel(
+            binaryMessenger,
+            "host4_flutter_device_native/usb_dp_key_events/$sessionId",
+        )
+        dpKeyEventChannel.setStreamHandler(dpKeyEventHandler)
+
         val usbHandle: UsbDeviceSessionHandle = platformSdk.usb()
         val record = TransportSessionRecord(
             sessionId = sessionId,
@@ -260,6 +270,8 @@ class Host4FlutterDeviceNativePlugin :
             deviceKey = usbHandle.deviceId,
             eventChannel = eventChannel,
             eventHandler = eventHandler,
+            dpKeyEventChannel = dpKeyEventChannel,
+            dpKeyEventHandler = dpKeyEventHandler,
         )
         transportSessions[sessionId] = record
         activeUsbTransport = record
@@ -373,7 +385,10 @@ class Host4FlutterDeviceNativePlugin :
         }.keys.toList()
 
         for (sessionId in usbSessionIds) {
-            transportSessions.remove(sessionId)?.eventChannel?.setStreamHandler(null)
+            transportSessions.remove(sessionId)?.let { record ->
+                record.eventChannel.setStreamHandler(null)
+                record.dpKeyEventChannel?.setStreamHandler(null)
+            }
             removeProtocolSessionsForTransport(sessionId)
         }
 
@@ -390,6 +405,7 @@ class Host4FlutterDeviceNativePlugin :
      */
     private fun ensureUsbHostInitialized(usbHandle: UsbDeviceSessionHandle, deviceId: String?) {
         usbHandle.setUsbConnectListener(usbConnectListener)
+        usbHandle.registerAllEscalationListener(usbAllEscalationListener)
         if (usbHostInitialized) {
             return
         }
@@ -401,6 +417,13 @@ class Host4FlutterDeviceNativePlugin :
             usbHandle.init(applicationContext)
         }
         usbHostInitialized = true
+    }
+
+    private val usbAllEscalationListener = OnEscalationListener<EscalationRsp> { message ->
+        if (message !is DPKeyEventRsp) return@OnEscalationListener
+        val modeEvent = message.modeEvent ?: return@OnEscalationListener
+        val record = activeUsbTransport ?: return@OnEscalationListener
+        record.dpKeyEventHandler?.emit(DpKeyEventMapper.map(modeEvent))
     }
 
     private val usbConnectListener = UsbConnectListener { status ->
@@ -434,6 +457,7 @@ class Host4FlutterDeviceNativePlugin :
         }
 
         record.eventChannel.setStreamHandler(null)
+        record.dpKeyEventChannel?.setStreamHandler(null)
         when (record.transportKind) {
             Host4FlutterTransportKinds.USB -> {
                 if (activeUsbTransport?.sessionId == transportSessionId) {
@@ -556,6 +580,8 @@ class Host4FlutterDeviceNativePlugin :
         val deviceKey: String,
         val eventChannel: EventChannel,
         val eventHandler: QueuedEventStreamHandler,
+        val dpKeyEventChannel: EventChannel? = null,
+        val dpKeyEventHandler: QueuedEventStreamHandler? = null,
         @Volatile var lastTransportStatus: Int = Constants.CONNECTING,
         @Volatile var usbRecoverScheduled: Boolean = false,
     )

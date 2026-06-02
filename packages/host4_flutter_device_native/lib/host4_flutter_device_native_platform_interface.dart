@@ -88,6 +88,10 @@ abstract class Host4FlutterDeviceNativePlatform extends PlatformInterface {
     throw UnimplementedError('transportEvents() has not been implemented.');
   }
 
+  Stream<NativeDpKeyEvent> usbDpKeyEvents(String transportSessionId) {
+    throw UnimplementedError('usbDpKeyEvents() has not been implemented.');
+  }
+
   Future<void> disconnectTransport(String transportSessionId) {
     throw UnimplementedError('disconnectTransport() has not been implemented.');
   }

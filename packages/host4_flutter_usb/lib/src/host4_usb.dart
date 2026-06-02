@@ -93,6 +93,9 @@ class Host4UsbTransportSession implements TransportSession {
     return _native.transportEvents(id).map(_mapTransportEvent);
   }
 
+  /// USB [DPKeyEventRsp] key / rocker events from the native SDK.
+  Stream<NativeDpKeyEvent> get dpKeyEvents => _native.usbDpKeyEvents(id);
+
   @override
   Future<void> disconnect() {
     return _native.disconnectTransport(id);

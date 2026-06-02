@@ -98,6 +98,11 @@ class MockHost4FlutterDeviceNativePlatform
   }
 
   @override
+  Stream<NativeDpKeyEvent> usbDpKeyEvents(String transportSessionId) {
+    return const Stream<NativeDpKeyEvent>.empty();
+  }
+
+  @override
   Future<void> startOta({
     required String protocolSessionId,
     required Uint8List firmwareData,
