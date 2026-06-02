@@ -7,6 +7,7 @@ import 'package:host4_flutter_gmacro/host4_flutter_gmacro.dart';
 import 'package:host4_flutter_protocol/host4_flutter_protocol.dart';
 
 import '../../widgets/sub_page_scaffold.dart';
+import 'gmacro_input_debug_page.dart';
 
 class GmacroApiTestPage extends StatefulWidget {
   const GmacroApiTestPage({super.key, this.session});
@@ -28,27 +29,63 @@ class _GmacroApiTestPageState extends State<GmacroApiTestPage> {
     GmacroCurvePoint(x: 100, y: 100),
   ];
 
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   _eventSub = widget.session?.events.listen((event) {
+  //     if (!mounted) return;
+  //     setState(() {
+  //       _events.insert(
+  //         0,
+  //         '[${DateTime.now().toIso8601String()}] ${event.runtimeType}: $event',
+  //       );
+  //       if (_events.length > 50) {
+  //         _events.removeLast();
+  //       }
+  //     });
+  //   });
+  // }
+
+  //2026.6.1修改
   @override
   void initState() {
     super.initState();
-    _eventSub = widget.session?.events.listen((event) {
-      if (!mounted) return;
-      setState(() {
-        _events.insert(
-          0,
-          '[${DateTime.now().toIso8601String()}] ${event.runtimeType}: $event',
-        );
-        if (_events.length > 50) {
-          _events.removeLast();
-        }
-      });
-    });
+
+    _eventSub = widget.session?.events.listen(_handleProtocolEvent);
   }
 
   @override
   void dispose() {
     _eventSub?.cancel();
     super.dispose();
+  }
+
+  //2026.6.1新增
+  void _appendEvent(String message) {
+    if (!mounted) return;
+    setState(() {
+      _events.insert(0, '[${DateTime.now().toIso8601String()}] $message');
+      if (_events.length > 50) {
+        _events.removeLast();
+      }
+    });
+  }
+
+  void _handleProtocolEvent(ProtocolEvent event) {
+    switch (event) {
+      case ProtocolReady():
+        _appendEvent('ProtocolReady');
+      case ProtocolBusy(reason: final reason):
+        _appendEvent('ProtocolBusy: $reason');
+      case ProtocolError(failure: final failure):
+        _appendEvent('ProtocolError: ${failure.code} - ${failure.message}');
+    }
+  }
+
+  void _openInputDebugPage() {
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const GmacroInputDebugPage()));
   }
 
   Future<void> _run(
@@ -382,8 +419,16 @@ class _GmacroApiTestPageState extends State<GmacroApiTestPage> {
             child: _SectionHeader(title: '协议事件流'),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
+            padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
             child: _buildFixedEventPanel(),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+            child: OutlinedButton.icon(
+              onPressed: _openInputDebugPage,
+              icon: const Icon(Icons.gamepad_outlined, size: 16),
+              label: const Text('打开统一输入调试页'),
+            ),
           ),
           Expanded(
             child: ListView(

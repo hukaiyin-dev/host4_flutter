@@ -1,8 +1,11 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:host4_flutter_device_native/host4_flutter_device_native.dart';
 import 'package:host4_flutter_protocol/host4_flutter_protocol.dart';
 import 'package:host4_flutter_transport/host4_flutter_transport.dart';
+
+import 'Models/gmacro_protocol_events.dart';
 
 class GmacroSession implements ProtocolSession {
   GmacroSession({
@@ -25,6 +28,33 @@ class GmacroSession implements ProtocolSession {
   @override
   Stream<ProtocolEvent> get events {
     return _native.protocolEvents(id).map(_mapProtocolEvent);
+  }
+
+  /// 实时按键/摇杆/扳机事件流。
+  ///
+  /// 从 [events] 流中的 [ProtocolBusy] 事件解析而来。
+  /// 当 payload 中的 `event` 字段为 `devKeysState` 或 `testKeys` 时触发。
+  Stream<GmacroRealtimeEvent> get realtimeEvents {
+    return events
+        .where((e) => e is ProtocolBusy)
+        .cast<ProtocolBusy>()
+        .expand((busy) {
+      final eventName = busy.payload['event'] as String?;
+      if (eventName == null) return const Iterable<GmacroRealtimeEvent>.empty();
+
+      switch (eventName) {
+        case 'devKeysState':
+          return <GmacroRealtimeEvent>[
+            DeviceKeysStateEvent.fromMap(busy.payload),
+          ];
+        case 'testKeys':
+          return <GmacroRealtimeEvent>[
+            TestEventMode.fromMap(busy.payload),
+          ];
+        default:
+          return const Iterable<GmacroRealtimeEvent>.empty();
+      }
+    });
   }
 
   @override

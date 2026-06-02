@@ -23,3 +23,10 @@ export 'src/gmacro_session+vibration.dart';
 export 'src/gmacro_session+gyro.dart';
 
 export 'src/host4_gmacro.dart';
+
+export 'src/Input/gmacro_input_hub.dart';
+export 'src/Input/gmacro_input_service.dart';
+export 'src/Input/gmacro_input_state.dart';
+
+export 'src/Cursor/gmacro_cursor_controller.dart';
+export 'src/Cursor/gmacro_cursor_overlay.dart';
