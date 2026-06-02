@@ -27,13 +27,15 @@ class GmacroButtonEvent {
 ///
 /// 作用：
 /// 1. 监听 `GmacroSession.realtimeEvents`
-/// 2. 同时兼容 `devKeysState + testKeys`
-/// 3. 产出统一的完整状态流 `states`
-/// 4. 产出统一的按键边沿流 `buttonEvents`
+/// 2. Android USB 补充监听 `GmacroSession.usbRealtimeEvents`
+/// 3. 同时兼容 `devKeysState + testKeys`
+/// 4. 产出统一的完整状态流 `states`
+/// 5. 产出统一的按键边沿流 `buttonEvents`
 class GmacroInputService {
   GmacroInputService();
 
   StreamSubscription<GmacroRealtimeEvent>? _inputSub;
+  StreamSubscription<GmacroRealtimeEvent>? _usbInputSub;
 
   /// 持续广播“当前完整输入状态”。
   final _stateController = StreamController<GmacroInputState>.broadcast();
@@ -59,35 +61,42 @@ class GmacroInputService {
   /// - `DeviceKeysStateEvent`
   /// - `TestEventMode`
   ///
+  /// Android USB 通过 `usbRealtimeEvents` 注入同构事件，保证 Input/Cursor
+  /// 无需感知 transport 差异。
+  ///
   /// 这样即使不同手柄随机上报 `devKeysState` 或 `testKeys`，
   /// 上层也仍然只面对统一输入状态。
   void bindSession(GmacroSession session) {
     _inputSub?.cancel();
+    _usbInputSub?.cancel();
     _latestState = GmacroInputState.empty();
 
     debugPrint('[GmacroInputService] bindSession — subscribing to realtimeEvents');
 
-    _inputSub = session.realtimeEvents.listen((event) {
-      debugPrint('[GmacroInputService] received ${event.runtimeType}: '
-          'keys=${switch (event) { DeviceKeysStateEvent e => e.keys, TestEventMode e => e.keys, _ => [] }}');
+    _inputSub = session.realtimeEvents.listen(_onRealtimeEvent);
+    _usbInputSub = session.usbRealtimeEvents.listen(_onRealtimeEvent);
+  }
 
-      var nextState = switch (event) {
-        DeviceKeysStateEvent() => GmacroInputState.fromDeviceKeysState(event),
-        TestEventMode() => GmacroInputState.fromTestEventMode(event),
-        _ => null,
-      };
+  void _onRealtimeEvent(GmacroRealtimeEvent event) {
+    debugPrint('[GmacroInputService] received ${event.runtimeType}: '
+        'keys=${switch (event) { DeviceKeysStateEvent e => e.keys, TestEventMode e => e.keys, _ => [] }}');
 
-      if (nextState == null) {
-        return;
-      }
+    var nextState = switch (event) {
+      DeviceKeysStateEvent() => GmacroInputState.fromDeviceKeysState(event),
+      TestEventMode() => GmacroInputState.fromTestEventMode(event),
+      _ => null,
+    };
 
-      // 将左摇杆偏差转为虚拟方向键，摇杆和 D-pad 共用 buttonEvents。
-      nextState = nextState.mergeJoystickDirections();
+    if (nextState == null) {
+      return;
+    }
 
-      _emitDiff(_latestState, nextState);
-      _latestState = nextState;
-      _stateController.add(nextState);
-    });
+    // 将左摇杆偏差转为虚拟方向键，摇杆和 D-pad 共用 buttonEvents。
+    nextState = nextState.mergeJoystickDirections();
+
+    _emitDiff(_latestState, nextState);
+    _latestState = nextState;
+    _stateController.add(nextState);
   }
 
   /// 根据前后两帧 pressedKeys 差集生成按键边沿事件。
@@ -110,6 +119,7 @@ class GmacroInputService {
 
   Future<void> dispose() async {
     await _inputSub?.cancel();
+    await _usbInputSub?.cancel();
     await _stateController.close();
     await _buttonController.close();
   }

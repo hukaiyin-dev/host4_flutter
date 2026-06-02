@@ -75,6 +75,18 @@ class GmacroSession implements ProtocolSession {
     });
   }
 
+  /// Android USB 回退实时流由 `DPKeyEventRsp` 转换而来。
+  /// 这使得输入/光标用户始终使用统一的 `GmacroRealtimeEvent` 模型。
+  /// 即使平台在专用事件通道上发出 USB 键帧。
+  Stream<GmacroRealtimeEvent> get usbRealtimeEvents {
+    if (transport.device.kind != TransportKind.usb) {
+      return const Stream<GmacroRealtimeEvent>.empty();
+    }
+    return _native
+        .usbDpKeyEvents(transport.id)
+        .map<GmacroRealtimeEvent>(DeviceKeysStateEvent.fromNativeDpKeyEvent);
+  }
+
   @override
   Future<void> close() async {
     await _nativeSub?.cancel();

@@ -1,4 +1,5 @@
 import 'gmacro_gamepad_key.dart';
+import 'package:host4_flutter_device_native/host4_flutter_device_native.dart';
 
 sealed class GmacroRealtimeEvent {
   const GmacroRealtimeEvent();
@@ -97,6 +98,32 @@ class DeviceKeysStateEvent extends GmacroRealtimeEvent {
       l2Original: _asInt(map['l2Original']),
       r2: _asInt(map['r2']),
       r2Original: _asInt(map['r2Original']),
+    );
+  }
+
+  /// Builds a full-state realtime event from Android USB [DPKeyEventRsp].
+  ///
+  /// Android USB currently exposes key/rocker updates on a dedicated dp-key
+  /// channel. Converting them here keeps the upper Input/Cursor pipeline
+  /// transport-agnostic.
+  factory DeviceKeysStateEvent.fromNativeDpKeyEvent(NativeDpKeyEvent event) {
+    return DeviceKeysStateEvent(
+      rawKeys: event.keys,
+      keys: event.keys
+          .map((raw) => GamepadKey.fromValue(raw) ?? GamepadKey.none)
+          .toList(growable: false),
+      j1x: event.leftRockerXValue,
+      j1xOriginal: event.leftRockerXOriginalValue,
+      j1y: event.leftRockerYValue,
+      j1yOriginal: event.leftRockerYOriginalValue,
+      j2x: event.rightRockerXValue,
+      j2xOriginal: event.rightRockerXOriginalValue,
+      j2y: event.rightRockerYValue,
+      j2yOriginal: event.rightRockerYOriginalValue,
+      l2: event.leftKeyLTwoValue,
+      l2Original: event.leftKeyLTOriginalValue,
+      r2: event.rightKeyRTwoValue,
+      r2Original: event.rightKeyRTOriginalValue,
     );
   }
 }
