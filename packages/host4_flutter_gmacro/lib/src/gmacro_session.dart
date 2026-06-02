@@ -12,7 +12,9 @@ class GmacroSession implements ProtocolSession {
     required this.id,
     required this.transport,
     required Host4FlutterDeviceNative native,
-  }) : _native = native;
+  }) : _native = native {
+    _initEvents();
+  }
 
   final Host4FlutterDeviceNative _native;
 
@@ -25,22 +27,40 @@ class GmacroSession implements ProtocolSession {
   @override
   final TransportSession transport;
 
-  @override
-  Stream<ProtocolEvent> get events {
-    return _native.protocolEvents(id).map(_mapProtocolEvent);
+  /// 共享的协议事件广播流。
+  ///
+  /// 所有订阅者（realtimeEvents、GmacroSessionPage、GmacroApiTestPage 等）
+  /// 共享同一个 native [EventChannel] 连接，不会有重复创建/订阅丢失问题。
+  final StreamController<ProtocolEvent> _eventController =
+      StreamController<ProtocolEvent>.broadcast();
+
+  StreamSubscription<NativeProtocolEvent>? _nativeSub;
+
+  void _initEvents() {
+    _nativeSub = _native
+        .protocolEvents(id)
+        .listen(
+          (nativeEvent) => _eventController.add(_mapProtocolEvent(nativeEvent)),
+        );
   }
+
+  @override
+  Stream<ProtocolEvent> get events => _eventController.stream;
 
   /// 实时按键/摇杆/扳机事件流。
   ///
-  /// 从 [events] 流中的 [ProtocolBusy] 事件解析而来。
-  /// 当 payload 中的 `event` 字段为 `devKeysState` 或 `testKeys` 时触发。
+  /// 从共享 [_eventController] 流中的 [ProtocolBusy] 事件解析而来。
+  /// [ProtocolBusy.reason] 为事件名（`devKeysState` / `testKeys`），
+  /// [ProtocolBusy.payload] 为事件数据字段（`keys` / `j1x` / `j1y` 等）。
+  ///
+  /// 每次访问此 getter 都会创建一个新的变换管道，
+  /// 但所有管道都监听同一个共享的 _eventController 广播流，
+  /// 因此不会产生重复的 native EventChannel 订阅。
   Stream<GmacroRealtimeEvent> get realtimeEvents {
-    return events
-        .where((e) => e is ProtocolBusy)
-        .cast<ProtocolBusy>()
-        .expand((busy) {
-      final eventName = busy.payload['event'] as String?;
-      if (eventName == null) return const Iterable<GmacroRealtimeEvent>.empty();
+    return events.where((e) => e is ProtocolBusy).cast<ProtocolBusy>().expand((
+      busy,
+    ) {
+      final eventName = busy.reason;
 
       switch (eventName) {
         case 'devKeysState':
@@ -48,9 +68,7 @@ class GmacroSession implements ProtocolSession {
             DeviceKeysStateEvent.fromMap(busy.payload),
           ];
         case 'testKeys':
-          return <GmacroRealtimeEvent>[
-            TestEventMode.fromMap(busy.payload),
-          ];
+          return <GmacroRealtimeEvent>[TestEventMode.fromMap(busy.payload)];
         default:
           return const Iterable<GmacroRealtimeEvent>.empty();
       }
@@ -58,15 +76,14 @@ class GmacroSession implements ProtocolSession {
   }
 
   @override
-  Future<void> close() {
+  Future<void> close() async {
+    await _nativeSub?.cancel();
+    await _eventController.close();
     return _native.closeProtocol(id);
   }
 
   Future<void> startOta(Uint8List firmwareData) {
-    return _native.startOta(
-      protocolSessionId: id,
-      firmwareData: firmwareData,
-    );
+    return _native.startOta(protocolSessionId: id, firmwareData: firmwareData);
   }
 
   Future<Map<String, Object?>> invoke(
@@ -85,10 +102,7 @@ class GmacroSession implements ProtocolSession {
       case NativeProtocolEventType.ready:
         return const ProtocolReady();
       case NativeProtocolEventType.busy:
-        return ProtocolBusy(
-          event.reason ?? 'busy',
-          payload: event.payload,
-        );
+        return ProtocolBusy(event.reason ?? 'busy', payload: event.payload);
       case NativeProtocolEventType.error:
         final failure = event.failure;
         return ProtocolError(

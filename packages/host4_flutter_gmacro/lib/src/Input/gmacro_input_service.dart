@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
+
 import '../Models/gmacro_gamepad_key.dart';
 import '../Models/gmacro_protocol_events.dart';
 import '../gmacro_session.dart';
@@ -61,8 +63,14 @@ class GmacroInputService {
   /// 上层也仍然只面对统一输入状态。
   void bindSession(GmacroSession session) {
     _inputSub?.cancel();
+    _latestState = GmacroInputState.empty();
+
+    debugPrint('[GmacroInputService] bindSession — subscribing to realtimeEvents');
 
     _inputSub = session.realtimeEvents.listen((event) {
+      debugPrint('[GmacroInputService] received ${event.runtimeType}: '
+          'keys=${switch (event) { DeviceKeysStateEvent e => e.keys, TestEventMode e => e.keys, _ => [] }}');
+
       var nextState = switch (event) {
         DeviceKeysStateEvent() => GmacroInputState.fromDeviceKeysState(event),
         TestEventMode() => GmacroInputState.fromTestEventMode(event),

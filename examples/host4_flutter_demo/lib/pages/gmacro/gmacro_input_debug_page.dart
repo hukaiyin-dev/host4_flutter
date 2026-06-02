@@ -58,8 +58,7 @@ class _StateCard extends StatelessWidget {
             initialData: GmacroInputState.empty(),
             builder: (context, snapshot) {
               final state = snapshot.data!;
-              final pressedKeys =
-                  state.pressedKeys.map((e) => e.name).toList();
+              final pressedKeys = state.pressedKeys.map((e) => e.name).toList();
 
               return DefaultTextStyle(
                 style:
@@ -67,6 +66,8 @@ class _StateCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    Text('来源: ${state.source.name}'),
+                    const SizedBox(height: 4),
                     Text('当前按键: $pressedKeys'),
                     const SizedBox(height: 6),
                     Text('Raw Keys: ${state.rawKeys}'),
@@ -106,6 +107,8 @@ class _StateCard extends StatelessWidget {
 /// 日志面板需要保持历史记录，无法用 [StreamBuilder] 纯声明式实现，
 /// 因此使用 [StatefulWidget] + 手动监听。
 ///
+/// 订阅 [states] 流记录状态帧日志，订阅 [buttonEvents] 流记录按键边沿日志。
+///
 /// 对于生产页面只需要确认按键是否按下等判断，直接用 [StreamBuilder] 即可，
 /// 不需要手动订阅和 [dispose] 清理。
 class _EventLog extends StatefulWidget {
@@ -121,22 +124,48 @@ class _EventLogState extends State<_EventLog> {
   /// 事件日志列表，最新插入头部，最多 80 条。
   final List<String> _logs = [];
 
-  /// 按钮事件订阅（仅日志需要，因为要累积历史）。
+  /// 完整状态帧订阅。
+  StreamSubscription<GmacroInputState>? _stateSub;
+
+  /// 按钮事件订阅。
   StreamSubscription<GmacroButtonEvent>? _buttonSub;
 
   @override
   void initState() {
     super.initState();
-    _buttonSub = widget.service.buttonEvents.listen((event) {
+
+    debugPrint('[GmacroInputDebugPage._EventLog] initState — subscribing to states & buttonEvents');
+
+    // 订阅完整状态帧：按键、摇杆、扳机变化时记录
+    _stateSub = widget.service.states.listen((state) {
+      debugPrint('[GmacroInputDebugPage._EventLog] state emitted: source=${state.source.name} keys=${state.pressedKeys.map((e) => e.name)}');
+
       if (!mounted) return;
-      setState(() => _insertLog(
-        'button: ${event.key.name} ${event.phase.name}',
-      ));
+      setState(
+        () => _insertLog(
+          'state: keys=${state.pressedKeys.map((e) => e.name).toList()} '
+          'raw=${state.rawKeys} '
+          'j1=(${state.j1x}, ${state.j1y}) '
+          'j2=(${state.j2x}, ${state.j2y}) '
+          'l2=${state.l2} r2=${state.r2}',
+        ),
+      );
+    });
+
+    // 订阅按键边沿事件：按下/抬起时记录
+    _buttonSub = widget.service.buttonEvents.listen((event) {
+      debugPrint('[GmacroInputDebugPage._EventLog] buttonEvent: ${event.key.name} ${event.phase.name}');
+
+      if (!mounted) return;
+      setState(
+        () => _insertLog('button: ${event.key.name} ${event.phase.name}'),
+      );
     });
   }
 
   @override
   void dispose() {
+    _stateSub?.cancel();
     _buttonSub?.cancel();
     super.dispose();
   }
