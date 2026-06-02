@@ -1,5 +1,6 @@
 package com.host4.host4_flutter_device_native
 
+import Host4FlutterGmacroConstants
 import io.flutter.plugin.common.MethodChannel
 
 internal object GmacroMethodInvoker {
@@ -415,12 +416,19 @@ internal object GmacroMethodInvoker {
                 )
 
                 //测试振动
-                Host4FlutterGmacroConstants.testVibration -> commands.forceVibrationTest(
-                    GmacroArgParser.intArg(arguments, "left"),
-                    GmacroArgParser.intArg(arguments, "right"),
-                    GmacroArgParser.intArg(arguments, "position"),
-                    GmacroCallbackBridge.message(result),
-                )
+                Host4FlutterGmacroConstants.testVibration -> {
+                    val left = GmacroArgParser.intArg(arguments, "left")
+                    val right = GmacroArgParser.intArg(arguments, "right")
+                    val position = GmacroArgParser.intArg(arguments, "position")
+                    val relLeft = (2.55f * left).toInt()
+                    val relRight = (2.55f * right).toInt()
+                    commands.forceVibrationTest(
+                        relLeft,
+                        relRight,
+                        position,
+                        GmacroCallbackBridge.message(result),
+                    )
+                }
 
                 Host4FlutterGmacroConstants.setTurboDatas -> {
                     val turbos = GmacroArgParser.mapList(arguments, "keyTurbos")

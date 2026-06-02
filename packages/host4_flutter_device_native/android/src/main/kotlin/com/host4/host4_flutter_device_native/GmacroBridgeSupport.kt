@@ -41,7 +41,7 @@ internal object GmacroCallbackBridge {
     }
 
     private fun deliver(code: Int, rsp: Any?, result: MethodChannel.Result) {
-        if (code == Constants.SUCCESS) {
+        if (code == Constants.SUCCESS || code == 80) {
             result.success(GmacroResponseSerializer.toMap(rsp))
         } else {
             result.error(
