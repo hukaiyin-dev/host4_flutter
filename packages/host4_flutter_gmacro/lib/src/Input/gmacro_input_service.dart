@@ -26,16 +26,14 @@ class GmacroButtonEvent {
 /// 统一输入服务。
 ///
 /// 作用：
-/// 1. 监听 `GmacroSession.realtimeEvents`
-/// 2. Android USB 补充监听 `GmacroSession.usbRealtimeEvents`
-/// 3. 同时兼容 `devKeysState + testKeys`
-/// 4. 产出统一的完整状态流 `states`
-/// 5. 产出统一的按键边沿流 `buttonEvents`
+/// 1. 监听 `GmacroSession.realtimeEvents`（BLE / USB 共用）
+/// 2. 同时兼容 `devKeysState + testKeys`
+/// 3. 产出统一的完整状态流 `states`
+/// 4. 产出统一的按键边沿流 `buttonEvents`
 class GmacroInputService {
   GmacroInputService();
 
   StreamSubscription<GmacroRealtimeEvent>? _inputSub;
-  StreamSubscription<GmacroRealtimeEvent>? _usbInputSub;
 
   /// 持续广播“当前完整输入状态”。
   final _stateController = StreamController<GmacroInputState>.broadcast();
@@ -61,20 +59,17 @@ class GmacroInputService {
   /// - `DeviceKeysStateEvent`
   /// - `TestEventMode`
   ///
-  /// Android USB 通过 `usbRealtimeEvents` 注入同构事件，保证 Input/Cursor
-  /// 无需感知 transport 差异。
+  /// BLE 与 USB 均通过 `realtimeEvents` 注入，Input/Cursor 无需感知 transport 差异。
   ///
   /// 这样即使不同手柄随机上报 `devKeysState` 或 `testKeys`，
   /// 上层也仍然只面对统一输入状态。
   void bindSession(GmacroSession session) {
     _inputSub?.cancel();
-    _usbInputSub?.cancel();
     _latestState = GmacroInputState.empty();
 
     debugPrint('[GmacroInputService] bindSession — subscribing to realtimeEvents');
 
     _inputSub = session.realtimeEvents.listen(_onRealtimeEvent);
-    _usbInputSub = session.usbRealtimeEvents.listen(_onRealtimeEvent);
   }
 
   void _onRealtimeEvent(GmacroRealtimeEvent event) {
@@ -119,7 +114,6 @@ class GmacroInputService {
 
   Future<void> dispose() async {
     await _inputSub?.cancel();
-    await _usbInputSub?.cancel();
     await _stateController.close();
     await _buttonController.close();
   }
