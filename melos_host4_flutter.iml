@@ -22,6 +22,45 @@
       <excludeFolder url="file://$MODULE_DIR$/packages/host4_flutter_log/.dart_tool" />
       <excludeFolder url="file://$MODULE_DIR$/packages/host4_flutter_log/.pub" />
       <excludeFolder url="file://$MODULE_DIR$/packages/host4_flutter_log/build" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/host4_flutter_analytics/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/host4_flutter_analytics/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/host4_flutter_analytics/build" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/host4_flutter_ble/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/host4_flutter_ble/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/host4_flutter_ble/build" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/host4_flutter_bridge/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/host4_flutter_bridge/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/host4_flutter_bridge/build" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/host4_flutter_bridge/example/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/host4_flutter_bridge/example/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/host4_flutter_bridge/example/build" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/host4_flutter_crypto/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/host4_flutter_crypto/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/host4_flutter_crypto/build" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/host4_flutter_device_native/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/host4_flutter_device_native/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/host4_flutter_device_native/build" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/host4_flutter_gmacro/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/host4_flutter_gmacro/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/host4_flutter_gmacro/build" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/host4_flutter_mfi/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/host4_flutter_mfi/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/host4_flutter_mfi/build" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/host4_flutter_protocol/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/host4_flutter_protocol/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/host4_flutter_protocol/build" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/host4_flutter_transport/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/host4_flutter_transport/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/host4_flutter_transport/build" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/host4_flutter_ui/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/host4_flutter_ui/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/host4_flutter_ui/build" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/host4_flutter_usb/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/host4_flutter_usb/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/host4_flutter_usb/build" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/host4_flutter_utils/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/host4_flutter_utils/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/host4_flutter_utils/build" />
     </content>
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="Dart SDK" level="project" />

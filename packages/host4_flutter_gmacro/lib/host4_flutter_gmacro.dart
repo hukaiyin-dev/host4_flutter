@@ -1,5 +1,6 @@
 export 'src/gmacro_session.dart';
 
+export 'src/Models/gmacro_protocol_events.dart';
 export 'src/Models/gmacro_gamepad_key.dart';
 export 'src/Models/gmacro_macro_models.dart';
 export 'src/Models/gmacro_curve_point.dart';
