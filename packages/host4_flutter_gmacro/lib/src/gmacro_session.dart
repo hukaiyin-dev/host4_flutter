@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:host4_flutter_device_native/host4_flutter_device_native.dart';
 import 'package:host4_flutter_protocol/host4_flutter_protocol.dart';
 import 'package:host4_flutter_transport/host4_flutter_transport.dart';
@@ -36,15 +37,15 @@ class GmacroSession implements ProtocolSession {
 
   /// 共享的实时输入事件广播流。
   ///
-  /// BLE 来自 [ProtocolBusy]（`devKeysState` / `testKeys`）；
-  /// Android USB 额外合并 `DPKeyEventRsp` 转换后的同构事件。
+  /// BLE / USB 均可来自 [ProtocolBusy]（`devKeysState` / `testKeys`）；
+  /// Android BLE / USB 额外合并 native `DPKeyEventRsp` 转换后的同构事件。
   /// 上层只需订阅 [realtimeEvents]，无需区分 transport。
   final StreamController<GmacroRealtimeEvent> _realtimeEventController =
       StreamController<GmacroRealtimeEvent>.broadcast();
 
   StreamSubscription<NativeProtocolEvent>? _nativeSub;
   StreamSubscription<ProtocolEvent>? _realtimeProtocolSub;
-  StreamSubscription<GmacroRealtimeEvent>? _usbRealtimeSub;
+  StreamSubscription<GmacroRealtimeEvent>? _dpKeyRealtimeSub;
 
   void _initEvents() {
     _nativeSub = _native
@@ -57,12 +58,23 @@ class GmacroSession implements ProtocolSession {
       _forwardProtocolRealtimeEvents,
     );
 
-    if (transport.device.kind == TransportKind.usb) {
-      _usbRealtimeSub = _native
+    if (_shouldMergeNativeDpKeyEvents) {
+      _dpKeyRealtimeSub = _native
           .usbDpKeyEvents(transport.id)
           .map<GmacroRealtimeEvent>(DeviceKeysStateEvent.fromNativeDpKeyEvent)
           .listen(_realtimeEventController.add);
     }
+  }
+
+  /// Android BLE / USB：native 侧通过 escalation 推送 DP 按键状态。
+  bool get _shouldMergeNativeDpKeyEvents {
+    if (kIsWeb || defaultTargetPlatform != TargetPlatform.android) {
+      return false;
+    }
+    return switch (transport.device.kind) {
+      TransportKind.ble || TransportKind.usb => true,
+      TransportKind.mfi => false,
+    };
   }
 
   void _forwardProtocolRealtimeEvents(ProtocolEvent event) {
@@ -94,8 +106,8 @@ class GmacroSession implements ProtocolSession {
 
   /// 实时按键/摇杆/扳机事件流。
   ///
-  /// BLE 与 USB 共用此流：BLE 来自 [ProtocolBusy]（`devKeysState` / `testKeys`），
-  /// Android USB 额外合并 `DPKeyEventRsp` 转换后的 [DeviceKeysStateEvent]。
+  /// BLE 与 USB 共用此流：均可来自 [ProtocolBusy]（`devKeysState` / `testKeys`），
+  /// Android BLE / USB 额外合并 `DPKeyEventRsp` 转换后的 [DeviceKeysStateEvent]。
   Stream<GmacroRealtimeEvent> get realtimeEvents =>
       _realtimeEventController.stream;
 
@@ -103,7 +115,7 @@ class GmacroSession implements ProtocolSession {
   Future<void> close() async {
     await _nativeSub?.cancel();
     await _realtimeProtocolSub?.cancel();
-    await _usbRealtimeSub?.cancel();
+    await _dpKeyRealtimeSub?.cancel();
     await _eventController.close();
     await _realtimeEventController.close();
     return _native.closeProtocol(id);

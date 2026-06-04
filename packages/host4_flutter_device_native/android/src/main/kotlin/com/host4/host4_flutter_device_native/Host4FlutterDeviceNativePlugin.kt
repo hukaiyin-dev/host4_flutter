@@ -11,6 +11,7 @@ import com.host4.platform.listener.UsbConnectListener
 import com.host4.platform.kr.response.DPKeyEventRsp
 import com.host4.platform.kr.response.EscalationRsp
 import com.host4.platform.manager.ReliableUsbCommManager
+import com.host4.platform.v2.api.BleDeviceSessionHandle
 import com.host4.platform.v2.api.FullPlatformSdk
 import com.host4.platform.v2.api.UsbDeviceSessionHandle
 import com.host4.platform.v2.ble.BleMacUtils
@@ -215,14 +216,25 @@ class Host4FlutterDeviceNativePlugin :
         )
         eventChannel.setStreamHandler(eventHandler)
 
+        val dpKeyEventHandler = QueuedEventStreamHandler()
+        val dpKeyEventChannel = EventChannel(
+            binaryMessenger,
+            "host4_flutter_device_native/usb_dp_key_events/$sessionId",
+        )
+        dpKeyEventChannel.setStreamHandler(dpKeyEventHandler)
+
         val record = TransportSessionRecord(
             sessionId = sessionId,
             transportKind = Host4FlutterTransportKinds.BLE,
             deviceKey = mac,
             eventChannel = eventChannel,
             eventHandler = eventHandler,
+            dpKeyEventChannel = dpKeyEventChannel,
+            dpKeyEventHandler = dpKeyEventHandler,
         )
         transportSessions[sessionId] = record
+
+        registerBleAllEscalationListener(mac)
 
         val stateListener = BluetoothStateListener { _, status ->
             record.lastTransportStatus = status
@@ -366,6 +378,26 @@ class Host4FlutterDeviceNativePlugin :
         }
         record.lastTransportStatus = ReliableUsbCommManager.CONNECT_COMPLETED
         record.eventHandler.emit(mapOf("type" to "ready"))
+    }
+
+    /**
+     * Registers [OnEscalationListener] on the BLE session handle for [mac], mirroring USB
+     * [UsbDeviceSessionHandle.registerAllEscalationListener].
+     */
+    private fun registerBleAllEscalationListener(mac: String) {
+        BleDeviceSessionHandle.forDevice(mac)
+            .registerAllEscalationListener(bleEscalationListenerFor(mac))
+    }
+
+    private fun bleEscalationListenerFor(mac: String): OnEscalationListener<EscalationRsp> {
+        return OnEscalationListener { message ->
+            if (message !is DPKeyEventRsp) return@OnEscalationListener
+            val modeEvent = message.modeEvent ?: return@OnEscalationListener
+            val record = transportSessions.values.firstOrNull {
+                it.transportKind == Host4FlutterTransportKinds.BLE && it.deviceKey == mac
+            } ?: return@OnEscalationListener
+            record.dpKeyEventHandler?.emit(DpKeyEventMapper.map(modeEvent))
+        }
     }
 
     private val usbAllEscalationListener = OnEscalationListener<EscalationRsp> { message ->

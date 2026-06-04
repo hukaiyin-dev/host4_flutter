@@ -81,7 +81,7 @@ class Host4FlutterDeviceNative {
     );
   }
 
-  /// Android USB only: [DPKeyEventRsp] escalation events from the device.
+  /// Android BLE / USB: [DPKeyEventRsp] escalation events from the device.
   Stream<NativeDpKeyEvent> usbDpKeyEvents(String transportSessionId) {
     return Host4FlutterDeviceNativePlatform.instance.usbDpKeyEvents(
       transportSessionId,
