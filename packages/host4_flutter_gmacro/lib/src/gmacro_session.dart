@@ -43,9 +43,13 @@ class GmacroSession implements ProtocolSession {
   final StreamController<GmacroRealtimeEvent> _realtimeEventController =
       StreamController<GmacroRealtimeEvent>.broadcast();
 
+  /// Android BLE / USB：native `DeviceAlignRsp` 校准进度。
+  final StreamController<DeviceCalibrationEvent> _calibrationEventController =
+      StreamController<DeviceCalibrationEvent>.broadcast();
+
   StreamSubscription<NativeProtocolEvent>? _nativeSub;
   StreamSubscription<ProtocolEvent>? _realtimeProtocolSub;
-  StreamSubscription<GmacroRealtimeEvent>? _dpKeyRealtimeSub;
+  StreamSubscription<Map<String, Object?>>? _escalationSub;
 
   void _initEvents() {
     _nativeSub = _native
@@ -58,16 +62,33 @@ class GmacroSession implements ProtocolSession {
       _forwardProtocolRealtimeEvents,
     );
 
-    if (_shouldMergeNativeDpKeyEvents) {
-      _dpKeyRealtimeSub = _native
-          .usbDpKeyEvents(transport.id)
-          .map<GmacroRealtimeEvent>(DeviceKeysStateEvent.fromNativeDpKeyEvent)
-          .listen(_realtimeEventController.add);
+    if (_shouldMergeNativeEscalationEvents) {
+      // Single native EventChannel subscription; fan out by event type on Dart side.
+      _escalationSub = _native
+          .transportEscalationEvents(transport.id)
+          .listen(_onTransportEscalationEvent);
     }
   }
 
-  /// Android BLE / USB：native 侧通过 escalation 推送 DP 按键状态。
-  bool get _shouldMergeNativeDpKeyEvents {
+  void _onTransportEscalationEvent(Map<String, Object?> event) {
+    switch (event['type']) {
+      case 'dpKeyEvent':
+        _realtimeEventController.add(
+          DeviceKeysStateEvent.fromNativeDpKeyEvent(
+            NativeDpKeyEvent.fromMap(event),
+          ),
+        );
+      case 'deviceAlign':
+        _calibrationEventController.add(
+          DeviceCalibrationEvent.fromNative(
+            NativeDeviceAlignEvent.fromMap(event),
+          ),
+        );
+    }
+  }
+
+  /// Android BLE / USB：native 侧通过 escalation 推送 DP 按键与校准数据。
+  bool get _shouldMergeNativeEscalationEvents {
     if (kIsWeb || defaultTargetPlatform != TargetPlatform.android) {
       return false;
     }
@@ -111,13 +132,18 @@ class GmacroSession implements ProtocolSession {
   Stream<GmacroRealtimeEvent> get realtimeEvents =>
       _realtimeEventController.stream;
 
+  /// 设备校准进度（陀螺仪 / 摇杆 / 扳机等），来自 [DeviceAlignRsp]。
+  Stream<DeviceCalibrationEvent> get calibrationEvents =>
+      _calibrationEventController.stream;
+
   @override
   Future<void> close() async {
     await _nativeSub?.cancel();
     await _realtimeProtocolSub?.cancel();
-    await _dpKeyRealtimeSub?.cancel();
+    await _escalationSub?.cancel();
     await _eventController.close();
     await _realtimeEventController.close();
+    await _calibrationEventController.close();
     return _native.closeProtocol(id);
   }
 

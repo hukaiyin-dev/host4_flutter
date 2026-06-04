@@ -92,6 +92,19 @@ abstract class Host4FlutterDeviceNativePlatform extends PlatformInterface {
     throw UnimplementedError('usbDpKeyEvents() has not been implemented.');
   }
 
+  Stream<NativeDeviceAlignEvent> deviceAlignEvents(String transportSessionId) {
+    throw UnimplementedError('deviceAlignEvents() has not been implemented.');
+  }
+
+  /// Raw escalation stream (`dpKeyEvent` / `deviceAlign`); one subscription per transport.
+  Stream<Map<String, Object?>> transportEscalationEvents(
+    String transportSessionId,
+  ) {
+    throw UnimplementedError(
+      'transportEscalationEvents() has not been implemented.',
+    );
+  }
+
   Future<void> disconnectTransport(String transportSessionId) {
     throw UnimplementedError('disconnectTransport() has not been implemented.');
   }

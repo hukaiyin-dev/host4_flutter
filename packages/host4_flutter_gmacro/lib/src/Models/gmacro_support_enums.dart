@@ -1,3 +1,21 @@
+/// Native calibration sub-ids from [DeviceAlignRsp] / align commands.
+enum DeviceCalibrationSubId {
+  gyro(0x01),
+  rocker(0x02),
+  trigger(0x03);
+
+  const DeviceCalibrationSubId(this.value);
+
+  final int value;
+
+  static DeviceCalibrationSubId? fromValue(int value) {
+    for (final item in DeviceCalibrationSubId.values) {
+      if (item.value == value) return item;
+    }
+    return null;
+  }
+}
+
 enum OutputGraphics {
   circle(0),
   square(1),

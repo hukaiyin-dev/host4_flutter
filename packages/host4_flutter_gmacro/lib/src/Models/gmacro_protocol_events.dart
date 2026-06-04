@@ -1,8 +1,39 @@
 import 'gmacro_gamepad_key.dart';
+import 'gmacro_support_enums.dart';
 import 'package:host4_flutter_device_native/host4_flutter_device_native.dart';
 
 sealed class GmacroRealtimeEvent {
   const GmacroRealtimeEvent();
+}
+
+/// 校准数据
+class DeviceCalibrationEvent extends GmacroRealtimeEvent {
+  const DeviceCalibrationEvent({
+    required this.subId,
+    required this.kind,
+    required this.result,
+    this.param1 = const <int>[],
+    this.param2 = const <int>[],
+    this.errorList = const <int>[],
+  });
+
+  final int subId;
+  final DeviceCalibrationSubId? kind;
+  final int result;
+  final List<int> param1;
+  final List<int> param2;
+  final List<int> errorList;
+
+  factory DeviceCalibrationEvent.fromNative(NativeDeviceAlignEvent event) {
+    return DeviceCalibrationEvent(
+      subId: event.subId,
+      kind: DeviceCalibrationSubId.fromValue(event.subId),
+      result: event.result,
+      param1: event.param1,
+      param2: event.param2,
+      errorList: event.errorList,
+    );
+  }
 }
 
 class RawGmacroEvent extends GmacroRealtimeEvent {

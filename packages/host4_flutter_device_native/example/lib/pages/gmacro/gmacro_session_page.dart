@@ -27,6 +27,7 @@ class _GmacroSessionPageState extends State<GmacroSessionPage> {
 
   StreamSubscription<TransportEvent>? _transportSubscription;
   StreamSubscription<ProtocolEvent>? _protocolSubscription;
+  StreamSubscription<DeviceCalibrationEvent>? _calibrationSubscription;
   GmacroSession? _gmacroSession;
 
   String _transportStatus = 'connecting';
@@ -138,6 +139,7 @@ class _GmacroSessionPageState extends State<GmacroSessionPage> {
     _log.info('Disposing session page');
     unawaited(_transportSubscription?.cancel());
     unawaited(_protocolSubscription?.cancel());
+    unawaited(_calibrationSubscription?.cancel());
     _intentDataStreamSubscription.cancel();
     final GmacroSession? session = _gmacroSession;
     if (session != null) {
@@ -200,6 +202,26 @@ class _GmacroSessionPageState extends State<GmacroSessionPage> {
         onError: (Object error, StackTrace stackTrace) {
           _log.error('Protocol stream error', error: error, stackTrace: stackTrace);
           _addErrorLog('protocol', error.toString());
+        },
+      );
+
+      _calibrationSubscription = session.calibrationEvents.listen(
+        (DeviceCalibrationEvent event) {
+          _log.info('Calibration: $event');
+          _addLog(
+            'calibration',
+            '${event.kind?.name ?? 'subId=0x${event.subId.toRadixString(16)}'} '
+            'result=${event.result} '
+            'p1=${event.param1} p2=${event.param2} '
+            'errors=${event.errorList}',
+          );
+        },
+        onError: (Object error, StackTrace stackTrace) {
+          _log.error(
+            'Calibration stream error',
+            error: error,
+            stackTrace: stackTrace,
+          );
         },
       );
 

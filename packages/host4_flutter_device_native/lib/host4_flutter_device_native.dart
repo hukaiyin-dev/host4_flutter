@@ -81,9 +81,28 @@ class Host4FlutterDeviceNative {
     );
   }
 
-  /// Android BLE / USB: [DPKeyEventRsp] escalation events from the device.
+  /// BLE / USB: [DPKeyEventRsp] escalation events from the device.
   Stream<NativeDpKeyEvent> usbDpKeyEvents(String transportSessionId) {
     return Host4FlutterDeviceNativePlatform.instance.usbDpKeyEvents(
+      transportSessionId,
+    );
+  }
+
+  /// BLE / USB: [DeviceAlignRsp] calibration / align escalation events.
+  Stream<NativeDeviceAlignEvent> deviceAlignEvents(String transportSessionId) {
+    return Host4FlutterDeviceNativePlatform.instance.deviceAlignEvents(
+      transportSessionId,
+    );
+  }
+
+  /// BLE / USB: shared escalation stream (`dpKeyEvent` + `deviceAlign`).
+  ///
+  /// Use this when subscribing to both DP key and calibration data so only one
+  /// native [EventChannel] listener is opened per transport session.
+  Stream<Map<String, Object?>> transportEscalationEvents(
+    String transportSessionId,
+  ) {
+    return Host4FlutterDeviceNativePlatform.instance.transportEscalationEvents(
       transportSessionId,
     );
   }
