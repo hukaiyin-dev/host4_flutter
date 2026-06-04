@@ -131,8 +131,8 @@ internal object GmacroMethodInvoker {
 
                 Host4FlutterGmacroConstants.getTriggerQuickSwitch -> commands.queryQuickTriggerSwitch(GmacroCallbackBridge.message(result))
 
-                Host4FlutterGmacroConstants.startTriggerCalibration -> commands.beginAlignRockerOrTrigger(0, CALIB_TRIGGER_SUB_ID, GmacroCallbackBridge.message(result))
-                Host4FlutterGmacroConstants.endTriggerCalibration -> commands.endAlignRockerOrTrigger(0, CALIB_TRIGGER_SUB_ID, GmacroCallbackBridge.message(result))
+                Host4FlutterGmacroConstants.startTriggerCalibration -> commands.beginAlignRockerOrTrigger(CALIB_TRIGGER_SUB_ID, 0, GmacroCallbackBridge.message(result))
+                Host4FlutterGmacroConstants.endTriggerCalibration -> commands.endAlignRockerOrTrigger(CALIB_TRIGGER_SUB_ID, 0, GmacroCallbackBridge.message(result))
 
                 Host4FlutterGmacroConstants.triggerLinearOutput -> commands.setTriggerCurveType(
                     GmacroArgParser.intArg(arguments, "leftMode"),
@@ -197,8 +197,8 @@ internal object GmacroMethodInvoker {
                     GmacroCallbackBridge.message(result),
                 )
 
-                Host4FlutterGmacroConstants.startRockerCalibration -> commands.beginAlignRockerOrTrigger(0, CALIB_ROCKER_SUB_ID, GmacroCallbackBridge.message(result))
-                Host4FlutterGmacroConstants.endRockerCalibration -> commands.endAlignRockerOrTrigger(0, CALIB_ROCKER_SUB_ID, GmacroCallbackBridge.message(result))
+                Host4FlutterGmacroConstants.startRockerCalibration -> commands.beginAlignRockerOrTrigger(CALIB_ROCKER_SUB_ID,0 , GmacroCallbackBridge.message(result))
+                Host4FlutterGmacroConstants.endRockerCalibration -> commands.endAlignRockerOrTrigger(CALIB_ROCKER_SUB_ID, 0, GmacroCallbackBridge.message(result))
 
                 Host4FlutterGmacroConstants.updateRockerAdditional -> commands.setRockerAdditionalReq(
                     GmacroModelFactory.rockerParam(arguments),
@@ -321,8 +321,8 @@ internal object GmacroMethodInvoker {
 
                 Host4FlutterGmacroConstants.fetchGyroOuterDeadZone -> commands.queryMotionOuterDeadZone(GmacroCallbackBridge.message(result))
 
-                Host4FlutterGmacroConstants.startGyroCalibration -> commands.beginAlignGyroscope(0, CALIB_GYRO_SUB_ID, GmacroCallbackBridge.message(result))
-                Host4FlutterGmacroConstants.endGyroCalibration -> commands.endAlignGyroscope(0, CALIB_GYRO_SUB_ID, GmacroCallbackBridge.message(result))
+                Host4FlutterGmacroConstants.startGyroCalibration -> commands.beginAlignGyroscope(CALIB_GYRO_SUB_ID, 0, GmacroCallbackBridge.message(result))
+                Host4FlutterGmacroConstants.endGyroCalibration -> commands.endAlignGyroscope(CALIB_GYRO_SUB_ID, 0, GmacroCallbackBridge.message(result))
 
                 Host4FlutterGmacroConstants.updateGyroXYRatio -> commands.setMotionXYAxisRatio(
                     GmacroArgParser.intArg(arguments, "gyroXYRatio"),
