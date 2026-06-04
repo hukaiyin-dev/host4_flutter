@@ -96,6 +96,9 @@ class Host4UsbTransportSession implements TransportSession {
   /// USB [DPKeyEventRsp] key / rocker events from the native SDK.
   Stream<NativeDpKeyEvent> get dpKeyEvents => _native.usbDpKeyEvents(id);
 
+  Stream<NativeDeviceAlignEvent> get calibrationEvents =>
+      _native.deviceAlignEvents(id);
+
   @override
   Future<void> disconnect() {
     return _native.disconnectTransport(id);

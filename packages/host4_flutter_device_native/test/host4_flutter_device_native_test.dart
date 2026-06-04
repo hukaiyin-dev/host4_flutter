@@ -103,6 +103,18 @@ class MockHost4FlutterDeviceNativePlatform
   }
 
   @override
+  Stream<NativeDeviceAlignEvent> deviceAlignEvents(String transportSessionId) {
+    return const Stream<NativeDeviceAlignEvent>.empty();
+  }
+
+  @override
+  Stream<Map<String, Object?>> transportEscalationEvents(
+    String transportSessionId,
+  ) {
+    return const Stream<Map<String, Object?>>.empty();
+  }
+
+  @override
   Future<void> startOta({
     required String protocolSessionId,
     required Uint8List firmwareData,

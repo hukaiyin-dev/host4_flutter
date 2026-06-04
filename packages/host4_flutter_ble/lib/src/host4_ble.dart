@@ -102,6 +102,9 @@ class Host4BleTransportSession implements TransportSession {
     return _native.disconnectTransport(id);
   }
 
+  Stream<NativeDeviceAlignEvent> get calibrationEvents =>
+      _native.deviceAlignEvents(id);
+
   TransportEvent _mapTransportEvent(NativeTransportEvent event) {
     final failure = event.failure == null
         ? null

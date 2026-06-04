@@ -95,7 +95,53 @@ class NativeTransportEvent {
 
 enum NativeProtocolEventType { ready, busy, error }
 
-/// USB device key / test-mode input from [DPKeyEventRsp] escalation callbacks.
+/// Calibration / align progress from [DeviceAlignRsp] escalation callbacks.
+class NativeDeviceAlignEvent {
+  const NativeDeviceAlignEvent({
+    required this.subId,
+    required this.result,
+    this.param1 = const <int>[],
+    this.param2 = const <int>[],
+    this.errorList = const <int>[],
+  });
+
+  factory NativeDeviceAlignEvent.fromMap(Map<String, Object?> map) {
+    return NativeDeviceAlignEvent(
+      subId: _readInt(map['subId']),
+      result: _readInt(map['result']),
+      param1: _readIntList(map['param1']),
+      param2: _readIntList(map['param2']),
+      errorList: _readIntList(map['errorList']),
+    );
+  }
+
+  /// Matches native calibration sub-ids (gyro `0x01`, rocker `0x02`, trigger `0x03`).
+  final int subId;
+  final int result;
+  final List<int> param1;
+  final List<int> param2;
+  final List<int> errorList;
+
+  Map<String, Object?> toMap() {
+    return <String, Object?>{
+      'type': 'deviceAlign',
+      'subId': subId,
+      'result': result,
+      'param1': param1,
+      'param2': param2,
+      'errorList': errorList,
+    };
+  }
+
+  @override
+  String toString() {
+    return 'NativeDeviceAlignEvent(subId: 0x${subId.toRadixString(16)}, '
+        'result: $result, param1: $param1, param2: $param2, '
+        'errorList: $errorList)';
+  }
+}
+
+/// Device key / test-mode input from [DPKeyEventRsp] escalation callbacks.
 class NativeDpKeyEvent {
   const NativeDpKeyEvent({
     required this.keyValue,
@@ -241,4 +287,11 @@ int _readInt(Object? value) {
   if (value is int) return value;
   if (value is num) return value.toInt();
   return 0;
+}
+
+List<int> _readIntList(Object? value) {
+  if (value is! List) {
+    return const <int>[];
+  }
+  return value.map((item) => _readInt(item)).toList(growable: false);
 }

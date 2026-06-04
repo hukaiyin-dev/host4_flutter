@@ -21,6 +21,17 @@ class MethodChannelHost4FlutterDeviceNative
     'host4_flutter_device_native/usb_scan',
   );
 
+  /// One cached stream per session — multiple Dart listeners must not open
+  /// duplicate native [EventChannel] subscriptions (that overwrites [eventSink]).
+  final Map<String, Stream<NativeTransportEvent>> _transportEventStreams =
+      <String, Stream<NativeTransportEvent>>{};
+
+  final Map<String, Stream<Map<String, Object?>>> _escalationEventStreams =
+      <String, Stream<Map<String, Object?>>>{};
+
+  final Map<String, Stream<NativeProtocolEvent>> _protocolEventStreams =
+      <String, Stream<NativeProtocolEvent>>{};
+
   @override
   Future<String?> getPlatformVersion() async {
     final version = await methodChannel.invokeMethod<String>(
@@ -144,26 +155,54 @@ class MethodChannelHost4FlutterDeviceNative
 
   @override
   Stream<NativeTransportEvent> transportEvents(String transportSessionId) {
-    return EventChannel(
-      'host4_flutter_device_native/transport_events/$transportSessionId',
-    ).receiveBroadcastStream().map(
-      (dynamic event) =>
-          NativeTransportEvent.fromMap(Map<String, Object?>.from(event as Map)),
-    );
+    return _transportEventStreams.putIfAbsent(transportSessionId, () {
+      return EventChannel(
+        'host4_flutter_device_native/transport_events/$transportSessionId',
+      ).receiveBroadcastStream().map(
+        (dynamic event) => NativeTransportEvent.fromMap(
+          Map<String, Object?>.from(event as Map),
+        ),
+      );
+    });
+  }
+
+  Stream<Map<String, Object?>> _transportEscalationEvents(
+    String transportSessionId,
+  ) {
+    return _escalationEventStreams.putIfAbsent(transportSessionId, () {
+      return EventChannel(
+        'host4_flutter_device_native/transport_escalation_events/$transportSessionId',
+      ).receiveBroadcastStream().map(
+        (dynamic event) => Map<String, Object?>.from(event as Map),
+      );
+    });
+  }
+
+  @override
+  Stream<Map<String, Object?>> transportEscalationEvents(
+    String transportSessionId,
+  ) {
+    return _transportEscalationEvents(transportSessionId);
   }
 
   @override
   Stream<NativeDpKeyEvent> usbDpKeyEvents(String transportSessionId) {
-    return EventChannel(
-      'host4_flutter_device_native/usb_dp_key_events/$transportSessionId',
-    ).receiveBroadcastStream().map(
-      (dynamic event) =>
-          NativeDpKeyEvent.fromMap(Map<String, Object?>.from(event as Map)),
-    );
+    return _transportEscalationEvents(transportSessionId)
+        .where((event) => event['type'] == 'dpKeyEvent')
+        .map(NativeDpKeyEvent.fromMap);
+  }
+
+  @override
+  Stream<NativeDeviceAlignEvent> deviceAlignEvents(String transportSessionId) {
+    return _transportEscalationEvents(transportSessionId)
+        .where((event) => event['type'] == 'deviceAlign')
+        .map(NativeDeviceAlignEvent.fromMap);
   }
 
   @override
   Future<void> disconnectTransport(String transportSessionId) {
+    _transportEventStreams.remove(transportSessionId);
+    _escalationEventStreams.remove(transportSessionId);
     return methodChannel.invokeMethod<void>(
       'disconnectTransport',
       <String, Object?>{'transportSessionId': transportSessionId},
@@ -193,12 +232,15 @@ class MethodChannelHost4FlutterDeviceNative
 
   @override
   Stream<NativeProtocolEvent> protocolEvents(String protocolSessionId) {
-    return EventChannel(
-      'host4_flutter_device_native/protocol_events/$protocolSessionId',
-    ).receiveBroadcastStream().map(
-      (dynamic event) =>
-          NativeProtocolEvent.fromMap(Map<String, Object?>.from(event as Map)),
-    );
+    return _protocolEventStreams.putIfAbsent(protocolSessionId, () {
+      return EventChannel(
+        'host4_flutter_device_native/protocol_events/$protocolSessionId',
+      ).receiveBroadcastStream().map(
+        (dynamic event) => NativeProtocolEvent.fromMap(
+          Map<String, Object?>.from(event as Map),
+        ),
+      );
+    });
   }
 
   @override
@@ -220,6 +262,7 @@ class MethodChannelHost4FlutterDeviceNative
 
   @override
   Future<void> closeProtocol(String protocolSessionId) {
+    _protocolEventStreams.remove(protocolSessionId);
     return methodChannel.invokeMethod<void>('closeProtocol', <String, Object?>{
       'protocolSessionId': protocolSessionId,
     });

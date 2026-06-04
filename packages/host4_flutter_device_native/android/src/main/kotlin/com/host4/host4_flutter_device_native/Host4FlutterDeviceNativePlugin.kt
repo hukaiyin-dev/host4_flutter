@@ -8,9 +8,9 @@ import com.host4.platform.listener.MessageCallBack
 import com.host4.platform.listener.OnEscalationListener
 import com.host4.platform.util.Constants
 import com.host4.platform.listener.UsbConnectListener
-import com.host4.platform.kr.response.DPKeyEventRsp
 import com.host4.platform.kr.response.EscalationRsp
 import com.host4.platform.manager.ReliableUsbCommManager
+import com.host4.platform.v2.api.BleDeviceSessionHandle
 import com.host4.platform.v2.api.FullPlatformSdk
 import com.host4.platform.v2.api.UsbDeviceSessionHandle
 import com.host4.platform.v2.ble.BleMacUtils
@@ -55,6 +55,9 @@ class Host4FlutterDeviceNativePlugin :
     private var activeUsbTransport: TransportSessionRecord? = null
 
     private val transportSessions = ConcurrentHashMap<String, TransportSessionRecord>()
+
+    private fun escalationEventChannelName(sessionId: String): String =
+        "host4_flutter_device_native/transport_escalation_events/$sessionId"
     private val protocolSessions = ConcurrentHashMap<String, ProtocolSessionRecord>()
 
     private val platformSdk: FullPlatformSdk
@@ -215,14 +218,25 @@ class Host4FlutterDeviceNativePlugin :
         )
         eventChannel.setStreamHandler(eventHandler)
 
+        val escalationEventHandler = QueuedEventStreamHandler()
+        val escalationEventChannel = EventChannel(
+            binaryMessenger,
+            escalationEventChannelName(sessionId),
+        )
+        escalationEventChannel.setStreamHandler(escalationEventHandler)
+
         val record = TransportSessionRecord(
             sessionId = sessionId,
             transportKind = Host4FlutterTransportKinds.BLE,
             deviceKey = mac,
             eventChannel = eventChannel,
             eventHandler = eventHandler,
+            escalationEventChannel = escalationEventChannel,
+            escalationEventHandler = escalationEventHandler,
         )
         transportSessions[sessionId] = record
+
+        registerBleAllEscalationListener(mac)
 
         val stateListener = BluetoothStateListener { _, status ->
             record.lastTransportStatus = status
@@ -256,12 +270,12 @@ class Host4FlutterDeviceNativePlugin :
         )
         eventChannel.setStreamHandler(eventHandler)
 
-        val dpKeyEventHandler = QueuedEventStreamHandler()
-        val dpKeyEventChannel = EventChannel(
+        val escalationEventHandler = QueuedEventStreamHandler()
+        val escalationEventChannel = EventChannel(
             binaryMessenger,
-            "host4_flutter_device_native/usb_dp_key_events/$sessionId",
+            escalationEventChannelName(sessionId),
         )
-        dpKeyEventChannel.setStreamHandler(dpKeyEventHandler)
+        escalationEventChannel.setStreamHandler(escalationEventHandler)
 
         val usbHandle: UsbDeviceSessionHandle = platformSdk.usb()
         val record = TransportSessionRecord(
@@ -270,8 +284,8 @@ class Host4FlutterDeviceNativePlugin :
             deviceKey = usbHandle.deviceId,
             eventChannel = eventChannel,
             eventHandler = eventHandler,
-            dpKeyEventChannel = dpKeyEventChannel,
-            dpKeyEventHandler = dpKeyEventHandler,
+            escalationEventChannel = escalationEventChannel,
+            escalationEventHandler = escalationEventHandler,
         )
         transportSessions[sessionId] = record
         activeUsbTransport = record
@@ -326,7 +340,7 @@ class Host4FlutterDeviceNativePlugin :
         for (sessionId in usbSessionIds) {
             transportSessions.remove(sessionId)?.let { record ->
                 record.eventChannel.setStreamHandler(null)
-                record.dpKeyEventChannel?.setStreamHandler(null)
+                record.escalationEventChannel?.setStreamHandler(null)
             }
             removeProtocolSessionsForTransport(sessionId)
         }
@@ -368,11 +382,25 @@ class Host4FlutterDeviceNativePlugin :
         record.eventHandler.emit(mapOf("type" to "ready"))
     }
 
+    /**
+     * Registers [OnEscalationListener] on the BLE session handle for [mac], mirroring USB
+     * [UsbDeviceSessionHandle.registerAllEscalationListener].
+     */
+    private fun registerBleAllEscalationListener(mac: String) {
+        platformSdk.registerAllEscalationListener(bleEscalationListenerFor(mac))
+    }
+
+    private fun bleEscalationListenerFor(mac: String): OnEscalationListener<EscalationRsp> {
+        return OnEscalationListener { message ->
+            val record = transportSessions.values.firstOrNull {
+                it.transportKind == Host4FlutterTransportKinds.BLE && it.deviceKey == mac
+            }
+            EscalationEventEmitter.emit(record?.escalationEventHandler, message)
+        }
+    }
+
     private val usbAllEscalationListener = OnEscalationListener<EscalationRsp> { message ->
-        if (message !is DPKeyEventRsp) return@OnEscalationListener
-        val modeEvent = message.modeEvent ?: return@OnEscalationListener
-        val record = activeUsbTransport ?: return@OnEscalationListener
-        record.dpKeyEventHandler?.emit(DpKeyEventMapper.map(modeEvent))
+        EscalationEventEmitter.emit(activeUsbTransport?.escalationEventHandler, message)
     }
 
     private val usbConnectListener = UsbConnectListener { status ->
@@ -398,7 +426,7 @@ class Host4FlutterDeviceNativePlugin :
         }
 
         record.eventChannel.setStreamHandler(null)
-        record.dpKeyEventChannel?.setStreamHandler(null)
+        record.escalationEventChannel?.setStreamHandler(null)
         when (record.transportKind) {
             Host4FlutterTransportKinds.USB -> {
                 if (activeUsbTransport?.sessionId == transportSessionId) {
@@ -521,8 +549,8 @@ class Host4FlutterDeviceNativePlugin :
         val deviceKey: String,
         val eventChannel: EventChannel,
         val eventHandler: QueuedEventStreamHandler,
-        val dpKeyEventChannel: EventChannel? = null,
-        val dpKeyEventHandler: QueuedEventStreamHandler? = null,
+        val escalationEventChannel: EventChannel? = null,
+        val escalationEventHandler: QueuedEventStreamHandler? = null,
         @Volatile var lastTransportStatus: Int = Constants.CONNECTING,
     )
 
