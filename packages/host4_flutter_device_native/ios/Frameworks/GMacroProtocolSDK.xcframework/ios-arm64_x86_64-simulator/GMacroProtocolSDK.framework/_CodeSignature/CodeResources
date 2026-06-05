@@ -34,7 +34,7 @@
 		</data>
 		<key>Headers/DataHelper+Parse.swift</key>
 		<data>
-		Z5H22AY9uM1bZTgDaof9b7PtPCU=
+		rigHsCvuCmMnwSmdUI4lIDcYbb8=
 		</data>
 		<key>Headers/DataHelper+Rocker.swift</key>
 		<data>
@@ -50,7 +50,7 @@
 		</data>
 		<key>Headers/DataHelper+SupportKey.swift</key>
 		<data>
-		cgi96QnM0ZIjdY/wB+DL/9cUrwo=
+		MskEwZLs7lygC23QgjRxpFK6+eU=
 		</data>
 		<key>Headers/DataHelper+Trigger.swift</key>
 		<data>
@@ -198,53 +198,57 @@
 		</data>
 		<key>Info.plist</key>
 		<data>
-		7+6Mgkf941sKcxedluLQiw2y3JA=
+		3kWerK1JHWui3t6+qNxJO0A/97g=
 		</data>
 		<key>Modules/GMacroProtocolSDK.swiftmodule/arm64-apple-ios-simulator.abi.json</key>
 		<data>
-		l+Ig3QHS4oAP039id+82N41/Vxg=
+		tYJVZFBJjSbuhwXThX8h1fmFphM=
 		</data>
 		<key>Modules/GMacroProtocolSDK.swiftmodule/arm64-apple-ios-simulator.private.swiftinterface</key>
 		<data>
-		rY/l1b5C0xXTTZn8qUh/Ai8T6ZA=
+		BTl8I6Tnp7O6yaaIe8lE/GAbzc8=
 		</data>
 		<key>Modules/GMacroProtocolSDK.swiftmodule/arm64-apple-ios-simulator.swiftdoc</key>
 		<data>
-		D6HWS8JVLHsEKeKX4p8ey+u/Ago=
+		zdpf/HZgtQVJ4TLRuDcmgaWxfSE=
 		</data>
 		<key>Modules/GMacroProtocolSDK.swiftmodule/arm64-apple-ios-simulator.swiftinterface</key>
 		<data>
-		rY/l1b5C0xXTTZn8qUh/Ai8T6ZA=
+		BTl8I6Tnp7O6yaaIe8lE/GAbzc8=
 		</data>
 		<key>Modules/GMacroProtocolSDK.swiftmodule/arm64-apple-ios-simulator.swiftmodule</key>
 		<data>
-		D2pB1p/866GDrUxz0R6k9nTJrjE=
+		MRVMs38Df5TAH2+T3LjEI2tdpQs=
 		</data>
 		<key>Modules/GMacroProtocolSDK.swiftmodule/x86_64-apple-ios-simulator.abi.json</key>
 		<data>
-		l+Ig3QHS4oAP039id+82N41/Vxg=
+		tYJVZFBJjSbuhwXThX8h1fmFphM=
 		</data>
 		<key>Modules/GMacroProtocolSDK.swiftmodule/x86_64-apple-ios-simulator.private.swiftinterface</key>
 		<data>
-		aPcjBHPiTzZt1DyZPgBgDrGajLs=
+		k2xUBAUUmYbvHiuYixjiWqaqy74=
 		</data>
 		<key>Modules/GMacroProtocolSDK.swiftmodule/x86_64-apple-ios-simulator.swiftdoc</key>
 		<data>
-		KhGyhtNewOl9/D947r58khlaM/Y=
+		+LFRnN57R0xC8xbc0giMDfs6kg4=
 		</data>
 		<key>Modules/GMacroProtocolSDK.swiftmodule/x86_64-apple-ios-simulator.swiftinterface</key>
 		<data>
-		aPcjBHPiTzZt1DyZPgBgDrGajLs=
+		k2xUBAUUmYbvHiuYixjiWqaqy74=
 		</data>
 		<key>Modules/GMacroProtocolSDK.swiftmodule/x86_64-apple-ios-simulator.swiftmodule</key>
 		<data>
-		FW32tGdHcTGZsRWTJHbTYZ03uUo=
+		V+q0ediWQWXjNEfd0Vq0nMk+PN8=
 		</data>
 	</dict>
 	<key>files2</key>
 	<dict>
 		<key>Headers/CurvePoint.swift</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			qT04edObqIntplSAhiz/VGAVSbU=
+			</data>
 			<key>hash2</key>
 			<data>
 			/HlAv7QEdJumQv5lmL95VVFvg6mO93IFaDtj1MwXRQA=
@@ -252,6 +256,10 @@
 		</dict>
 		<key>Headers/DataHelper+Device.swift</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			wG+CYntzazCGqvmyl9B7vbCl9sk=
+			</data>
 			<key>hash2</key>
 			<data>
 			xDx+e8ioz8fTl3slc50ChtBRi/bswNYkfjWvZWXL6Vc=
@@ -259,6 +267,10 @@
 		</dict>
 		<key>Headers/DataHelper+Extension.swift</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			OEe9xGM14eRwcyAH0qPC9nOxXR4=
+			</data>
 			<key>hash2</key>
 			<data>
 			OAxGw+jh+0NHGjpxzKl15BZ1SYTTYvVVcQkkpNtTsJA=
@@ -266,6 +278,10 @@
 		</dict>
 		<key>Headers/DataHelper+Gyro.swift</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			OUeVvrn4TMDoBOJ3wSwZ+cSLJ6E=
+			</data>
 			<key>hash2</key>
 			<data>
 			mXuz4IZIBd6QXrAlLoLGNYIoFWPN50K7PpOFbrVF4Bw=
@@ -273,6 +289,10 @@
 		</dict>
 		<key>Headers/DataHelper+Light.swift</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			k0SpEI/swUFzmFNWN5PZcGH7zv0=
+			</data>
 			<key>hash2</key>
 			<data>
 			gmC2pNmEiR5Yv/1UJMoJivvdKG1EFKvKiyPHeiM46DM=
@@ -280,6 +300,10 @@
 		</dict>
 		<key>Headers/DataHelper+Macro.swift</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			Ao/RtxxSwE4L9+z4gxxvdK/Q/Iw=
+			</data>
 			<key>hash2</key>
 			<data>
 			YfM79WGcqmiL4wIB0Xn5gkJc3h2LDDqMKK3uKkauASk=
@@ -287,6 +311,10 @@
 		</dict>
 		<key>Headers/DataHelper+Map.swift</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			nvNhqEenB1oOBdg/9u8atFcSUcY=
+			</data>
 			<key>hash2</key>
 			<data>
 			VQ8Hv0HefYgG7D/+uUHI9h5tXQQrpSlL3+CgmeOMe5U=
@@ -294,13 +322,21 @@
 		</dict>
 		<key>Headers/DataHelper+Parse.swift</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			rigHsCvuCmMnwSmdUI4lIDcYbb8=
+			</data>
 			<key>hash2</key>
 			<data>
-			e5dDPrEbF8lnFp6Zu8NvwBHwb2jt320moGyUzpNeI9A=
+			Qz7EJfQpTIlLRUPG8mrumaihKsVOlob0bkaZ++ELmm8=
 			</data>
 		</dict>
 		<key>Headers/DataHelper+Rocker.swift</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			Lql2cE6JjGopxRsk2XLKlU2APC0=
+			</data>
 			<key>hash2</key>
 			<data>
 			Ss6hQuZx309zlxg+eRkp7RHA90ttd0DRO7DnoWwDAb0=
@@ -308,6 +344,10 @@
 		</dict>
 		<key>Headers/DataHelper+Sleep.swift</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			XD0vEZQC1X0uYOrxUGcdkwenfRs=
+			</data>
 			<key>hash2</key>
 			<data>
 			kswDTL+abmMxdttetI0dik+PGHTtZd06wG1EkfZ0RWY=
@@ -315,6 +355,10 @@
 		</dict>
 		<key>Headers/DataHelper+Support.swift</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			WXP7JDcIHDkcvcqNNKL3RC049Ek=
+			</data>
 			<key>hash2</key>
 			<data>
 			gYfWC7pXStIPFn52dG67BN56vNx3exPTgQgkrdObEm0=
@@ -322,13 +366,21 @@
 		</dict>
 		<key>Headers/DataHelper+SupportKey.swift</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			MskEwZLs7lygC23QgjRxpFK6+eU=
+			</data>
 			<key>hash2</key>
 			<data>
-			zEnqkAT0e7bFAsE9eQqzeDkeILthDS3YXz86/7KQ4rk=
+			8JZilmH65avfBaX3H07YIr57J0EtOwZQVH+idlhzrog=
 			</data>
 		</dict>
 		<key>Headers/DataHelper+Trigger.swift</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			ukMXTeM60Aa0paj4346ZFRdVNFo=
+			</data>
 			<key>hash2</key>
 			<data>
 			eguTCMq8rbx3qxGE8wZIXJH49vnASwr2udEmP/xkVS0=
@@ -336,6 +388,10 @@
 		</dict>
 		<key>Headers/DataHelper+Turbo.swift</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			dq8T6JZPjNM8Pjm5AtZNDLJ26Yo=
+			</data>
 			<key>hash2</key>
 			<data>
 			+UNDSbo3lZSPDjAZpDkXYMbDfBUpddVeHnupvE9nK6o=
@@ -343,6 +399,10 @@
 		</dict>
 		<key>Headers/DataHelper+Vibration.swift</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			l8TvLWryUDAg8eTVZuNq1/qe6Vw=
+			</data>
 			<key>hash2</key>
 			<data>
 			Z251oa8WGmpf3qzFWG+V8xvYQYkXS2ioFE9Q9IN7h9o=
@@ -350,6 +410,10 @@
 		</dict>
 		<key>Headers/DataHelper.swift</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			Wy/vO1es5r5p25VQmQTXhu2zNW0=
+			</data>
 			<key>hash2</key>
 			<data>
 			ed1OOc5jYAQGYcpgViMKO8hg8cakumt9GzJqqDVlDRc=
@@ -357,6 +421,10 @@
 		</dict>
 		<key>Headers/DataParser.swift</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			l270caweoeyjo2yl2U6UovwhZtc=
+			</data>
 			<key>hash2</key>
 			<data>
 			tp2oUu1NJs/aaNDQrFN9UpFdFmI7J4UZMhUUfrciyMg=
@@ -364,6 +432,10 @@
 		</dict>
 		<key>Headers/DeviceProtocolID.swift</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			mPywQkQ4Un7mXbw0Z94er7wIi1Q=
+			</data>
 			<key>hash2</key>
 			<data>
 			hUt7fHbkkv0AUtsLW+jtizZqbAd5OjnpjDV6ZkzErFY=
@@ -371,6 +443,10 @@
 		</dict>
 		<key>Headers/GMacroProtocolHelper+Device.swift</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			raYy/lIm5yJcKx+hrYJpQG4YQ80=
+			</data>
 			<key>hash2</key>
 			<data>
 			2Vx5uJSzir5GoPLoxTSHrY14KPkzRF3vWpW67LEeV2Y=
@@ -378,6 +454,10 @@
 		</dict>
 		<key>Headers/GMacroProtocolHelper+Gyro.swift</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			OelajjRTXQHegN9dL9QSwti6Y6g=
+			</data>
 			<key>hash2</key>
 			<data>
 			G2Z+o5mtca2GQYGZeIaVKXWmDgzOSAhdstCnZhJI0WQ=
@@ -385,6 +465,10 @@
 		</dict>
 		<key>Headers/GMacroProtocolHelper+Light.swift</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			QHcJikFiH4Jn18xWO/Ik0bVdFxM=
+			</data>
 			<key>hash2</key>
 			<data>
 			PIq40whLbA2qHOPueBULJuDjc/vMyqpTyke/ATVVHK4=
@@ -392,6 +476,10 @@
 		</dict>
 		<key>Headers/GMacroProtocolHelper+Macro.swift</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			Trdt1hgK2Zu+STere2OvfRTq+qw=
+			</data>
 			<key>hash2</key>
 			<data>
 			8AAPT8cj2FmhD9i1/VOWhE/hxhSDUkxepMDFCy1Xxzw=
@@ -399,6 +487,10 @@
 		</dict>
 		<key>Headers/GMacroProtocolHelper+Mapping.swift</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			Ik6e6DjYQnWCmVMetlRLuBz4RXo=
+			</data>
 			<key>hash2</key>
 			<data>
 			vu9hBqovvdWFuGi4j5py2XVc0tXyzD/DHCDfzEMxslU=
@@ -406,6 +498,10 @@
 		</dict>
 		<key>Headers/GMacroProtocolHelper+Rocker.swift</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			W2VRadePYfzDG/37OC7ThjmXeIY=
+			</data>
 			<key>hash2</key>
 			<data>
 			MfWrYEbK9LGv3nGzdFbvJbhLqsUbc2ZIkBaL2nP7Ntw=
@@ -413,6 +509,10 @@
 		</dict>
 		<key>Headers/GMacroProtocolHelper+Sleep.swift</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			XZGoikKGLvRn6qshX72My+8JaGY=
+			</data>
 			<key>hash2</key>
 			<data>
 			6s5ri2UCG4fpzJQwL4vZkzFQHsUtd7KbGZC4+1Ba80U=
@@ -420,6 +520,10 @@
 		</dict>
 		<key>Headers/GMacroProtocolHelper+Trigger.swift</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			W+9c5GG7yyTmnlLE6eJnq8Rll1k=
+			</data>
 			<key>hash2</key>
 			<data>
 			DBIGqa9o/uA2S2OHpGA5razJ3VBT7XHYf8JGO/LFAnE=
@@ -427,6 +531,10 @@
 		</dict>
 		<key>Headers/GMacroProtocolHelper+Turbo.swift</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			3KatDloIPZ+QDVuodi21Ru3hmDo=
+			</data>
 			<key>hash2</key>
 			<data>
 			G8ofQWykxkPx73cS8EDSd2F+v+ohEAUmZiZlvCTkYcs=
@@ -434,6 +542,10 @@
 		</dict>
 		<key>Headers/GMacroProtocolHelper+Vibration.swift</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			bz11uYJrrZagVeUedhIalhYy9Pk=
+			</data>
 			<key>hash2</key>
 			<data>
 			M6mqCARyXmC0NLMEPW/O4dMWUwppLPTADhkh4iQXY64=
@@ -441,6 +553,10 @@
 		</dict>
 		<key>Headers/GMacroProtocolSDK.swift</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			+j8zPfISV2Q+SHS2s74XkW9KhmA=
+			</data>
 			<key>hash2</key>
 			<data>
 			DPYzSHGIP0X4pKEZCiyJhEOBYsc/+HP3mLWtOAz5OkA=
@@ -448,6 +564,10 @@
 		</dict>
 		<key>Headers/GPDConstant.swift</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			5mKR0YJYYAxgQ4xsTXOu4WmTNy0=
+			</data>
 			<key>hash2</key>
 			<data>
 			F0TJZKuqNa0nD3IHtCysw6ZWR5EadMWHpOsVAN31dhw=
@@ -455,6 +575,10 @@
 		</dict>
 		<key>Headers/GamepadKey+Constant.swift</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			YZ8UTq5Zlb6ZnSgA/TJfpCiUstg=
+			</data>
 			<key>hash2</key>
 			<data>
 			hmmYjlP47qU3uH+whPXS3nnSTXdGzgYLCGZvgyIXGYM=
@@ -462,6 +586,10 @@
 		</dict>
 		<key>Headers/GamepadKey.swift</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			3QNMv5E9zjZTifg1Qw0hTVy4XwU=
+			</data>
 			<key>hash2</key>
 			<data>
 			8Iwobv6QVdJJkWkGjz35LD8xT2IXSsNOJauYWAy1Bp4=
@@ -469,6 +597,10 @@
 		</dict>
 		<key>Headers/KeyMapping.swift</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			mQlU4pxf9NyiBLrZZJjIRbARMzg=
+			</data>
 			<key>hash2</key>
 			<data>
 			ojR6IvCpjnnqkZXr3y6KIweUGe6PuTRChMFB5Mv9/AU=
@@ -476,6 +608,10 @@
 		</dict>
 		<key>Headers/KeyTurbo.swift</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			fm+sTIJTNDxPDqSodNJ1tPK5VtE=
+			</data>
 			<key>hash2</key>
 			<data>
 			634BAesq2nwB27h3eTa+0q6Wsgp+zTRgbpTZfGMl45k=
@@ -483,6 +619,10 @@
 		</dict>
 		<key>Headers/KeyboardKey.swift</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			ke55pzKxKZZtHQBi43Lv0jsgiYE=
+			</data>
 			<key>hash2</key>
 			<data>
 			1UNr6Q98E4IR0k+q5yZ664pNfIf9nyxI3f4Hx+t/yts=
@@ -490,6 +630,10 @@
 		</dict>
 		<key>Headers/LightMode.swift</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			3OJGlhXoVzzHbJfU1QHB5cgYFJQ=
+			</data>
 			<key>hash2</key>
 			<data>
 			3ZIwmAo/2a4I06FqD2gP1ulCqjskUjCyIt7/4y+VsKU=
@@ -497,6 +641,10 @@
 		</dict>
 		<key>Headers/LightPosition.swift</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			R697y991ZMMH0W2R/Y+cVRwQi3I=
+			</data>
 			<key>hash2</key>
 			<data>
 			n4v2BVI6UtrfcLFQWPAeO5EhiYognd1PuhWYO7ORhZg=
@@ -504,6 +652,10 @@
 		</dict>
 		<key>Headers/LinearInfo.swift</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			3KfF9Erv2ag9E5KxIqfdBtrLWn8=
+			</data>
 			<key>hash2</key>
 			<data>
 			AHRatuSQnWHXcD76vK74Q3rPrjITxyivnbmvY5gbQl4=
@@ -511,6 +663,10 @@
 		</dict>
 		<key>Headers/MacroKey.swift</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			82bP44v1kYBND3b01pZLvUHTAdw=
+			</data>
 			<key>hash2</key>
 			<data>
 			iVXDWUtmY9vRi/TzgYt7/eRi+D8az3ZuewMlfBqRdAI=
@@ -518,6 +674,10 @@
 		</dict>
 		<key>Headers/MediaKey.swift</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			Jw+dn77A/hrup+K9WNhmUjYyNPs=
+			</data>
 			<key>hash2</key>
 			<data>
 			8mEZcpgcLKyuDoU1OIaYaiue67GHkQePO8IHMYcs/Gk=
@@ -525,6 +685,10 @@
 		</dict>
 		<key>Headers/ModifierKey.swift</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			4BYKHlYRl3pGR4WOiDLSGKNu/0E=
+			</data>
 			<key>hash2</key>
 			<data>
 			2FWA8rTcy8UCGjGAxVBktj4b0XukBn8vXLquVLkloSM=
@@ -532,6 +696,10 @@
 		</dict>
 		<key>Headers/MotionInfo.swift</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			WbTQPt0EtesVOA2QUMly4T2yGrg=
+			</data>
 			<key>hash2</key>
 			<data>
 			29scpsnp5qO3VNjjHC7yjbhbxl5jQupfickLFTlwNWo=
@@ -539,6 +707,10 @@
 		</dict>
 		<key>Headers/MouseKey.swift</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			7uWGvWzI1+dYgSac+dVxhVRFajc=
+			</data>
 			<key>hash2</key>
 			<data>
 			4KoQzijjB0s3B/HsZl1tZJgoxHx3BCNVfrlnfNqKycg=
@@ -546,6 +718,10 @@
 		</dict>
 		<key>Headers/Print.swift</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			XAVH2bqN2tHu0wjmgLVHZQ5K4sc=
+			</data>
 			<key>hash2</key>
 			<data>
 			OrTJg4g1MaQyjKfRwETy6T+KYwUxUoRdPvu/gkdJrdg=
@@ -553,6 +729,10 @@
 		</dict>
 		<key>Headers/SubIDs.swift</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			h/Is+MVI65DK/h7b4zZoYtznzx4=
+			</data>
 			<key>hash2</key>
 			<data>
 			ObQiKGYs8p84Ll7Oxp0nbCwppEOqTFVSham+DVR0OwI=
@@ -560,6 +740,10 @@
 		</dict>
 		<key>Headers/SupportEnums.swift</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			w97/1hhaeNCoOk5lTPeWYiKoaGw=
+			</data>
 			<key>hash2</key>
 			<data>
 			HpEbywSCeeTNqZT1iX2yNbA35ZkJJW7uVYUB6GO2FMU=
@@ -567,6 +751,10 @@
 		</dict>
 		<key>Headers/ThreeDInfo.swift</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			dYRlkZuMfL8dtojbBPTWb52WTuI=
+			</data>
 			<key>hash2</key>
 			<data>
 			5J22HZpnENYm7iQD3hjcd5rOrm5UvPODtCjt8CG+YgM=
@@ -574,6 +762,10 @@
 		</dict>
 		<key>Headers/TurboMode.swift</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			TNWG6Vn4GoOQnBz4mcXICxcNdLQ=
+			</data>
 			<key>hash2</key>
 			<data>
 			x0S5fC3xm8LOfwtjg3Wv8n/zytttmLvp0lP5OQrdwqQ=
@@ -581,72 +773,112 @@
 		</dict>
 		<key>Modules/GMacroProtocolSDK.swiftmodule/arm64-apple-ios-simulator.abi.json</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			tYJVZFBJjSbuhwXThX8h1fmFphM=
+			</data>
 			<key>hash2</key>
 			<data>
-			+/33EKeX+eWkxmxuLwKEpbJfRLaYmEJKZVGq8C+PWEc=
+			WqWFpuVJCD1r9KdcFBkuqKot+7mh5EFFQXBWJ0L8P+I=
 			</data>
 		</dict>
 		<key>Modules/GMacroProtocolSDK.swiftmodule/arm64-apple-ios-simulator.private.swiftinterface</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			BTl8I6Tnp7O6yaaIe8lE/GAbzc8=
+			</data>
 			<key>hash2</key>
 			<data>
-			Q7vWHqOnZFic8iIW8qUYobMBmdahDGhJo3b2RDXLgv8=
+			bGxZSty7o11Ki5jhVYT861ddcPLln5lBrkT3ojgg3Jo=
 			</data>
 		</dict>
 		<key>Modules/GMacroProtocolSDK.swiftmodule/arm64-apple-ios-simulator.swiftdoc</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			zdpf/HZgtQVJ4TLRuDcmgaWxfSE=
+			</data>
 			<key>hash2</key>
 			<data>
-			eIcWtIXt8xistepRZSeNylGU3fFXZMs3TLJ3hVUDTEg=
+			Rn2NvUbAUbtoexUlkwPkJWXkOvmqCClwLA9bYurHfIE=
 			</data>
 		</dict>
 		<key>Modules/GMacroProtocolSDK.swiftmodule/arm64-apple-ios-simulator.swiftinterface</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			BTl8I6Tnp7O6yaaIe8lE/GAbzc8=
+			</data>
 			<key>hash2</key>
 			<data>
-			Q7vWHqOnZFic8iIW8qUYobMBmdahDGhJo3b2RDXLgv8=
+			bGxZSty7o11Ki5jhVYT861ddcPLln5lBrkT3ojgg3Jo=
 			</data>
 		</dict>
 		<key>Modules/GMacroProtocolSDK.swiftmodule/arm64-apple-ios-simulator.swiftmodule</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			MRVMs38Df5TAH2+T3LjEI2tdpQs=
+			</data>
 			<key>hash2</key>
 			<data>
-			XqSX5VVEpKAWk45VVflCctMGomSVrUeDbOmFr72JC50=
+			BmIiE9Htwg4XEAcxHNZ1wleuRWVeg6ayPRiCVTC+1u4=
 			</data>
 		</dict>
 		<key>Modules/GMacroProtocolSDK.swiftmodule/x86_64-apple-ios-simulator.abi.json</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			tYJVZFBJjSbuhwXThX8h1fmFphM=
+			</data>
 			<key>hash2</key>
 			<data>
-			+/33EKeX+eWkxmxuLwKEpbJfRLaYmEJKZVGq8C+PWEc=
+			WqWFpuVJCD1r9KdcFBkuqKot+7mh5EFFQXBWJ0L8P+I=
 			</data>
 		</dict>
 		<key>Modules/GMacroProtocolSDK.swiftmodule/x86_64-apple-ios-simulator.private.swiftinterface</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			k2xUBAUUmYbvHiuYixjiWqaqy74=
+			</data>
 			<key>hash2</key>
 			<data>
-			7B+aDaG2ViDTy8GQ1EcTwTz802PcWYyNGDZlbvbAKJs=
+			IQQk7DUn+QHEsJiJjGDYdfyr3cbJr8WruOgqlqy/EXk=
 			</data>
 		</dict>
 		<key>Modules/GMacroProtocolSDK.swiftmodule/x86_64-apple-ios-simulator.swiftdoc</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			+LFRnN57R0xC8xbc0giMDfs6kg4=
+			</data>
 			<key>hash2</key>
 			<data>
-			ZStdydvxzykBdD1GISqTLkYyrNb5vIq/gp1tUUo2t2E=
+			ziMY5kG02MgYcqMTC+XY9w7remju9Fhv6GgfPi9KKKc=
 			</data>
 		</dict>
 		<key>Modules/GMacroProtocolSDK.swiftmodule/x86_64-apple-ios-simulator.swiftinterface</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			k2xUBAUUmYbvHiuYixjiWqaqy74=
+			</data>
 			<key>hash2</key>
 			<data>
-			7B+aDaG2ViDTy8GQ1EcTwTz802PcWYyNGDZlbvbAKJs=
+			IQQk7DUn+QHEsJiJjGDYdfyr3cbJr8WruOgqlqy/EXk=
 			</data>
 		</dict>
 		<key>Modules/GMacroProtocolSDK.swiftmodule/x86_64-apple-ios-simulator.swiftmodule</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			V+q0ediWQWXjNEfd0Vq0nMk+PN8=
+			</data>
 			<key>hash2</key>
 			<data>
-			7LfVKrhQ/MgyyQ/hgiJB27iqgHOyqi3862fZ8gcNNPs=
+			UPexQOYPj0MU4Y0Ai++dplllgPomLoMGzWUVY5UNiHk=
 			</data>
 		</dict>
 	</dict>
