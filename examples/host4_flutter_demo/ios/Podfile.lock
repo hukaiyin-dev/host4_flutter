@@ -130,6 +130,8 @@ PODS:
   - GoogleUtilities/UserDefaults (8.1.0):
     - GoogleUtilities/Logger
     - GoogleUtilities/Privacy
+  - host4_flutter_aivoice (0.0.1):
+    - Flutter
   - host4_flutter_bridge (0.0.1):
     - Flutter
   - host4_flutter_device_native (0.0.1):
@@ -155,13 +157,14 @@ DEPENDENCIES:
   - firebase_analytics (from `.symlinks/plugins/firebase_analytics/ios`)
   - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
   - Flutter (from `Flutter`)
+  - host4_flutter_aivoice (from `.symlinks/plugins/host4_flutter_aivoice/ios`)
   - host4_flutter_bridge (from `.symlinks/plugins/host4_flutter_bridge/ios`)
   - host4_flutter_device_native (from `.symlinks/plugins/host4_flutter_device_native/ios`)
   - share_plus (from `.symlinks/plugins/share_plus/ios`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
 
 SPEC REPOS:
-  trunk:
+  https://github.com/CocoaPods/Specs.git:
     - DKImagePickerController
     - DKPhotoGallery
     - Firebase
@@ -186,6 +189,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/firebase_core/ios"
   Flutter:
     :path: Flutter
+  host4_flutter_aivoice:
+    :path: ".symlinks/plugins/host4_flutter_aivoice/ios"
   host4_flutter_bridge:
     :path: ".symlinks/plugins/host4_flutter_bridge/ios"
   host4_flutter_device_native:
@@ -210,6 +215,7 @@ SPEC CHECKSUMS:
   GoogleAdsOnDeviceConversion: 2be6297a4f048459e0ae17fad9bfd2844e10cf64
   GoogleAppMeasurement: 700dce7541804bec33db590a5c496b663fbe2539
   GoogleUtilities: 00c88b9a86066ef77f0da2fab05f65d7768ed8e1
+  host4_flutter_aivoice: 9354f89b3561d8dc10d3eed4c982532620100985
   host4_flutter_bridge: 3dba61b80f9d9dea557bfcd623dd9c12eba92f14
   host4_flutter_device_native: 1a071b56557b2b63601ac11fd133cc6810e4a33f
   nanopb: fad817b59e0457d11a5dfbde799381cd727c1275
@@ -219,6 +225,6 @@ SPEC CHECKSUMS:
   shared_preferences_foundation: 7036424c3d8ec98dfe75ff1667cb0cd531ec82bb
   SwiftyGif: 706c60cf65fa2bc5ee0313beece843c8eb8194d4
 
-PODFILE CHECKSUM: 1fb6450ff08be75c8a49e285ec46320e7eb5d6fb
+PODFILE CHECKSUM: cda2c881d8443f32b78ec4c3a7d6c2cbae958a5a
 
 COCOAPODS: 1.16.2
