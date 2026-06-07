@@ -18,7 +18,9 @@ final _log = Host4Logger('App');
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await configureLogger();
-  await configureAppAnalytics();
+  // Firebase initialization is async and can take several seconds on device.
+  // Start it in the background so runApp is not blocked.
+  unawaited(configureAppAnalytics());
   _log.info('App starting');
   unawaited(
     appAnalytics.track(
