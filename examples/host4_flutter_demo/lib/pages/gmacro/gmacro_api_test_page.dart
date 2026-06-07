@@ -305,6 +305,16 @@ class _GmacroApiTestPageState extends State<GmacroApiTestPage> {
           return map == null ? payload : MacroTimeRangePayload.fromMap(map);
 
         case 'queryCurrentMacro':
+          // iOS 返回格式: {"macros": [{value, cycle, intervalTime, comKeys}, ...]}
+          final raw = _mapOf(payload);
+          final macrosList = raw?['macros'] as List?;
+          if (macrosList != null) {
+            return macrosList
+                .cast<Map<dynamic, dynamic>>()
+                .map(MacroKeyPayload.fromMap)
+                .toList();
+          }
+          // Android 兼容格式
           final map = _mapOf(payload);
           if (map != null &&
               map.containsKey('value') &&

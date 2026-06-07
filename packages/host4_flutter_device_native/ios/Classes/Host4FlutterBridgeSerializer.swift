@@ -156,6 +156,15 @@ enum Host4FlutterBridgeSerializer {
         ]
       }
 
+    case let macroComkeys as [MacroComkey]:
+      return macroComkeys.map {
+        [
+          "keys": $0.keys.map { $0.rawValue },
+          "keepTime": $0.keepTime,
+          "intervalTime": $0.intervalTime,
+        ]
+      }
+
     case let macroKey as MacroKeyBridge:
       return [
         "value": macroKey.value?.intValue as Any,
@@ -163,6 +172,16 @@ enum Host4FlutterBridgeSerializer {
         "intervalTime": macroKey.intervalTime,
         "comKeys": serializableValue(macroKey.comKeys as Any),
       ]
+
+    case let macroKeys as [MacroKey]:
+      return macroKeys.map {
+        [
+          "value": $0.value.rawValue,
+          "cycle": Int($0.cycle.rawValue),
+          "intervalTime": $0.intervalTime,
+          "comKeys": serializableValue($0.comKeys),
+        ]
+      }
 
     case let position as LightPosition:
       return Int(position.rawValue)

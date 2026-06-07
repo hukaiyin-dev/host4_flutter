@@ -26,6 +26,7 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
+import java.util.Collections.emptyList
 import java.util.Collections.emptyMap
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
@@ -100,6 +101,7 @@ class Host4FlutterDeviceNativePlugin :
                 result.success(null)
             }
             "connectBle" -> handleConnectBle(call, result)
+            "connectSystemConnectedBle" -> handleConnectSystemConnectedBle(call, result)
             "connectUsb" -> handleConnectUsb(call, result)
             "reconnectUsb" -> handleReconnectUsb(result)
             "releaseUsb" -> handleReleaseUsb(result)
@@ -209,7 +211,49 @@ class Host4FlutterDeviceNativePlugin :
             return
         }
 
-        val mac = BleMacUtils.normalizeMac(deviceId)
+        startBleTransportSession(BleMacUtils.normalizeMac(deviceId), result)
+    }
+
+    private fun handleConnectSystemConnectedBle(call: MethodCall, result: Result) {
+        val arguments = call.arguments as? Map<*, *>
+        val serviceIds = (arguments?.get("serviceIds") as? List<*>)?.mapNotNull { it as? String }
+            ?: emptyList()
+        val deviceNames = (arguments?.get("deviceNames") as? List<*>)?.mapNotNull { it as? String }
+            ?: emptyList()
+
+        if (serviceIds.isEmpty()) {
+            result.error("invalid-arguments", "serviceIds is required.", null)
+            return
+        }
+
+        if (!BlePermissionHelper.hasAllPermissions(applicationContext)) {
+            result.error(
+                "ble-permission-denied",
+                "System-connected BLE requires Bluetooth permissions on Android.",
+                null,
+            )
+            return
+        }
+
+        val mac = SystemConnectedBleResolver.resolveMac(
+            context = applicationContext,
+            platformSdk = platformSdk,
+            deviceNames = deviceNames,
+        )
+        if (mac.isNullOrEmpty()) {
+            result.error(
+                "ble-connect-failed",
+                "No system-connected or bonded BLE device matched " +
+                    "deviceNames=$deviceNames serviceIds=$serviceIds.",
+                null,
+            )
+            return
+        }
+
+        startBleTransportSession(mac, result)
+    }
+
+    private fun startBleTransportSession(mac: String, result: Result) {
         val sessionId = UUID.randomUUID().toString()
         val eventHandler = QueuedEventStreamHandler()
         val eventChannel = EventChannel(

@@ -9,6 +9,7 @@ import 'logs_page.dart';
 import 'tester_page.dart';
 import 'theme_playground_page.dart';
 import 'usb_drive_page.dart';
+import 'aivoice_test_page.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({required this.onResetToDefaults, super.key});
@@ -70,6 +71,18 @@ class HomePage extends StatelessWidget {
           title: l10n.usbDrivePageTitle,
           subtitle: l10n.usbDrivePageSubtitle,
           child: const UsbDrivePage(),
+        ),
+      ),
+      _LabEntry(
+        title: 'AI Voice',
+        subtitle: '火山引擎 RTC 语音对话测试',
+        icon: Icons.record_voice_over_outlined,
+        color: Colors.deepPurple,
+        minHeight: 210,
+        builder: (_) => SubPageScaffold(
+          title: 'AI Voice',
+          subtitle: '火山引擎 RTC 语音对话',
+          child: AiVoiceTestPage(),
         ),
       ),
       _LabEntry(
