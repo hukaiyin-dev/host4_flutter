@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:host4_flutter_utils/host4_flutter_utils.dart';
 
@@ -14,27 +14,33 @@ class Host4ThemeLoader {
     String assetPath, {
     String? mode,
   }) async {
-    final jsonString = await bundle.loadString(assetPath);
-    final decoded = json.decode(jsonString);
-    if (decoded is! Map<String, dynamic>) {
-      throw const FormatException('Theme tokens root must be a JSON object.');
+    // AssetBundle is not isolate-safe; load raw strings on the main thread.
+    final tokensJson = await bundle.loadString(assetPath);
+    final assetJson = await _loadAssetFileString(bundle, assetPath);
+    final manifestJson = await _loadManifestString(bundle, assetPath);
+
+    // Decode, normalize and resolve token references in a background isolate
+    // so the main thread (and Flutter's frame scheduler) stays unblocked.
+    _ThemeParseOutput result;
+    final _ThemeParseInput input = (
+      tokensJson: tokensJson,
+      assetJson: assetJson,
+      manifestJson: manifestJson,
+      mode: mode,
+    );
+    try {
+      result = await compute<_ThemeParseInput, _ThemeParseOutput>(
+        _parseThemeInBackground,
+        input,
+      );
+    } catch (e, stack) {
+      debugPrint('[Host4ThemeLoader] compute() failed ($e), falling back to main-thread parse.\n$stack');
+      result = _parseThemeInBackground(input);
     }
 
-    // Load asset.json if present and merge into tokens under the 'asset' namespace.
-    // Falls back gracefully when asset.json is absent (e.g. legacy bundles).
-    final assetFileData = await _loadAssetFile(bundle, assetPath);
-    if (assetFileData is Map<String, dynamic>) {
-      decoded['asset'] = assetFileData;
-    }
-
-    final manifest = await _loadManifest(bundle, assetPath);
-    if (manifest is! Map<String, dynamic>) {
-      throw const FormatException('Theme manifest root must be a JSON object.');
-    }
-
-    final selectedMode = _resolveSelectedMode(manifest, mode);
-    final normalized = _normalizeTheme(decoded, manifest, selectedMode);
-    final resolved = Host4ReferenceResolver(normalized).resolveMap(normalized);
+    final resolved = result.resolved;
+    final sourceTokens = result.sourceTokens;
+    final selectedMode = result.selectedMode;
     final assetDirectory = assetPath.substring(
       0,
       assetPath.lastIndexOf('/') + 1,
@@ -149,7 +155,7 @@ class Host4ThemeLoader {
         ),
         tabItems: _readTabItemImages(
           resolved,
-          decoded,
+          sourceTokens,
           assetDirectory,
           selectedMode,
         ),
@@ -562,10 +568,182 @@ class Host4ThemeLoader {
           ),
           items: _readTabItemImages(
             resolved,
-            decoded,
+            sourceTokens,
             assetDirectory,
             selectedMode,
           ),
+        ),
+        tag: Host4TagComponentTokens(
+          radius: _readDouble(resolved, 'component.tag.radius'),
+          paddingHorizontal: _readDouble(
+            resolved,
+            'component.tag.padding-horizontal',
+          ),
+          paddingVertical: _readDouble(
+            resolved,
+            'component.tag.padding-vertical',
+          ),
+          iconSize: _readDouble(resolved, 'component.tag.icon-size'),
+          iconGap: _readDouble(resolved, 'component.tag.icon-gap'),
+          labelStyle: _readTextToken(resolved, 'component.tag.label-style'),
+          defaultState: _readTagState(resolved, 'component.tag.state.default'),
+          selectedState: _readTagState(
+            resolved,
+            'component.tag.state.selected',
+          ),
+          disabledState: _readTagState(
+            resolved,
+            'component.tag.state.disabled',
+          ),
+        ),
+        emptyState: Host4EmptyStateComponentTokens(
+          iconSize: _readDouble(resolved, 'component.empty-state.icon-size'),
+          iconGap: _readDouble(resolved, 'component.empty-state.icon-gap'),
+          textGap: _readDouble(resolved, 'component.empty-state.text-gap'),
+          actionGap: _readDouble(resolved, 'component.empty-state.action-gap'),
+          iconColor: _readColor(resolved, 'component.empty-state.icon-color'),
+          titleStyle: _readTextToken(
+            resolved,
+            'component.empty-state.title-style',
+          ),
+          titleColor: _readColor(
+            resolved,
+            'component.empty-state.title-color',
+          ),
+          subtitleStyle: _readTextToken(
+            resolved,
+            'component.empty-state.subtitle-style',
+          ),
+          subtitleColor: _readColor(
+            resolved,
+            'component.empty-state.subtitle-color',
+          ),
+        ),
+        banner: Host4BannerComponentTokens(
+          paddingHorizontal: _readDouble(
+            resolved,
+            'component.banner.padding-horizontal',
+          ),
+          paddingVertical: _readDouble(
+            resolved,
+            'component.banner.padding-vertical',
+          ),
+          radius: _readDouble(resolved, 'component.banner.radius'),
+          iconSize: _readDouble(resolved, 'component.banner.icon-size'),
+          iconGap: _readDouble(resolved, 'component.banner.icon-gap'),
+          titleBodyGap: _readDouble(resolved, 'component.banner.title-body-gap'),
+          titleStyle: _readTextToken(resolved, 'component.banner.title-style'),
+          bodyStyle: _readTextToken(resolved, 'component.banner.body-style'),
+          info: _readBannerVariant(resolved, 'component.banner.variant.info'),
+          success: _readBannerVariant(
+            resolved,
+            'component.banner.variant.success',
+          ),
+          warning: _readBannerVariant(
+            resolved,
+            'component.banner.variant.warning',
+          ),
+          error: _readBannerVariant(
+            resolved,
+            'component.banner.variant.error',
+          ),
+        ),
+        progressBar: Host4ProgressBarComponentTokens(
+          height: _readDouble(resolved, 'component.progress-bar.height'),
+          radius: _readDouble(resolved, 'component.progress-bar.radius'),
+          track: _readColor(resolved, 'component.progress-bar.track'),
+          fill: _readColor(resolved, 'component.progress-bar.fill'),
+          fillSuccess: _readColor(
+            resolved,
+            'component.progress-bar.fill-success',
+          ),
+          fillWarning: _readColor(
+            resolved,
+            'component.progress-bar.fill-warning',
+          ),
+          fillError: _readColor(resolved, 'component.progress-bar.fill-error'),
+        ),
+        segmentedFilter: Host4SegmentedFilterComponentTokens(
+          paddingHorizontal: _readDouble(
+            resolved,
+            'component.segmented-filter.padding-horizontal',
+          ),
+          paddingVertical: _readDouble(
+            resolved,
+            'component.segmented-filter.padding-vertical',
+          ),
+          radius: _readDouble(resolved, 'component.segmented-filter.radius'),
+          containerRadius: _readDouble(
+            resolved,
+            'component.segmented-filter.container-radius',
+          ),
+          gap: _readDouble(resolved, 'component.segmented-filter.gap'),
+          iconSize: _readDouble(
+            resolved,
+            'component.segmented-filter.icon-size',
+          ),
+          iconGap: _readDouble(
+            resolved,
+            'component.segmented-filter.icon-gap',
+          ),
+          labelStyle: _readTextToken(
+            resolved,
+            'component.segmented-filter.label-style',
+          ),
+          containerBackground: _readColor(
+            resolved,
+            'component.segmented-filter.container.background',
+          ),
+          containerBorder: _readColor(
+            resolved,
+            'component.segmented-filter.container.border',
+          ),
+          defaultState: _readSegmentedFilterItemState(
+            resolved,
+            'component.segmented-filter.item.state.default',
+          ),
+          selectedState: _readSegmentedFilterItemState(
+            resolved,
+            'component.segmented-filter.item.state.selected',
+          ),
+          disabledState: _readSegmentedFilterItemState(
+            resolved,
+            'component.segmented-filter.item.state.disabled',
+          ),
+        ),
+        infoChip: Host4InfoChipComponentTokens(
+          paddingHorizontal: _readDouble(
+            resolved,
+            'component.info-chip.padding-horizontal',
+          ),
+          paddingVertical: _readDouble(
+            resolved,
+            'component.info-chip.padding-vertical',
+          ),
+          radius: _readDouble(resolved, 'component.info-chip.radius'),
+          iconSize: _readDouble(resolved, 'component.info-chip.icon-size'),
+          iconGap: _readDouble(resolved, 'component.info-chip.icon-gap'),
+          labelStyle: _readTextToken(
+            resolved,
+            'component.info-chip.label-style',
+          ),
+          background: _readColor(resolved, 'component.info-chip.background'),
+          foreground: _readColor(resolved, 'component.info-chip.foreground'),
+          border: _readColor(resolved, 'component.info-chip.border'),
+          iconColor: _readColor(resolved, 'component.info-chip.icon-color'),
+        ),
+        toolbar: Host4ToolbarComponentTokens(
+          paddingHorizontal: _readDouble(
+            resolved,
+            'component.toolbar.padding-horizontal',
+          ),
+          paddingVertical: _readDouble(
+            resolved,
+            'component.toolbar.padding-vertical',
+          ),
+          gap: _readDouble(resolved, 'component.toolbar.gap'),
+          background: _readColor(resolved, 'component.toolbar.background'),
+          borderBottom: _readColor(resolved, 'component.toolbar.border-bottom'),
         ),
       ),
     );
@@ -1101,6 +1279,178 @@ class Host4ThemeLoader {
           ),
           items: fallbackImages?.tabItems ?? const [],
         ),
+        tag: Host4TagComponentTokens(
+          radius: _readDouble(resolved, 'component.tag.radius'),
+          paddingHorizontal: _readDouble(
+            resolved,
+            'component.tag.padding-horizontal',
+          ),
+          paddingVertical: _readDouble(
+            resolved,
+            'component.tag.padding-vertical',
+          ),
+          iconSize: _readDouble(resolved, 'component.tag.icon-size'),
+          iconGap: _readDouble(resolved, 'component.tag.icon-gap'),
+          labelStyle: _readTextToken(resolved, 'component.tag.label-style'),
+          defaultState: _readTagState(resolved, 'component.tag.state.default'),
+          selectedState: _readTagState(
+            resolved,
+            'component.tag.state.selected',
+          ),
+          disabledState: _readTagState(
+            resolved,
+            'component.tag.state.disabled',
+          ),
+        ),
+        emptyState: Host4EmptyStateComponentTokens(
+          iconSize: _readDouble(resolved, 'component.empty-state.icon-size'),
+          iconGap: _readDouble(resolved, 'component.empty-state.icon-gap'),
+          textGap: _readDouble(resolved, 'component.empty-state.text-gap'),
+          actionGap: _readDouble(resolved, 'component.empty-state.action-gap'),
+          iconColor: _readColor(resolved, 'component.empty-state.icon-color'),
+          titleStyle: _readTextToken(
+            resolved,
+            'component.empty-state.title-style',
+          ),
+          titleColor: _readColor(
+            resolved,
+            'component.empty-state.title-color',
+          ),
+          subtitleStyle: _readTextToken(
+            resolved,
+            'component.empty-state.subtitle-style',
+          ),
+          subtitleColor: _readColor(
+            resolved,
+            'component.empty-state.subtitle-color',
+          ),
+        ),
+        banner: Host4BannerComponentTokens(
+          paddingHorizontal: _readDouble(
+            resolved,
+            'component.banner.padding-horizontal',
+          ),
+          paddingVertical: _readDouble(
+            resolved,
+            'component.banner.padding-vertical',
+          ),
+          radius: _readDouble(resolved, 'component.banner.radius'),
+          iconSize: _readDouble(resolved, 'component.banner.icon-size'),
+          iconGap: _readDouble(resolved, 'component.banner.icon-gap'),
+          titleBodyGap: _readDouble(resolved, 'component.banner.title-body-gap'),
+          titleStyle: _readTextToken(resolved, 'component.banner.title-style'),
+          bodyStyle: _readTextToken(resolved, 'component.banner.body-style'),
+          info: _readBannerVariant(resolved, 'component.banner.variant.info'),
+          success: _readBannerVariant(
+            resolved,
+            'component.banner.variant.success',
+          ),
+          warning: _readBannerVariant(
+            resolved,
+            'component.banner.variant.warning',
+          ),
+          error: _readBannerVariant(
+            resolved,
+            'component.banner.variant.error',
+          ),
+        ),
+        progressBar: Host4ProgressBarComponentTokens(
+          height: _readDouble(resolved, 'component.progress-bar.height'),
+          radius: _readDouble(resolved, 'component.progress-bar.radius'),
+          track: _readColor(resolved, 'component.progress-bar.track'),
+          fill: _readColor(resolved, 'component.progress-bar.fill'),
+          fillSuccess: _readColor(
+            resolved,
+            'component.progress-bar.fill-success',
+          ),
+          fillWarning: _readColor(
+            resolved,
+            'component.progress-bar.fill-warning',
+          ),
+          fillError: _readColor(resolved, 'component.progress-bar.fill-error'),
+        ),
+        segmentedFilter: Host4SegmentedFilterComponentTokens(
+          paddingHorizontal: _readDouble(
+            resolved,
+            'component.segmented-filter.padding-horizontal',
+          ),
+          paddingVertical: _readDouble(
+            resolved,
+            'component.segmented-filter.padding-vertical',
+          ),
+          radius: _readDouble(resolved, 'component.segmented-filter.radius'),
+          containerRadius: _readDouble(
+            resolved,
+            'component.segmented-filter.container-radius',
+          ),
+          gap: _readDouble(resolved, 'component.segmented-filter.gap'),
+          iconSize: _readDouble(
+            resolved,
+            'component.segmented-filter.icon-size',
+          ),
+          iconGap: _readDouble(
+            resolved,
+            'component.segmented-filter.icon-gap',
+          ),
+          labelStyle: _readTextToken(
+            resolved,
+            'component.segmented-filter.label-style',
+          ),
+          containerBackground: _readColor(
+            resolved,
+            'component.segmented-filter.container.background',
+          ),
+          containerBorder: _readColor(
+            resolved,
+            'component.segmented-filter.container.border',
+          ),
+          defaultState: _readSegmentedFilterItemState(
+            resolved,
+            'component.segmented-filter.item.state.default',
+          ),
+          selectedState: _readSegmentedFilterItemState(
+            resolved,
+            'component.segmented-filter.item.state.selected',
+          ),
+          disabledState: _readSegmentedFilterItemState(
+            resolved,
+            'component.segmented-filter.item.state.disabled',
+          ),
+        ),
+        infoChip: Host4InfoChipComponentTokens(
+          paddingHorizontal: _readDouble(
+            resolved,
+            'component.info-chip.padding-horizontal',
+          ),
+          paddingVertical: _readDouble(
+            resolved,
+            'component.info-chip.padding-vertical',
+          ),
+          radius: _readDouble(resolved, 'component.info-chip.radius'),
+          iconSize: _readDouble(resolved, 'component.info-chip.icon-size'),
+          iconGap: _readDouble(resolved, 'component.info-chip.icon-gap'),
+          labelStyle: _readTextToken(
+            resolved,
+            'component.info-chip.label-style',
+          ),
+          background: _readColor(resolved, 'component.info-chip.background'),
+          foreground: _readColor(resolved, 'component.info-chip.foreground'),
+          border: _readColor(resolved, 'component.info-chip.border'),
+          iconColor: _readColor(resolved, 'component.info-chip.icon-color'),
+        ),
+        toolbar: Host4ToolbarComponentTokens(
+          paddingHorizontal: _readDouble(
+            resolved,
+            'component.toolbar.padding-horizontal',
+          ),
+          paddingVertical: _readDouble(
+            resolved,
+            'component.toolbar.padding-vertical',
+          ),
+          gap: _readDouble(resolved, 'component.toolbar.gap'),
+          background: _readColor(resolved, 'component.toolbar.background'),
+          borderBottom: _readColor(resolved, 'component.toolbar.border-bottom'),
+        ),
       ),
     );
   }
@@ -1233,6 +1583,41 @@ class Host4ThemeLoader {
     );
   }
 
+  static Host4TagStateTokens _readTagState(
+    Map<String, dynamic> json,
+    String path,
+  ) {
+    return Host4TagStateTokens(
+      background: _readColor(json, '$path.background'),
+      foreground: _readColor(json, '$path.foreground'),
+      border: _readColor(json, '$path.border'),
+      icon: _readColor(json, '$path.icon'),
+    );
+  }
+
+  static Host4BannerVariantTokens _readBannerVariant(
+    Map<String, dynamic> json,
+    String path,
+  ) {
+    return Host4BannerVariantTokens(
+      background: _readColor(json, '$path.background'),
+      foreground: _readColor(json, '$path.foreground'),
+      border: _readColor(json, '$path.border'),
+      icon: _readColor(json, '$path.icon'),
+    );
+  }
+
+  static Host4SegmentedFilterItemStateTokens _readSegmentedFilterItemState(
+    Map<String, dynamic> json,
+    String path,
+  ) {
+    return Host4SegmentedFilterItemStateTokens(
+      background: _readColor(json, '$path.background'),
+      foreground: _readColor(json, '$path.foreground'),
+      border: _readColor(json, '$path.border'),
+    );
+  }
+
   static Host4TextToken _readTextToken(Map<String, dynamic> json, String path) {
     return Host4TextToken(
       fontSize: _readDouble(json, '$path.font-size'),
@@ -1249,7 +1634,7 @@ class Host4ThemeLoader {
     return '$directory$assetPath';
   }
 
-  static Future<dynamic> _loadManifest(
+  static Future<String> _loadManifestString(
     AssetBundle bundle,
     String assetPath,
   ) async {
@@ -1257,11 +1642,10 @@ class Host4ThemeLoader {
       RegExp(r'tokens\.json$'),
       'manifest.json',
     );
-    final manifestString = await bundle.loadString(manifestPath);
-    return json.decode(manifestString);
+    return bundle.loadString(manifestPath);
   }
 
-  static Future<dynamic> _loadAssetFile(
+  static Future<String?> _loadAssetFileString(
     AssetBundle bundle,
     String assetPath,
   ) async {
@@ -1270,13 +1654,57 @@ class Host4ThemeLoader {
       'asset.json',
     );
     try {
-      final jsonString = await bundle.loadString(filePath);
-      return json.decode(jsonString);
+      return await bundle.loadString(filePath);
     } catch (_) {
       return null;
     }
   }
 }
+
+// ---------------------------------------------------------------------------
+// Background isolate helpers for compute()
+// ---------------------------------------------------------------------------
+
+typedef _ThemeParseInput = ({
+  String tokensJson,
+  String? assetJson,
+  String manifestJson,
+  String? mode,
+});
+
+typedef _ThemeParseOutput = ({
+  Map<String, dynamic> resolved,
+  Map<String, dynamic> sourceTokens,
+  String selectedMode,
+});
+
+/// Runs in a background isolate via [compute].
+/// Decodes JSON, normalises the theme tree, and resolves all token references.
+_ThemeParseOutput _parseThemeInBackground(_ThemeParseInput input) {
+  final decoded = json.decode(input.tokensJson);
+  if (decoded is! Map<String, dynamic>) {
+    throw const FormatException('Theme tokens root must be a JSON object.');
+  }
+
+  if (input.assetJson != null) {
+    final assetDecoded = json.decode(input.assetJson!);
+    if (assetDecoded is Map<String, dynamic>) {
+      decoded['asset'] = assetDecoded;
+    }
+  }
+
+  final manifest = json.decode(input.manifestJson);
+  if (manifest is! Map<String, dynamic>) {
+    throw const FormatException('Theme manifest root must be a JSON object.');
+  }
+
+  final selectedMode = _resolveSelectedMode(manifest, input.mode);
+  final normalized = _normalizeTheme(decoded, manifest, selectedMode);
+  final resolved = Host4ReferenceResolver(normalized).resolveMap(normalized);
+  return (resolved: resolved, sourceTokens: decoded, selectedMode: selectedMode);
+}
+
+// ---------------------------------------------------------------------------
 
 Map<String, dynamic> _normalizeTheme(
   Map<String, dynamic> tokens,

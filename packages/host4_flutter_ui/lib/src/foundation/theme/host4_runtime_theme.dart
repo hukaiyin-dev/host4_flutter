@@ -255,6 +255,13 @@ class Host4ThemeComponents {
     required this.textField,
     required this.listCell,
     required this.tabBar,
+    required this.tag,
+    required this.emptyState,
+    required this.banner,
+    required this.progressBar,
+    required this.segmentedFilter,
+    required this.infoChip,
+    required this.toolbar,
   });
 
   final Host4PageShellComponentTokens pageShell;
@@ -266,6 +273,13 @@ class Host4ThemeComponents {
   final Host4TextFieldComponentTokens textField;
   final Host4ListCellComponentTokens listCell;
   final Host4TabBarComponentTokens tabBar;
+  final Host4TagComponentTokens tag;
+  final Host4EmptyStateComponentTokens emptyState;
+  final Host4BannerComponentTokens banner;
+  final Host4ProgressBarComponentTokens progressBar;
+  final Host4SegmentedFilterComponentTokens segmentedFilter;
+  final Host4InfoChipComponentTokens infoChip;
+  final Host4ToolbarComponentTokens toolbar;
 }
 
 @immutable
@@ -696,4 +710,240 @@ class Host4TabBarItemStateTokens {
 
   final Color labelColor;
   final Color iconColor;
+}
+
+// ─── Tag ─────────────────────────────────────────────────────────────────────
+
+@immutable
+class Host4TagStateTokens {
+  const Host4TagStateTokens({
+    required this.background,
+    required this.foreground,
+    required this.border,
+    required this.icon,
+  });
+
+  final Color background;
+  final Color foreground;
+  final Color border;
+  final Color icon;
+}
+
+@immutable
+class Host4TagComponentTokens {
+  const Host4TagComponentTokens({
+    required this.radius,
+    required this.paddingHorizontal,
+    required this.paddingVertical,
+    required this.iconSize,
+    required this.iconGap,
+    required this.labelStyle,
+    required this.defaultState,
+    required this.selectedState,
+    required this.disabledState,
+  });
+
+  final double radius;
+  final double paddingHorizontal;
+  final double paddingVertical;
+  final double iconSize;
+  final double iconGap;
+  final Host4TextToken labelStyle;
+  final Host4TagStateTokens defaultState;
+  final Host4TagStateTokens selectedState;
+  final Host4TagStateTokens disabledState;
+}
+
+// ─── EmptyState ───────────────────────────────────────────────────────────────
+
+@immutable
+class Host4EmptyStateComponentTokens {
+  const Host4EmptyStateComponentTokens({
+    required this.iconSize,
+    required this.iconGap,
+    required this.textGap,
+    required this.actionGap,
+    required this.iconColor,
+    required this.titleStyle,
+    required this.titleColor,
+    required this.subtitleStyle,
+    required this.subtitleColor,
+  });
+
+  final double iconSize;
+  final double iconGap;
+  final double textGap;
+  final double actionGap;
+  final Color iconColor;
+  final Host4TextToken titleStyle;
+  final Color titleColor;
+  final Host4TextToken subtitleStyle;
+  final Color subtitleColor;
+}
+
+// ─── Banner ───────────────────────────────────────────────────────────────────
+
+@immutable
+class Host4BannerVariantTokens {
+  const Host4BannerVariantTokens({
+    required this.background,
+    required this.foreground,
+    required this.border,
+    required this.icon,
+  });
+
+  final Color background;
+  final Color foreground;
+  final Color border;
+  final Color icon;
+}
+
+@immutable
+class Host4BannerComponentTokens {
+  const Host4BannerComponentTokens({
+    required this.paddingHorizontal,
+    required this.paddingVertical,
+    required this.radius,
+    required this.iconSize,
+    required this.iconGap,
+    required this.titleBodyGap,
+    required this.titleStyle,
+    required this.bodyStyle,
+    required this.info,
+    required this.success,
+    required this.warning,
+    required this.error,
+  });
+
+  final double paddingHorizontal;
+  final double paddingVertical;
+  final double radius;
+  final double iconSize;
+  final double iconGap;
+  final double titleBodyGap;
+  final Host4TextToken titleStyle;
+  final Host4TextToken bodyStyle;
+  final Host4BannerVariantTokens info;
+  final Host4BannerVariantTokens success;
+  final Host4BannerVariantTokens warning;
+  final Host4BannerVariantTokens error;
+}
+
+// ─── ProgressBar ──────────────────────────────────────────────────────────────
+
+@immutable
+class Host4ProgressBarComponentTokens {
+  const Host4ProgressBarComponentTokens({
+    required this.height,
+    required this.radius,
+    required this.track,
+    required this.fill,
+    required this.fillSuccess,
+    required this.fillWarning,
+    required this.fillError,
+  });
+
+  final double height;
+  final double radius;
+  final Color track;
+  final Color fill;
+  final Color fillSuccess;
+  final Color fillWarning;
+  final Color fillError;
+}
+
+// ─── SegmentedFilter ──────────────────────────────────────────────────────────
+
+@immutable
+class Host4SegmentedFilterItemStateTokens {
+  const Host4SegmentedFilterItemStateTokens({
+    required this.background,
+    required this.foreground,
+    required this.border,
+  });
+
+  final Color background;
+  final Color foreground;
+  final Color border;
+}
+
+@immutable
+class Host4SegmentedFilterComponentTokens {
+  const Host4SegmentedFilterComponentTokens({
+    required this.paddingHorizontal,
+    required this.paddingVertical,
+    required this.radius,
+    required this.containerRadius,
+    required this.gap,
+    required this.iconSize,
+    required this.iconGap,
+    required this.labelStyle,
+    required this.containerBackground,
+    required this.containerBorder,
+    required this.defaultState,
+    required this.selectedState,
+    required this.disabledState,
+  });
+
+  final double paddingHorizontal;
+  final double paddingVertical;
+  final double radius;
+  final double containerRadius;
+  final double gap;
+  final double iconSize;
+  final double iconGap;
+  final Host4TextToken labelStyle;
+  final Color containerBackground;
+  final Color containerBorder;
+  final Host4SegmentedFilterItemStateTokens defaultState;
+  final Host4SegmentedFilterItemStateTokens selectedState;
+  final Host4SegmentedFilterItemStateTokens disabledState;
+}
+
+// ─── InfoChip ─────────────────────────────────────────────────────────────────
+
+@immutable
+class Host4InfoChipComponentTokens {
+  const Host4InfoChipComponentTokens({
+    required this.paddingHorizontal,
+    required this.paddingVertical,
+    required this.radius,
+    required this.iconSize,
+    required this.iconGap,
+    required this.labelStyle,
+    required this.background,
+    required this.foreground,
+    required this.border,
+    required this.iconColor,
+  });
+
+  final double paddingHorizontal;
+  final double paddingVertical;
+  final double radius;
+  final double iconSize;
+  final double iconGap;
+  final Host4TextToken labelStyle;
+  final Color background;
+  final Color foreground;
+  final Color border;
+  final Color iconColor;
+}
+
+// ─── Toolbar ──────────────────────────────────────────────────────────────────
+
+@immutable
+class Host4ToolbarComponentTokens {
+  const Host4ToolbarComponentTokens({
+    required this.paddingHorizontal,
+    required this.paddingVertical,
+    required this.gap,
+    required this.background,
+    required this.borderBottom,
+  });
+
+  final double paddingHorizontal;
+  final double paddingVertical;
+  final double gap;
+  final Color background;
+  final Color borderBottom;
 }

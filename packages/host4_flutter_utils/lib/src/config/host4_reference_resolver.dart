@@ -1,5 +1,8 @@
 import '../json/host4_json.dart';
 
+// Compiled once; all values of the form "{some.token.path}" are references.
+final _tokenRefRegExp = RegExp(r'^\{(.+)\}$');
+
 class Host4ReferenceResolver {
   const Host4ReferenceResolver(this.root);
 
@@ -28,7 +31,7 @@ class Host4ReferenceResolver {
       return value;
     }
 
-    final match = RegExp(r'^\{(.+)\}$').firstMatch(value);
+    final match = _tokenRefRegExp.firstMatch(value);
     if (match == null) {
       return value;
     }
