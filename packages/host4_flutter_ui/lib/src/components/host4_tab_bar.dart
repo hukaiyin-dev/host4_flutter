@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../foundation/host4_svg_icon.dart';
 import '../foundation/theme/host4_runtime_theme.dart';
 import '../foundation/theme/host4_theme_scope.dart';
 
@@ -25,8 +26,10 @@ class Host4TabItem {
   final String label;
   final bool featured;
   final bool enabled;
-  final IconData? fallbackIcon;
-  final IconData? fallbackSelectedIcon;
+  /// SVG asset path used as fallback when the theme image for this tab is missing.
+  final String? fallbackIcon;
+  /// SVG asset path used as selected-state fallback when the theme image is missing.
+  final String? fallbackSelectedIcon;
 }
 
 /// A bottom tab bar whose visual style is entirely driven by
@@ -121,7 +124,7 @@ class Host4TabBar extends StatelessWidget {
   Widget _buildIcon(
     String? imagePath,
     String? lightFallbackPath,
-    IconData? fallback,
+    String? fallbackSvgPath,
     double size,
     Color color,
   ) {
@@ -130,25 +133,25 @@ class Host4TabBar extends StatelessWidget {
         imagePath,
         fit: BoxFit.contain,
         errorBuilder: (_, error, stackTrace) {
-          // Dark image missing — try the light-mode image before the icon fallback.
+          // Dark image missing — try the light-mode image before the SVG fallback.
           if (lightFallbackPath != null) {
             return Image.asset(
               lightFallbackPath,
               fit: BoxFit.contain,
               errorBuilder: (_, error, stackTrace) =>
-                  _iconWidget(fallback, size, color),
+                  _iconWidget(fallbackSvgPath, size, color),
             );
           }
-          return _iconWidget(fallback, size, color);
+          return _iconWidget(fallbackSvgPath, size, color);
         },
       );
     }
-    return _iconWidget(fallback, size, color);
+    return _iconWidget(fallbackSvgPath, size, color);
   }
 
-  Widget _iconWidget(IconData? icon, double size, Color color) {
-    if (icon != null) {
-      return Icon(icon, size: size * 0.85, color: color);
+  Widget _iconWidget(String? svgPath, double size, Color color) {
+    if (svgPath != null) {
+      return Host4SvgIcon(assetPath: svgPath, size: size * 0.85, color: color);
     }
     return SizedBox(width: size, height: size);
   }
@@ -169,7 +172,7 @@ class _Host4TabBarItemView extends StatefulWidget {
   final bool selected;
   final bool showLabels;
   final VoidCallback? onTap;
-  final Widget Function(String?, String?, IconData?, double, Color) buildIcon;
+  final Widget Function(String?, String?, String?, double, Color) buildIcon;
 
   @override
   State<_Host4TabBarItemView> createState() => _Host4TabBarItemViewState();

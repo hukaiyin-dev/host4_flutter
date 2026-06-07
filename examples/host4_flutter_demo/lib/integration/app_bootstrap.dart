@@ -77,9 +77,7 @@ Future<void> configureAppAnalytics() async {
       );
     }
   } else {
-    bootstrapLog.info(
-      'Firebase Analytics skipped on unsupported platform.',
-    );
+    bootstrapLog.info('Firebase Analytics skipped on unsupported platform.');
   }
 
   configureAnalytics(firebaseAnalytics: firebaseAnalytics);
@@ -96,15 +94,4 @@ bool _supportsNativeFirebase(TargetPlatform platform) {
 
 // ── Theme catalog ─────────────────────────────────────────────────────────────
 
-const defaultThemeCatalog = [
-  Host4ThemeCatalogEntry(
-    id: Host4ThemeAssets.defaultThemeId,
-    name: Host4ThemeAssets.defaultThemeName,
-    tokensAssetPath: Host4ThemeAssets.defaultTokensAssetPath,
-  ),
-  Host4ThemeCatalogEntry(
-    id: 'grassland',
-    name: 'Grassland',
-    tokensAssetPath: 'assets/themes/grassland/tokens.json',
-  ),
-];
+const defaultThemeCatalog = Host4ThemeAssets.defaultCatalog;

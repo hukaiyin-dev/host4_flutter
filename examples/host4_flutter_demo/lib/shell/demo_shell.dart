@@ -73,24 +73,10 @@ class _Host4DemoShellState extends State<Host4DemoShell> {
               setState(() => _currentIndex = index);
             },
             items: [
-              Host4TabItem(
-                index: 0,
-                label: l10n.tabHome,
-                fallbackIcon: Icons.home_outlined,
-                fallbackSelectedIcon: Icons.home_rounded,
-              ),
-              Host4TabItem(
-                index: 1,
-                label: l10n.tabList,
-                fallbackIcon: Icons.widgets_outlined,
-                fallbackSelectedIcon: Icons.widgets_rounded,
-              ),
-              Host4TabItem(
-                index: 2,
-                label: l10n.tabSettings,
-                fallbackIcon: Icons.settings_outlined,
-                fallbackSelectedIcon: Icons.settings_rounded,
-              ),
+              // TODO: add fallbackIcon/fallbackSelectedIcon SVG paths once Figma icons are exported
+              Host4TabItem(index: 0, label: l10n.tabHome),
+              Host4TabItem(index: 1, label: l10n.tabList),
+              Host4TabItem(index: 2, label: l10n.tabSettings),
             ],
           ),
           body: Column(

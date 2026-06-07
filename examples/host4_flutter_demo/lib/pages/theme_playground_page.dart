@@ -147,8 +147,6 @@ class _ThemePlaygroundPageState extends State<ThemePlaygroundPage> {
           SizedBox(height: theme.spacing.md),
           Host4Button(
             label: '浏览本地主题',
-            content: Host4ButtonContent.iconLeft,
-            icon: Icons.grid_view_rounded,
             variant: Host4ButtonVariant.secondary,
             expanded: true,
             onPressed: () => Navigator.push(
@@ -206,8 +204,6 @@ class _ThemePlaygroundPageState extends State<ThemePlaygroundPage> {
                 ],
                 Host4Button(
                   label: _isGenerating ? '生成中...' : l10n.generateThemeButton,
-                  content: Host4ButtonContent.iconLeft,
-                  icon: Icons.auto_awesome_outlined,
                   expanded: true,
                   onPressed: _isGenerating
                       ? null

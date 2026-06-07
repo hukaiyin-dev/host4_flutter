@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../foundation/host4_svg_icon.dart';
 import '../foundation/theme/host4_runtime_theme.dart';
 import '../foundation/theme/host4_theme_scope.dart';
 
@@ -10,6 +11,7 @@ class Host4ListCell extends StatefulWidget {
     super.key,
     this.leading,
     this.trailingText,
+    this.trailingIconAsset,
     this.onTap,
     this.enabled = true,
     this.selected = false,
@@ -19,6 +21,9 @@ class Host4ListCell extends StatefulWidget {
   final String subtitle;
   final Widget? leading;
   final String? trailingText;
+  /// SVG asset path for the trailing chevron/icon (e.g. `'assets/icons/chevron_right.svg'`).
+  /// Pass `null` to hide the trailing icon.
+  final String? trailingIconAsset;
   final VoidCallback? onTap;
   final bool enabled;
   final bool selected;
@@ -83,8 +88,14 @@ class _Host4ListCellState extends State<Host4ListCell> {
                   style: tokens.trailingStyle.toTextStyle(stateTokens.trailing),
                 ),
               ],
-              SizedBox(width: tokens.chevronGap),
-              Icon(Icons.chevron_right_rounded, color: stateTokens.trailing),
+              if (widget.trailingIconAsset != null) ...[
+                SizedBox(width: tokens.chevronGap),
+                Host4SvgIcon(
+                  assetPath: widget.trailingIconAsset!,
+                  size: 20,
+                  color: stateTokens.trailing,
+                ),
+              ],
             ],
           ),
         ),

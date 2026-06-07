@@ -94,17 +94,27 @@ class Host4ThemeTypography {
   const Host4ThemeTypography({
     required this.display,
     required this.title,
+    required this.titleRegular,
     required this.heading,
     required this.body,
+    required this.bodyMedium,
+    required this.bodyRegular,
     required this.label,
+    required this.labelMedium,
+    required this.labelRegular,
     required this.caption,
   });
 
   final Host4TextToken display;
   final Host4TextToken title;
+  final Host4TextToken titleRegular;
   final Host4TextToken heading;
   final Host4TextToken body;
+  final Host4TextToken bodyMedium;
+  final Host4TextToken bodyRegular;
   final Host4TextToken label;
+  final Host4TextToken labelMedium;
+  final Host4TextToken labelRegular;
   final Host4TextToken caption;
 }
 
@@ -301,45 +311,56 @@ class Host4PageShellComponentTokens {
 class Host4ButtonComponentTokens {
   const Host4ButtonComponentTokens({
     required this.focusedRing,
+    required this.selectedIndicator,
     required this.sizes,
     required this.spacing,
     required this.labelStyle,
     required this.minHeight,
     required this.leadingIconSize,
-    required this.topIconSize,
     required this.iconOnlySize,
     required this.primary,
     required this.secondary,
     required this.popoverPrimary,
     required this.popoverSecondary,
     required this.tertiary,
-    required this.outline,
     required this.ghost,
-    required this.danger,
     required this.dangerHigh,
     required this.dangerSoft,
     required this.loading,
   });
 
   final Host4ButtonFocusedRingTokens focusedRing;
+  final Host4ButtonSelectedIndicatorTokens selectedIndicator;
   final Host4ButtonSizeGroupTokens sizes;
   final Host4ButtonSpacingTokens spacing;
   final Host4TextToken labelStyle;
   final double minHeight;
   final double leadingIconSize;
-  final double topIconSize;
   final double iconOnlySize;
   final Host4ButtonVariantTokens primary;
   final Host4ButtonVariantTokens secondary;
   final Host4ButtonVariantTokens popoverPrimary;
   final Host4ButtonVariantTokens popoverSecondary;
   final Host4ButtonVariantTokens tertiary;
-  final Host4ButtonVariantTokens outline;
   final Host4ButtonVariantTokens ghost;
-  final Host4ButtonVariantTokens danger;
   final Host4ButtonVariantTokens dangerHigh;
   final Host4ButtonVariantTokens dangerSoft;
   final Host4ButtonLoadingTokens loading;
+}
+
+@immutable
+class Host4ButtonSelectedIndicatorTokens {
+  const Host4ButtonSelectedIndicatorTokens({
+    required this.color,
+    required this.width,
+    required this.height,
+    required this.gap,
+  });
+
+  final Color color;
+  final double width;
+  final double height;
+  final double gap;
 }
 
 @immutable
@@ -348,13 +369,11 @@ class Host4ButtonSizeGroupTokens {
     required this.xs,
     required this.sm,
     required this.md,
-    required this.lg,
   });
 
   final Host4ButtonSizeTokens xs;
   final Host4ButtonSizeTokens sm;
   final Host4ButtonSizeTokens md;
-  final Host4ButtonSizeTokens lg;
 }
 
 @immutable
@@ -374,11 +393,13 @@ class Host4ButtonFocusedRingTokens {
     required this.color,
     required this.width,
     required this.offsetWidth,
+    required this.radius,
   });
 
   final Color color;
   final double width;
   final double offsetWidth;
+  final double radius;
 }
 
 @immutable
@@ -402,15 +423,12 @@ class Host4ButtonSpacingTokens {
     required this.iconOnlyHorizontal,
     required this.iconOnlyVertical,
     required this.iconGap,
-    required this.stackGap,
     required this.xsHorizontal,
     required this.xsVertical,
     required this.smHorizontal,
     required this.smVertical,
     required this.mdHorizontal,
     required this.mdVertical,
-    required this.lgHorizontal,
-    required this.lgVertical,
   });
 
   final double horizontal;
@@ -418,21 +436,19 @@ class Host4ButtonSpacingTokens {
   final double iconOnlyHorizontal;
   final double iconOnlyVertical;
   final double iconGap;
-  final double stackGap;
   final double xsHorizontal;
   final double xsVertical;
   final double smHorizontal;
   final double smVertical;
   final double mdHorizontal;
   final double mdVertical;
-  final double lgHorizontal;
-  final double lgVertical;
 }
 
 @immutable
 class Host4ButtonVariantTokens {
   const Host4ButtonVariantTokens({
     required this.radius,
+    required this.focusRingVisible,
     required this.defaultState,
     required this.hoverState,
     required this.pressedState,
@@ -442,6 +458,7 @@ class Host4ButtonVariantTokens {
   });
 
   final double radius;
+  final bool focusRingVisible;
   final Host4ButtonStateTokens defaultState;
   final Host4ButtonStateTokens hoverState;
   final Host4ButtonStateTokens pressedState;
@@ -456,11 +473,15 @@ class Host4ButtonStateTokens {
     required this.background,
     required this.foreground,
     required this.border,
+    required this.opacity,
+    required this.bottomBorderWidth,
   });
 
   final Color background;
   final Color foreground;
   final Color border;
+  final double opacity;
+  final double bottomBorderWidth;
 }
 
 @immutable

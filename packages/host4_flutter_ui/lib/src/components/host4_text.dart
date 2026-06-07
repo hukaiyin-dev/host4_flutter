@@ -2,7 +2,19 @@ import 'package:flutter/material.dart';
 
 import '../foundation/theme/host4_theme_scope.dart';
 
-enum Host4TextRole { display, title, heading, body, label, caption }
+enum Host4TextRole {
+  display,
+  title,
+  titleRegular,
+  heading,
+  body,
+  bodyMedium,
+  bodyRegular,
+  label,
+  labelMedium,
+  labelRegular,
+  caption,
+}
 
 enum Host4TextColorRole { primary, secondary, inverse, accent }
 
@@ -30,9 +42,14 @@ class Host4Text extends StatelessWidget {
     final token = switch (role) {
       Host4TextRole.display => theme.typography.display,
       Host4TextRole.title => theme.typography.title,
+      Host4TextRole.titleRegular => theme.typography.titleRegular,
       Host4TextRole.heading => theme.typography.heading,
       Host4TextRole.body => theme.typography.body,
+      Host4TextRole.bodyMedium => theme.typography.bodyMedium,
+      Host4TextRole.bodyRegular => theme.typography.bodyRegular,
       Host4TextRole.label => theme.typography.label,
+      Host4TextRole.labelMedium => theme.typography.labelMedium,
+      Host4TextRole.labelRegular => theme.typography.labelRegular,
       Host4TextRole.caption => theme.typography.caption,
     };
     final color = switch (colorRole) {

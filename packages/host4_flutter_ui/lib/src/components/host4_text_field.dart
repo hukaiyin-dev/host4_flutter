@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../foundation/host4_svg_icon.dart';
 import '../foundation/theme/host4_runtime_theme.dart';
 import '../foundation/theme/host4_theme_scope.dart';
 
@@ -22,7 +23,8 @@ class Host4TextField extends StatelessWidget {
   final String hintText;
   final TextEditingController? controller;
   final ValueChanged<String>? onChanged;
-  final IconData? prefixIcon;
+  /// SVG asset path for the prefix icon (e.g. `'assets/icons/search.svg'`).
+  final String? prefixIcon;
   final Widget? suffix;
   final int maxLines;
   final bool enabled;
@@ -52,10 +54,19 @@ class Host4TextField extends StatelessWidget {
           fillColor: baseState.background,
           prefixIcon: prefixIcon == null
               ? null
-              : Icon(
-                  prefixIcon,
-                  color: baseState.icon,
-                  size: tokens.prefixIconSize,
+              : Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Host4SvgIcon(
+                    assetPath: prefixIcon!,
+                    size: tokens.prefixIconSize,
+                    color: baseState.icon,
+                  ),
+                ),
+          prefixIconConstraints: prefixIcon == null
+              ? null
+              : BoxConstraints(
+                  minWidth: tokens.prefixIconSize + 24,
+                  minHeight: tokens.prefixIconSize,
                 ),
           suffixIcon: suffix == null
               ? null

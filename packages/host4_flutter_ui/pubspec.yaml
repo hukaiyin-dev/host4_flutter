@@ -13,6 +13,7 @@ dependencies:
     sdk: flutter
   host4_flutter_utils:
     path: ../host4_flutter_utils
+  flutter_svg: ^2.0.0
 
 dev_dependencies:
   flutter_test:
@@ -30,6 +31,7 @@ flutter:
     - assets/themes/default/images/
     - assets/themes/obsidian/
     - assets/themes/mint/
+    - assets/icons/
 
   # To add assets to your package, add an assets section, like this:
   # For details regarding assets in packages, see

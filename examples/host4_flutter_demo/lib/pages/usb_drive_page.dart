@@ -128,8 +128,6 @@ class _UsbDrivePageState extends State<UsbDrivePage> {
                 label: _picking
                     ? l10n.usbDrivePicking
                     : l10n.usbDrivePickButton,
-                content: Host4ButtonContent.iconLeft,
-                icon: Icons.folder_open_rounded,
                 expanded: true,
                 onPressed: _picking ? null : _pickFile,
               ),

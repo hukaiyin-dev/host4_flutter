@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:host4_flutter_ui/host4_flutter_ui.dart';
 
-import '../l10n/generated/app_localizations.dart';
 import '../widgets/list_icon.dart';
 
 class ComponentsPage extends StatelessWidget {
@@ -9,7 +8,6 @@ class ComponentsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
     final theme = context.host4Theme;
 
     return ListView(
@@ -19,10 +17,26 @@ class ComponentsPage extends StatelessWidget {
         theme.spacing.page,
         theme.spacing.page,
       ),
-      children: [
+      children: _withComponentCellGaps([
         Host4ListCell(
-          title: l10n.componentButtonsTitle,
-          subtitle: l10n.componentButtonsSubtitle,
+          title: 'Host4Text',
+          subtitle: 'Typography roles',
+          leading: ListIcon(
+            icon: Icons.text_fields_rounded,
+            color: theme.colors.brandPrimary,
+          ),
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => const _ComponentDemoScaffold(
+                title: 'Host4Text',
+                child: _TypographyDemoPage(),
+              ),
+            ),
+          ),
+        ),
+        Host4ListCell(
+          title: 'Host4Button',
+          subtitle: 'Variants, states and icon combinations',
           leading: ListIcon(
             icon: Icons.smart_button_outlined,
             color: theme.colors.brandPrimary,
@@ -30,80 +44,16 @@ class ComponentsPage extends StatelessWidget {
           onTap: () => Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => _ComponentDemoScaffold(
-                title: l10n.componentButtonsTitle,
-                subtitle: l10n.componentButtonsSubtitle,
+                title: 'Host4Button',
+                subtitle: 'Variants, states and icon combinations',
                 child: const ButtonsPage(),
               ),
             ),
           ),
         ),
         Host4ListCell(
-          title: 'Tag / Pill',
-          subtitle: 'Host4Tag — label chip with states',
-          leading: ListIcon(
-            icon: Icons.label_outline_rounded,
-            color: theme.colors.brandPrimary,
-          ),
-          onTap: () => Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => const _ComponentDemoScaffold(
-                title: 'Tag / Pill',
-                child: _TagDemoPage(),
-              ),
-            ),
-          ),
-        ),
-        Host4ListCell(
-          title: 'Empty State',
-          subtitle: 'Host4EmptyState — icon + title + action',
-          leading: ListIcon(
-            icon: Icons.inbox_outlined,
-            color: theme.colors.brandPrimary,
-          ),
-          onTap: () => Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => const _ComponentDemoScaffold(
-                title: 'Empty State',
-                child: _EmptyStateDemoPage(),
-              ),
-            ),
-          ),
-        ),
-        Host4ListCell(
-          title: 'Banner',
-          subtitle: 'Host4Banner — info / success / warning / error',
-          leading: ListIcon(
-            icon: Icons.campaign_outlined,
-            color: theme.colors.brandPrimary,
-          ),
-          onTap: () => Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => const _ComponentDemoScaffold(
-                title: 'Banner',
-                child: _BannerDemoPage(),
-              ),
-            ),
-          ),
-        ),
-        Host4ListCell(
-          title: 'Progress Bar',
-          subtitle: 'Host4ProgressBar — linear progress',
-          leading: ListIcon(
-            icon: Icons.linear_scale_rounded,
-            color: theme.colors.brandPrimary,
-          ),
-          onTap: () => Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => const _ComponentDemoScaffold(
-                title: 'Progress Bar',
-                child: _ProgressBarDemoPage(),
-              ),
-            ),
-          ),
-        ),
-        Host4ListCell(
-          title: 'Segmented Filter',
-          subtitle: 'Host4SegmentedFilter — tab-style selector',
+          title: 'Host4SegmentedFilter',
+          subtitle: 'Tab-style selector',
           leading: ListIcon(
             icon: Icons.tune_rounded,
             color: theme.colors.brandPrimary,
@@ -111,31 +61,15 @@ class ComponentsPage extends StatelessWidget {
           onTap: () => Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => const _ComponentDemoScaffold(
-                title: 'Segmented Filter',
+                title: 'Host4SegmentedFilter',
                 child: _SegmentedFilterDemoPage(),
               ),
             ),
           ),
         ),
         Host4ListCell(
-          title: 'Info Chip',
-          subtitle: 'Host4InfoChip — key-value label',
-          leading: ListIcon(
-            icon: Icons.info_outline_rounded,
-            color: theme.colors.brandPrimary,
-          ),
-          onTap: () => Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => const _ComponentDemoScaffold(
-                title: 'Info Chip',
-                child: _InfoChipDemoPage(),
-              ),
-            ),
-          ),
-        ),
-        Host4ListCell(
-          title: 'Toolbar',
-          subtitle: 'Host4Toolbar — search + filter bar',
+          title: 'Host4Toolbar',
+          subtitle: 'Search and filter bar',
           leading: ListIcon(
             icon: Icons.search_rounded,
             color: theme.colors.brandPrimary,
@@ -143,11 +77,257 @@ class ComponentsPage extends StatelessWidget {
           onTap: () => Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => const _ComponentDemoScaffold(
-                title: 'Toolbar',
+                title: 'Host4Toolbar',
                 child: _ToolbarDemoPage(),
               ),
             ),
           ),
+        ),
+        Host4ListCell(
+          title: 'Host4ProgressBar',
+          subtitle: 'Linear progress',
+          leading: ListIcon(
+            icon: Icons.linear_scale_rounded,
+            color: theme.colors.brandPrimary,
+          ),
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => const _ComponentDemoScaffold(
+                title: 'Host4ProgressBar',
+                child: _ProgressBarDemoPage(),
+              ),
+            ),
+          ),
+        ),
+        Host4ListCell(
+          title: 'Host4Tag',
+          subtitle: 'Label chip with states',
+          leading: ListIcon(
+            icon: Icons.label_outline_rounded,
+            color: theme.colors.brandPrimary,
+          ),
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => const _ComponentDemoScaffold(
+                title: 'Host4Tag',
+                child: _TagDemoPage(),
+              ),
+            ),
+          ),
+        ),
+        Host4ListCell(
+          title: 'Host4Banner',
+          subtitle: 'Info, success, warning and error messages',
+          leading: ListIcon(
+            icon: Icons.campaign_outlined,
+            color: theme.colors.brandPrimary,
+          ),
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => const _ComponentDemoScaffold(
+                title: 'Host4Banner',
+                child: _BannerDemoPage(),
+              ),
+            ),
+          ),
+        ),
+        Host4ListCell(
+          title: 'Host4InfoChip',
+          subtitle: 'Key-value label',
+          leading: ListIcon(
+            icon: Icons.info_outline_rounded,
+            color: theme.colors.brandPrimary,
+          ),
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => const _ComponentDemoScaffold(
+                title: 'Host4InfoChip',
+                child: _InfoChipDemoPage(),
+              ),
+            ),
+          ),
+        ),
+        Host4ListCell(
+          title: 'Host4EmptyState',
+          subtitle: 'Icon, title and action',
+          leading: ListIcon(
+            icon: Icons.inbox_outlined,
+            color: theme.colors.brandPrimary,
+          ),
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => const _ComponentDemoScaffold(
+                title: 'Host4EmptyState',
+                child: _EmptyStateDemoPage(),
+              ),
+            ),
+          ),
+        ),
+      ]),
+    );
+  }
+}
+
+List<Widget> _withComponentCellGaps(List<Widget> children) {
+  return [
+    for (var index = 0; index < children.length; index++) ...[
+      if (index > 0) const SizedBox(height: 6),
+      children[index],
+    ],
+  ];
+}
+
+// ─── Typography Demo ─────────────────────────────────────────────────────────
+
+class _TypographyDemoPage extends StatelessWidget {
+  const _TypographyDemoPage();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = context.host4Theme;
+
+    return ListView(
+      padding: EdgeInsets.all(theme.spacing.page),
+      children: [
+        Host4SectionHeader(
+          title: 'Typography Roles',
+          subtitle: 'Size / line height / weight roles',
+        ),
+        SizedBox(height: theme.spacing.md),
+        Host4Card(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              for (final spec in _typographySpecs) ...[
+                _TypographySpecRow(spec: spec),
+                if (spec != _typographySpecs.last)
+                  SizedBox(height: theme.spacing.lg),
+              ],
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _TypographySpec {
+  const _TypographySpec({
+    required this.name,
+    required this.role,
+    required this.size,
+    required this.lineHeight,
+    required this.weight,
+    required this.usage,
+  });
+
+  final String name;
+  final Host4TextRole role;
+  final String size;
+  final String lineHeight;
+  final String weight;
+  final String usage;
+}
+
+const List<_TypographySpec> _typographySpecs = [
+  _TypographySpec(
+    name: 'display',
+    role: Host4TextRole.display,
+    size: '32sp',
+    lineHeight: '36dp',
+    weight: 'Bold',
+    usage: '特殊标题 D1',
+  ),
+  _TypographySpec(
+    name: 'title',
+    role: Host4TextRole.title,
+    size: '24sp',
+    lineHeight: '36dp',
+    weight: 'Medium',
+    usage: '标题 H1',
+  ),
+  _TypographySpec(
+    name: 'title regular',
+    role: Host4TextRole.titleRegular,
+    size: '24sp',
+    lineHeight: '36dp',
+    weight: 'Regular',
+    usage: '标题 H1 常规字重',
+  ),
+  _TypographySpec(
+    name: 'heading',
+    role: Host4TextRole.heading,
+    size: '18sp',
+    lineHeight: '24dp',
+    weight: 'Medium',
+    usage: '正文 B2 / 列表标题',
+  ),
+  _TypographySpec(
+    name: 'body medium',
+    role: Host4TextRole.bodyMedium,
+    size: '16sp',
+    lineHeight: '22dp',
+    weight: 'Medium',
+    usage: 'Body B1',
+  ),
+  _TypographySpec(
+    name: 'body regular',
+    role: Host4TextRole.bodyRegular,
+    size: '16sp',
+    lineHeight: '22dp',
+    weight: 'Regular',
+    usage: 'Body B2',
+  ),
+  _TypographySpec(
+    name: 'label medium',
+    role: Host4TextRole.labelMedium,
+    size: '14sp',
+    lineHeight: '22dp',
+    weight: 'Medium',
+    usage: 'Label L1',
+  ),
+  _TypographySpec(
+    name: 'label regular',
+    role: Host4TextRole.labelRegular,
+    size: '14sp',
+    lineHeight: '22dp',
+    weight: 'Regular',
+    usage: 'Label L2',
+  ),
+  _TypographySpec(
+    name: 'caption',
+    role: Host4TextRole.caption,
+    size: '12sp',
+    lineHeight: '20dp',
+    weight: 'Regular',
+    usage: 'Caption C2',
+  ),
+];
+
+class _TypographySpecRow extends StatelessWidget {
+  const _TypographySpecRow({required this.spec});
+
+  final _TypographySpec spec;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = context.host4Theme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Host4Text(
+          spec.name,
+          role: Host4TextRole.caption,
+          colorRole: Host4TextColorRole.secondary,
+        ),
+        SizedBox(height: theme.spacing.xs),
+        Host4Text('欢迎使用 Pantas', role: spec.role),
+        SizedBox(height: theme.spacing.xs),
+        Host4Text(
+          '${spec.size} / ${spec.lineHeight} / ${spec.weight} · ${spec.usage}',
+          role: Host4TextRole.caption,
+          colorRole: Host4TextColorRole.secondary,
         ),
       ],
     );
@@ -170,31 +350,15 @@ class ButtonsPage extends StatelessWidget {
       ),
       children: [
         Host4SectionHeader(
-          title: 'Figma Matrix',
-          subtitle: 'Match the button component sheet in node 147:3176',
+          title: 'Button Variants',
+          subtitle: 'Variants, sizes, content and states',
         ),
         SizedBox(height: theme.spacing.md),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Container(
-            padding: EdgeInsets.all(theme.spacing.lg),
-            decoration: BoxDecoration(
-              color: theme.colors.surface,
-              borderRadius: BorderRadius.circular(theme.radius.card),
-              border: Border.all(color: theme.colors.borderDefault),
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                for (var index = 0; index < _figmaButtonColumns.length; index++) ...[
-                  _FigmaButtonColumnView(column: _figmaButtonColumns[index]),
-                  if (index != _figmaButtonColumns.length - 1)
-                    SizedBox(width: theme.spacing.lg),
-                ],
-              ],
-            ),
-          ),
-        ),
+        for (var index = 0; index < _buttonDemoGroups.length; index++) ...[
+          _ButtonDemoGroupView(column: _buttonDemoGroups[index]),
+          if (index != _buttonDemoGroups.length - 1)
+            SizedBox(height: theme.spacing.md),
+        ],
       ],
     );
   }
@@ -202,14 +366,14 @@ class ButtonsPage extends StatelessWidget {
 
 enum _ButtonPreviewState { defaultState, hover, pressed, focused, selected }
 
-class _FigmaButtonColumn {
-  const _FigmaButtonColumn({required this.buttons});
+class _ButtonDemoGroup {
+  const _ButtonDemoGroup({required this.buttons});
 
-  final List<_FigmaButtonSpec> buttons;
+  final List<_ButtonDemoSpec> buttons;
 }
 
-class _FigmaButtonSpec {
-  const _FigmaButtonSpec({
+class _ButtonDemoSpec {
+  const _ButtonDemoSpec({
     required this.variant,
     required this.size,
     required this.content,
@@ -221,13 +385,13 @@ class _FigmaButtonSpec {
   final Host4ButtonSize size;
   final Host4ButtonContent content;
   final _ButtonPreviewState state;
-  final IconData? icon;
+  final String? icon;
 
   bool get showsLabel => content != Host4ButtonContent.iconOnly;
 }
 
-class _FigmaButtonMetrics {
-  const _FigmaButtonMetrics({
+class _ButtonDemoMetrics {
+  const _ButtonDemoMetrics({
     required this.width,
     required this.height,
     required this.iconSize,
@@ -238,34 +402,36 @@ class _FigmaButtonMetrics {
   final double iconSize;
 }
 
-const List<_FigmaButtonColumn> _figmaButtonColumns = [
-  _FigmaButtonColumn(
+const String _buttonDemoIcon = Host4IconAssets.hamburger;
+
+const List<_ButtonDemoGroup> _buttonDemoGroups = [
+  _ButtonDemoGroup(
     buttons: [
-      _FigmaButtonSpec(
+      _ButtonDemoSpec(
         variant: Host4ButtonVariant.ghost,
         size: Host4ButtonSize.sm,
         content: Host4ButtonContent.textOnly,
         state: _ButtonPreviewState.defaultState,
       ),
-      _FigmaButtonSpec(
+      _ButtonDemoSpec(
         variant: Host4ButtonVariant.ghost,
         size: Host4ButtonSize.sm,
         content: Host4ButtonContent.textOnly,
         state: _ButtonPreviewState.hover,
       ),
-      _FigmaButtonSpec(
+      _ButtonDemoSpec(
         variant: Host4ButtonVariant.ghost,
         size: Host4ButtonSize.sm,
         content: Host4ButtonContent.textOnly,
         state: _ButtonPreviewState.pressed,
       ),
-      _FigmaButtonSpec(
+      _ButtonDemoSpec(
         variant: Host4ButtonVariant.ghost,
         size: Host4ButtonSize.sm,
         content: Host4ButtonContent.textOnly,
         state: _ButtonPreviewState.focused,
       ),
-      _FigmaButtonSpec(
+      _ButtonDemoSpec(
         variant: Host4ButtonVariant.ghost,
         size: Host4ButtonSize.sm,
         content: Host4ButtonContent.textOnly,
@@ -273,33 +439,33 @@ const List<_FigmaButtonColumn> _figmaButtonColumns = [
       ),
     ],
   ),
-  _FigmaButtonColumn(
+  _ButtonDemoGroup(
     buttons: [
-      _FigmaButtonSpec(
+      _ButtonDemoSpec(
         variant: Host4ButtonVariant.ghost,
         size: Host4ButtonSize.md,
         content: Host4ButtonContent.textOnly,
         state: _ButtonPreviewState.defaultState,
       ),
-      _FigmaButtonSpec(
+      _ButtonDemoSpec(
         variant: Host4ButtonVariant.ghost,
         size: Host4ButtonSize.md,
         content: Host4ButtonContent.textOnly,
         state: _ButtonPreviewState.hover,
       ),
-      _FigmaButtonSpec(
+      _ButtonDemoSpec(
         variant: Host4ButtonVariant.ghost,
         size: Host4ButtonSize.md,
         content: Host4ButtonContent.textOnly,
         state: _ButtonPreviewState.pressed,
       ),
-      _FigmaButtonSpec(
+      _ButtonDemoSpec(
         variant: Host4ButtonVariant.ghost,
         size: Host4ButtonSize.md,
         content: Host4ButtonContent.textOnly,
         state: _ButtonPreviewState.focused,
       ),
-      _FigmaButtonSpec(
+      _ButtonDemoSpec(
         variant: Host4ButtonVariant.ghost,
         size: Host4ButtonSize.md,
         content: Host4ButtonContent.textOnly,
@@ -307,211 +473,211 @@ const List<_FigmaButtonColumn> _figmaButtonColumns = [
       ),
     ],
   ),
-  _FigmaButtonColumn(
+  _ButtonDemoGroup(
     buttons: [
-      _FigmaButtonSpec(
+      _ButtonDemoSpec(
         variant: Host4ButtonVariant.ghost,
         size: Host4ButtonSize.sm,
         content: Host4ButtonContent.iconLeft,
         state: _ButtonPreviewState.defaultState,
-        icon: Icons.refresh_rounded,
+        icon: _buttonDemoIcon,
       ),
-      _FigmaButtonSpec(
+      _ButtonDemoSpec(
         variant: Host4ButtonVariant.ghost,
         size: Host4ButtonSize.sm,
         content: Host4ButtonContent.iconLeft,
         state: _ButtonPreviewState.hover,
-        icon: Icons.refresh_rounded,
+        icon: _buttonDemoIcon,
       ),
-      _FigmaButtonSpec(
+      _ButtonDemoSpec(
         variant: Host4ButtonVariant.ghost,
         size: Host4ButtonSize.sm,
         content: Host4ButtonContent.iconLeft,
         state: _ButtonPreviewState.pressed,
-        icon: Icons.refresh_rounded,
+        icon: _buttonDemoIcon,
       ),
-      _FigmaButtonSpec(
+      _ButtonDemoSpec(
         variant: Host4ButtonVariant.ghost,
         size: Host4ButtonSize.sm,
         content: Host4ButtonContent.iconLeft,
         state: _ButtonPreviewState.focused,
-        icon: Icons.refresh_rounded,
+        icon: _buttonDemoIcon,
       ),
     ],
   ),
-  _FigmaButtonColumn(
+  _ButtonDemoGroup(
     buttons: [
-      _FigmaButtonSpec(
+      _ButtonDemoSpec(
         variant: Host4ButtonVariant.ghost,
         size: Host4ButtonSize.sm,
         content: Host4ButtonContent.iconRight,
         state: _ButtonPreviewState.defaultState,
-        icon: Icons.refresh_rounded,
+        icon: _buttonDemoIcon,
       ),
-      _FigmaButtonSpec(
+      _ButtonDemoSpec(
         variant: Host4ButtonVariant.ghost,
         size: Host4ButtonSize.sm,
         content: Host4ButtonContent.iconRight,
         state: _ButtonPreviewState.hover,
-        icon: Icons.refresh_rounded,
+        icon: _buttonDemoIcon,
       ),
-      _FigmaButtonSpec(
+      _ButtonDemoSpec(
         variant: Host4ButtonVariant.ghost,
         size: Host4ButtonSize.sm,
         content: Host4ButtonContent.iconRight,
         state: _ButtonPreviewState.pressed,
-        icon: Icons.refresh_rounded,
+        icon: _buttonDemoIcon,
       ),
-      _FigmaButtonSpec(
+      _ButtonDemoSpec(
         variant: Host4ButtonVariant.ghost,
         size: Host4ButtonSize.sm,
         content: Host4ButtonContent.iconRight,
         state: _ButtonPreviewState.focused,
-        icon: Icons.refresh_rounded,
+        icon: _buttonDemoIcon,
       ),
     ],
   ),
-  _FigmaButtonColumn(
+  _ButtonDemoGroup(
     buttons: [
-      _FigmaButtonSpec(
+      _ButtonDemoSpec(
         variant: Host4ButtonVariant.ghost,
         size: Host4ButtonSize.sm,
         content: Host4ButtonContent.iconOnly,
         state: _ButtonPreviewState.defaultState,
-        icon: Icons.delete_outline_rounded,
+        icon: _buttonDemoIcon,
       ),
-      _FigmaButtonSpec(
+      _ButtonDemoSpec(
         variant: Host4ButtonVariant.ghost,
         size: Host4ButtonSize.sm,
         content: Host4ButtonContent.iconOnly,
         state: _ButtonPreviewState.hover,
-        icon: Icons.delete_outline_rounded,
+        icon: _buttonDemoIcon,
       ),
-      _FigmaButtonSpec(
+      _ButtonDemoSpec(
         variant: Host4ButtonVariant.ghost,
         size: Host4ButtonSize.sm,
         content: Host4ButtonContent.iconOnly,
         state: _ButtonPreviewState.pressed,
-        icon: Icons.delete_outline_rounded,
+        icon: _buttonDemoIcon,
       ),
-      _FigmaButtonSpec(
+      _ButtonDemoSpec(
         variant: Host4ButtonVariant.ghost,
         size: Host4ButtonSize.sm,
         content: Host4ButtonContent.iconOnly,
         state: _ButtonPreviewState.focused,
-        icon: Icons.delete_outline_rounded,
+        icon: _buttonDemoIcon,
       ),
     ],
   ),
-  _FigmaButtonColumn(
+  _ButtonDemoGroup(
     buttons: [
-      _FigmaButtonSpec(
+      _ButtonDemoSpec(
         variant: Host4ButtonVariant.ghost,
         size: Host4ButtonSize.xs,
         content: Host4ButtonContent.iconOnly,
         state: _ButtonPreviewState.defaultState,
-        icon: Icons.delete_outline_rounded,
+        icon: _buttonDemoIcon,
       ),
-      _FigmaButtonSpec(
+      _ButtonDemoSpec(
         variant: Host4ButtonVariant.ghost,
         size: Host4ButtonSize.xs,
         content: Host4ButtonContent.iconOnly,
         state: _ButtonPreviewState.hover,
-        icon: Icons.delete_outline_rounded,
+        icon: _buttonDemoIcon,
       ),
-      _FigmaButtonSpec(
+      _ButtonDemoSpec(
         variant: Host4ButtonVariant.ghost,
         size: Host4ButtonSize.xs,
         content: Host4ButtonContent.iconOnly,
         state: _ButtonPreviewState.pressed,
-        icon: Icons.delete_outline_rounded,
+        icon: _buttonDemoIcon,
       ),
-      _FigmaButtonSpec(
+      _ButtonDemoSpec(
         variant: Host4ButtonVariant.ghost,
         size: Host4ButtonSize.xs,
         content: Host4ButtonContent.iconOnly,
         state: _ButtonPreviewState.focused,
-        icon: Icons.delete_outline_rounded,
+        icon: _buttonDemoIcon,
       ),
     ],
   ),
-  _FigmaButtonColumn(
+  _ButtonDemoGroup(
     buttons: [
-      _FigmaButtonSpec(
+      _ButtonDemoSpec(
         variant: Host4ButtonVariant.primary,
         size: Host4ButtonSize.sm,
         content: Host4ButtonContent.textOnly,
         state: _ButtonPreviewState.defaultState,
       ),
-      _FigmaButtonSpec(
+      _ButtonDemoSpec(
         variant: Host4ButtonVariant.primary,
         size: Host4ButtonSize.sm,
         content: Host4ButtonContent.textOnly,
         state: _ButtonPreviewState.hover,
       ),
-      _FigmaButtonSpec(
+      _ButtonDemoSpec(
         variant: Host4ButtonVariant.primary,
         size: Host4ButtonSize.sm,
         content: Host4ButtonContent.textOnly,
         state: _ButtonPreviewState.pressed,
       ),
-      _FigmaButtonSpec(
+      _ButtonDemoSpec(
         variant: Host4ButtonVariant.primary,
         size: Host4ButtonSize.sm,
-        content: Host4ButtonContent.textOnly,
-        state: _ButtonPreviewState.focused,
-      ),
-    ],
-  ),
-  _FigmaButtonColumn(
-    buttons: [
-      _FigmaButtonSpec(
-        variant: Host4ButtonVariant.primary,
-        size: Host4ButtonSize.xs,
-        content: Host4ButtonContent.textOnly,
-        state: _ButtonPreviewState.defaultState,
-      ),
-      _FigmaButtonSpec(
-        variant: Host4ButtonVariant.primary,
-        size: Host4ButtonSize.xs,
-        content: Host4ButtonContent.textOnly,
-        state: _ButtonPreviewState.hover,
-      ),
-      _FigmaButtonSpec(
-        variant: Host4ButtonVariant.primary,
-        size: Host4ButtonSize.xs,
-        content: Host4ButtonContent.textOnly,
-        state: _ButtonPreviewState.pressed,
-      ),
-      _FigmaButtonSpec(
-        variant: Host4ButtonVariant.primary,
-        size: Host4ButtonSize.xs,
         content: Host4ButtonContent.textOnly,
         state: _ButtonPreviewState.focused,
       ),
     ],
   ),
-  _FigmaButtonColumn(
+  _ButtonDemoGroup(
     buttons: [
-      _FigmaButtonSpec(
+      _ButtonDemoSpec(
+        variant: Host4ButtonVariant.primary,
+        size: Host4ButtonSize.xs,
+        content: Host4ButtonContent.textOnly,
+        state: _ButtonPreviewState.defaultState,
+      ),
+      _ButtonDemoSpec(
+        variant: Host4ButtonVariant.primary,
+        size: Host4ButtonSize.xs,
+        content: Host4ButtonContent.textOnly,
+        state: _ButtonPreviewState.hover,
+      ),
+      _ButtonDemoSpec(
+        variant: Host4ButtonVariant.primary,
+        size: Host4ButtonSize.xs,
+        content: Host4ButtonContent.textOnly,
+        state: _ButtonPreviewState.pressed,
+      ),
+      _ButtonDemoSpec(
+        variant: Host4ButtonVariant.primary,
+        size: Host4ButtonSize.xs,
+        content: Host4ButtonContent.textOnly,
+        state: _ButtonPreviewState.focused,
+      ),
+    ],
+  ),
+  _ButtonDemoGroup(
+    buttons: [
+      _ButtonDemoSpec(
         variant: Host4ButtonVariant.popoverPrimary,
         size: Host4ButtonSize.md,
         content: Host4ButtonContent.textOnly,
         state: _ButtonPreviewState.defaultState,
       ),
-      _FigmaButtonSpec(
+      _ButtonDemoSpec(
         variant: Host4ButtonVariant.popoverPrimary,
         size: Host4ButtonSize.md,
         content: Host4ButtonContent.textOnly,
         state: _ButtonPreviewState.hover,
       ),
-      _FigmaButtonSpec(
+      _ButtonDemoSpec(
         variant: Host4ButtonVariant.popoverPrimary,
         size: Host4ButtonSize.md,
         content: Host4ButtonContent.textOnly,
         state: _ButtonPreviewState.pressed,
       ),
-      _FigmaButtonSpec(
+      _ButtonDemoSpec(
         variant: Host4ButtonVariant.popoverPrimary,
         size: Host4ButtonSize.md,
         content: Host4ButtonContent.textOnly,
@@ -519,147 +685,153 @@ const List<_FigmaButtonColumn> _figmaButtonColumns = [
       ),
     ],
   ),
-  _FigmaButtonColumn(
+  _ButtonDemoGroup(
     buttons: [
-      _FigmaButtonSpec(
+      _ButtonDemoSpec(
         variant: Host4ButtonVariant.popoverSecondary,
         size: Host4ButtonSize.md,
         content: Host4ButtonContent.textOnly,
         state: _ButtonPreviewState.defaultState,
       ),
-      _FigmaButtonSpec(
+      _ButtonDemoSpec(
         variant: Host4ButtonVariant.popoverSecondary,
         size: Host4ButtonSize.md,
         content: Host4ButtonContent.textOnly,
         state: _ButtonPreviewState.hover,
       ),
-      _FigmaButtonSpec(
+      _ButtonDemoSpec(
         variant: Host4ButtonVariant.popoverSecondary,
         size: Host4ButtonSize.md,
         content: Host4ButtonContent.textOnly,
         state: _ButtonPreviewState.pressed,
       ),
-      _FigmaButtonSpec(
+      _ButtonDemoSpec(
         variant: Host4ButtonVariant.popoverSecondary,
+        size: Host4ButtonSize.md,
+        content: Host4ButtonContent.textOnly,
+        state: _ButtonPreviewState.focused,
+      ),
+      _ButtonDemoSpec(
+        variant: Host4ButtonVariant.popoverSecondary,
+        size: Host4ButtonSize.md,
+        content: Host4ButtonContent.textOnly,
+        state: _ButtonPreviewState.selected,
+      ),
+    ],
+  ),
+  _ButtonDemoGroup(
+    buttons: [
+      _ButtonDemoSpec(
+        variant: Host4ButtonVariant.dangerSoft,
+        size: Host4ButtonSize.md,
+        content: Host4ButtonContent.iconLeft,
+        state: _ButtonPreviewState.defaultState,
+        icon: _buttonDemoIcon,
+      ),
+      _ButtonDemoSpec(
+        variant: Host4ButtonVariant.dangerSoft,
+        size: Host4ButtonSize.md,
+        content: Host4ButtonContent.iconLeft,
+        state: _ButtonPreviewState.hover,
+        icon: _buttonDemoIcon,
+      ),
+      _ButtonDemoSpec(
+        variant: Host4ButtonVariant.dangerSoft,
+        size: Host4ButtonSize.md,
+        content: Host4ButtonContent.iconLeft,
+        state: _ButtonPreviewState.pressed,
+        icon: _buttonDemoIcon,
+      ),
+      _ButtonDemoSpec(
+        variant: Host4ButtonVariant.dangerSoft,
+        size: Host4ButtonSize.md,
+        content: Host4ButtonContent.iconLeft,
+        state: _ButtonPreviewState.focused,
+        icon: _buttonDemoIcon,
+      ),
+    ],
+  ),
+  _ButtonDemoGroup(
+    buttons: [
+      _ButtonDemoSpec(
+        variant: Host4ButtonVariant.dangerHigh,
+        size: Host4ButtonSize.sm,
+        content: Host4ButtonContent.textOnly,
+        state: _ButtonPreviewState.defaultState,
+      ),
+      _ButtonDemoSpec(
+        variant: Host4ButtonVariant.dangerHigh,
+        size: Host4ButtonSize.sm,
+        content: Host4ButtonContent.textOnly,
+        state: _ButtonPreviewState.hover,
+      ),
+      _ButtonDemoSpec(
+        variant: Host4ButtonVariant.dangerHigh,
+        size: Host4ButtonSize.sm,
+        content: Host4ButtonContent.textOnly,
+        state: _ButtonPreviewState.pressed,
+      ),
+      _ButtonDemoSpec(
+        variant: Host4ButtonVariant.dangerHigh,
         size: Host4ButtonSize.sm,
         content: Host4ButtonContent.textOnly,
         state: _ButtonPreviewState.focused,
       ),
     ],
   ),
-  _FigmaButtonColumn(
+  _ButtonDemoGroup(
     buttons: [
-      _FigmaButtonSpec(
-        variant: Host4ButtonVariant.dangerSoft,
-        size: Host4ButtonSize.md,
-        content: Host4ButtonContent.iconLeft,
-        state: _ButtonPreviewState.defaultState,
-        icon: Icons.refresh_rounded,
-      ),
-      _FigmaButtonSpec(
-        variant: Host4ButtonVariant.dangerSoft,
-        size: Host4ButtonSize.md,
-        content: Host4ButtonContent.iconLeft,
-        state: _ButtonPreviewState.hover,
-        icon: Icons.refresh_rounded,
-      ),
-      _FigmaButtonSpec(
-        variant: Host4ButtonVariant.dangerSoft,
-        size: Host4ButtonSize.md,
-        content: Host4ButtonContent.iconLeft,
-        state: _ButtonPreviewState.pressed,
-        icon: Icons.refresh_rounded,
-      ),
-      _FigmaButtonSpec(
-        variant: Host4ButtonVariant.dangerSoft,
-        size: Host4ButtonSize.md,
-        content: Host4ButtonContent.iconLeft,
-        state: _ButtonPreviewState.focused,
-        icon: Icons.refresh_rounded,
-      ),
-    ],
-  ),
-  _FigmaButtonColumn(
-    buttons: [
-      _FigmaButtonSpec(
-        variant: Host4ButtonVariant.dangerHigh,
-        size: Host4ButtonSize.sm,
-        content: Host4ButtonContent.textOnly,
-        state: _ButtonPreviewState.defaultState,
-      ),
-      _FigmaButtonSpec(
-        variant: Host4ButtonVariant.dangerHigh,
-        size: Host4ButtonSize.sm,
-        content: Host4ButtonContent.textOnly,
-        state: _ButtonPreviewState.hover,
-      ),
-      _FigmaButtonSpec(
-        variant: Host4ButtonVariant.dangerHigh,
-        size: Host4ButtonSize.sm,
-        content: Host4ButtonContent.textOnly,
-        state: _ButtonPreviewState.pressed,
-      ),
-      _FigmaButtonSpec(
-        variant: Host4ButtonVariant.dangerHigh,
-        size: Host4ButtonSize.sm,
-        content: Host4ButtonContent.textOnly,
-        state: _ButtonPreviewState.focused,
-      ),
-    ],
-  ),
-  _FigmaButtonColumn(
-    buttons: [
-      _FigmaButtonSpec(
+      _ButtonDemoSpec(
         variant: Host4ButtonVariant.secondary,
         size: Host4ButtonSize.md,
         content: Host4ButtonContent.iconLeft,
         state: _ButtonPreviewState.defaultState,
-        icon: Icons.refresh_rounded,
+        icon: _buttonDemoIcon,
       ),
-      _FigmaButtonSpec(
+      _ButtonDemoSpec(
         variant: Host4ButtonVariant.secondary,
         size: Host4ButtonSize.md,
         content: Host4ButtonContent.iconLeft,
         state: _ButtonPreviewState.hover,
-        icon: Icons.refresh_rounded,
+        icon: _buttonDemoIcon,
       ),
-      _FigmaButtonSpec(
+      _ButtonDemoSpec(
         variant: Host4ButtonVariant.secondary,
         size: Host4ButtonSize.md,
         content: Host4ButtonContent.iconLeft,
         state: _ButtonPreviewState.pressed,
-        icon: Icons.refresh_rounded,
+        icon: _buttonDemoIcon,
       ),
-      _FigmaButtonSpec(
+      _ButtonDemoSpec(
         variant: Host4ButtonVariant.secondary,
         size: Host4ButtonSize.md,
         content: Host4ButtonContent.iconLeft,
         state: _ButtonPreviewState.focused,
-        icon: Icons.refresh_rounded,
+        icon: _buttonDemoIcon,
       ),
     ],
   ),
-  _FigmaButtonColumn(
+  _ButtonDemoGroup(
     buttons: [
-      _FigmaButtonSpec(
+      _ButtonDemoSpec(
         variant: Host4ButtonVariant.secondary,
         size: Host4ButtonSize.sm,
         content: Host4ButtonContent.textOnly,
         state: _ButtonPreviewState.defaultState,
       ),
-      _FigmaButtonSpec(
+      _ButtonDemoSpec(
         variant: Host4ButtonVariant.secondary,
         size: Host4ButtonSize.sm,
         content: Host4ButtonContent.textOnly,
         state: _ButtonPreviewState.hover,
       ),
-      _FigmaButtonSpec(
+      _ButtonDemoSpec(
         variant: Host4ButtonVariant.secondary,
         size: Host4ButtonSize.sm,
         content: Host4ButtonContent.textOnly,
         state: _ButtonPreviewState.pressed,
       ),
-      _FigmaButtonSpec(
+      _ButtonDemoSpec(
         variant: Host4ButtonVariant.secondary,
         size: Host4ButtonSize.sm,
         content: Host4ButtonContent.textOnly,
@@ -669,31 +841,75 @@ const List<_FigmaButtonColumn> _figmaButtonColumns = [
   ),
 ];
 
-class _FigmaButtonColumnView extends StatelessWidget {
-  const _FigmaButtonColumnView({required this.column});
+class _ButtonDemoGroupView extends StatelessWidget {
+  const _ButtonDemoGroupView({required this.column});
 
-  final _FigmaButtonColumn column;
+  final _ButtonDemoGroup column;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = context.host4Theme;
+    final first = column.buttons.first;
+
+    return Host4Card(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Host4Text(_buttonGroupTitle(first), role: Host4TextRole.labelMedium),
+          SizedBox(height: theme.spacing.xs),
+          Host4Text(
+            _buttonGroupSubtitle(first),
+            role: Host4TextRole.caption,
+            colorRole: Host4TextColorRole.secondary,
+          ),
+          SizedBox(height: theme.spacing.md),
+          for (var index = 0; index < column.buttons.length; index++) ...[
+            _ButtonDemoStateRow(spec: column.buttons[index]),
+            if (index != column.buttons.length - 1)
+              SizedBox(height: theme.spacing.sm),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _ButtonDemoStateRow extends StatelessWidget {
+  const _ButtonDemoStateRow({required this.spec});
+
+  final _ButtonDemoSpec spec;
 
   @override
   Widget build(BuildContext context) {
     final theme = context.host4Theme;
 
-    return Column(
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        for (var index = 0; index < column.buttons.length; index++) ...[
-          _FigmaButtonPreview(spec: column.buttons[index]),
-          if (index != column.buttons.length - 1)
-            SizedBox(height: theme.spacing.md),
-        ],
+        SizedBox(
+          width: 76,
+          child: Host4Text(
+            _stateLabel(spec.state),
+            role: Host4TextRole.caption,
+            colorRole: Host4TextColorRole.secondary,
+          ),
+        ),
+        SizedBox(width: theme.spacing.sm),
+        Expanded(
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: _ButtonDemoPreview(spec: spec),
+          ),
+        ),
       ],
     );
   }
 }
 
-class _FigmaButtonPreview extends StatelessWidget {
-  const _FigmaButtonPreview({required this.spec});
+class _ButtonDemoPreview extends StatelessWidget {
+  const _ButtonDemoPreview({required this.spec});
 
-  final _FigmaButtonSpec spec;
+  final _ButtonDemoSpec spec;
 
   @override
   Widget build(BuildContext context) {
@@ -707,13 +923,23 @@ class _FigmaButtonPreview extends StatelessWidget {
 
     Widget child;
     if (spec.content == Host4ButtonContent.iconOnly) {
-      child = Icon(icon, size: metrics.iconSize, color: stateTokens.foreground);
+      child = icon == null
+          ? const SizedBox.shrink()
+          : Host4SvgIcon(
+              assetPath: icon,
+              size: metrics.iconSize,
+              color: stateTokens.foreground,
+            );
     } else if (spec.content == Host4ButtonContent.iconLeft) {
       child = Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           if (icon != null) ...[
-            Icon(icon, size: metrics.iconSize, color: stateTokens.foreground),
+            Host4SvgIcon(
+              assetPath: icon,
+              size: metrics.iconSize,
+              color: stateTokens.foreground,
+            ),
             SizedBox(width: buttonTokens.spacing.iconGap),
           ],
           Text(
@@ -732,7 +958,11 @@ class _FigmaButtonPreview extends StatelessWidget {
           ),
           if (icon != null) ...[
             SizedBox(width: buttonTokens.spacing.iconGap),
-            Icon(icon, size: metrics.iconSize, color: stateTokens.foreground),
+            Host4SvgIcon(
+              assetPath: icon,
+              size: metrics.iconSize,
+              color: stateTokens.foreground,
+            ),
           ],
         ],
       );
@@ -743,37 +973,74 @@ class _FigmaButtonPreview extends StatelessWidget {
       );
     }
 
-    return Padding(
-      padding: EdgeInsets.all(
-        spec.state == _ButtonPreviewState.focused ? theme.spacing.xs : 0,
+    if (spec.state == _ButtonPreviewState.selected &&
+        spec.variant == Host4ButtonVariant.ghost &&
+        spec.content != Host4ButtonContent.iconOnly) {
+      final indicator = buttonTokens.selectedIndicator;
+      child = Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          child,
+          SizedBox(height: indicator.gap),
+          Container(
+            width: indicator.width,
+            height: indicator.height,
+            decoration: BoxDecoration(
+              color: indicator.color,
+              borderRadius: BorderRadius.circular(indicator.height / 2),
+            ),
+          ),
+        ],
+      );
+    }
+
+    final button = Container(
+      width: metrics.width,
+      height: metrics.height,
+      decoration: BoxDecoration(
+        color: stateTokens.background,
+        borderRadius: BorderRadius.circular(variantTokens.radius),
+        border: _buttonPreviewBorder(stateTokens),
       ),
-      child: Container(
-        width: metrics.width,
-        height: metrics.height,
-        decoration: BoxDecoration(
-          color: stateTokens.background,
-          borderRadius: BorderRadius.circular(variantTokens.radius),
-          border: Border.all(color: stateTokens.border),
-          boxShadow: spec.state == _ButtonPreviewState.focused
-              ? [
-                  BoxShadow(
-                    color: ring.color,
-                    spreadRadius: ring.offsetWidth + ring.width,
-                    blurRadius: 0,
-                  ),
-                  BoxShadow(
-                    color: stateTokens.background,
-                    spreadRadius: ring.offsetWidth,
-                    blurRadius: 0,
-                  ),
-                ]
-              : null,
+      alignment: Alignment.center,
+      child: child,
+    );
+
+    Widget result = button;
+    if (stateTokens.opacity < 1) {
+      result = Opacity(opacity: stateTokens.opacity, child: result);
+    }
+
+    if (spec.state != _ButtonPreviewState.focused ||
+        !variantTokens.focusRingVisible) {
+      return result;
+    }
+
+    return Container(
+      padding: EdgeInsets.all(ring.offsetWidth),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(
+          ring.radius > 0
+              ? ring.radius
+              : variantTokens.radius + ring.offsetWidth + ring.width,
         ),
-        alignment: Alignment.center,
-        child: child,
+        border: Border.all(color: ring.color, width: ring.width),
+      ),
+      child: result,
+    );
+  }
+}
+
+Border _buttonPreviewBorder(Host4ButtonStateTokens stateTokens) {
+  if (stateTokens.bottomBorderWidth > 0) {
+    return Border(
+      bottom: BorderSide(
+        color: stateTokens.border,
+        width: stateTokens.bottomBorderWidth,
       ),
     );
   }
+  return Border.all(color: stateTokens.border);
 }
 
 Host4ButtonVariantTokens _variantTokens(
@@ -787,8 +1054,6 @@ Host4ButtonVariantTokens _variantTokens(
     Host4ButtonVariant.popoverPrimary => buttonTokens.popoverPrimary,
     Host4ButtonVariant.popoverSecondary => buttonTokens.popoverSecondary,
     Host4ButtonVariant.tertiary => buttonTokens.tertiary,
-    Host4ButtonVariant.outline => buttonTokens.outline,
-    Host4ButtonVariant.danger => buttonTokens.danger,
     Host4ButtonVariant.dangerHigh => buttonTokens.dangerHigh,
     Host4ButtonVariant.dangerSoft => buttonTokens.dangerSoft,
   };
@@ -808,66 +1073,117 @@ Host4ButtonStateTokens _stateTokens(
   };
 }
 
-_FigmaButtonMetrics _metricsFor(_FigmaButtonSpec spec) {
+_ButtonDemoMetrics _metricsFor(_ButtonDemoSpec spec) {
   if (spec.variant == Host4ButtonVariant.ghost &&
       spec.size == Host4ButtonSize.sm &&
       spec.content == Host4ButtonContent.textOnly) {
-    return const _FigmaButtonMetrics(width: 70, height: 26, iconSize: 16);
+    if (spec.state == _ButtonPreviewState.selected) {
+      return const _ButtonDemoMetrics(width: 71, height: 27, iconSize: 16);
+    }
+    return const _ButtonDemoMetrics(width: 70, height: 26, iconSize: 16);
   }
   if (spec.variant == Host4ButtonVariant.ghost &&
       spec.size == Host4ButtonSize.md &&
       spec.content == Host4ButtonContent.textOnly) {
-    return const _FigmaButtonMetrics(width: 70, height: 34, iconSize: 16);
+    return const _ButtonDemoMetrics(width: 70, height: 34, iconSize: 16);
   }
   if (spec.variant == Host4ButtonVariant.ghost &&
       spec.size == Host4ButtonSize.sm &&
       (spec.content == Host4ButtonContent.iconLeft ||
           spec.content == Host4ButtonContent.iconRight)) {
-    return const _FigmaButtonMetrics(width: 94, height: 32, iconSize: 20);
+    return const _ButtonDemoMetrics(width: 94, height: 32, iconSize: 20);
   }
   if (spec.variant == Host4ButtonVariant.ghost &&
       spec.size == Host4ButtonSize.sm &&
       spec.content == Host4ButtonContent.iconOnly) {
-    return const _FigmaButtonMetrics(width: 40, height: 32, iconSize: 20);
+    return const _ButtonDemoMetrics(width: 40, height: 32, iconSize: 20);
   }
   if (spec.variant == Host4ButtonVariant.ghost &&
       spec.size == Host4ButtonSize.xs &&
       spec.content == Host4ButtonContent.iconOnly) {
-    return const _FigmaButtonMetrics(width: 24, height: 24, iconSize: 16);
+    return const _ButtonDemoMetrics(width: 24, height: 24, iconSize: 16);
   }
   if (spec.variant == Host4ButtonVariant.primary &&
       spec.size == Host4ButtonSize.sm) {
-    return const _FigmaButtonMetrics(width: 94, height: 34, iconSize: 16);
+    return const _ButtonDemoMetrics(width: 94, height: 34, iconSize: 16);
   }
   if (spec.variant == Host4ButtonVariant.primary &&
       spec.size == Host4ButtonSize.xs) {
-    return const _FigmaButtonMetrics(width: 62, height: 34, iconSize: 16);
+    return const _ButtonDemoMetrics(width: 62, height: 34, iconSize: 16);
   }
   if (spec.variant == Host4ButtonVariant.popoverPrimary) {
-    return const _FigmaButtonMetrics(width: 78, height: 42, iconSize: 16);
+    return const _ButtonDemoMetrics(width: 78, height: 42, iconSize: 16);
   }
   if (spec.variant == Host4ButtonVariant.popoverSecondary) {
-    return const _FigmaButtonMetrics(width: 78, height: 42, iconSize: 16);
+    return const _ButtonDemoMetrics(width: 78, height: 42, iconSize: 16);
   }
   if (spec.variant == Host4ButtonVariant.dangerSoft &&
       spec.content == Host4ButtonContent.iconLeft) {
-    return const _FigmaButtonMetrics(width: 94, height: 40, iconSize: 20);
+    return const _ButtonDemoMetrics(width: 94, height: 40, iconSize: 20);
   }
   if (spec.variant == Host4ButtonVariant.dangerHigh) {
-    return const _FigmaButtonMetrics(width: 94, height: 34, iconSize: 16);
+    return const _ButtonDemoMetrics(width: 94, height: 34, iconSize: 16);
   }
   if (spec.variant == Host4ButtonVariant.secondary &&
       spec.size == Host4ButtonSize.md &&
       spec.content == Host4ButtonContent.iconLeft) {
-    return const _FigmaButtonMetrics(width: 94, height: 40, iconSize: 20);
+    return const _ButtonDemoMetrics(width: 94, height: 40, iconSize: 20);
   }
   if (spec.variant == Host4ButtonVariant.secondary &&
       spec.size == Host4ButtonSize.sm &&
       spec.content == Host4ButtonContent.textOnly) {
-    return const _FigmaButtonMetrics(width: 62, height: 34, iconSize: 16);
+    return const _ButtonDemoMetrics(width: 62, height: 34, iconSize: 16);
   }
 
-  return const _FigmaButtonMetrics(width: 94, height: 34, iconSize: 16);
+  return const _ButtonDemoMetrics(width: 94, height: 34, iconSize: 16);
+}
+
+String _buttonGroupTitle(_ButtonDemoSpec spec) {
+  return '${_variantLabel(spec.variant)} / ${_sizeLabel(spec.size)}';
+}
+
+String _buttonGroupSubtitle(_ButtonDemoSpec spec) {
+  return '${_contentLabel(spec.content)} · ${spec.showsLabel ? 'label' : 'icon only'}';
+}
+
+String _variantLabel(Host4ButtonVariant variant) {
+  return switch (variant) {
+    Host4ButtonVariant.ghost => 'ghost',
+    Host4ButtonVariant.primary => 'primary',
+    Host4ButtonVariant.secondary => 'secondary',
+    Host4ButtonVariant.popoverPrimary => 'popover primary',
+    Host4ButtonVariant.popoverSecondary => 'popover secondary',
+    Host4ButtonVariant.dangerHigh => 'danger high',
+    Host4ButtonVariant.dangerSoft => 'danger soft',
+    Host4ButtonVariant.tertiary => 'tertiary',
+  };
+}
+
+String _sizeLabel(Host4ButtonSize size) {
+  return switch (size) {
+    Host4ButtonSize.xs => 'xs',
+    Host4ButtonSize.sm => 'sm',
+    Host4ButtonSize.md => 'md',
+  };
+}
+
+String _contentLabel(Host4ButtonContent content) {
+  return switch (content) {
+    Host4ButtonContent.textOnly => 'text only',
+    Host4ButtonContent.iconLeft => 'icon left',
+    Host4ButtonContent.iconRight => 'icon right',
+    Host4ButtonContent.iconOnly => 'icon only',
+  };
+}
+
+String _stateLabel(_ButtonPreviewState state) {
+  return switch (state) {
+    _ButtonPreviewState.defaultState => 'default',
+    _ButtonPreviewState.hover => 'hover',
+    _ButtonPreviewState.pressed => 'pressed',
+    _ButtonPreviewState.focused => 'focused',
+    _ButtonPreviewState.selected => 'selected',
+  };
 }
 
 // ─── Tag Demo ────────────────────────────────────────────────────────────────
@@ -900,15 +1216,14 @@ class _TagDemoPage extends StatelessWidget {
           spacing: theme.spacing.sm,
           runSpacing: theme.spacing.sm,
           children: [
-            Host4Tag(label: 'Normal', icon: Icons.label_outline_rounded),
-            Host4Tag(
+            // TODO: pass SVG asset paths once Figma icons are exported
+            const Host4Tag(label: 'Normal'),
+            const Host4Tag(
               label: 'Selected',
-              icon: Icons.check_rounded,
               variant: Host4TagVariant.selected,
             ),
-            Host4Tag(
+            const Host4Tag(
               label: 'Disabled',
-              icon: Icons.block_rounded,
               variant: Host4TagVariant.disabled,
             ),
           ],
@@ -919,13 +1234,7 @@ class _TagDemoPage extends StatelessWidget {
         Wrap(
           spacing: theme.spacing.sm,
           runSpacing: theme.spacing.sm,
-          children: [
-            Host4Tag(
-              label: 'Tap me',
-              icon: Icons.touch_app_rounded,
-              onTap: () {},
-            ),
-          ],
+          children: [Host4Tag(label: 'Tap me', onTap: () {})],
         ),
       ],
     );
@@ -944,12 +1253,15 @@ class _EmptyStateDemoPage extends StatelessWidget {
     return ListView(
       padding: EdgeInsets.all(theme.spacing.page),
       children: [
-        Host4SectionHeader(title: 'Full', subtitle: 'Icon + title + subtitle + action'),
+        Host4SectionHeader(
+          title: 'Full',
+          subtitle: 'Icon + title + subtitle + action',
+        ),
         SizedBox(height: theme.spacing.md),
         SizedBox(
           height: 280,
           child: Host4EmptyState(
-            icon: Icons.inbox_outlined,
+            // TODO: icon: 'assets/icons/inbox.svg' once Figma icons are exported
             title: 'No items yet',
             subtitle: 'Add your first item to get started.',
             action: Host4Button(
@@ -963,19 +1275,14 @@ class _EmptyStateDemoPage extends StatelessWidget {
         SizedBox(height: theme.spacing.section),
         Host4SectionHeader(title: 'Title Only', subtitle: ''),
         SizedBox(height: theme.spacing.md),
-        SizedBox(
-          height: 180,
-          child: Host4EmptyState(
-            title: 'Nothing here',
-          ),
-        ),
+        SizedBox(height: 180, child: Host4EmptyState(title: 'Nothing here')),
         SizedBox(height: theme.spacing.section),
         Host4SectionHeader(title: 'Icon + Title', subtitle: ''),
         SizedBox(height: theme.spacing.md),
         SizedBox(
           height: 220,
           child: Host4EmptyState(
-            icon: Icons.search_off_rounded,
+            // TODO: icon: 'assets/icons/search_off.svg' once Figma icons are exported
             title: 'No results found',
             subtitle: 'Try adjusting your search or filters.',
           ),
@@ -1000,7 +1307,7 @@ class _BannerDemoPage extends StatelessWidget {
         Host4SectionHeader(title: 'Info', subtitle: ''),
         SizedBox(height: theme.spacing.md),
         Host4Banner(
-          icon: Icons.info_outline_rounded,
+          // TODO: icon: 'assets/icons/info.svg' once Figma icons are exported
           title: 'Information',
           body: 'This is an informational message for the user.',
         ),
@@ -1008,7 +1315,7 @@ class _BannerDemoPage extends StatelessWidget {
         Host4SectionHeader(title: 'Success', subtitle: ''),
         SizedBox(height: theme.spacing.md),
         Host4Banner(
-          icon: Icons.check_circle_outline_rounded,
+          // TODO: icon: 'assets/icons/check_circle.svg' once Figma icons are exported
           title: 'Success',
           body: 'Your changes have been saved successfully.',
           variant: Host4BannerVariant.success,
@@ -1017,7 +1324,7 @@ class _BannerDemoPage extends StatelessWidget {
         Host4SectionHeader(title: 'Warning', subtitle: ''),
         SizedBox(height: theme.spacing.md),
         Host4Banner(
-          icon: Icons.warning_amber_rounded,
+          // TODO: icon: 'assets/icons/warning.svg' once Figma icons are exported
           title: 'Warning',
           body: 'Please review the highlighted fields before proceeding.',
           variant: Host4BannerVariant.warning,
@@ -1026,7 +1333,7 @@ class _BannerDemoPage extends StatelessWidget {
         Host4SectionHeader(title: 'Error', subtitle: ''),
         SizedBox(height: theme.spacing.md),
         Host4Banner(
-          icon: Icons.error_outline_rounded,
+          // TODO: icon: 'assets/icons/error.svg' once Figma icons are exported
           title: 'Error',
           body: 'Something went wrong. Please try again.',
           variant: Host4BannerVariant.error,
@@ -1072,7 +1379,10 @@ class _ProgressBarDemoPage extends StatelessWidget {
         SizedBox(height: theme.spacing.md),
         Host4ProgressBar(value: null),
         SizedBox(height: theme.spacing.section),
-        Host4SectionHeader(title: 'Steps', subtitle: '0% / 25% / 50% / 75% / 100%'),
+        Host4SectionHeader(
+          title: 'Steps',
+          subtitle: '0% / 25% / 50% / 75% / 100%',
+        ),
         SizedBox(height: theme.spacing.md),
         for (final v in [0.0, 0.25, 0.5, 0.75, 1.0]) ...[
           Host4ProgressBar(value: v),
@@ -1119,19 +1429,11 @@ class _SegmentedFilterDemoPageState extends State<_SegmentedFilterDemoPage> {
         Host4SectionHeader(title: 'With Icons', subtitle: ''),
         SizedBox(height: theme.spacing.md),
         Host4SegmentedFilter(
+          // TODO: add icon: 'assets/icons/xxx.svg' once Figma icons are exported
           items: const [
-            Host4SegmentedFilterItem(
-              label: 'List',
-              icon: Icons.view_list_rounded,
-            ),
-            Host4SegmentedFilterItem(
-              label: 'Grid',
-              icon: Icons.grid_view_rounded,
-            ),
-            Host4SegmentedFilterItem(
-              label: 'Map',
-              icon: Icons.map_outlined,
-            ),
+            Host4SegmentedFilterItem(label: 'List'),
+            Host4SegmentedFilterItem(label: 'Grid'),
+            Host4SegmentedFilterItem(label: 'Map'),
           ],
           selectedIndex: _selectedWithIconIndex,
           onChanged: (i) => setState(() => _selectedWithIconIndex = i),
@@ -1170,14 +1472,12 @@ class _InfoChipDemoPage extends StatelessWidget {
         Wrap(
           spacing: theme.spacing.sm,
           runSpacing: theme.spacing.sm,
+          // TODO: add icon: 'assets/icons/xxx.svg' once Figma icons are exported
           children: const [
-            Host4InfoChip(label: 'Online', icon: Icons.circle),
-            Host4InfoChip(label: 'v2.3.1', icon: Icons.new_releases_outlined),
-            Host4InfoChip(
-              label: '42 players',
-              icon: Icons.people_outline_rounded,
-            ),
-            Host4InfoChip(label: 'Low latency', icon: Icons.bolt_rounded),
+            Host4InfoChip(label: 'Online'),
+            Host4InfoChip(label: 'v2.3.1'),
+            Host4InfoChip(label: '42 players'),
+            Host4InfoChip(label: 'Low latency'),
           ],
         ),
       ],
@@ -1202,10 +1502,8 @@ class _ToolbarDemoPage extends StatelessWidget {
             Host4SearchBar(hintText: 'Search...'),
             Host4Button(
               label: 'Filter',
-              icon: Icons.tune_rounded,
               variant: Host4ButtonVariant.ghost,
               size: Host4ButtonSize.sm,
-              content: Host4ButtonContent.iconOnly,
               onPressed: () {},
             ),
           ],

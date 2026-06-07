@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../foundation/host4_svg_icon.dart';
 import '../foundation/theme/host4_theme_scope.dart';
 
 class Host4EmptyState extends StatelessWidget {
@@ -11,7 +12,8 @@ class Host4EmptyState extends StatelessWidget {
     this.action,
   });
 
-  final IconData? icon;
+  /// SVG asset path for the illustration icon (e.g. `'assets/icons/empty.svg'`).
+  final String? icon;
   final String title;
   final String? subtitle;
   final Widget? action;
@@ -25,7 +27,7 @@ class Host4EmptyState extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           if (icon != null) ...[
-            Icon(icon, size: tokens.iconSize, color: tokens.iconColor),
+            Host4SvgIcon(assetPath: icon!, size: tokens.iconSize, color: tokens.iconColor),
             SizedBox(height: tokens.iconGap),
           ],
           Text(

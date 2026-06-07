@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../foundation/host4_svg_icon.dart';
 import '../foundation/theme/host4_runtime_theme.dart';
 import '../foundation/theme/host4_theme_scope.dart';
 
@@ -15,7 +16,8 @@ class Host4Banner extends StatelessWidget {
     this.trailing,
   });
 
-  final IconData? icon;
+  /// SVG asset path for the leading icon (e.g. `'assets/icons/info.svg'`).
+  final String? icon;
   final String title;
   final String? body;
   final Host4BannerVariant variant;
@@ -48,7 +50,7 @@ class Host4Banner extends StatelessWidget {
         child: Row(
           children: [
             if (icon != null) ...[
-              Icon(icon, size: tokens.iconSize, color: colors.icon),
+              Host4SvgIcon(assetPath: icon!, size: tokens.iconSize, color: colors.icon),
               SizedBox(width: tokens.iconGap),
             ],
             Expanded(

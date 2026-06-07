@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../foundation/host4_svg_icon.dart';
 import '../foundation/theme/host4_runtime_theme.dart';
 import '../foundation/theme/host4_theme_scope.dart';
 
@@ -7,7 +8,8 @@ class Host4SegmentedFilterItem {
   const Host4SegmentedFilterItem({required this.label, this.icon});
 
   final String label;
-  final IconData? icon;
+  /// SVG asset path for the leading icon (e.g. `'assets/icons/filter.svg'`).
+  final String? icon;
 }
 
 class Host4SegmentedFilter extends StatelessWidget {
@@ -90,7 +92,7 @@ class _SegmentItem extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               if (item.icon != null) ...[
-                Icon(item.icon, size: tokens.iconSize, color: stateTokens.foreground),
+                Host4SvgIcon(assetPath: item.icon!, size: tokens.iconSize, color: stateTokens.foreground),
                 SizedBox(width: tokens.iconGap),
               ],
               Text(

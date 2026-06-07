@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 
+import '../foundation/host4_svg_icon.dart';
 import '../foundation/theme/host4_theme_scope.dart';
 
 class Host4InfoChip extends StatelessWidget {
   const Host4InfoChip({required this.label, super.key, this.icon});
 
   final String label;
-  final IconData? icon;
+  /// SVG asset path for the leading icon (e.g. `'assets/icons/info.svg'`).
+  final String? icon;
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +29,7 @@ class Host4InfoChip extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             if (icon != null) ...[
-              Icon(icon, size: tokens.iconSize, color: tokens.iconColor),
+              Host4SvgIcon(assetPath: icon!, size: tokens.iconSize, color: tokens.iconColor),
               SizedBox(width: tokens.iconGap),
             ],
             Text(

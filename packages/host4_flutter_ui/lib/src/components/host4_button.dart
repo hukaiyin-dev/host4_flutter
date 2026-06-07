@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../foundation/host4_svg_icon.dart';
 import '../foundation/theme/host4_runtime_theme.dart';
 import '../foundation/theme/host4_theme_scope.dart';
 
@@ -12,13 +13,11 @@ enum Host4ButtonVariant {
   dangerHigh,
   dangerSoft,
   tertiary,
-  outline,
-  danger,
 }
 
-enum Host4ButtonContent { textOnly, iconLeft, iconRight, iconTop, iconOnly }
+enum Host4ButtonContent { textOnly, iconLeft, iconRight, iconOnly }
 
-enum Host4ButtonSize { xs, sm, md, lg }
+enum Host4ButtonSize { xs, sm, md }
 
 class Host4Button extends StatefulWidget {
   const Host4Button({
@@ -42,7 +41,9 @@ class Host4Button extends StatefulWidget {
   final Host4ButtonVariant variant;
   final Host4ButtonSize size;
   final Host4ButtonContent content;
-  final IconData? icon;
+
+  /// SVG asset path for the button icon (e.g. `Host4IconAssets.hamburger`).
+  final String? icon;
   final bool expanded;
   final bool loading;
   final bool selected;
@@ -78,52 +79,51 @@ class _Host4ButtonState extends State<Host4Button> {
             vertical: _verticalPadding(buttonTokens),
           );
 
-    final ringTokens = buttonTokens.focusedRing;
-    final buttonChild = ConstrainedBox(
-      constraints: BoxConstraints(
-        minHeight: sizeTokens.minHeight,
-        minWidth: widget.content == Host4ButtonContent.iconOnly
-            ? sizeTokens.iconOnlyExtent
-            : 0,
-      ),
-      child: Material(
-        color: stateTokens.background,
-        borderRadius: radius,
-        child: InkWell(
-          onTap: enabled ? widget.onPressed : null,
-          onHover: enabled ? (value) => setState(() => _hovered = value) : null,
-          onHighlightChanged: (value) => setState(() => _pressed = value),
+    final buttonSurface = AnimatedOpacity(
+      duration: const Duration(milliseconds: 160),
+      opacity: stateTokens.opacity,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          minHeight: sizeTokens.minHeight,
+          minWidth: widget.content == Host4ButtonContent.iconOnly
+              ? sizeTokens.iconOnlyExtent
+              : 0,
+        ),
+        child: Material(
+          color: stateTokens.background,
           borderRadius: radius,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 160),
-            padding: padding,
-            decoration: BoxDecoration(
-              borderRadius: radius,
-              border: Border.all(color: stateTokens.border),
-              boxShadow: _focused
-                  ? [
-                      BoxShadow(
-                        color: ringTokens.color,
-                        spreadRadius: ringTokens.offsetWidth + ringTokens.width,
-                        blurRadius: 0,
-                      ),
-                      BoxShadow(
-                        color: stateTokens.background,
-                        spreadRadius: ringTokens.offsetWidth,
-                        blurRadius: 0,
-                      ),
-                    ]
-                  : null,
-            ),
-            child: AnimatedOpacity(
+          child: InkWell(
+            onTap: enabled ? widget.onPressed : null,
+            onHover: enabled
+                ? (value) => setState(() => _hovered = value)
+                : null,
+            onHighlightChanged: (value) => setState(() => _pressed = value),
+            borderRadius: radius,
+            child: AnimatedContainer(
               duration: const Duration(milliseconds: 160),
-              opacity: widget.loading ? buttonTokens.loading.opacity : 1,
-              child: _buildContent(theme, stateTokens),
+              padding: padding,
+              decoration: BoxDecoration(
+                borderRadius: radius,
+                border: _buttonBorder(stateTokens),
+              ),
+              child: AnimatedOpacity(
+                duration: const Duration(milliseconds: 160),
+                opacity: widget.loading ? buttonTokens.loading.opacity : 1,
+                child: _buildContent(theme, stateTokens, buttonTokens),
+              ),
             ),
           ),
         ),
       ),
     );
+
+    final buttonChild = _focused && variantTokens.focusRingVisible
+        ? _ButtonFocusRing(
+            radius: variantTokens.radius,
+            tokens: buttonTokens.focusedRing,
+            child: buttonSurface,
+          )
+        : buttonSurface;
 
     final focusable = Focus(
       onFocusChange: (value) => setState(() => _focused = value),
@@ -137,9 +137,8 @@ class _Host4ButtonState extends State<Host4Button> {
   Widget _buildContent(
     Host4RuntimeTheme theme,
     Host4ButtonStateTokens stateTokens,
+    Host4ButtonComponentTokens buttonTokens,
   ) {
-    final buttonTokens = theme.components.button;
-
     if (widget.loading) {
       final spinner = SizedBox(
         width: buttonTokens.loading.spinnerSize,
@@ -165,71 +164,81 @@ class _Host4ButtonState extends State<Host4Button> {
       );
     }
 
-    switch (widget.content) {
-      case Host4ButtonContent.textOnly:
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: widget.expanded ? MainAxisSize.max : MainAxisSize.min,
-          children: [_label(theme, stateTokens)],
-        );
+    final content = switch (widget.content) {
+      Host4ButtonContent.textOnly => Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: widget.expanded ? MainAxisSize.max : MainAxisSize.min,
+        children: [_label(theme, stateTokens)],
+      ),
 
-      case Host4ButtonContent.iconLeft:
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: widget.expanded ? MainAxisSize.max : MainAxisSize.min,
-          children: [
-            Icon(
-              widget.icon,
+      Host4ButtonContent.iconLeft => Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: widget.expanded ? MainAxisSize.max : MainAxisSize.min,
+        children: [
+          if (widget.icon != null)
+            Host4SvgIcon(
+              assetPath: widget.icon!,
               size: buttonTokens.leadingIconSize,
               color: stateTokens.foreground,
             ),
-            SizedBox(width: buttonTokens.spacing.iconGap),
-            _label(theme, stateTokens),
-          ],
-        );
+          SizedBox(width: buttonTokens.spacing.iconGap),
+          _label(theme, stateTokens),
+        ],
+      ),
 
-      case Host4ButtonContent.iconRight:
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: widget.expanded ? MainAxisSize.max : MainAxisSize.min,
-          children: [
-            _label(theme, stateTokens),
-            SizedBox(width: buttonTokens.spacing.iconGap),
-            Icon(
-              widget.icon,
+      Host4ButtonContent.iconRight => Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: widget.expanded ? MainAxisSize.max : MainAxisSize.min,
+        children: [
+          _label(theme, stateTokens),
+          SizedBox(width: buttonTokens.spacing.iconGap),
+          if (widget.icon != null)
+            Host4SvgIcon(
+              assetPath: widget.icon!,
               size: buttonTokens.leadingIconSize,
               color: stateTokens.foreground,
             ),
-          ],
-        );
+        ],
+      ),
 
-      case Host4ButtonContent.iconTop:
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              widget.icon,
-              size: buttonTokens.topIconSize,
-              color: stateTokens.foreground,
-            ),
-            SizedBox(height: buttonTokens.spacing.stackGap),
-            _label(theme, stateTokens),
-          ],
-        );
+      Host4ButtonContent.iconOnly => SizedBox.square(
+        dimension: _sizeTokens(buttonTokens).iconOnlyExtent,
+        child: Center(
+          child: widget.icon != null
+              ? Host4SvgIcon(
+                  assetPath: widget.icon!,
+                  size: buttonTokens.iconOnlySize,
+                  color: stateTokens.foreground,
+                )
+              : const SizedBox.shrink(),
+        ),
+      ),
+    };
 
-      case Host4ButtonContent.iconOnly:
-        return SizedBox.square(
-          dimension: _sizeTokens(buttonTokens).iconOnlyExtent,
-          child: Center(
-            child: Icon(
-              widget.icon,
-              size: buttonTokens.iconOnlySize,
-              color: stateTokens.foreground,
-            ),
+    if (!_showsSelectedIndicator) return content;
+
+    final indicator = buttonTokens.selectedIndicator;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        content,
+        SizedBox(height: indicator.gap),
+        Container(
+          width: indicator.width,
+          height: indicator.height,
+          decoration: BoxDecoration(
+            color: indicator.color,
+            borderRadius: BorderRadius.circular(indicator.height / 2),
           ),
-        );
-    }
+        ),
+      ],
+    );
   }
+
+  bool get _showsSelectedIndicator =>
+      widget.selected &&
+      widget.variant == Host4ButtonVariant.ghost &&
+      widget.content != Host4ButtonContent.iconOnly;
 
   Widget _label(Host4RuntimeTheme theme, Host4ButtonStateTokens stateTokens) {
     return Flexible(
@@ -249,15 +258,25 @@ class _Host4ButtonState extends State<Host4Button> {
         Host4ButtonSize.xs => buttonTokens.spacing.xsHorizontal,
         Host4ButtonSize.sm => buttonTokens.spacing.smHorizontal,
         Host4ButtonSize.md => buttonTokens.spacing.mdHorizontal,
-        Host4ButtonSize.lg => buttonTokens.spacing.lgHorizontal,
       };
+
+  Border _buttonBorder(Host4ButtonStateTokens stateTokens) {
+    if (stateTokens.bottomBorderWidth > 0) {
+      return Border(
+        bottom: BorderSide(
+          color: stateTokens.border,
+          width: stateTokens.bottomBorderWidth,
+        ),
+      );
+    }
+    return Border.all(color: stateTokens.border);
+  }
 
   double _verticalPadding(Host4ButtonComponentTokens buttonTokens) =>
       switch (widget.size) {
         Host4ButtonSize.xs => buttonTokens.spacing.xsVertical,
         Host4ButtonSize.sm => buttonTokens.spacing.smVertical,
         Host4ButtonSize.md => buttonTokens.spacing.mdVertical,
-        Host4ButtonSize.lg => buttonTokens.spacing.lgVertical,
       };
 
   Host4ButtonSizeTokens _sizeTokens(Host4ButtonComponentTokens buttonTokens) =>
@@ -265,7 +284,6 @@ class _Host4ButtonState extends State<Host4Button> {
         Host4ButtonSize.xs => buttonTokens.sizes.xs,
         Host4ButtonSize.sm => buttonTokens.sizes.sm,
         Host4ButtonSize.md => buttonTokens.sizes.md,
-        Host4ButtonSize.lg => buttonTokens.sizes.lg,
       };
 
   Host4ButtonStateTokens _stateTokens(
@@ -298,8 +316,34 @@ class _Host4ButtonState extends State<Host4Button> {
       Host4ButtonVariant.dangerHigh => theme.components.button.dangerHigh,
       Host4ButtonVariant.dangerSoft => theme.components.button.dangerSoft,
       Host4ButtonVariant.tertiary => theme.components.button.tertiary,
-      Host4ButtonVariant.outline => theme.components.button.outline,
-      Host4ButtonVariant.danger => theme.components.button.danger,
     };
+  }
+}
+
+class _ButtonFocusRing extends StatelessWidget {
+  const _ButtonFocusRing({
+    required this.radius,
+    required this.tokens,
+    required this.child,
+  });
+
+  final double radius;
+  final Host4ButtonFocusedRingTokens tokens;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(tokens.offsetWidth),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(
+          tokens.radius > 0
+              ? tokens.radius
+              : radius + tokens.offsetWidth + tokens.width,
+        ),
+        border: Border.all(color: tokens.color, width: tokens.width),
+      ),
+      child: child,
+    );
   }
 }

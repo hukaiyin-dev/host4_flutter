@@ -3,13 +3,10 @@ import 'package:host4_flutter_ui/host4_flutter_ui.dart';
 
 import '../l10n/generated/app_localizations.dart';
 import '../widgets/sub_page_scaffold.dart';
-import 'debug_inspector_page.dart';
-import 'gmacro/gmacro_entry_page.dart';
-import 'logs_page.dart';
-import 'tester_page.dart';
-import 'theme_playground_page.dart';
-import 'usb_drive_page.dart';
 import 'aivoice_test_page.dart';
+import 'gmacro/gmacro_entry_page.dart';
+import 'tester_page.dart';
+import 'usb_drive_page.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({required this.onResetToDefaults, super.key});
@@ -28,38 +25,6 @@ class HomePage extends StatelessWidget {
         color: theme.colors.brandPrimary,
         minHeight: 220,
         builder: (_) => const GmacroEntryPage(),
-      ),
-      _LabEntry(
-        title: l10n.labThemePlaygroundTitle,
-        subtitle: l10n.labThemePlaygroundSubtitle,
-        icon: Icons.palette_outlined,
-        color: theme.colors.brandPrimary,
-        minHeight: 250,
-        builder: (_) => SubPageScaffold(
-          title: l10n.themePlaygroundPageTitle,
-          subtitle: l10n.themePlaygroundPageSubtitle,
-          child: const ThemePlaygroundPage(),
-        ),
-      ),
-      _LabEntry(
-        title: l10n.labLogsTitle,
-        subtitle: l10n.labLogsSubtitle,
-        icon: Icons.ios_share_rounded,
-        color: theme.colors.success,
-        minHeight: 220,
-        builder: (_) => const LogsPage(),
-      ),
-      _LabEntry(
-        title: l10n.labDebugTitle,
-        subtitle: l10n.labDebugSubtitle,
-        icon: Icons.analytics_outlined,
-        color: theme.colors.brandAccent,
-        minHeight: 280,
-        builder: (_) => SubPageScaffold(
-          title: l10n.labDebugTitle,
-          subtitle: l10n.labDebugSubtitle,
-          child: const DebugInspectorPage(),
-        ),
       ),
       _LabEntry(
         title: l10n.labUsbDriveTitle,
@@ -118,11 +83,6 @@ class HomePage extends StatelessWidget {
         theme.spacing.page,
       ),
       children: [
-        Host4SectionHeader(
-          title: l10n.homePageTitle,
-          subtitle: l10n.homePageSubtitle,
-        ),
-        SizedBox(height: theme.spacing.md),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

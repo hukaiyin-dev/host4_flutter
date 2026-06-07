@@ -9,11 +9,15 @@ class Host4SearchBar extends StatelessWidget {
     super.key,
     this.controller,
     this.onChanged,
+    this.searchIconAsset,
   });
 
   final String hintText;
   final TextEditingController? controller;
   final ValueChanged<String>? onChanged;
+  /// SVG asset path for the leading search icon (e.g. `'assets/icons/search.svg'`).
+  /// Pass `null` to omit the icon.
+  final String? searchIconAsset;
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +28,7 @@ class Host4SearchBar extends StatelessWidget {
       controller: controller,
       onChanged: onChanged,
       hintText: hintText,
-      prefixIcon: Icons.search_rounded,
+      prefixIcon: searchIconAsset,
       suffix: Container(
         padding: EdgeInsets.symmetric(
           horizontal: tokens.shortcutHorizontal,

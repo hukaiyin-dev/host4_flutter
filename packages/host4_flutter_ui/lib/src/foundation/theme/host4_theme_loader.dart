@@ -34,7 +34,9 @@ class Host4ThemeLoader {
         input,
       );
     } catch (e, stack) {
-      debugPrint('[Host4ThemeLoader] compute() failed ($e), falling back to main-thread parse.\n$stack');
+      debugPrint(
+        '[Host4ThemeLoader] compute() failed ($e), falling back to main-thread parse.\n$stack',
+      );
       result = _parseThemeInBackground(input);
     }
 
@@ -91,9 +93,26 @@ class Host4ThemeLoader {
       typography: Host4ThemeTypography(
         display: _readTextToken(resolved, 'semantic.typography.display'),
         title: _readTextToken(resolved, 'semantic.typography.title'),
+        titleRegular: _readTextToken(
+          resolved,
+          'semantic.typography.title-regular',
+        ),
         heading: _readTextToken(resolved, 'semantic.typography.heading'),
         body: _readTextToken(resolved, 'semantic.typography.body'),
+        bodyMedium: _readTextToken(resolved, 'semantic.typography.body-medium'),
+        bodyRegular: _readTextToken(
+          resolved,
+          'semantic.typography.body-regular',
+        ),
         label: _readTextToken(resolved, 'semantic.typography.label'),
+        labelMedium: _readTextToken(
+          resolved,
+          'semantic.typography.label-medium',
+        ),
+        labelRegular: _readTextToken(
+          resolved,
+          'semantic.typography.label-regular',
+        ),
         caption: _readTextToken(resolved, 'semantic.typography.caption'),
       ),
       spacing: Host4ThemeSpacing(
@@ -184,6 +203,29 @@ class Host4ThemeLoader {
               resolved,
               'component.button.focused-ring.offset-width',
             ),
+            radius: _readDouble(
+              resolved,
+              'component.button.focused-ring.radius',
+              fallback: 0,
+            ),
+          ),
+          selectedIndicator: Host4ButtonSelectedIndicatorTokens(
+            color: _readColor(
+              resolved,
+              'component.button.selected-indicator.color',
+            ),
+            width: _readDouble(
+              resolved,
+              'component.button.selected-indicator.width',
+            ),
+            height: _readDouble(
+              resolved,
+              'component.button.selected-indicator.height',
+            ),
+            gap: _readDouble(
+              resolved,
+              'component.button.selected-indicator.gap',
+            ),
           ),
           sizes: Host4ButtonSizeGroupTokens(
             xs: Host4ButtonSizeTokens(
@@ -216,16 +258,6 @@ class Host4ThemeLoader {
                 'component.button.size.md.icon-only-extent',
               ),
             ),
-            lg: Host4ButtonSizeTokens(
-              minHeight: _readDouble(
-                resolved,
-                'component.button.size.lg.min-height',
-              ),
-              iconOnlyExtent: _readDouble(
-                resolved,
-                'component.button.size.lg.icon-only-extent',
-              ),
-            ),
           ),
           spacing: Host4ButtonSpacingTokens(
             horizontal: _readDouble(
@@ -245,10 +277,6 @@ class Host4ThemeLoader {
               'component.button.spacing.icon-only.vertical',
             ),
             iconGap: _readDouble(resolved, 'component.button.spacing.icon-gap'),
-            stackGap: _readDouble(
-              resolved,
-              'component.button.spacing.stack-gap',
-            ),
             xsHorizontal: _readDouble(
               resolved,
               'component.button.spacing.xs.horizontal',
@@ -281,14 +309,6 @@ class Host4ThemeLoader {
               resolved,
               'component.button.spacing.md.vertical',
             ),
-            lgHorizontal: _readDouble(
-              resolved,
-              'component.button.spacing.lg.horizontal',
-            ),
-            lgVertical: _readDouble(
-              resolved,
-              'component.button.spacing.lg.vertical',
-            ),
           ),
           labelStyle: _readTextToken(resolved, 'component.button.label-style'),
           minHeight: _readDouble(resolved, 'component.button.min-height'),
@@ -296,7 +316,6 @@ class Host4ThemeLoader {
             resolved,
             'component.button.leading-icon-size',
           ),
-          topIconSize: _readDouble(resolved, 'component.button.top-icon-size'),
           iconOnlySize: _readDouble(
             resolved,
             'component.button.icon-only-size',
@@ -314,13 +333,10 @@ class Host4ThemeLoader {
             'component.button.secondary',
           ),
           tertiary: _readButtonVariant(resolved, 'component.button.tertiary'),
-          outline: _readButtonVariant(resolved, 'component.button.outline'),
           ghost: _readButtonVariant(resolved, 'component.button.ghost'),
-          danger: _readButtonVariant(resolved, 'component.button.danger'),
           dangerHigh: _readButtonVariant(
             resolved,
             'component.button.danger-high',
-            'component.button.danger',
           ),
           dangerSoft: _readButtonVariant(
             resolved,
@@ -606,10 +622,7 @@ class Host4ThemeLoader {
             resolved,
             'component.empty-state.title-style',
           ),
-          titleColor: _readColor(
-            resolved,
-            'component.empty-state.title-color',
-          ),
+          titleColor: _readColor(resolved, 'component.empty-state.title-color'),
           subtitleStyle: _readTextToken(
             resolved,
             'component.empty-state.subtitle-style',
@@ -631,7 +644,10 @@ class Host4ThemeLoader {
           radius: _readDouble(resolved, 'component.banner.radius'),
           iconSize: _readDouble(resolved, 'component.banner.icon-size'),
           iconGap: _readDouble(resolved, 'component.banner.icon-gap'),
-          titleBodyGap: _readDouble(resolved, 'component.banner.title-body-gap'),
+          titleBodyGap: _readDouble(
+            resolved,
+            'component.banner.title-body-gap',
+          ),
           titleStyle: _readTextToken(resolved, 'component.banner.title-style'),
           bodyStyle: _readTextToken(resolved, 'component.banner.body-style'),
           info: _readBannerVariant(resolved, 'component.banner.variant.info'),
@@ -643,10 +659,7 @@ class Host4ThemeLoader {
             resolved,
             'component.banner.variant.warning',
           ),
-          error: _readBannerVariant(
-            resolved,
-            'component.banner.variant.error',
-          ),
+          error: _readBannerVariant(resolved, 'component.banner.variant.error'),
         ),
         progressBar: Host4ProgressBarComponentTokens(
           height: _readDouble(resolved, 'component.progress-bar.height'),
@@ -682,10 +695,7 @@ class Host4ThemeLoader {
             resolved,
             'component.segmented-filter.icon-size',
           ),
-          iconGap: _readDouble(
-            resolved,
-            'component.segmented-filter.icon-gap',
-          ),
+          iconGap: _readDouble(resolved, 'component.segmented-filter.icon-gap'),
           labelStyle: _readTextToken(
             resolved,
             'component.segmented-filter.label-style',
@@ -822,9 +832,26 @@ class Host4ThemeLoader {
       typography: Host4ThemeTypography(
         display: _readTextToken(resolved, 'semantic.typography.display'),
         title: _readTextToken(resolved, 'semantic.typography.title'),
+        titleRegular: _readTextToken(
+          resolved,
+          'semantic.typography.title-regular',
+        ),
         heading: _readTextToken(resolved, 'semantic.typography.heading'),
         body: _readTextToken(resolved, 'semantic.typography.body'),
+        bodyMedium: _readTextToken(resolved, 'semantic.typography.body-medium'),
+        bodyRegular: _readTextToken(
+          resolved,
+          'semantic.typography.body-regular',
+        ),
         label: _readTextToken(resolved, 'semantic.typography.label'),
+        labelMedium: _readTextToken(
+          resolved,
+          'semantic.typography.label-medium',
+        ),
+        labelRegular: _readTextToken(
+          resolved,
+          'semantic.typography.label-regular',
+        ),
         caption: _readTextToken(resolved, 'semantic.typography.caption'),
       ),
       spacing: Host4ThemeSpacing(
@@ -895,6 +922,29 @@ class Host4ThemeLoader {
               resolved,
               'component.button.focused-ring.offset-width',
             ),
+            radius: _readDouble(
+              resolved,
+              'component.button.focused-ring.radius',
+              fallback: 0,
+            ),
+          ),
+          selectedIndicator: Host4ButtonSelectedIndicatorTokens(
+            color: _readColor(
+              resolved,
+              'component.button.selected-indicator.color',
+            ),
+            width: _readDouble(
+              resolved,
+              'component.button.selected-indicator.width',
+            ),
+            height: _readDouble(
+              resolved,
+              'component.button.selected-indicator.height',
+            ),
+            gap: _readDouble(
+              resolved,
+              'component.button.selected-indicator.gap',
+            ),
           ),
           sizes: Host4ButtonSizeGroupTokens(
             xs: Host4ButtonSizeTokens(
@@ -927,16 +977,6 @@ class Host4ThemeLoader {
                 'component.button.size.md.icon-only-extent',
               ),
             ),
-            lg: Host4ButtonSizeTokens(
-              minHeight: _readDouble(
-                resolved,
-                'component.button.size.lg.min-height',
-              ),
-              iconOnlyExtent: _readDouble(
-                resolved,
-                'component.button.size.lg.icon-only-extent',
-              ),
-            ),
           ),
           spacing: Host4ButtonSpacingTokens(
             horizontal: _readDouble(
@@ -956,10 +996,6 @@ class Host4ThemeLoader {
               'component.button.spacing.icon-only.vertical',
             ),
             iconGap: _readDouble(resolved, 'component.button.spacing.icon-gap'),
-            stackGap: _readDouble(
-              resolved,
-              'component.button.spacing.stack-gap',
-            ),
             xsHorizontal: _readDouble(
               resolved,
               'component.button.spacing.xs.horizontal',
@@ -992,14 +1028,6 @@ class Host4ThemeLoader {
               resolved,
               'component.button.spacing.md.vertical',
             ),
-            lgHorizontal: _readDouble(
-              resolved,
-              'component.button.spacing.lg.horizontal',
-            ),
-            lgVertical: _readDouble(
-              resolved,
-              'component.button.spacing.lg.vertical',
-            ),
           ),
           labelStyle: _readTextToken(resolved, 'component.button.label-style'),
           minHeight: _readDouble(resolved, 'component.button.min-height'),
@@ -1007,7 +1035,6 @@ class Host4ThemeLoader {
             resolved,
             'component.button.leading-icon-size',
           ),
-          topIconSize: _readDouble(resolved, 'component.button.top-icon-size'),
           iconOnlySize: _readDouble(
             resolved,
             'component.button.icon-only-size',
@@ -1025,13 +1052,10 @@ class Host4ThemeLoader {
             'component.button.secondary',
           ),
           tertiary: _readButtonVariant(resolved, 'component.button.tertiary'),
-          outline: _readButtonVariant(resolved, 'component.button.outline'),
           ghost: _readButtonVariant(resolved, 'component.button.ghost'),
-          danger: _readButtonVariant(resolved, 'component.button.danger'),
           dangerHigh: _readButtonVariant(
             resolved,
             'component.button.danger-high',
-            'component.button.danger',
           ),
           dangerSoft: _readButtonVariant(
             resolved,
@@ -1312,10 +1336,7 @@ class Host4ThemeLoader {
             resolved,
             'component.empty-state.title-style',
           ),
-          titleColor: _readColor(
-            resolved,
-            'component.empty-state.title-color',
-          ),
+          titleColor: _readColor(resolved, 'component.empty-state.title-color'),
           subtitleStyle: _readTextToken(
             resolved,
             'component.empty-state.subtitle-style',
@@ -1337,7 +1358,10 @@ class Host4ThemeLoader {
           radius: _readDouble(resolved, 'component.banner.radius'),
           iconSize: _readDouble(resolved, 'component.banner.icon-size'),
           iconGap: _readDouble(resolved, 'component.banner.icon-gap'),
-          titleBodyGap: _readDouble(resolved, 'component.banner.title-body-gap'),
+          titleBodyGap: _readDouble(
+            resolved,
+            'component.banner.title-body-gap',
+          ),
           titleStyle: _readTextToken(resolved, 'component.banner.title-style'),
           bodyStyle: _readTextToken(resolved, 'component.banner.body-style'),
           info: _readBannerVariant(resolved, 'component.banner.variant.info'),
@@ -1349,10 +1373,7 @@ class Host4ThemeLoader {
             resolved,
             'component.banner.variant.warning',
           ),
-          error: _readBannerVariant(
-            resolved,
-            'component.banner.variant.error',
-          ),
+          error: _readBannerVariant(resolved, 'component.banner.variant.error'),
         ),
         progressBar: Host4ProgressBarComponentTokens(
           height: _readDouble(resolved, 'component.progress-bar.height'),
@@ -1388,10 +1409,7 @@ class Host4ThemeLoader {
             resolved,
             'component.segmented-filter.icon-size',
           ),
-          iconGap: _readDouble(
-            resolved,
-            'component.segmented-filter.icon-gap',
-          ),
+          iconGap: _readDouble(resolved, 'component.segmented-filter.icon-gap'),
           labelStyle: _readTextToken(
             resolved,
             'component.segmented-filter.label-style',
@@ -1514,6 +1532,11 @@ class Host4ThemeLoader {
         : (fallbackPath ?? path);
     return Host4ButtonVariantTokens(
       radius: _readDouble(json, '$resolvedPath.radius'),
+      focusRingVisible: _readBool(
+        json,
+        '$resolvedPath.focus-ring-visible',
+        fallback: true,
+      ),
       defaultState: _readButtonState(json, '$resolvedPath.state.default'),
       hoverState: _readButtonState(json, '$resolvedPath.state.hover'),
       pressedState: _readButtonState(json, '$resolvedPath.state.pressed'),
@@ -1534,6 +1557,12 @@ class Host4ThemeLoader {
       background: _readColor(json, '$path.background'),
       foreground: _readColor(json, '$path.foreground'),
       border: _readColor(json, '$path.border'),
+      opacity: _readDouble(json, '$path.opacity', fallback: 1),
+      bottomBorderWidth: _readDouble(
+        json,
+        '$path.bottom-border-width',
+        fallback: 0,
+      ),
     );
   }
 
@@ -1701,7 +1730,11 @@ _ThemeParseOutput _parseThemeInBackground(_ThemeParseInput input) {
   final selectedMode = _resolveSelectedMode(manifest, input.mode);
   final normalized = _normalizeTheme(decoded, manifest, selectedMode);
   final resolved = Host4ReferenceResolver(normalized).resolveMap(normalized);
-  return (resolved: resolved, sourceTokens: decoded, selectedMode: selectedMode);
+  return (
+    resolved: resolved,
+    sourceTokens: decoded,
+    selectedMode: selectedMode,
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -1844,7 +1877,25 @@ double _readDouble(Map<String, dynamic> json, String path, {double? fallback}) {
   try {
     return readJsonDouble(json, path, fallback: fallback);
   } on FormatException catch (error) {
-    if (error.message == 'Missing json path: $path') {
+    if (error.message == 'Missing json path: $path' ||
+        error.message == 'Missing token path: $path') {
+      if (fallback != null) {
+        return fallback;
+      }
+      throw FormatException('Missing token path: $path');
+    }
+    rethrow;
+  }
+}
+
+bool _readBool(Map<String, dynamic> json, String path, {bool? fallback}) {
+  try {
+    final value = _readPath(json, path);
+    if (value is bool) return value;
+    throw FormatException('Expected bool at $path.');
+  } on FormatException catch (error) {
+    if (error.message == 'Missing json path: $path' ||
+        error.message == 'Missing token path: $path') {
       if (fallback != null) {
         return fallback;
       }

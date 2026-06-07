@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../foundation/theme/host4_theme_scope.dart';
+import '../foundation/host4_svg_icon.dart';
 import '../foundation/theme/host4_runtime_theme.dart';
+import '../foundation/theme/host4_theme_scope.dart';
 
 enum Host4TagVariant { normal, selected, disabled }
 
@@ -15,7 +16,8 @@ class Host4Tag extends StatelessWidget {
   });
 
   final String label;
-  final IconData? icon;
+  /// SVG asset path for the leading icon (e.g. `'assets/icons/tag.svg'`).
+  final String? icon;
   final Host4TagVariant variant;
   final VoidCallback? onTap;
 
@@ -46,7 +48,7 @@ class Host4Tag extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             if (icon != null) ...[
-              Icon(icon, size: tokens.iconSize, color: state.icon),
+              Host4SvgIcon(assetPath: icon!, size: tokens.iconSize, color: state.icon),
               SizedBox(width: tokens.iconGap),
             ],
             Text(

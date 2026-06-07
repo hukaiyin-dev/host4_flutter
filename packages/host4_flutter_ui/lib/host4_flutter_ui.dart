@@ -17,6 +17,8 @@ export 'src/components/host4_tab_bar.dart';
 export 'src/components/host4_text_field.dart';
 export 'src/components/host4_theme_store_page.dart';
 export 'src/components/host4_toolbar.dart';
+export 'src/foundation/host4_svg_icon.dart';
+export 'src/foundation/host4_icon_assets.dart';
 export 'src/foundation/theme/host4_theme_assets.dart';
 export 'src/foundation/theme/host4_runtime_theme.dart';
 export 'src/foundation/theme/host4_theme_loader.dart';

@@ -157,8 +157,6 @@ class _LogsPageState extends State<LogsPage> {
               ),
               child: Host4Button(
                 label: l10n.logsExportButton,
-                content: Host4ButtonContent.iconLeft,
-                icon: Icons.ios_share_rounded,
                 expanded: true,
                 onPressed: !_loading && !_exporting && _file != null
                     ? _export

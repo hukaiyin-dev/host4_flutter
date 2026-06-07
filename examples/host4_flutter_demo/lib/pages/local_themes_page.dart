@@ -141,7 +141,12 @@ class _LocalThemeDetailPageState extends State<LocalThemeDetailPage> {
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : ListView(
-              padding: EdgeInsets.all(theme.spacing.page),
+              padding: EdgeInsets.fromLTRB(
+                theme.spacing.page,
+                theme.spacing.page,
+                theme.spacing.page,
+                theme.spacing.page + theme.spacing.xxl,
+              ),
               children: [
                 if (_preview != null) ...[
                   _ModeToggle(
@@ -156,8 +161,23 @@ class _LocalThemeDetailPageState extends State<LocalThemeDetailPage> {
                   _ThemeColorPreview(preview: _preview!, theme: theme),
                   SizedBox(height: theme.spacing.md),
                   _ThemeDebugSection(preview: _preview!, theme: theme),
-                  SizedBox(height: theme.spacing.lg),
-                  _PreviewButton(
+                ],
+              ],
+            ),
+      bottomNavigationBar: _loading || _preview == null
+          ? null
+          : SafeArea(
+              top: false,
+              child: ColoredBox(
+                color: theme.colors.pageBackground,
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    theme.spacing.page,
+                    theme.spacing.sm,
+                    theme.spacing.page,
+                    theme.spacing.page,
+                  ),
+                  child: _PreviewButton(
                     label: '使用此主题',
                     icon: Icons.check_circle_outline,
                     theme: theme,
@@ -167,8 +187,8 @@ class _LocalThemeDetailPageState extends State<LocalThemeDetailPage> {
                       if (context.mounted) Navigator.pop(context);
                     },
                   ),
-                ],
-              ],
+                ),
+              ),
             ),
     );
   }

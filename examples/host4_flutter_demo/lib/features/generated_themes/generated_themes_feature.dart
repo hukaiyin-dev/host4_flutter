@@ -44,8 +44,6 @@ class _GeneratedThemesEntryButtonState
           children: [
             Host4Button(
               label: '已生成主题',
-              content: Host4ButtonContent.iconLeft,
-              icon: Icons.palette_outlined,
               variant: Host4ButtonVariant.secondary,
               expanded: true,
               onPressed: () => Navigator.push(
