@@ -212,8 +212,7 @@ class _GmacroSessionPageState extends State<GmacroSessionPage> {
             'calibration',
             '${event.kind?.name ?? 'subId=0x${event.subId.toRadixString(16)}'} '
             'result=${event.result} '
-            'p1=${event.param1} p2=${event.param2} '
-            'errors=${event.errorList}',
+            'p1=${event.param1} p2=${event.param2} ',
           );
         },
         onError: (Object error, StackTrace stackTrace) {
