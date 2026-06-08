@@ -117,4 +117,19 @@ struct Host4FlutterChannelConstants {
 
   // OTA
   static let startOta = "startOta"
+
+  // Other — 马达/手柄/扳机等功能控制
+  static let queryVibrateOpen = "queryVibrateOpen"
+  static let switchVibrateOpen = "switchVibrateOpen"
+  static let queryWorkStyle = "queryWorkStyle"
+  static let switchWorkStyle = "switchWorkStyle"
+  static let queryOutputMode = "queryOutputMode"
+  static let switchOutputMode = "switchOutputMode"
+  static let sendHandleBeta = "sendHandleBeta"
+  static let switchHandleConfig = "switchHandleConfig"
+  static let switchHandleCallbacks = "switchHandleCallbacks"
+  static let queryLinerTrigger = "queryLinerTrigger"
+  static let switchLinerTrigger = "switchLinerTrigger"
+  static let queryLightingEffectPantas = "queryLightingEffectPantas"
+  static let setLightGroupEffectPantas = "setLightGroupEffectPantas"
 }

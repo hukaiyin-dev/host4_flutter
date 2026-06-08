@@ -78,6 +78,13 @@ extension GMacroProtocolSession {
 
 
 extension GMacroProtocolSession {
+    // MARK: - 查询左右扳机线性输出 85 06
+    public func fetchTriggerLinearOutput(response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
+        dataHelper.fetchTriggerLinearOutput(response: response)
+    }
+}
+
+extension GMacroProtocolSession {
     // MARK: - 设置左右扳机线性输出 85 07
     
     /// - Parameters:

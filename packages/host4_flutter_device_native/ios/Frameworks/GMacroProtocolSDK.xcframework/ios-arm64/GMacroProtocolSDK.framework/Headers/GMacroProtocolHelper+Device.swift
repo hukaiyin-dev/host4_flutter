@@ -141,6 +141,68 @@ extension GMacroProtocolSession {
     }
 }
 
+// MARK: - 手柄工作模式
+extension GMacroProtocolSession {
+    
+    /// 获取手柄工作模式 6901
+    /// mode: 0=关闭, 1=XBOX, 2=Nintendo, 3=XBOX ONE
+    public func fetchHandleWorkMode(response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
+        dataHelper.fetchHandleWorkMode(response: response)
+    }
+    
+    /// 设置手柄工作模式 6902
+    /// mode: 0=关闭, 1=XBOX, 2=Nintendo, 3=XBOX ONE
+    public func updateHandleWorkMode(mode: Int,
+                                     response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
+        dataHelper.setHandleWorkMode(mode: mode, response: response)
+    }
+    
+    /// 获取当前手柄模式 6907
+    /// mode: 1=XINPUT, 2=DINPUT, 3=Switch
+    public func fetchCurrentHandleMode(response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
+        dataHelper.fetchCurrentHandleMode(response: response)
+    }
+    
+    /// 设置当前手柄模式 6908
+    /// mode: 1=XINPUT, 2=DINPUT, 3=Switch
+    public func updateCurrentHandleMode(mode: Int,
+                                        response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
+        dataHelper.setCurrentHandleMode(mode: mode, response: response)
+    }
+}
+
+// MARK: - 手柄配置页
+extension GMacroProtocolSession {
+    
+    /// 切换手柄配置页 8101
+    /// profile: 配置页编号
+    public func switchToProfile(profile: Int,
+                                 response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
+        dataHelper.switchToProfile(profile: profile, response: response)
+    }
+    
+    /// 测试模式切换配置页 8102
+    /// profile: 配置页编号
+    public func switchToTestProfile(profile: Int,
+                                     response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
+        dataHelper.switchToTestProfile(profile: profile, response: response)
+    }
+}
+
+// MARK: - 开关手柄功能以及回调
+extension GMacroProtocolSession {
+    
+    /// 开关手柄功能以及回调 8302
+    /// - Parameters:
+    ///   - handleOn: Bit0 手柄功能开关
+    ///   - ep3CallbackOn: Bit1 EP3 回调开关
+    public func updateHandleFunction(handleOn: Bool,
+                                      ep3CallbackOn: Bool,
+                                      response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
+        dataHelper.updateHandleFunction(handleOn: handleOn, ep3CallbackOn: ep3CallbackOn, response: response)
+    }
+}
+
 extension DataHelper {
     
     /// 查询支持校准的模块
