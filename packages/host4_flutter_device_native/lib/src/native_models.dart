@@ -102,7 +102,6 @@ class NativeDeviceAlignEvent {
     required this.result,
     this.param1 = const <int>[],
     this.param2 = const <int>[],
-    this.errorList = const <int>[],
   });
 
   factory NativeDeviceAlignEvent.fromMap(Map<String, Object?> map) {
@@ -111,7 +110,6 @@ class NativeDeviceAlignEvent {
       result: _readInt(map['result']),
       param1: _readIntList(map['param1']),
       param2: _readIntList(map['param2']),
-      errorList: _readIntList(map['errorList']),
     );
   }
 
@@ -120,7 +118,6 @@ class NativeDeviceAlignEvent {
   final int result;
   final List<int> param1;
   final List<int> param2;
-  final List<int> errorList;
 
   Map<String, Object?> toMap() {
     return <String, Object?>{
@@ -129,15 +126,13 @@ class NativeDeviceAlignEvent {
       'result': result,
       'param1': param1,
       'param2': param2,
-      'errorList': errorList,
     };
   }
 
   @override
   String toString() {
     return 'NativeDeviceAlignEvent(subId: 0x${subId.toRadixString(16)}, '
-        'result: $result, param1: $param1, param2: $param2, '
-        'errorList: $errorList)';
+        'result: $result, param1: $param1, param2: $param2)';
   }
 }
 

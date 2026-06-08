@@ -14,7 +14,6 @@ class DeviceCalibrationEvent extends GmacroRealtimeEvent {
     required this.result,
     this.param1 = const <int>[],
     this.param2 = const <int>[],
-    this.errorList = const <int>[],
   });
 
   final int subId;
@@ -22,7 +21,6 @@ class DeviceCalibrationEvent extends GmacroRealtimeEvent {
   final int result;
   final List<int> param1;
   final List<int> param2;
-  final List<int> errorList;
 
   factory DeviceCalibrationEvent.fromNative(NativeDeviceAlignEvent event) {
     return DeviceCalibrationEvent(
@@ -31,7 +29,6 @@ class DeviceCalibrationEvent extends GmacroRealtimeEvent {
       result: event.result,
       param1: event.param1,
       param2: event.param2,
-      errorList: event.errorList,
     );
   }
 }
