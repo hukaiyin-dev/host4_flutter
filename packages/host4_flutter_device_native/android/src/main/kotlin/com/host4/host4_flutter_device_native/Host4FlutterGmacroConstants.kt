@@ -107,4 +107,19 @@ internal object Host4FlutterGmacroConstants {
     // Turbo
     const val setTurboDatas = "setTurboDatas"
     const val querySupportedTurboKeys = "querySupportedTurboKeys"
+
+    // Other
+    const val switchVibrateOpen = "switchVibrateOpen"
+    const val queryVibrateOpen = "queryVibrateOpen"
+    const val switchWorkStyle = "switchWorkStyle"
+    const val queryWorkStyle = "queryWorkStyle"
+    const val switchOutputMode = "switchOutputMode"
+    const val queryOutputMode = "queryOutputMode"
+    const val sendHandleBeta = "sendHandleBeta"
+    const val switchHandleConfig = "switchHandleConfig"
+    const val switchHandleCallbacks = "switchHandleCallbacks"
+    const val queryLinerTrigger = "queryLinerTrigger"
+    const val switchLinerTrigger = "switchLinerTrigger"
+    const val queryLightingEffectPantas = "queryLightingEffectPantas"
+    const val setLightGroupEffectPantas = "setLightGroupEffectPantas"
 }

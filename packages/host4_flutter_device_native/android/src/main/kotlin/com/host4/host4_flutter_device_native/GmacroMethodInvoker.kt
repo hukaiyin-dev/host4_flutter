@@ -447,6 +447,68 @@ internal object GmacroMethodInvoker {
                     commands.queryBurstSupportReq(profile, GmacroCallbackBridge.message(result))
                 }
 
+                Host4FlutterGmacroConstants.switchVibrateOpen -> {
+                    val status = GmacroArgParser.intArg(arguments, "status")
+                    commands.switchVibrateOpen(status, GmacroCallbackBridge.message(result))
+                }
+
+                Host4FlutterGmacroConstants.queryVibrateOpen ->
+                    commands.queryVibrateOpen(GmacroCallbackBridge.message(result))
+
+                Host4FlutterGmacroConstants.switchWorkStyle -> {
+                    val mode = GmacroArgParser.intArg(arguments, "mode")
+                    commands.switchWorkStyle(mode, GmacroCallbackBridge.message(result))
+                }
+
+                Host4FlutterGmacroConstants.queryWorkStyle ->
+                    commands.queryWorkStyle(GmacroCallbackBridge.message(result))
+
+                Host4FlutterGmacroConstants.switchOutputMode -> {
+                    val mode = GmacroArgParser.intArg(arguments, "mode")
+                    commands.switchOutputMode(mode, GmacroCallbackBridge.message(result))
+                }
+
+                Host4FlutterGmacroConstants.queryOutputMode ->
+                    commands.queryOutputMode(GmacroCallbackBridge.message(result))
+
+                Host4FlutterGmacroConstants.sendHandleBeta -> {
+                    val profile = GmacroArgParser.intArg(arguments, "profile")
+                    commands.sendHandleBeta(profile, GmacroCallbackBridge.message(result))
+                }
+
+                Host4FlutterGmacroConstants.switchHandleConfig -> {
+                    val profile = GmacroArgParser.intArg(arguments, "profile")
+                    commands.switchHandleConfig(profile, GmacroCallbackBridge.message(result))
+                }
+
+                Host4FlutterGmacroConstants.switchHandleCallbacks -> {
+                    val method = GmacroArgParser.intArg(arguments, "method")
+                    commands.switchHandleCallbacks(method, GmacroCallbackBridge.message(result))
+                }
+
+                Host4FlutterGmacroConstants.queryLinerTrigger ->
+                    commands.queryLinerTrigger(GmacroCallbackBridge.message(result))
+
+                Host4FlutterGmacroConstants.switchLinerTrigger -> {
+                    val mode = GmacroArgParser.intArg(arguments, "mode")
+                    commands.switchLinerTrigger(mode, GmacroCallbackBridge.message(result))
+                }
+
+                Host4FlutterGmacroConstants.queryLightingEffectPantas ->
+                    commands.queryLightingEffectPantas(GmacroCallbackBridge.message(result))
+
+                Host4FlutterGmacroConstants.setLightGroupEffectPantas -> {
+                    commands.setLightGroupEffectPantas(
+                        GmacroArgParser.boolArg(arguments, "open"),
+                        GmacroArgParser.intArg(arguments, "mode"),
+                        GmacroArgParser.intArg(arguments, "brightness"),
+                        GmacroArgParser.intArg(arguments, "colorR"),
+                        GmacroArgParser.intArg(arguments, "colorG"),
+                        GmacroArgParser.intArg(arguments, "colorB"),
+                        GmacroCallbackBridge.message(result),
+                    )
+                }
+
                 else -> {
                     result.error(
                         "unsupported-gmacro-method",

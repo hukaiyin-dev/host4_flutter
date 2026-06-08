@@ -109,4 +109,19 @@ abstract final class GmacroMethods {
   // Turbo
   static const setTurboDatas = 'setTurboDatas';
   static const querySupportedTurboKeys = 'querySupportedTurboKeys';
+
+  // Other
+  static const switchVibrateOpen = 'switchVibrateOpen';
+  static const queryVibrateOpen = 'queryVibrateOpen';
+  static const switchWorkStyle = 'switchWorkStyle';
+  static const queryWorkStyle = 'queryWorkStyle';
+  static const switchOutputMode = 'switchOutputMode';
+  static const queryOutputMode = 'queryOutputMode';
+  static const sendHandleBeta = 'sendHandleBeta';
+  static const switchHandleConfig = 'switchHandleConfig';
+  static const switchHandleCallbacks = 'switchHandleCallbacks';
+  static const queryLinerTrigger = 'queryLinerTrigger';
+  static const switchLinerTrigger = 'switchLinerTrigger';
+  static const queryLightingEffectPantas = 'queryLightingEffectPantas';
+  static const setLightGroupEffectPantas = 'setLightGroupEffectPantas';
 }

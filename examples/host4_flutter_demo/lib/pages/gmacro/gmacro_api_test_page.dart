@@ -777,6 +777,88 @@ class _GmacroApiTestPageState extends State<GmacroApiTestPage> {
         ],
       ),
       _Section(
+        title: 'Other / 新增接口',
+        items: [
+          _Item(
+            'queryVibrateOpen',
+            '查询马达开关状态',
+            () => s!.queryVibrateOpen(),
+          ),
+          _Item(
+            'switchVibrateOpen_on',
+            '设置马达开关状态：开(status=1)',
+            () => s!.switchVibrateOpen(status: 1),
+          ),
+          _Item(
+            'switchVibrateOpen_off',
+            '设置马达开关状态：关(status=0)',
+            () => s!.switchVibrateOpen(status: 0),
+          ),
+          _Item(
+            'queryWorkStyle',
+            '查询手柄工作模式',
+            () => s!.queryWorkStyle(),
+          ),
+          _Item(
+            'switchWorkStyle',
+            '设置手柄工作模式(mode=1)',
+            () => s!.switchWorkStyle(mode: 1),
+          ),
+          _Item(
+            'queryOutputMode',
+            '查询当前手柄模式',
+            () => s!.queryOutputMode(),
+          ),
+          _Item(
+            'switchOutputMode',
+            '设置当前手柄模式(mode=1)',
+            () => s!.switchOutputMode(mode: 1),
+          ),
+          _Item(
+            'sendHandleBeta',
+            '测试模式切换配置页(profile=0)',
+            () => s!.sendHandleBeta(profile: 0),
+          ),
+          _Item(
+            'switchHandleConfig',
+            '切换手柄配置页(profile=0)',
+            () => s!.switchHandleConfig(profile: 0),
+          ),
+          _Item(
+            'switchHandleCallbacks',
+            '开关手柄功能以及回调(method=1)',
+            () => s!.switchHandleCallbacks(method: 1),
+          ),
+          _Item(
+            'queryLinerTrigger',
+            '查询左右扳机线性输出',
+            () => s!.queryLinerTrigger(),
+          ),
+          _Item(
+            'switchLinerTrigger',
+            '设置左右扳机线性输出(mode=1)',
+            () => s!.switchLinerTrigger(mode: 1),
+          ),
+          _Item(
+            'queryLightingEffectPantas',
+            '查询当前灯效（Pantas）',
+            () => s!.queryLightingEffectPantas(),
+          ),
+          _Item(
+            'setLightGroupEffectPantas',
+            '设置当前灯效（Pantas）',
+            () => s!.setLightGroupEffectPantas(
+              open: true,
+              mode: 1,
+              brightness: 80,
+              colorR: 255,
+              colorG: 80,
+              colorB: 0,
+            ),
+          ),
+        ],
+      ),
+      _Section(
         title: '宏',
         items: [
           _Item(
