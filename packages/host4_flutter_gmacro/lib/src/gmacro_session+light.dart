@@ -26,7 +26,7 @@ extension GmacroSessionLight on GmacroSession {
   /// - [effect] 1=单色, 2=呼吸, 3=色谱循环
   /// - [colorR/G/B] RGB 值 0-255
   /// - [light] 亮度 0-100
-  /// - [speed] 速度 0-100
+  /// - [speed] 速度 0-100  //G910106 掌机和pantas 的2个拉升手柄用：灯效开关 1：开；2：关
   /// - [profile] 配置文件索引
   Future<Map<String, Object?>> setLightConfig({
     required int effect,

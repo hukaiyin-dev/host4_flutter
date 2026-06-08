@@ -46,27 +46,4 @@ extension GmacroSessionOther on GmacroSession {
   Future<Map<String, Object?>> switchLinerTrigger({required int mode}) =>
       invoke(GmacroMethods.switchLinerTrigger, arguments: {'mode': mode});
 
-  /// 查询当前灯效（pantas 使用）
-  Future<Map<String, Object?>> queryLightingEffectPantas() =>
-      invoke(GmacroMethods.queryLightingEffectPantas);
-
-  /// 设置灯组灯效（pantas 使用）
-  Future<Map<String, Object?>> setLightGroupEffectPantas({
-    required bool open,
-    required int mode,
-    required int brightness,
-    required int colorR,
-    required int colorG,
-    required int colorB,
-  }) => invoke(
-    GmacroMethods.setLightGroupEffectPantas,
-    arguments: {
-      'open': open,
-      'mode': mode,
-      'brightness': brightness,
-      'colorR': colorR,
-      'colorG': colorG,
-      'colorB': colorB,
-    },
-  );
 }

@@ -840,20 +840,21 @@ class _GmacroApiTestPageState extends State<GmacroApiTestPage> {
             () => s!.switchLinerTrigger(mode: 1),
           ),
           _Item(
-            'queryLightingEffectPantas',
+            'fetchCurrentLightConfig',
             '查询当前灯效（Pantas）',
-            () => s!.queryLightingEffectPantas(),
+            () => s!.fetchCurrentLightConfig(),
           ),
           _Item(
-            'setLightGroupEffectPantas',
+            'setLightConfig',
             '设置当前灯效（Pantas）',
-            () => s!.setLightGroupEffectPantas(
-              open: true,
-              mode: 1,
-              brightness: 80,
+            () => s!.setLightConfig(
+              effect: 1,
               colorR: 255,
               colorG: 80,
               colorB: 0,
+              light: 80,
+              speed: 1,
+              profile: 1,
             ),
           ),
         ],

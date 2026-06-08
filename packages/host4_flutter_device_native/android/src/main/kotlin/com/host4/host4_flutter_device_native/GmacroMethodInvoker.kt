@@ -63,16 +63,20 @@ internal object GmacroMethodInvoker {
                 Host4FlutterGmacroConstants.fetchLightPosition -> commands.queryLightingPositionGroup(GmacroCallbackBridge.message(result))
                 Host4FlutterGmacroConstants.fetchSupportedLightEffects -> commands.queryLightingPositionEffect(GmacroCallbackBridge.message(result))
                 Host4FlutterGmacroConstants.fetchCurrentLightEffect -> commands.queryCurrentLightEffect(GmacroCallbackBridge.message(result))
-                Host4FlutterGmacroConstants.fetchCurrentLightConfig -> commands.queryCurrentLightingEffect(GmacroCallbackBridge.message(result))
 
+                //查询等效 0x71
+                Host4FlutterGmacroConstants.fetchCurrentLightConfig -> commands.queryCurrentLightEffect(GmacroCallbackBridge.message(result))
+
+                //设置灯光 0x72
                 Host4FlutterGmacroConstants.setLightConfig -> {
-                    commands.setLightModeEffect(
+                    commands.setLightEffect(
                         GmacroArgParser.intArg(arguments, "effect"),
+                        GmacroArgParser.intArg(arguments, "light"),
+                        GmacroArgParser.intArg(arguments, "speed"),
+                        GmacroArgParser.intArg(arguments, "profile"),
                         GmacroArgParser.intArg(arguments, "colorR"),
                         GmacroArgParser.intArg(arguments, "colorG"),
                         GmacroArgParser.intArg(arguments, "colorB"),
-                        GmacroArgParser.intArg(arguments, "light"),
-                        GmacroArgParser.intArg(arguments, "speed"),
                         GmacroCallbackBridge.message(result),
                     )
                 }
