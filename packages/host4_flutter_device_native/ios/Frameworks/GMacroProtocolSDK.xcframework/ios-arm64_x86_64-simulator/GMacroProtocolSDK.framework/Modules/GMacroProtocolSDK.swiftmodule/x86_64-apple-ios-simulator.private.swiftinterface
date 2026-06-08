@@ -372,6 +372,33 @@ extension GMacroProtocolSDK.GMacroProtocolSession {
 }
 extension GMacroProtocolSDK.GMacroProtocolSession {
   #if compiler(>=5.3) && $NonescapableTypes
+  final public func fetchHandleWorkMode(response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  #endif
+  #if compiler(>=5.3) && $NonescapableTypes
+  final public func updateHandleWorkMode(mode: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  #endif
+  #if compiler(>=5.3) && $NonescapableTypes
+  final public func fetchCurrentHandleMode(response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  #endif
+  #if compiler(>=5.3) && $NonescapableTypes
+  final public func updateCurrentHandleMode(mode: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  #endif
+}
+extension GMacroProtocolSDK.GMacroProtocolSession {
+  #if compiler(>=5.3) && $NonescapableTypes
+  final public func switchToProfile(profile: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  #endif
+  #if compiler(>=5.3) && $NonescapableTypes
+  final public func switchToTestProfile(profile: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  #endif
+}
+extension GMacroProtocolSDK.GMacroProtocolSession {
+  #if compiler(>=5.3) && $NonescapableTypes
+  final public func updateHandleFunction(handleOn: Swift.Bool, ep3CallbackOn: Swift.Bool, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  #endif
+}
+extension GMacroProtocolSDK.GMacroProtocolSession {
+  #if compiler(>=5.3) && $NonescapableTypes
   final public func updateKeyTurbo(_ values: [(GMacroProtocolSDK.GamepadKey, GMacroProtocolSDK.TurboMode, Swift.Int)], response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
   #endif
   #if compiler(>=5.3) && $NonescapableTypes
@@ -444,6 +471,11 @@ extension GMacroProtocolSDK.GMacroProtocolSession {
 }
 extension GMacroProtocolSDK.GMacroProtocolSession {
   #if compiler(>=5.3) && $NonescapableTypes
+  final public func fetchTriggerLinearOutput(response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  #endif
+}
+extension GMacroProtocolSDK.GMacroProtocolSession {
+  #if compiler(>=5.3) && $NonescapableTypes
   final public func triggerLinearOutput(leftMode: Swift.Int, leftThreshold: Swift.Int, rightMode: Swift.Int, rightThreshold: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
   #endif
 }
@@ -453,6 +485,14 @@ extension GMacroProtocolSDK.GMacroProtocolSession {
   #endif
   #if compiler(>=5.3) && $NonescapableTypes
   final public func testVibration(left: Swift.Int, right: Swift.Int, position: GMacroProtocolSDK.VibrationPosition, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  #endif
+}
+extension GMacroProtocolSDK.GMacroProtocolSession {
+  #if compiler(>=5.3) && $NonescapableTypes
+  final public func fetchMotorSwitchState(response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  #endif
+  #if compiler(>=5.3) && $NonescapableTypes
+  final public func updateMotorSwitchState(isOn: Swift.Bool, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
   #endif
 }
 extension GMacroProtocolSDK.GMacroProtocolSession {

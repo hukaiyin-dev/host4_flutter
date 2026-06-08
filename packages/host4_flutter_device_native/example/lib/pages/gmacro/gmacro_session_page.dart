@@ -208,11 +208,12 @@ class _GmacroSessionPageState extends State<GmacroSessionPage> {
       _calibrationSubscription = session.calibrationEvents.listen(
         (DeviceCalibrationEvent event) {
           _log.info('Calibration: $event');
+          final status = event.result == 0 ? 'success' : 'failed';
           _addLog(
             'calibration',
             '${event.kind?.name ?? 'subId=0x${event.subId.toRadixString(16)}'} '
-            'result=${event.result} '
-            'p1=${event.param1} p2=${event.param2} ',
+            'ACK $status (result=${event.result}) '
+            'p1=${event.param1} p2=${event.param2}',
           );
         },
         onError: (Object error, StackTrace stackTrace) {

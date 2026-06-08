@@ -32,3 +32,18 @@ extension GMacroProtocolSession {
         dataHelper.testVibration(left: left, right: right, position: position, response: response)
     }
 }
+
+// MARK: - 马达开关状态
+extension GMacroProtocolSession {
+    
+    /// 获取马达开关状态 6709
+    public func fetchMotorSwitchState(response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
+        dataHelper.fetchMotorSwitchState(response: response)
+    }
+    
+    /// 设置马达开关状态 670A
+    public func updateMotorSwitchState(isOn: Bool,
+                                       response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
+        dataHelper.setMotorSwitchState(isOn: isOn, response: response)
+    }
+}

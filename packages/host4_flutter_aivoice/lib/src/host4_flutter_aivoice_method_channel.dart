@@ -25,16 +25,16 @@ class Host4FlutterAiVoice {
 
   /// 监听事件流
   static Stream<Map<String, dynamic>> get events {
-    _eventStream ??= _eventChannel
-        .receiveBroadcastStream()
-        .map((dynamic event) {
-          if (event is Map) {
-            return event.map<String, dynamic>(
-              (key, value) => MapEntry(key.toString(), value),
-            );
-          }
-          return <String, dynamic>{};
-        });
+    _eventStream ??= _eventChannel.receiveBroadcastStream().map((
+      dynamic event,
+    ) {
+      if (event is Map) {
+        return event.map<String, dynamic>(
+          (key, value) => MapEntry(key.toString(), value),
+        );
+      }
+      return <String, dynamic>{};
+    });
     return _eventStream!;
   }
 }

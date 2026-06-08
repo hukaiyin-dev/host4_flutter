@@ -1096,6 +1096,63 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
         session.startOTA(data: firmwareData)
         nativeLog("[OTA] startOTA dispatched")
         result([:] as [String: Any])
+
+      // MARK: - Other / handle control
+      case Host4FlutterChannelConstants.queryVibrateOpen:
+        invoke(result) { callback in session.fetchMotorSwitchState(response: callback) }
+      case Host4FlutterChannelConstants.switchVibrateOpen:
+        let status = try intArg("status", from: arguments)
+        invoke(result) { callback in session.updateMotorSwitchState(isOn: status == 1, response: callback) }
+      case Host4FlutterChannelConstants.queryWorkStyle:
+        invoke(result) { callback in session.fetchHandleWorkMode(response: callback) }
+      case Host4FlutterChannelConstants.switchWorkStyle:
+        let mode = try intArg("mode", from: arguments)
+        invoke(result) { callback in session.updateHandleWorkMode(mode: mode, response: callback) }
+      case Host4FlutterChannelConstants.queryOutputMode:
+        invoke(result) { callback in session.fetchCurrentHandleMode(response: callback) }
+      case Host4FlutterChannelConstants.switchOutputMode:
+        let mode = try intArg("mode", from: arguments)
+        invoke(result) { callback in session.updateCurrentHandleMode(mode: mode, response: callback) }
+      case Host4FlutterChannelConstants.sendHandleBeta:
+        let profile = try intArg("profile", from: arguments)
+        invoke(result) { callback in session.switchToTestProfile(profile: profile, response: callback) }
+      case Host4FlutterChannelConstants.switchHandleConfig:
+        let profile = try intArg("profile", from: arguments)
+        invoke(result) { callback in session.switchToProfile(profile: profile, response: callback) }
+      case Host4FlutterChannelConstants.switchHandleCallbacks:
+        let method = try intArg("method", from: arguments)
+        let handleOn = method != 0
+        let ep3CallbackOn = method == 2
+        invoke(result) { callback in session.updateHandleFunction(handleOn: handleOn, ep3CallbackOn: ep3CallbackOn, response: callback) }
+      case Host4FlutterChannelConstants.queryLinerTrigger:
+        invoke(result) { callback in session.fetchTriggerLinearOutput(response: callback) }
+      case Host4FlutterChannelConstants.switchLinerTrigger:
+        let mode = try intArg("mode", from: arguments)
+        // mode: 1=线性输出, 2=非线性输出
+        invoke(result) { callback in
+          session.triggerLinearOutput(leftMode: mode, leftThreshold: 0, rightMode: mode, rightThreshold: 0, response: callback)
+        }
+      case Host4FlutterChannelConstants.queryLightingEffectPantas:
+        invoke(result) { callback in session.fetchCurrentLightConfig(response: callback) }
+      case Host4FlutterChannelConstants.setLightGroupEffectPantas:
+        let open = try boolArg("open", from: arguments)
+        let mode = try intArg("mode", from: arguments)
+        let brightness = try intArg("brightness", from: arguments)
+        let colorR = try intArg("colorR", from: arguments)
+        let colorG = try intArg("colorG", from: arguments)
+        let colorB = try intArg("colorB", from: arguments)
+        let colors: [(red: UInt8, green: UInt8, blue: UInt8)] = [
+          (red: UInt8(colorR), green: UInt8(colorG), blue: UInt8(colorB))
+        ]
+        invoke(result) { callback in
+          session.setLightConfig(
+            position: .all, groupCount: 1, isOn: open,
+            light: mode, speed: brightness, mode: .color,
+            subMode: .still, colors: colors,
+            response: callback
+          )
+        }
+
       default:
         result(
           flutterError(

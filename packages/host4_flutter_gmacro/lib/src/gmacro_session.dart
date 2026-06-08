@@ -7,6 +7,7 @@ import 'package:host4_flutter_protocol/host4_flutter_protocol.dart';
 import 'package:host4_flutter_transport/host4_flutter_transport.dart';
 
 import 'Models/gmacro_protocol_events.dart';
+import 'Models/gmacro_support_enums.dart';
 
 class GmacroSession implements ProtocolSession {
   GmacroSession({
@@ -62,6 +63,11 @@ class GmacroSession implements ProtocolSession {
       _forwardProtocolRealtimeEvents,
     );
 
+    // iOS：校准完成事件（calibrationFinished）通过 protocol_events 通道以 busy 形式推送
+    // Android：通过独立的 escalation_events 通道以 deviceAlign 形式推送
+    // 这里统一监听 protocol_events 通道，处理 iOS 的校准事件
+    _eventController.stream.listen(_forwardProtocolCalibrationEvents);
+
     if (_shouldMergeNativeEscalationEvents) {
       // Single native EventChannel subscription; fan out by event type on Dart side.
       _escalationSub = _native
@@ -96,6 +102,26 @@ class GmacroSession implements ProtocolSession {
       TransportKind.ble || TransportKind.usb => true,
       TransportKind.mfi => false,
     };
+  }
+
+  /// iOS: 转发校准完成事件（calibrationFinished）到 _calibrationEventController
+  ///
+  /// iOS 的校准完成事件通过 protocol_events 通道以 busy + reason: "calibrationFinished"
+  /// 形式推送，这里将其转换为 DeviceCalibrationEvent 并添加到校准事件流。
+  void _forwardProtocolCalibrationEvents(ProtocolEvent event) {
+    if (event is! ProtocolBusy || event.reason != 'calibrationFinished') {
+      return;
+    }
+    final payload = event.payload;
+    if (payload == null) return;
+
+    _calibrationEventController.add(DeviceCalibrationEvent(
+      subId: payload['subId'] as int? ?? 0,
+      kind: DeviceCalibrationSubId.fromValue(payload['subId'] as int? ?? 0),
+      result: payload['result'] as int? ?? 0,
+      param1: _asIntList(payload['param1']),
+      param2: _asIntList(payload['param2']),
+    ));
   }
 
   void _forwardProtocolRealtimeEvents(ProtocolEvent event) {
@@ -181,4 +207,15 @@ class GmacroSession implements ProtocolSession {
         );
     }
   }
+}
+
+List<int> _asIntList(dynamic value) {
+  if (value is! List) {
+    return const <int>[];
+  }
+  return value.map((item) {
+    if (item is int) return item;
+    if (item is num) return item.toInt();
+    return int.tryParse(item.toString()) ?? 0;
+  }).toList(growable: false);
 }
