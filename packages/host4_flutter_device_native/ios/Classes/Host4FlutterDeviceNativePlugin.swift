@@ -1132,6 +1132,26 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
         invoke(result) { callback in
           session.triggerLinearOutput(leftMode: mode, leftThreshold: 0, rightMode: mode, rightThreshold: 0, response: callback)
         }
+      case Host4FlutterChannelConstants.queryLightingEffectPantas:
+        invoke(result) { callback in session.fetchCurrentLightConfig(response: callback) }
+      case Host4FlutterChannelConstants.setLightGroupEffectPantas:
+        let open = try boolArg("open", from: arguments)
+        let mode = try intArg("mode", from: arguments)
+        let brightness = try intArg("brightness", from: arguments)
+        let colorR = try intArg("colorR", from: arguments)
+        let colorG = try intArg("colorG", from: arguments)
+        let colorB = try intArg("colorB", from: arguments)
+        let colors: [(red: UInt8, green: UInt8, blue: UInt8)] = [
+          (red: UInt8(colorR), green: UInt8(colorG), blue: UInt8(colorB))
+        ]
+        invoke(result) { callback in
+          session.setLightConfig(
+            position: .all, groupCount: 1, isOn: open,
+            light: mode, speed: brightness, mode: .color,
+            subMode: .still, colors: colors,
+            response: callback
+          )
+        }
 
       default:
         result(
