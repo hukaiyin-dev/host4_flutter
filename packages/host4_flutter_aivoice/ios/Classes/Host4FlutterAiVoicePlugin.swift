@@ -1,11 +1,15 @@
 import Flutter
 import UIKit
 
+/// Flutter AI Voice 插件入口
+/// 只暴露两个接口：showAI / hideAI，所有逻辑由 Native 端处理
+
+// MARK: - 全局资源加载工具
+/// 使用 s.resources 后图片在主 bundle 中，直接 UIImage(named:) 即可
 public class Host4FlutterAiVoicePlugin: NSObject, FlutterPlugin {
   private var methodChannel: FlutterMethodChannel?
   private var eventChannel: FlutterEventChannel?
   private var eventSink: FlutterEventSink?
-  private var aiVoiceManager: AiVoiceManager?
 
   public static func register(with registrar: FlutterPluginRegistrar) {
     let instance = Host4FlutterAiVoicePlugin()
@@ -28,48 +32,24 @@ public class Host4FlutterAiVoicePlugin: NSObject, FlutterPlugin {
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
     switch call.method {
-    case "buildEngine":
+    case "showAI":
       guard let args = call.arguments as? [String: Any],
-            let roomId = args["roomId"] as? String,
-            let userId = args["userId"] as? String
+            let boostingTableID = args["boostingTableID"] as? String,
+            !boostingTableID.isEmpty
       else {
-        result(FlutterError(code: "invalid_args", message: "Missing roomId/userId", details: nil))
+        result(FlutterError(code: "invalid_args", message: "Missing boostingTableID", details: nil))
         return
       }
-      let manager = AiVoiceManager(roomId: roomId, userId: userId)
-      manager.eventCallback = { [weak self] event in
+      AiVoiceManager.shared.boostingTableID = boostingTableID
+      AiVoiceManager.shared.eventCallback = { [weak self] event in
         self?.eventSink?(event)
       }
-      self.aiVoiceManager = manager
-      manager.buildEngineAndJoin()
+      AiViewManager.shared.showFloatWindow(true)
       result(true)
 
-    case "rejoinRoom":
-      aiVoiceManager?.reJoinRoom()
+    case "hideAI":
+      AiViewManager.shared.showFloatWindow(false)
       result(true)
-
-    case "startTalk":
-      aiVoiceManager?.startTalk()
-      result(true)
-
-    case "stopTalk":
-      aiVoiceManager?.stopTalk()
-      result(true)
-
-    case "setVolume":
-      guard let args = call.arguments as? [String: Any],
-            let level = args["level"] as? Int
-      else {
-        result(FlutterError(code: "invalid_args", message: "Missing level", details: nil))
-        return
-      }
-      aiVoiceManager?.setVolume(level)
-      result(nil)
-
-    case "destroy":
-      aiVoiceManager?.destroy()
-      aiVoiceManager = nil
-      result(nil)
 
     default:
       result(FlutterMethodNotImplemented)

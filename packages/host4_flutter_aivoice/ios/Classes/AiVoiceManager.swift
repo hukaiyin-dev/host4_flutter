@@ -1,38 +1,61 @@
 import Foundation
 import VolcEngineRTC
+import AVFoundation
 
+/// AI 语音管理（单例）
 class AiVoiceManager: NSObject {
 
-  // MARK: - 常量
+  static let shared = AiVoiceManager()
   static let appId = "68230496df1dcd01804db0a9"
   static let appKey = "5054eb5367ec4703bc6763ca78736038"
 
   // MARK: - 属性
-  let roomId: String
-  let userId: String
-
   var rtcEngine: ByteRTCEngine?
   var rtcRoom: ByteRTCRoom?
-  var taskId: String?
-  var chatbotId: String?
-  var connectState: AiConnectState = .connecting
+  var connectState: AiConnectState = .connecting {
+    didSet {
+      let chatState: AiVoiceChatState
+      switch connectState {
+      case .connecting:    chatState = .connecting
+      case .loseConnect:   chatState = .reconnect
+      default:             chatState = .normal
+      }
+      ChatAssistantView.shared.updateToolWithChatState(chatState)
+    }
+  }
   var isUserVip = false
   var isUserAsk = false
+  var roomId: String?
+  var taskId: String?
+  var userId: String?
+  var chatbotId: String? {
+    didSet {
+      ChatAssistantView.shared.updateChatTitle(chatbotId ?? "")
+    }
+  }
+  var boostingTableID = ""
+
+  var isSpeaking: Bool = false {
+    didSet {
+      if isSpeaking {
+        ChatAssistantView.shared.updateToolWithChatState(.speaking)
+      } else {
+        if latestConvModel?.stage.code == 3 { return }
+        ChatAssistantView.shared.updateToolWithChatState(.normal)
+      }
+    }
+  }
+  var latestConvModel: ConversationStatusMessage?
+  var isJoinRoom = false
+
   var eventCallback: (([String: Any]) -> Void)?
 
-  private var isSpeaking = false
-  private var isJoinRoom = false
-  private var latestConvModel: ConversationStatusMessage?
-
-  // MARK: - 初始化
-  init(roomId: String, userId: String) {
-    self.roomId = roomId
-    self.userId = userId
+  private override init() {
     super.init()
   }
 
-  // MARK: - 创建引擎并加入房间
-  func buildEngineAndJoin() {
+  // MARK: - 创建引擎
+  func buildRTCEngine() {
     let engineCfg = ByteRTCEngineConfig()
     engineCfg.appID = Self.appId
     engineCfg.parameters = [:]
@@ -47,26 +70,49 @@ class AiVoiceManager: NSObject {
     engine.startAudioCapture()
     engine.setAudioProfile(.default)
     engine.setPlaybackVolume(100)
+    engine.stopVideoCapture()
 
     isUserAsk = false
     joinRoom()
+  }
+
+  // MARK: - 销毁引擎
+  func destructionRTCEngine() {
+    agentLeave()
+    leaveRoom()
+    ByteRTCEngine.destroyRTCEngine()
+    rtcEngine = nil
+
+    userId = nil
+    taskId = nil
+    roomId = nil
+    chatbotId = nil
+
+    isSpeaking = false
+    isUserAsk = false
+    isUserVip = false
+    isJoinRoom = false
+    connectState = .loseConnect
+    latestConvModel = nil
   }
 
   // MARK: - 加入房间
   func joinRoom() {
     guard let engine = rtcEngine else { return }
 
-    let roomID = roomId
-    let userID = userId
-
-    rtcRoom = engine.createRTCRoom(roomID)
+    let rid = roomId ?? RtcUtils.generateRoomId()
+    roomId = rid
+    rtcRoom = engine.createRTCRoom(rid)
     rtcRoom?.delegate = self
     rtcRoom?.setUserVisibility(true)
 
-    let userInfo = ByteRTCUserInfo()
-    userInfo.userId = userID
+    let uid = userId ?? RtcUtils.generateUserId()
+    userId = uid
 
-    guard let token = AccessToken.generate(roomID: roomID, userID: userID) else {
+    let userInfo = ByteRTCUserInfo()
+    userInfo.userId = uid
+
+    guard let token = AccessToken.generate(roomID: rid, userID: uid) else {
       print("[AiVoice] ❌ Token 生成失败")
       return
     }
@@ -96,68 +142,110 @@ class AiVoiceManager: NSObject {
     rtcRoom = nil
   }
 
-  // MARK: - 开麦/关麦（使用 publishStreamAudio）
-  func startTalk() {
-    rtcRoom?.publishStreamAudio(true)
-    isUserVip = true
+  // MARK: - 音量控制
+  func switchVoiceVolume(_ open: Bool) {
+    guard let engine = rtcEngine else { return }
+    print("[AiVoice] \(open ? "开启" : "关闭")音量")
+    engine.setPlaybackVolume(open ? 100 : 0)
   }
 
-  func stopTalk() {
-    rtcRoom?.publishStreamAudio(false)
-    isUserVip = false
-  }
+  // MARK: - 麦克风控制
+  func switchAudioCapture(_ isOpen: Bool) {
+    guard rtcEngine != nil, rtcRoom != nil else {
+      print("[AiVoice] ❌ 引擎或房间未初始化")
+      return
+    }
+    if isUserVip == isOpen {
+      print("[AiVoice] ℹ️ 麦克风状态已相同，跳过")
+      return
+    }
+    isUserVip = isOpen
 
-  // MARK: - 音量
-  func setVolume(_ level: Int) {
-    rtcEngine?.setPlaybackVolume(level)
-  }
-
-  // MARK: - 销毁
-  func destroy() {
-    agentLeave()
-    leaveRoom()
-    ByteRTCEngine.destroyRTCEngine()
-    rtcEngine = nil
-
-    taskId = nil
-    chatbotId = nil
-    isSpeaking = false
-    isUserAsk = false
-    isUserVip = false
-    isJoinRoom = false
-    connectState = .loseConnect
-    latestConvModel = nil
+    if isOpen {
+      print("[AiVoice] ✅ 开启麦克风")
+      rtcRoom?.publishStreamAudio(true)
+      ChatAssistantView.shared.updateToolWithChatState(.normal)
+    } else {
+      print("[AiVoice] ✅ 关闭麦克风")
+      rtcRoom?.publishStreamAudio(false)
+      ChatAssistantView.shared.updateToolWithChatState(.notVip)
+    }
   }
 
   // MARK: - 启动智能体
   func startAgent() {
-    guard rtcEngine != nil,
-          let roomID = rtcRoom?.getId(),
-          !roomID.isEmpty
-    else {
-      print("[AiVoice] ❌ 引擎未初始化")
+    guard rtcEngine != nil, let rid = roomId, !rid.isEmpty,
+          let uid = userId, !uid.isEmpty, !boostingTableID.isEmpty else {
+      print("[AiVoice] ❌ 参数不完整")
       return
     }
 
-    let tid = taskId ?? RtcUtils.generateTaskId()
-    taskId = tid
-    let botname = chatbotId ?? RtcUtils.generateChatbotId()
-    chatbotId = botname
+    if taskId == nil { taskId = RtcUtils.generateTaskId() }
+    if chatbotId == nil { chatbotId = RtcUtils.generateChatbotId() }
 
-    emitEvent("agentJoin", data: [
-      "roomId": roomID,
-      "taskId": tid,
-      "userId": userId,
-      "chatbotId": botname,
-    ])
+    let tid = taskId!
+    let botname = chatbotId!
+
+    ChatAssistantView.shared.updateToolWithChatState(.notVip)
+
+    let lang = NSLocale.current.languageCode ?? "zh"
+    AgentRequestManager.agentJoinRoom(
+      boostingTableID: boostingTableID,
+      roomID: rid,
+      taskID: tid,
+      userID: uid,
+      botname: botname,
+      language: lang
+    ) { [weak self] success in
+      if success {
+        print("[AiVoice] ✅ 智能体加入成功")
+        self?.getVipUseInfo(0)
+      } else {
+        print("[AiVoice] ❌ 智能体加入失败")
+      }
+    }
   }
 
   // MARK: - 退出智能体
   func agentLeave() {
-    guard let roomID = rtcRoom?.getId(), let tid = taskId else { return }
-    emitEvent("agentLeave", data: ["roomId": roomID, "taskId": tid])
+    guard let rid = roomId, let tid = taskId else { return }
+    AgentRequestManager.agentLeaveRoom(roomID: rid, taskID: tid) { _ in }
+    roomId = nil
     taskId = nil
+    userId = nil
     chatbotId = nil
+  }
+
+  // MARK: - VIP 检查
+  func getVipUseInfo(_ type: Int) {
+    // 实际项目中调后端接口
+    // 这里简化处理，默认有权限
+    switchAudioCapture(true)
+    ChatAssistantView.shared.updateVipTitle(nil)
+  }
+
+  func checkVipDeduction(_ subvModel: SubtitleMsgData) {
+    if subvModel.userId == userId, subvModel.definite {
+      isUserAsk = true
+    }
+    if subvModel.isBotCompleteSentenceNeedsSpecialHandling(botUserId: chatbotId ?? ""), isUserAsk {
+      // TODO: 上报扣费
+      getVipUseInfo(1)
+    }
+  }
+
+  // MARK: - 播放特殊音频
+  func playSpecialAudio() {
+    let lang = NSLocale.current.languageCode ?? "en"
+    let audioName: String
+    if lang.hasPrefix("zh") {
+      audioName = "illegal_game"
+    } else if lang.hasPrefix("ja") {
+      audioName = "illegal_game_ja"
+    } else {
+      audioName = "illegal_game_en"
+    }
+    WavAudioPlayer.play(audioName: audioName)
   }
 
   // MARK: - 事件发送
@@ -171,37 +259,27 @@ class AiVoiceManager: NSObject {
 // MARK: - ByteRTCEngineDelegate
 extension AiVoiceManager: ByteRTCEngineDelegate {
   func rtcEngine(_ engine: ByteRTCEngine, onNetworkTypeChanged type: ByteRTCNetworkType) {
-    // type 为枚举值，直接比较整数
     if type.rawValue == 0 {
       connectState = .loseConnect
-      emitEvent("connectionState", data: ["state": connectState.rawValue])
     }
   }
 
   func rtcEngine(_ engine: ByteRTCEngine, onConnectionStateChanged state: ByteRTCConnectionState) {
     switch state {
-    case .connecting, .reconnecting:
-      connectState = .connecting
-    case .connected, .reconnected:
-      connectState = .connected
-    default:
-      connectState = .loseConnect
+    case .connecting, .reconnecting: connectState = .connecting
+    case .connected, .reconnected:   connectState = .connected
+    default:                         connectState = .loseConnect
     }
-    emitEvent("connectionState", data: ["state": connectState.rawValue])
   }
 
-  func rtcEngine(_ engine: ByteRTCEngine, onLocalAudioPropertiesReport audioPropertiesInfos: [ByteRTCLocalAudioPropertiesInfo]) {
+  func rtcEngine(_ engine: ByteRTCEngine, onLocalAudioPropertiesReport infos: [ByteRTCLocalAudioPropertiesInfo]) {
     var speaking = false
-    for info in audioPropertiesInfos {
-      if info.audioPropertiesInfo.vad == 1 && info.audioPropertiesInfo.linearVolume > 10 {
+    for info in infos {
+      if info.audioPropertiesInfo.vad == 1, info.audioPropertiesInfo.linearVolume > 10 {
         speaking = true
       }
     }
     isSpeaking = speaking
-    emitEvent("volume", data: [
-      "speaking": speaking,
-      "volume": audioPropertiesInfos.first?.audioPropertiesInfo.linearVolume ?? 0,
-    ])
   }
 }
 
@@ -211,66 +289,41 @@ extension AiVoiceManager: ByteRTCRoomDelegate {
     if state == 0 {
       isJoinRoom = true
       if taskId == nil { taskId = RtcUtils.generateTaskId() }
+      if self.roomId == nil || self.roomId != roomId { self.roomId = roomId }
+      if self.userId == nil || self.userId != uid { self.userId = uid }
       if chatbotId == nil { chatbotId = RtcUtils.generateChatbotId() }
-      connectState = .connected
-      emitEvent("roomState", data: ["state": "joined", "roomId": roomId, "uid": uid])
       startAgent()
     } else {
       connectState = .loseConnect
-      emitEvent("roomState", data: ["state": "failed", "code": state])
     }
   }
 
-  func rtcRoom(_ rtcRoom: ByteRTCRoom, onLeaveRoom stats: ByteRTCRoomStats) {
-    // 不做特殊处理
-  }
+  func rtcRoom(_ rtcRoom: ByteRTCRoom, onLeaveRoom stats: ByteRTCRoomStats) {}
 
   func onTokenWillExpire(_ rtcRoom: ByteRTCRoom) {
-    let roomID = rtcRoom.getId()
-    if let token = AccessToken.generate(roomID: roomID, userID: userId) {
-      rtcRoom.updateToken(token)
-    }
+    guard let token = AccessToken.generate(roomID: rtcRoom.getId(), userID: userId ?? "") else { return }
+    rtcRoom.updateToken(token)
   }
 
   func rtcRoom(_ rtcRoom: ByteRTCRoom, onRoomBinaryMessageReceived uid: String, message: Data) {
     if let subtitles = SubtitleMsgData.unpack(from: message) {
-      let items = SubtitleMsgData.parse(json: subtitles, currentUserId: userId)
+      let items = SubtitleMsgData.parse(json: subtitles, currentUserId: userId ?? "")
       for item in items {
-        emitEvent("subtitle", data: [
-          "text": item.text,
-          "roundId": item.roundId,
-          "definite": item.definite,
-          "paragraph": item.paragraph,
-          "sequence": item.sequence,
-          "userId": item.userId,
-          "msgType": item.msgType,
-        ])
-        if item.userId == userId && item.definite {
-          isUserAsk = true
-        }
-        if item.isBotCompleteSentenceNeedsSpecialHandling(botUserId: chatbotId ?? "") && isUserAsk {
-          emitEvent("chargeCheck", data: ["roundId": item.roundId, "text": item.text])
-        }
-        if item.isBotCompleteSentenceAndPlayAudio(botUserId: chatbotId ?? "") {
-          emitEvent("playSpecialAudio", data: [:])
-        }
+        checkVipDeduction(item)
+        ChatAssistantView.shared.updateSubvMessage(item)
       }
       return
     }
 
-    let convStr = ConversationStatusMessage.unpack(from: message)
-    if let conv = convStr.flatMap({ ConversationStatusMessage.parse(json: $0) }) {
+    if let convStr = ConversationStatusMessage.unpack(from: message),
+       let conv = ConversationStatusMessage.parse(json: convStr) {
       latestConvModel = conv
-      emitEvent("conversationState", data: [
-        "code": conv.stage.code,
-        "description": conv.stage.description,
-        "taskId": conv.taskId,
-        "roundId": conv.roundID,
-      ])
+      ChatAssistantView.shared.updateConvMessage(conv)
+
       if conv.stage.code == 3 {
-        emitEvent("chatState", data: ["state": "interrupt"])
+        ChatAssistantView.shared.updateToolWithChatState(.interrupt)
       } else if conv.stage.code == 4 || conv.stage.code == 5 {
-        emitEvent("chatState", data: ["state": "normal"])
+        ChatAssistantView.shared.updateToolWithChatState(.normal)
       }
     }
   }

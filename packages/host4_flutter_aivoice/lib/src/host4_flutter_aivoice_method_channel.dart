@@ -3,58 +3,27 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 
 /// Flutter 端 AI Voice API
+/// 调用 showAI 后，所有 UI 和逻辑由 Native 端处理
 class Host4FlutterAiVoice {
   static final _channel = MethodChannel('host4_flutter_aivoice');
   static final _eventChannel = EventChannel('host4_flutter_aivoice_events');
   static Stream<Map<String, dynamic>>? _eventStream;
 
-  /// 初始化 RTC 引擎并加入房间
-  static Future<bool> buildEngine({
-    required String roomId,
-    required String userId,
-  }) async {
-    final result = await _channel.invokeMethod('buildEngine', {
-      'roomId': roomId,
-      'userId': userId,
+  /// 显示 AI 语音悬浮窗（自动处理引擎初始化、房间加入、智能体拉取、UI 显示）
+  static Future<bool> showAI({required String boostingTableID}) async {
+    final result = await _channel.invokeMethod('showAI', {
+      'boostingTableID': boostingTableID,
     });
     return result == true;
   }
 
-  /// 重新加入房间（网络重连）
-  static Future<bool> rejoinRoom() async {
-    final result = await _channel.invokeMethod('rejoinRoom');
+  /// 隐藏并销毁 AI 语音（销毁引擎、房间、隐藏悬浮窗/聊天窗）
+  static Future<bool> hideAI() async {
+    final result = await _channel.invokeMethod('hideAI');
     return result == true;
   }
 
-  /// 加入 RTC 房间
-  static Future<bool> joinRoom() async {
-    final result = await _channel.invokeMethod('joinRoom');
-    return result == true;
-  }
-
-  /// 开始说话（发布音频）
-  static Future<bool> startTalk() async {
-    final result = await _channel.invokeMethod('startTalk');
-    return result == true;
-  }
-
-  /// 停止说话（取消发布音频）
-  static Future<bool> stopTalk() async {
-    final result = await _channel.invokeMethod('stopTalk');
-    return result == true;
-  }
-
-  /// 设置播放音量
-  static Future<void> setVolume(int level) async {
-    await _channel.invokeMethod('setVolume', {'level': level});
-  }
-
-  /// 离开并销毁
-  static Future<void> destroy() async {
-    await _channel.invokeMethod('destroy');
-  }
-
-  /// 监听事件流（字幕、状态、音量等）
+  /// 监听事件流
   static Stream<Map<String, dynamic>> get events {
     _eventStream ??= _eventChannel
         .receiveBroadcastStream()

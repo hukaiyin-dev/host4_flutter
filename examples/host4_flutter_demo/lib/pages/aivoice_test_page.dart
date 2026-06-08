@@ -11,160 +11,108 @@ class AiVoiceTestPage extends StatefulWidget {
 }
 
 class _AiVoiceTestPageState extends State<AiVoiceTestPage> {
-  bool _isInitialized = false;
-  bool _isTalking = false;
-  String _roomId = '';
-  String _taskId = '';
-  String _status = '未初始化';
+  bool _isAIOn = false;
+  String _status = '未启动';
   final List<String> _events = [];
   StreamSubscription<Map<String, dynamic>>? _eventSub;
 
   @override
   void initState() {
     super.initState();
-    _addLog('页面已加载');
+    _addLog('AI 语音悬浮窗测试（全部原生）');
   }
 
   void _addLog(String msg) {
     setState(() => _events.insert(0, '[${DateTime.now().millisecond}] $msg'));
   }
 
-  Future<void> _initialize() async {
-    setState(() => _status = '正在初始化引擎+加入房间...');
-    _addLog('开始初始化...');
-    try {
-      final roomId = 'room_${DateTime.now().millisecondsSinceEpoch}';
-      final userId = 'user_${DateTime.now().millisecondsSinceEpoch}';
-      _roomId = roomId;
-      _addLog('roomId=$roomId, userId=$userId');
+  Future<void> _toggleAI() async {
+    if (_isAIOn) {
+      // 关闭
+      await Host4FlutterAiVoice.hideAI();
+      _eventSub?.cancel();
+      _eventSub = null;
+      setState(() {
+        _isAIOn = false;
+        _status = '已关闭';
+      });
+      _addLog('✅ hideAI 已调用');
+    } else {
+      // 开启
+      setState(() => _status = '正在启动 AI 语音...');
+      _addLog('调用 showAI...');
 
-      final success = await Host4FlutterAiVoice.buildEngine(
-        roomId: roomId,
-        userId: userId,
-      );
-
-      if (success) {
-        _subscribeEvents();
-        setState(() {
-          _isInitialized = true;
-          _status = '已初始化（等待房间加入+智能体）';
-        });
-        _addLog('✅ buildEngine 成功');
-      } else {
-        setState(() => _status = '❌ buildEngine 失败');
-        _addLog('❌ buildEngine 返回 false');
+      try {
+        final success = await Host4FlutterAiVoice.showAI(
+          boostingTableID: 'GameMacro',
+        );
+        if (success) {
+          _subscribeEvents();
+          setState(() {
+            _isAIOn = true;
+            _status = '✅ 悬浮窗已显示';
+          });
+          _addLog('✅ showAI 成功');
+        } else {
+          setState(() => _status = '❌ 启动失败');
+          _addLog('❌ showAI 返回 false');
+        }
+      } catch (e) {
+        setState(() => _status = '❌ 异常: $e');
+        _addLog('❌ 异常: $e');
       }
-    } catch (e) {
-      setState(() => _status = '❌ 异常: $e');
-      _addLog('❌ 异常: $e');
     }
   }
 
   void _subscribeEvents() {
     _eventSub = Host4FlutterAiVoice.events.listen((event) {
       final type = event['event'] ?? 'unknown';
-      _addLog('📡 事件: $type → ${event.toString().substring(0, event.toString().length.clamp(0, 150))}');
+      _addLog('📡 $type');
 
-      if (type == 'roomState') {
-        final state = event['state'];
-        if (state == 'joined') {
-          setState(() => _status = '✅ 已加入房间');
-          _addLog('🎉 房间加入成功!');
-        } else if (state == 'failed') {
-          setState(() => _status = '❌ 房间加入失败 code=${event["code"]}');
-          _addLog('❌ 房间加入失败');
-        }
-      } else if (type == 'agentJoin') {
-        _taskId = event['taskId'] ?? '';
-        setState(() => _status = '✅ 已加入房间，等待智能体...');
-        _addLog('🤖 智能体事件: taskId=${event["taskId"]}');
-      } else if (type == 'connectionState') {
-        _addLog('🔌 连接状态: ${event["state"]}');
-      } else if (type == 'subtitle') {
-        _addLog('📝 字幕: ${event["text"]}');
-      } else if (type == 'conversationState') {
-        _addLog('💬 对话状态: code=${event["code"]}');
-      } else if (type == 'chatState') {
-        _addLog('💭 聊天状态: ${event["state"]}');
+      switch (type) {
+        case 'agentJoined':
+          setState(() => _status = '🎉 智能体已加入');
+          break;
+        case 'agentJoinFailed':
+          setState(() => _status = '❌ 智能体加入失败');
+          break;
       }
     });
-  }
-
-  Future<void> _startTalk() async {
-    await Host4FlutterAiVoice.startTalk();
-    setState(() {
-      _isTalking = true;
-      _status = '🎤 说话中...';
-    });
-    _addLog('开始说话');
-  }
-
-  Future<void> _stopTalk() async {
-    await Host4FlutterAiVoice.stopTalk();
-    setState(() {
-      _isTalking = false;
-      _status = '🙊 已停止说话';
-    });
-    _addLog('停止说话');
-  }
-
-  Future<void> _destroy() async {
-    await Host4FlutterAiVoice.destroy();
-    _eventSub?.cancel();
-    setState(() {
-      _isInitialized = false;
-      _isTalking = false;
-      _status = '已销毁';
-    });
-    _addLog('已销毁');
   }
 
   @override
   void dispose() {
     _eventSub?.cancel();
-    Host4FlutterAiVoice.destroy();
+    Host4FlutterAiVoice.hideAI();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('AI Voice 测试')),
+      appBar: AppBar(title: const Text('AI 语音测试（原生 UI）')),
       body: Column(
         children: [
-          // 状态 + 操作按钮
           Container(
             padding: const EdgeInsets.all(16),
             color: Theme.of(context).colorScheme.surfaceContainerLow,
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text('状态: $_status',
                     style: const TextStyle(fontWeight: FontWeight.bold)),
-                const SizedBox(height: 8),
-                Text('Room: $_roomId'),
-                Text('Task: $_taskId'),
                 const SizedBox(height: 12),
-                Row(
-                  children: [
-                    if (!_isInitialized)
-                      ElevatedButton(onPressed: _initialize, child: const Text('1. 初始化')),
-                    if (_isInitialized && !_isTalking)
-                      ElevatedButton(onPressed: _startTalk, child: const Text('2. 开始说话')),
-                    if (_isTalking)
-                      ElevatedButton(onPressed: _stopTalk, child: const Text('停止说话')),
-                    if (_isInitialized)
-                      ElevatedButton(
-                        onPressed: _destroy,
-                        style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                        child: const Text('3. 销毁'),
-                      ),
-                  ],
+                ElevatedButton.icon(
+                  onPressed: _toggleAI,
+                  icon: Icon(_isAIOn ? Icons.stop : Icons.play_arrow),
+                  label: Text(_isAIOn ? '关闭 AI' : '开启 AI 悬浮窗'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: _isAIOn ? Colors.red : Colors.green,
+                    foregroundColor: Colors.white,
+                  ),
                 ),
               ],
             ),
           ),
-          // 事件日志
           const Divider(height: 1),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -188,10 +136,9 @@ class _AiVoiceTestPageState extends State<AiVoiceTestPage> {
                     itemBuilder: (_, i) => Padding(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 16, vertical: 2),
-                      child: Text(
-                        _events[i],
-                        style: const TextStyle(fontSize: 12, fontFamily: 'monospace'),
-                      ),
+                      child: Text(_events[i],
+                          style: const TextStyle(
+                              fontSize: 12, fontFamily: 'monospace')),
                     ),
                   ),
           ),
