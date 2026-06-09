@@ -116,6 +116,25 @@ extension DataHelper {
     }
     
     
+    // 查询宏录制最大支持组数
+    func analyzeMacroMaxGroups(_ data: Data) -> [String: Any] {
+        var dic: [String: Any] = [:]
+        var parser = DataParser(data)
+
+        guard parser.remaining >= 2 else {
+            print("⚠️ 查询宏录制最大支持组数数据长度不足 2 字节")
+            return dic
+        }
+
+        // subID
+        _ = parser.next(1)
+        let maxGroups = parser.next(1).toInt()
+
+        dic["maxGroups"] = maxGroups
+
+        return dic
+    }
+
     // 查询宏录制时间参数范围
     func analyzeMacroTimeRange(_ data: Data)  -> [String: Any] {
         var dic: [String: Any] = [:]

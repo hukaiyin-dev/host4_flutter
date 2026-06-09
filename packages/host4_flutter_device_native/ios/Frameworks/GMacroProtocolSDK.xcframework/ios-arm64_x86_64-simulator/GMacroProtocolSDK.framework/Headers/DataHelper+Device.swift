@@ -132,6 +132,118 @@ extension DataHelper {
                    response: response)
     }
     
+    // MARK: - 6901 获取手柄工作模式
+    func fetchHandleWorkMode(finish: (() -> Void)? = nil,
+                              response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
+        let subID = 0x01
+        let protocolID = GMacroProtocolID.handleMode
+        
+        var payload = Data()
+        payload.append(Data.from(subID, count: 1))  // subID
+        payload.append(Data.from(0x05, count: 1))   // Dev
+        
+        let all = dataFrom(protocolID: protocolID, payload: payload)
+        self.write(protocolID: protocolID, data: all, finish: finish, response: response)
+    }
+    
+    // MARK: - 6902 设置手柄工作模式
+    func setHandleWorkMode(mode: Int,
+                            finish: (() -> Void)? = nil,
+                            response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
+        let subID = 0x02
+        let protocolID = GMacroProtocolID.handleMode
+        
+        var payload = Data()
+        payload.append(Data.from(subID, count: 1))  // subID
+        payload.append(Data.from(0x05, count: 1))   // Dev
+        payload.append(Data.from(mode, count: 1))   // mode
+        
+        let all = dataFrom(protocolID: protocolID, payload: payload)
+        self.write(protocolID: protocolID, data: all, finish: finish, response: response)
+    }
+    
+    // MARK: - 6907 获取当前手柄模式
+    func fetchCurrentHandleMode(finish: (() -> Void)? = nil,
+                                 response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
+        let subID = 0x07
+        let protocolID = GMacroProtocolID.handleMode
+        
+        var payload = Data()
+        payload.append(Data.from(subID, count: 1))  // subID
+        payload.append(Data.from(0x05, count: 1))   // Dev
+        
+        let all = dataFrom(protocolID: protocolID, payload: payload)
+        self.write(protocolID: protocolID, data: all, finish: finish, response: response)
+    }
+    
+    // MARK: - 6908 设置当前手柄模式
+    func setCurrentHandleMode(mode: Int,
+                               finish: (() -> Void)? = nil,
+                               response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
+        let subID = 0x08
+        let protocolID = GMacroProtocolID.handleMode
+        
+        var payload = Data()
+        payload.append(Data.from(subID, count: 1))  // subID
+        payload.append(Data.from(0x05, count: 1))   // Dev
+        payload.append(Data.from(mode, count: 1))   // mode
+        
+        let all = dataFrom(protocolID: protocolID, payload: payload)
+        self.write(protocolID: protocolID, data: all, finish: finish, response: response)
+    }
+    
+    // MARK: - 8101 切换手柄配置页
+    func switchToProfile(profile: Int,
+                          finish: (() -> Void)? = nil,
+                          response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
+        let subID = 0x01
+        let protocolID = GMacroProtocolID.handleProfile
+        
+        var payload = Data()
+        payload.append(Data.from(subID, count: 1))     // subID
+        payload.append(Data.from(0x05, count: 1))      // Dev
+        payload.append(Data.from(profile, count: 1))   // profile
+        
+        let all = dataFrom(protocolID: protocolID, payload: payload)
+        self.write(protocolID: protocolID, data: all, finish: finish, response: response)
+    }
+    
+    // MARK: - 8102 测试模式切换配置页
+    func switchToTestProfile(profile: Int,
+                              finish: (() -> Void)? = nil,
+                              response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
+        let subID = 0x02
+        let protocolID = GMacroProtocolID.handleProfile
+        
+        var payload = Data()
+        payload.append(Data.from(subID, count: 1))     // subID
+        payload.append(Data.from(0x05, count: 1))      // Dev
+        payload.append(Data.from(profile, count: 1))   // profile
+        
+        let all = dataFrom(protocolID: protocolID, payload: payload)
+        self.write(protocolID: protocolID, data: all, finish: finish, response: response)
+    }
+    
+    // MARK: - 8302 开关手柄功能以及回调
+    /// Bit0: 手柄功能开关 (0=关, 1=开)
+    /// Bit1: EP3 回调开关 (0=关, 1=开)
+    func updateHandleFunction(handleOn: Bool, ep3CallbackOn: Bool,
+                               finish: (() -> Void)? = nil,
+                               response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
+        let protocolID = GMacroProtocolID.handleFunction
+        
+        var payload = Data()
+        payload.append(Data.from(0x02, count: 1))  // subID
+        payload.append(Data.from(0x05, count: 1))  // Dev
+        
+        // Bit0=手柄功能, Bit1=EP3回调
+        let param = (handleOn ? 1 : 0) | (ep3CallbackOn ? 2 : 0)
+        payload.append(Data.from(param, count: 1)) // param
+        
+        let all = dataFrom(protocolID: protocolID, payload: payload)
+        self.write(protocolID: protocolID, data: all, finish: finish, response: response)
+    }
+    
 }
 // MARK: - Parse
 extension DataHelper {
@@ -254,6 +366,53 @@ extension DataHelper {
         }
         
         return dic
+    }
+    
+    // MARK: - 手柄工作模式解析 0x69
+    /// 格式: [subID][dev][value]
+    /// subID 0x01/0x07 → value = mode 直接传出
+    /// subID 0x02/0x08 → value = result 直接传出
+    func analyzeHandleMode(_ data: Data) -> [String: Any] {
+        var parser = DataParser(data)
+        
+        let subID = parser.next(1).toInt()  // subID
+        _ = parser.next(1)                   // dev
+        
+        let value = parser.next(1).toInt()   // mode/result
+        
+        // 根据 subID 类型传出对应的 key
+        if subID == 0x02 || subID == 0x08 {
+            return ["result": value]
+        } else {
+            return ["mode": value]
+        }
+    }
+    
+    // MARK: - 手柄配置页解析 0x81
+    /// 格式: [subID][dev][result]
+    /// subID 0x01/0x02 → value = result 直接传出
+    func analyzeHandleProfile(_ data: Data) -> [String: Any] {
+        var parser = DataParser(data)
+        
+        _ = parser.next(1)   // subID
+        _ = parser.next(1)   // dev
+        
+        let result = parser.next(1).toInt()
+        
+        return ["result": result]
+    }
+    
+    // MARK: - 0x83 开关手柄功能以及回调解析
+    /// 格式: [subID][dev][result]
+    func analyzeHandleFunction(_ data: Data) -> [String: Any] {
+        var parser = DataParser(data)
+        
+        _ = parser.next(1)   // subID
+        _ = parser.next(1)   // dev
+        
+        let result = parser.next(1).toInt()
+        
+        return ["result": result]
     }
 }
 

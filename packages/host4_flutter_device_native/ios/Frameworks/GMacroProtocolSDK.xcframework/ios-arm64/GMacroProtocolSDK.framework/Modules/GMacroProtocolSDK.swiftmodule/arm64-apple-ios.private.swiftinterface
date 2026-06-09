@@ -319,6 +319,19 @@ extension GMacroProtocolSDK.GMacroProtocolSession {
   final public func updateSwitchLayout(isOpen: Swift.Bool, locking: Swift.Bool, exchange: Swift.Bool, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
 }
 extension GMacroProtocolSDK.GMacroProtocolSession {
+  final public func fetchHandleWorkMode(response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func updateHandleWorkMode(mode: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func fetchCurrentHandleMode(response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func updateCurrentHandleMode(mode: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+}
+extension GMacroProtocolSDK.GMacroProtocolSession {
+  final public func switchToProfile(profile: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func switchToTestProfile(profile: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+}
+extension GMacroProtocolSDK.GMacroProtocolSession {
+  final public func updateHandleFunction(handleOn: Swift.Bool, ep3CallbackOn: Swift.Bool, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+}
+extension GMacroProtocolSDK.GMacroProtocolSession {
   final public func updateKeyTurbo(_ values: [(GMacroProtocolSDK.GamepadKey, GMacroProtocolSDK.TurboMode, Swift.Int)], response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
   final public func querySupportedTurboKeys(profile: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
 }
@@ -351,11 +364,18 @@ extension GMacroProtocolSDK.GMacroProtocolSession {
   final public func endTriggerCalibration(_ response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
 }
 extension GMacroProtocolSDK.GMacroProtocolSession {
+  final public func fetchTriggerLinearOutput(response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+}
+extension GMacroProtocolSDK.GMacroProtocolSession {
   final public func triggerLinearOutput(leftMode: Swift.Int, leftThreshold: Swift.Int, rightMode: Swift.Int, rightThreshold: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
 }
 extension GMacroProtocolSDK.GMacroProtocolSession {
   final public func setVibrationLevel(left: Swift.Int, right: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
   final public func testVibration(left: Swift.Int, right: Swift.Int, position: GMacroProtocolSDK.VibrationPosition, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+}
+extension GMacroProtocolSDK.GMacroProtocolSession {
+  final public func fetchMotorSwitchState(response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func updateMotorSwitchState(isOn: Swift.Bool, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
 }
 extension GMacroProtocolSDK.GMacroProtocolSession {
   final public func queryMappableKeys(profile: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
