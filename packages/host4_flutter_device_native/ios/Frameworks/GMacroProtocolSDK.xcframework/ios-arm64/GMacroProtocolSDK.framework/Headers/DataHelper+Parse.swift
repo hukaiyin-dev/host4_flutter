@@ -263,8 +263,6 @@ extension DataHelper {
             switch subID {
             case .queryMacroTimeRange:
                 responseDic = analyzeMacroTimeRange(payload)
-            case .queryMacroMaxGroups:
-                responseDic = analyzeMacroMaxGroups(payload)
             case .queryGyroMappingModes:
                 responseDic = analyzeGyroMappingModes(payload)
             default:
