@@ -98,4 +98,12 @@ extension GmacroSessionTrigger on GmacroSession {
   /// 查询扳机震动开关
   Future<Map<String, Object?>> fetchTriggerVibration() =>
       invoke(GmacroMethods.fetchTriggerVibration);
+
+  /// 查询左右扳机线性输出
+  Future<Map<String, Object?>> queryLinerTrigger() =>
+      invoke(GmacroMethods.queryLinerTrigger);
+
+  /// 设置左右扳机线性输出 1 线性 2 非线性
+  Future<Map<String, Object?>> switchLinerTrigger({required int mode}) =>
+      invoke(GmacroMethods.switchLinerTrigger, arguments: {'mode': mode});
 }

@@ -14,6 +14,14 @@ extension GmacroSessionVibration on GmacroSession {
     arguments: {'left': left, 'right': right},
   );
 
+  /// 设置马达开关状态 马达开关状态：1 为开启，2 为关闭
+  Future<Map<String, Object?>> switchVibrateOpen({required int status}) =>
+      invoke(GmacroMethods.switchVibrateOpen, arguments: {'status': status});
+
+  /// 查询马达开关状态
+  Future<Map<String, Object?>> queryVibrateOpen() =>
+      invoke(GmacroMethods.queryVibrateOpen);
+
   /// 测试振动力
   /// - [left] 左侧振动力（0-255）
   /// - [right] 右侧振动力（0-255）

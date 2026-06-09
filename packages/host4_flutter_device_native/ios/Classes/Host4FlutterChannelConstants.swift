@@ -130,6 +130,4 @@ struct Host4FlutterChannelConstants {
   static let switchHandleCallbacks = "switchHandleCallbacks"
   static let queryLinerTrigger = "queryLinerTrigger"
   static let switchLinerTrigger = "switchLinerTrigger"
-  static let queryLightingEffectPantas = "queryLightingEffectPantas"
-  static let setLightGroupEffectPantas = "setLightGroupEffectPantas"
 }

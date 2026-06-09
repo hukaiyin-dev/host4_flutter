@@ -18,11 +18,11 @@ extension GmacroSessionLight on GmacroSession {
   Future<Map<String, Object?>> fetchCurrentLightEffect() =>
       invoke(GmacroMethods.fetchCurrentLightEffect);
 
-  /// 查询当前灯效配置
+  /// 查询当前灯效配置 0x71
   Future<Map<String, Object?>> fetchCurrentLightConfig() =>
       invoke(GmacroMethods.fetchCurrentLightConfig);
 
-  /// 设置灯效配置
+  /// 设置灯效配置 0x72
   /// - [effect] 1=单色, 2=呼吸, 3=色谱循环
   /// - [colorR/G/B] RGB 值 0-255
   /// - [light] 亮度 0-100

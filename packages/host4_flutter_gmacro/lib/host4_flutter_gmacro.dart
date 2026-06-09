@@ -22,8 +22,6 @@ export 'src/gmacro_session+turbo.dart';
 export 'src/gmacro_session+mapping.dart';
 export 'src/gmacro_session+vibration.dart';
 export 'src/gmacro_session+gyro.dart';
-export 'src/gmacro_session+other.dart';
-
 export 'src/host4_gmacro.dart';
 
 export 'src/Input/gmacro_input_hub.dart';
