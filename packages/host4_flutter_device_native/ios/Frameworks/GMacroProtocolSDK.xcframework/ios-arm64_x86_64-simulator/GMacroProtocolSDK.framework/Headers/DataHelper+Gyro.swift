@@ -676,7 +676,7 @@ extension DataHelper {
         return dic
     }
     
-    /// 处理有subid,dev 成功/失败 数据， 为0 时判定为失败，传入外部还是0成功，1失败（保持和其他接口同步）（校准使用）
+    /// 处理有subid,dev 成功/失败 数据， 为0 时判定为失败（校准使用）
     func analyzeCalibrationResult(payload: Data) -> (response: Result<[String: Any], Error>, isComplete: Bool) {
         var responseDic: [String: Any] = [:]
         var parser = DataParser(payload)

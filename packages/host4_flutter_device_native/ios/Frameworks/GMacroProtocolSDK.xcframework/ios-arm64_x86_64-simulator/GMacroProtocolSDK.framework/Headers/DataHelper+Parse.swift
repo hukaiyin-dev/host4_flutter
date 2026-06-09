@@ -263,8 +263,6 @@ extension DataHelper {
             switch subID {
             case .queryMacroTimeRange:
                 responseDic = analyzeMacroTimeRange(payload)
-            case .queryMacroMaxGroups:
-                responseDic = analyzeMacroMaxGroups(payload)
             case .queryGyroMappingModes:
                 responseDic = analyzeGyroMappingModes(payload)
             default:
@@ -295,8 +293,6 @@ extension DataHelper {
             return analyzeResult(payload: payload)
         case .sleep:
             responseDic = analyzeSleep(payload)
-        case .handleFunction:
-            responseDic = analyzeHandleFunction(payload)
         case .light:
             // 多包数据（有 subID）
             if let (completeData, subID, sn) = handleSubIDFragmentedData(all, sn) {
@@ -324,8 +320,6 @@ extension DataHelper {
             responseDic = analyzeGamePadBitKeys(payload)
         case .vibration:
             responseDic = analyzeVibration(payload)
-        case .handleMode:
-            responseDic = analyzeHandleMode(payload)
         case .gyro:
 //            let subID = GyroSubID(rawValue: all[2])
             //2026.5.28 新增：gyro 协议需要 subID 来区分不同的查询类型，因此在解析时尝试提取 subID 以构建更准确的 responseKey
@@ -383,7 +377,7 @@ extension DataHelper {
 //            let subID = CalibrationStartSubID(rawValue: all[2])
             //2026.5.28 新增：beginCalibration 协议需要 subID 来区分不同的校准类型，因此在解析时尝试提取 subID 以构建更准确的 responseKey
             guard let subIDRaw = extractSubID(from: all, protocolID: protocolID),
-                let subID = CalibrationStartSubID(rawValue: subIDRaw) else {
+                      let subID = CalibrationStartSubID(rawValue: subIDRaw) else {
                 return (.failure(invalidSubIDPacketError(protocolID, packet: all)), true)
             }
             switch subID {
@@ -413,8 +407,6 @@ extension DataHelper {
             return analyzeResultWithSubId(payload: payload, isSubID: true, isDev: true)
         case .channelLight:
             responseDic = analyzeChannelLight(payload)
-        case .handleProfile:
-            responseDic = analyzeHandleProfile(payload)
         case .trigger3D:
 //            let subID = TriggerSubID(rawValue: all[2])
             //2026.5.28 新增：trigger3D 协议需要 subID 来区分不同的查询类型，因此在解析时尝试提取 subID 以构建更准确的 responseKey
@@ -423,8 +415,6 @@ extension DataHelper {
                 return (.failure(invalidSubIDPacketError(protocolID, packet: all)), true)
             }
             switch subID {
-            case .fetchLinearOutput:
-                responseDic = analyzeFetchLinearOutput(payload)
             case .linearOutput:
                 return analyzeResultWithSubId(payload: payload, isSubID: true, isDev: true)
             case .getQuickSwitch:
@@ -490,23 +480,21 @@ extension DataHelper {
     }
     
     /// 处理有subid,dev 成功/失败 数据， 为0 时判定为失败（校准使用）
-    /// 原始设备值： 0 = 失败, 非0 = 成功；转换为外部统一约定：0 = 成功, 1 = 失败
     func analyzeCheckResult(payload: Data) -> (response: Result<[String: Any], Error>, isComplete: Bool) {
         var responseDic: [String: Any] = [:]
         var parser = DataParser(payload)
         
-        parser.skip(2)  // 跳过 subID(1) + dev(1)
+        parser.skip(2)
         
         let result = parser.next(1).toInt()
         
         if result == 0 {
-            let error = BluetoothError.deviceReportedError(code: 1)
+            let error = BluetoothError.deviceReportedError(code: result)
             
             return (.failure(error), true)
         }
         
-        // result 非0(设备成功) → 转为 0(外部成功)
-        responseDic = ["result": 0]
+        responseDic = ["result": result]
         
         return (.success(responseDic), true)
     }

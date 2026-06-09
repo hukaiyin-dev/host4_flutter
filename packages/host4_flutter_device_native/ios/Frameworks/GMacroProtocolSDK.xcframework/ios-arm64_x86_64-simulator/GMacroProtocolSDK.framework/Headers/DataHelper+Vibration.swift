@@ -57,46 +57,6 @@ extension DataHelper {
         self.write(protocolID: protocolID, data: all, finish: finish, response: response)
     }
     
-    // MARK: - 6709 获取马达开关状态
-    func fetchMotorSwitchState(finish: (() -> Void)? = nil,
-                               response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
-        
-        let subID = VibrationSubID.fetchMotorSwitchState
-        let protocolID = subID.proID
-        
-        var payload = Data()
-        payload.append(Data.from(Int(subID.rawValue), count: 1)) // subID
-        payload.append(Data.from(Int(0x05), count: 1)) // Dev 值固定 0x05
-        
-        let all = dataFrom(protocolID: protocolID, payload: payload)
-        self.write(protocolID: protocolID,
-                   data: all,
-                   finish: finish,
-                   response: response)
-    }
-    
-    // MARK: - 670A 设置马达开关状态
-    func setMotorSwitchState(isOn: Bool,
-                             finish: (() -> Void)? = nil,
-                             response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
-        
-        let subID = VibrationSubID.setMotorSwitchState
-        let protocolID = subID.proID
-        
-        var payload = Data()
-        payload.append(Data.from(Int(subID.rawValue), count: 1)) // subID
-        payload.append(Data.from(Int(0x05), count: 1)) // Dev 值固定 0x05
-        
-        // 1 为开启，2 为关闭
-        payload.append(Data.from(isOn ? 1 : 2, count: 1))
-        
-        let all = dataFrom(protocolID: protocolID, payload: payload)
-        self.write(protocolID: protocolID,
-                   data: all,
-                   finish: finish,
-                   response: response)
-    }
-    
 }
 
 extension DataHelper {
@@ -122,20 +82,6 @@ extension DataHelper {
                 isOn = false
             }
             dic["isOn"] = isOn
-            
-        case .fetchMotorSwitchState:
-            // Param：1 为开启，2 为关闭
-            let param = parser.next(1).toInt()
-            var isOn = true
-            if param == 2 {
-                isOn = false
-            }
-            dic["isOn"] = isOn
-            
-        case .setMotorSwitchState:
-            let result = parser.next(1).toInt()
-            dic["result"] = result
-            
         default:
             print("未处理的 VibrationSubID 0x\(String(format: "%02X", subID!.rawValue))")
         }

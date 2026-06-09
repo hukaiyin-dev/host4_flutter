@@ -90,12 +90,11 @@ enum RockerSubID: UInt8 {
 
 /// 扳机曲线 85
 enum TriggerSubID: UInt8 {
-    case fetchLinearOutput          = 0x06 // 查询左右扳机线性输出
     case leftCurve                  = 0x03 // 左扳机曲线
     case rightCurve                 = 0x04 // 右扳机曲线
-    case linearOutput               = 0x07 // 设置扳机线形输出
+    case linearOutput                 = 0x07 //扳机线形输出
     case quickSwitch                = 0x08 // 设置快速扳机开关
-    case getQuickSwitch             = 0x11 // 获取快速扳机开关
+    case getQuickSwitch                = 0x11 // 获取快速扳机开关
     
    var description: String {
         switch self {
@@ -108,9 +107,7 @@ enum TriggerSubID: UInt8 {
         case .getQuickSwitch:
             return "获取快速扳机开关"
         case .linearOutput:
-            return "设置扳机线形输出"
-        case .fetchLinearOutput:
-            return "查询左右扳机线性输出"
+            return "扳机线形输出"
         }
     }
     

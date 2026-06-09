@@ -1,7 +1,7 @@
 // swift-interface-format-version: 1.0
-// swift-compiler-version: Apple Swift version 6.2.3 effective-5.10 (swiftlang-6.2.3.3.21 clang-1700.6.3.2)
-// swift-module-flags: -target x86_64-apple-ios13.0-simulator -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -Onone -enable-experimental-feature DebugDescriptionMacro -enable-bare-slash-regex -module-name GMacroProtocolSDK
-// swift-module-flags-ignorable:  -formal-cxx-interoperability-mode=off -interface-compiler-version 6.2.3
+// swift-compiler-version: Apple Swift version 6.3.1 effective-5.10 (swiftlang-6.3.1.1.2 clang-2100.0.123.102)
+// swift-module-flags: -target x86_64-apple-ios13.0-simulator -enable-objc-interop -enable-library-evolution -swift-version 5 -Onone -enable-experimental-feature DebugDescriptionMacro -enable-bare-slash-regex -module-name GMacroProtocolSDK
+// swift-module-flags-ignorable:  -formal-cxx-interoperability-mode=off -interface-compiler-version 6.3.1
 import BluetoothKit
 import CoreBluetooth
 import Foundation
@@ -234,9 +234,7 @@ import _SwiftConcurrencyShims
   public var description: Swift.String {
     get
   }
-  #if compiler(>=5.3) && $NonescapableTypes
   public init?(rawValue: Swift.UInt8)
-  #endif
   public typealias RawValue = Swift.UInt8
   public var rawValue: Swift.UInt8 {
     get
@@ -253,9 +251,7 @@ import _SwiftConcurrencyShims
   public var description: Swift.String {
     get
   }
-  #if compiler(>=5.3) && $NonescapableTypes
   public init?(rawValue: Swift.UInt8)
-  #endif
   public typealias RawValue = Swift.UInt8
   public var rawValue: Swift.UInt8 {
     get
@@ -280,9 +276,7 @@ import _SwiftConcurrencyShims
   public var rawValue: Swift.Int {
     get
   }
-  #if compiler(>=5.3) && $NonescapableTypes
   public init?(rawValue: Swift.Int)
-  #endif
   public typealias AllCases = [GMacroProtocolSDK.GamepadKey]
   public typealias RawValue = Swift.Int
   nonisolated public static var allCases: [GMacroProtocolSDK.GamepadKey] {
@@ -290,383 +284,149 @@ import _SwiftConcurrencyShims
   }
 }
 extension GMacroProtocolSDK.GMacroProtocolSession {
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func fetchLight(response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func fetchLightPosition(response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func fetchSupportedLightEffects(response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func fetchCurrentLightEffect(response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func setLightColor(position: GMacroProtocolSDK.LightPosition, groupCount: Swift.Int, colors: [(red: Swift.UInt8, green: Swift.UInt8, blue: Swift.UInt8)], response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func setLightEffect(position: GMacroProtocolSDK.LightPosition, groupCount: Swift.Int, isOn: Swift.Bool, light: Swift.Int, speed: Swift.Int, mode: GMacroProtocolSDK.LightMajorMode, subMode: GMacroProtocolSDK.LightSubMode, colors: [(red: Swift.UInt8, green: Swift.UInt8, blue: Swift.UInt8)], response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
 }
 extension GMacroProtocolSDK.GMacroProtocolSession {
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func fetchCurrentLightConfig(response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func setLightConfig(effect: Swift.Int, colorR: Swift.UInt8, colorG: Swift.UInt8, colorB: Swift.UInt8, light: Swift.Int, speed: Swift.Int, profile: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func setChannelLightSwitch(isOn: Swift.Bool, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func fetchChannelLightSwitch(response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func setChannelLightBrightness(brightness: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func fetchChannelLightBrightness(response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
 }
 extension GMacroProtocolSDK.GMacroProtocolSession {
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func fetchDeviceVersion(_ response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func fetchMobapadDeviceInfo(profile: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func resetDevice(_ response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
 }
 extension GMacroProtocolSDK.GMacroProtocolSession {
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func switchToNormalMode(_ response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func switchToTestMode(_ response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func switchToConfigMode(_ response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
 }
 extension GMacroProtocolSDK.GMacroProtocolSession {
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func updateReportRate(_ rate: Swift.Int, finish: (() -> Swift.Void)? = nil, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func fetchReportRate(response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
 }
 extension GMacroProtocolSDK.GMacroProtocolSession {
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func fetchSupportCalibration(response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func fetchCalibrationKey(response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func updateSwitchLayout(isOpen: Swift.Bool, locking: Swift.Bool, exchange: Swift.Bool, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
 }
 extension GMacroProtocolSDK.GMacroProtocolSession {
-  #if compiler(>=5.3) && $NonescapableTypes
-  final public func fetchHandleWorkMode(response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
-  final public func updateHandleWorkMode(mode: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
-  final public func fetchCurrentHandleMode(response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
-  final public func updateCurrentHandleMode(mode: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-}
-extension GMacroProtocolSDK.GMacroProtocolSession {
-  #if compiler(>=5.3) && $NonescapableTypes
-  final public func switchToProfile(profile: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
-  final public func switchToTestProfile(profile: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-}
-extension GMacroProtocolSDK.GMacroProtocolSession {
-  #if compiler(>=5.3) && $NonescapableTypes
-  final public func updateHandleFunction(handleOn: Swift.Bool, ep3CallbackOn: Swift.Bool, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-}
-extension GMacroProtocolSDK.GMacroProtocolSession {
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func updateKeyTurbo(_ values: [(GMacroProtocolSDK.GamepadKey, GMacroProtocolSDK.TurboMode, Swift.Int)], response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func querySupportedTurboKeys(profile: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
 }
 extension GMacroProtocolSDK.GMacroProtocolSession {
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func setSleepTime(time: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func getSleepTime(profile: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
 }
 extension GMacroProtocolSDK.GMacroProtocolSession {
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func queryCurrentMacro(profile: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func queryMacroKeys(profile: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func queryMacroRecordableKeys(profile: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func queryMacroTimeRange(profile: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func queryMacroMaxGroups(profile: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func setMacroKeys(_ macroKey: GMacroProtocolSDK.MacroKey, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func setMacroInterval(profile: Swift.Int, key: GMacroProtocolSDK.GamepadKey, intervalTime: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
 }
 extension GMacroProtocolSDK.GMacroProtocolSession {
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func startRecord(_ response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func endRecord(_ response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
 }
 extension GMacroProtocolSDK.GMacroProtocolSession {
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func trigger(leftMin: Swift.Int, leftMax: Swift.Int, rightMin: Swift.Int, rightMax: Swift.Int, finish: (() -> ())? = nil, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func leftTriggerCurve(cgPoints: [CoreFoundation.CGPoint], response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func rightTriggerCurve(cgPoints: [CoreFoundation.CGPoint], response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func triggerQuickSwitch(leftOn: Swift.Bool, rightOn: Swift.Bool, finish: (() -> ())? = nil, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func getTriggerQuickSwitch(finish: (() -> ())? = nil, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
 }
 extension GMacroProtocolSDK.GMacroProtocolSession {
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func startTriggerCalibration(_ response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func endTriggerCalibration(_ response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
 }
 extension GMacroProtocolSDK.GMacroProtocolSession {
-  #if compiler(>=5.3) && $NonescapableTypes
-  final public func fetchTriggerLinearOutput(response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-}
-extension GMacroProtocolSDK.GMacroProtocolSession {
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func triggerLinearOutput(leftMode: Swift.Int, leftThreshold: Swift.Int, rightMode: Swift.Int, rightThreshold: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
 }
 extension GMacroProtocolSDK.GMacroProtocolSession {
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func setVibrationLevel(left: Swift.Int, right: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func testVibration(left: Swift.Int, right: Swift.Int, position: GMacroProtocolSDK.VibrationPosition, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
 }
 extension GMacroProtocolSDK.GMacroProtocolSession {
-  #if compiler(>=5.3) && $NonescapableTypes
-  final public func fetchMotorSwitchState(response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
-  final public func updateMotorSwitchState(isOn: Swift.Bool, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-}
-extension GMacroProtocolSDK.GMacroProtocolSession {
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func queryMappableKeys(profile: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func queryMappableGamepadKeys(profile: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func setKeyMappings(_ keyMappings: [GMacroProtocolSDK.GamepadKeyMapping], response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func setMouseKeyMappings(_ keyMappings: [GMacroProtocolSDK.MouseKeyMapping], response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func setKeyboardKeyMappings(_ keyMappings: [GMacroProtocolSDK.KeyboardKeyMapping], response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func queryCurrentMapping(profile: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
 }
 extension GMacroProtocolSDK.GMacroProtocolSession {
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func setMultiKeyMapping(original: GMacroProtocolSDK.GamepadKey, mappedKeys: [GMacroProtocolSDK.MappedKey], finish: (() -> Swift.Void)? = nil, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func queryAllMultiMappings(finish: (() -> Swift.Void)? = nil, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func queryMultiMapping(for original: GMacroProtocolSDK.GamepadKey, finish: (() -> Swift.Void)? = nil, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
 }
 extension GMacroProtocolSDK.GMacroProtocolSession {
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func updateRockerLinear(leftMin: Swift.Int, leftMax: Swift.Int, leftXFlip: Swift.Bool, leftYFlip: Swift.Bool, rightMin: Swift.Int, rightMax: Swift.Int, rightXFlip: Swift.Bool, rightYFlip: Swift.Bool, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func updateLeftRocker3DCurve(cgPoints: [CoreFoundation.CGPoint], response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func updateRightRocker3DCurve(cgPoints: [CoreFoundation.CGPoint], response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func rockerDeadZoneCompensation(left: Swift.Int, right: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func rockerDeadZoneRegressionComp(left: Swift.Int, right: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func rockerTriggerType(leftRigger: GMacroProtocolSDK.CurveTriggerMode, leftGamepadKey: GMacroProtocolSDK.GamepadKey, rightRigger: GMacroProtocolSDK.CurveTriggerMode, rightGamepadKey: GMacroProtocolSDK.GamepadKey, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func rockerOutputGraphics(left: GMacroProtocolSDK.OutputGraphics, right: GMacroProtocolSDK.OutputGraphics, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func updateRockerAntiDeadZone(min: Swift.Int, max: Swift.Int, isLeft: Swift.Bool, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func fetchRockerAntiDeadZone(response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
 }
 extension GMacroProtocolSDK.GMacroProtocolSession {
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func updateTriggerTestVibrationSwitch(triggerTestVibration: Swift.Bool, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func fetchTriggerTestVibrationSwitch(response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func updateTriggerVibration(triggerVibration: Swift.Bool, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func fetchTriggerVibration(response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func updategyroXYRatio(gyroXYRatio: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func fetchgyroXYRatio(response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func updateGyroMappingType(gyroMappingType: GMacroProtocolSDK.GyroMappingType, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func fetchGyroMappingType(response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func updateChargingDock(isOn: Swift.Bool, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func fetchChargingDock(response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
 }
 extension GMacroProtocolSDK.GMacroProtocolSession {
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func startRockerCalibration(_ response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func endRockerCalibration(_ response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
 }
 extension GMacroProtocolSDK.GMacroProtocolSession {
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func updateRockerAdditional(leftDeadZone: Swift.Int, leftOutMax: Swift.Int, leftCurveApply: Swift.Int, leftCurveApplyKey: Swift.Int, leftLineCorrection: Swift.Int, rightDeadZone: Swift.Int, rightOutMax: Swift.Int, rightCurveApply: Swift.Int, rightCurveApplyKey: Swift.Int, rightLineCorrection: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
 }
 extension GMacroProtocolSDK.GMacroProtocolSession {
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func queryGyroTriggerKeys(profile: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func queryGyroMappingModes(profile: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func setMotion(motionEnabled: Swift.Bool, mappingEnabled: Swift.Bool, triggerMode: GMacroProtocolSDK.MotionTriggerMode, triggerKey: GMacroProtocolSDK.GamepadKey, deadZone: Swift.Int, sensitivity: Swift.Int, mappingMode: GMacroProtocolSDK.MotionMappingMode, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func setMotionSecondary(isOn: Swift.Bool, triggerMode: GMacroProtocolSDK.MotionTriggerMode, triggerKey: GMacroProtocolSDK.GamepadKey, sensitivity: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func setMotionHorizontalAxis(axis: GMacroProtocolSDK.GyroAxis, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func fetchMotionHorizontalAxis(_ response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func fetchGyroDeadZoneComp(_ response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func fetchGyroSensitivityCurve(_ response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func fetchGyroSensitivity2(_ response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func setGyroXYInvert(xOn: Swift.Bool, yOn: Swift.Bool, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func fetchGyroXYInvert(response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func setGyroDeadZone(compensate: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
 }
 extension GMacroProtocolSDK.GMacroProtocolSession {
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func setGyroSensitivityCurve(x1: Swift.Int, y1: Swift.Int, x2: Swift.Int, y2: Swift.Int, x3: Swift.Int, y3: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
 }
 extension GMacroProtocolSDK.GMacroProtocolSession {
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func update(gyroOuterDeadZone: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func fetchGyroOuterDeadZone(response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func updateGyroAxisSwap(isSwap: Swift.Bool, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func fetchGyroAxisSwap(response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
 }
 extension GMacroProtocolSDK.GMacroProtocolSession {
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func startGyroCalibration(_ response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func endGyroCalibration(_ response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   final public func setMotionParam(mappingSwitch: Swift.Bool, mappingKey: Swift.Int, triggerMode: Swift.Int, triggerKey: Swift.Int, inputType: Swift.Int, inputMode: Swift.Int, rollReversal: Swift.Bool, pitchReversal: Swift.Bool, yawReversal: Swift.Bool, sensitivity: Swift.Int, deadZoneCompensation: Swift.Int, curveType: Swift.Int, curvature: Swift.Int, ratio: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
-  #endif
 }
 @objc public enum MediaKey : Swift.UInt8, Swift.CaseIterable {
   case none = 0x00
@@ -679,9 +439,7 @@ extension GMacroProtocolSDK.GMacroProtocolSession {
   case multitask = 0x40
   case pageUp = 0x4B
   case pageDown = 0x4E
-  #if compiler(>=5.3) && $NonescapableTypes
   public init?(rawValue: Swift.UInt8)
-  #endif
   public typealias AllCases = [GMacroProtocolSDK.MediaKey]
   public typealias RawValue = Swift.UInt8
   nonisolated public static var allCases: [GMacroProtocolSDK.MediaKey] {
@@ -707,9 +465,7 @@ extension GMacroProtocolSDK.MediaKey : Swift.CustomStringConvertible {
   public var description: Swift.String {
     get
   }
-  #if compiler(>=5.3) && $NonescapableTypes
   public init?(rawValue: Swift.UInt8)
-  #endif
   public typealias RawValue = Swift.UInt8
   public var rawValue: Swift.UInt8 {
     get
@@ -737,9 +493,7 @@ public enum MappedKeyType : Swift.Int, Swift.Sendable {
   public var description: Swift.String {
     get
   }
-  #if compiler(>=5.3) && $NonescapableTypes
   public init?(rawValue: Swift.Int)
-  #endif
   public typealias RawValue = Swift.Int
   public var rawValue: Swift.Int {
     get
@@ -785,9 +539,7 @@ public struct MultiKeyMapping : Swift.Sendable {
   @objc final public let values: [Swift.Int]
   @objc public init(type: Swift.Int, values: [Swift.Int])
   public init(mappedKey: GMacroProtocolSDK.MappedKey)
-  #if compiler(>=5.3) && $NonescapableTypes
   public func toMappedKey() -> GMacroProtocolSDK.MappedKey?
-  #endif
   @objc deinit
 }
 @objc @objcMembers public class MultiKeyMappingBridge : ObjectiveC.NSObject {
@@ -814,9 +566,7 @@ extension GMacroProtocolSDK.GamepadKey {
   public var description: Swift.String {
     get
   }
-  #if compiler(>=5.3) && $NonescapableTypes
   public init?(rawValue: Swift.UInt8)
-  #endif
   public typealias RawValue = Swift.UInt8
   public var rawValue: Swift.UInt8 {
     get
@@ -840,9 +590,7 @@ extension GMacroProtocolSDK.GamepadKey {
   public var description: Swift.String {
     get
   }
-  #if compiler(>=5.3) && $NonescapableTypes
   public init?(rawValue: Swift.Int)
-  #endif
   public typealias RawValue = Swift.Int
   public var rawValue: Swift.Int {
     get
@@ -858,9 +606,7 @@ extension GMacroProtocolSDK.GamepadKey {
   case rightShift = 0x20
   case rightAlt = 0x40
   case rightGUI = 0x80
-  #if compiler(>=5.3) && $NonescapableTypes
   public init?(rawValue: Swift.UInt8)
-  #endif
   public typealias AllCases = [GMacroProtocolSDK.ModifierKey]
   public typealias RawValue = Swift.UInt8
   nonisolated public static var allCases: [GMacroProtocolSDK.ModifierKey] {
@@ -882,9 +628,7 @@ extension GMacroProtocolSDK.ModifierKey : Swift.CustomStringConvertible {
   case middleButton = 0x04
   case backButton = 0x08
   case forwardButton = 0x10
-  #if compiler(>=5.3) && $NonescapableTypes
   public init?(rawValue: Swift.UInt8)
-  #endif
   public typealias AllCases = [GMacroProtocolSDK.MouseCoreButton]
   public typealias RawValue = Swift.UInt8
   nonisolated public static var allCases: [GMacroProtocolSDK.MouseCoreButton] {
@@ -905,9 +649,7 @@ extension GMacroProtocolSDK.MouseCoreButton : Swift.CustomStringConvertible {
   case wheelDown = 0x02
   case wheelLeft = 0x04
   case wheelRight = 0x08
-  #if compiler(>=5.3) && $NonescapableTypes
   public init?(rawValue: Swift.UInt8)
-  #endif
   public typealias AllCases = [GMacroProtocolSDK.MouseWheelButton]
   public typealias RawValue = Swift.UInt8
   nonisolated public static var allCases: [GMacroProtocolSDK.MouseWheelButton] {
@@ -948,9 +690,7 @@ public protocol GMacroDataDelegate : AnyObject {
   public var description: Swift.String {
     get
   }
-  #if compiler(>=5.3) && $NonescapableTypes
   public init?(rawValue: Swift.UInt8)
-  #endif
   public typealias RawValue = Swift.UInt8
   public var rawValue: Swift.UInt8 {
     get
@@ -963,9 +703,7 @@ public protocol GMacroDataDelegate : AnyObject {
   public var description: Swift.String {
     get
   }
-  #if compiler(>=5.3) && $NonescapableTypes
   public init?(rawValue: Swift.UInt8)
-  #endif
   public typealias RawValue = Swift.UInt8
   public var rawValue: Swift.UInt8 {
     get
@@ -977,9 +715,7 @@ public protocol GMacroDataDelegate : AnyObject {
   public var description: Swift.String {
     get
   }
-  #if compiler(>=5.3) && $NonescapableTypes
   public init?(rawValue: Swift.UInt8)
-  #endif
   public typealias RawValue = Swift.UInt8
   public var rawValue: Swift.UInt8 {
     get
@@ -992,9 +728,7 @@ public protocol GMacroDataDelegate : AnyObject {
   public var description: Swift.String {
     get
   }
-  #if compiler(>=5.3) && $NonescapableTypes
   public init?(rawValue: Swift.UInt8)
-  #endif
   public typealias RawValue = Swift.UInt8
   public var rawValue: Swift.UInt8 {
     get
@@ -1007,9 +741,7 @@ public protocol GMacroDataDelegate : AnyObject {
   public var description: Swift.String {
     get
   }
-  #if compiler(>=5.3) && $NonescapableTypes
   public init?(rawValue: Swift.UInt8)
-  #endif
   public typealias RawValue = Swift.UInt8
   public var rawValue: Swift.UInt8 {
     get
@@ -1023,9 +755,7 @@ public protocol GMacroDataDelegate : AnyObject {
   public var description: Swift.String {
     get
   }
-  #if compiler(>=5.3) && $NonescapableTypes
   public init?(rawValue: Swift.UInt8)
-  #endif
   public typealias RawValue = Swift.UInt8
   public var rawValue: Swift.UInt8 {
     get
@@ -1038,9 +768,7 @@ public protocol GMacroDataDelegate : AnyObject {
   public var description: Swift.String {
     get
   }
-  #if compiler(>=5.3) && $NonescapableTypes
   public init?(rawValue: Swift.UInt8)
-  #endif
   public typealias RawValue = Swift.UInt8
   public var rawValue: Swift.UInt8 {
     get
@@ -1054,9 +782,7 @@ public protocol GMacroDataDelegate : AnyObject {
   public var description: Swift.String {
     get
   }
-  #if compiler(>=5.3) && $NonescapableTypes
   public init?(rawValue: Swift.UInt8)
-  #endif
   public typealias RawValue = Swift.UInt8
   public var rawValue: Swift.UInt8 {
     get
@@ -1069,9 +795,7 @@ public protocol GMacroDataDelegate : AnyObject {
   public var description: Swift.String {
     get
   }
-  #if compiler(>=5.3) && $NonescapableTypes
   public init?(rawValue: Swift.UInt8)
-  #endif
   public typealias RawValue = Swift.UInt8
   public var rawValue: Swift.UInt8 {
     get
@@ -1084,9 +808,7 @@ public protocol GMacroDataDelegate : AnyObject {
   public var description: Swift.String {
     get
   }
-  #if compiler(>=5.3) && $NonescapableTypes
   public init?(rawValue: Swift.UInt8)
-  #endif
   public typealias RawValue = Swift.UInt8
   public var rawValue: Swift.UInt8 {
     get
@@ -1179,10 +901,8 @@ extension GMacroProtocolSDK.GMacroProtocolSession {
   final public func startOTA(data: Foundation.Data)
 }
 extension BluetoothKit.NativeAdapterRuntime {
-  #if compiler(>=5.3) && $NonescapableTypes
   @discardableResult
   final public func attachGMacroProtocol(transportSessionId: Swift.String, onceByteLimit: Swift.Int = 20, onEvent: @escaping (GMacroProtocolSDK.GMacroProtocolEvent) -> Swift.Void) -> GMacroProtocolSDK.GMacroProtocolSession?
-  #endif
 }
 extension GMacroProtocolSDK.KeyboardKey : Swift.Equatable {}
 extension GMacroProtocolSDK.KeyboardKey : Swift.Hashable {}

@@ -106,12 +106,7 @@ enum GMacroProtocolID: UInt8 {
     
     case motion             = 0x5B // 体感设置二
     
-    case handleMode         = 0x69 // 手柄工作模式
-    
     case vibration          = 0x67 // 振动状态
-    
-    case handleProfile      = 0x81 // 手柄配置页
-    case handleFunction     = 0x83 // 开关手柄功能以及回调
     case gyro               = 0x6A // 陀螺仪
     case mapping            = 0x6C // 手柄按键映射
     case error              = 0x00 // 错误值
@@ -159,9 +154,6 @@ extension GMacroProtocolID {
              .rocker3D,           // 0x3F
              .trigger3D,          // 0x85
              .supportKey,         // 0x86
-             .handleMode,         // 0x69
-             .handleProfile,      // 0x81
-             .handleFunction,     // 0x83
              .gyro,               // 0x6A
              .mapping,            // 0x6C
              .light,              // 0x82
