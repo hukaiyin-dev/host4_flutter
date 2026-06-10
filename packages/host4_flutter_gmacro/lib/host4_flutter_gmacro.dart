@@ -9,6 +9,7 @@ export 'src/Models/gmacro_config.dart';
 export 'src/Models/gmacro_light_models.dart';
 export 'src/Models/gmacro_support_enums.dart';
 export 'src/Models/gmacro_turbo_models.dart';
+export 'src/Models/gmacro_trigger_models.dart';
 export 'src/Models/gmacro_mapping_models.dart';
 export 'src/Models/gmacro_support_key_models.dart';
 

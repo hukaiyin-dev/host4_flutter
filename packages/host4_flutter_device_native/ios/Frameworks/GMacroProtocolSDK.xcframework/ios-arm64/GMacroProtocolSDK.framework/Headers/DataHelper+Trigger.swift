@@ -158,6 +158,47 @@ extension DataHelper {
 }
 
 extension DataHelper {
+    // MARK: - 8506 查询左右扳机线性输出
+    func fetchTriggerLinearOutput(finish: (() -> Void)? = nil,
+                                   response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
+        let subID = TriggerSubID.fetchLinearOutput
+        let protocolID = subID.proID
+        
+        var payload = Data()
+        payload.append(Data.from(Int(subID.rawValue), count: 1)) // subID
+        payload.append(Data.from(0x05, count: 1))               // Dev
+        
+        let all = dataFrom(protocolID: protocolID, payload: payload)
+        self.write(protocolID: protocolID,
+                   data: all,
+                   finish: finish,
+                   response: response)
+    }
+    
+    // MARK: - 查询左右扳机线性输出解析
+    /// 响应格式: [subID][dev][leftMode][leftThreshold][rightMode][rightThreshold]
+    /// leftMode/rightMode: 1=线性输出, 2=非线性输出
+    /// leftThreshold/rightThreshold: 1-255 (仅非线性输出使用)
+    func analyzeFetchLinearOutput(_ data: Data) -> [String: Any] {
+        var dic: [String: Any] = [:]
+        var parser = DataParser(data)
+        
+        _ = parser.next(1)  // subID
+        _ = parser.next(1)  // dev
+        
+        let leftMode = parser.next(1).toInt()
+        let leftThreshold = parser.next(1).toInt()
+        let rightMode = parser.next(1).toInt()
+        let rightThreshold = parser.next(1).toInt()
+        
+        dic["leftMode"] = leftMode
+        dic["leftThreshold"] = leftThreshold
+        dic["rightMode"] = rightMode
+        dic["rightThreshold"] = rightThreshold
+        
+        return dic
+    }
+    
     // MARK: - 0x85 subID:07 设置左右扳机线性输出
     /// 设置左右扳机线性输出
     func triggerLinearOutput(leftMode: Int, leftThreshold: Int, rightMode: Int, rightThreshold: Int,

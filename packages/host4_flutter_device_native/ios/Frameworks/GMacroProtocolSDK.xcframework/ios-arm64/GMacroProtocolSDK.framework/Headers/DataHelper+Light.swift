@@ -350,7 +350,7 @@ extension DataHelper {
                 let r = parser.next(1).toInt()
                 let g = parser.next(1).toInt()
                 let b = parser.next(1).toInt()
-                colors.append(["r": r, "g": g, "b": b])
+                colors.append(["colorR": r, "colorG": g, "colorB": b])
             }
             
             groups.append([
@@ -498,9 +498,9 @@ extension DataHelper{
         
         groups.append([
             "effect" : effect,
-            "r" : colorR,
-            "g" : colorG,
-            "b" : colorB,
+            "colorR" : colorR,
+            "colorG" : colorG,
+            "colorB" : colorB,
             "light" : light,
             "speed" : speed,
             "profile" : profile
