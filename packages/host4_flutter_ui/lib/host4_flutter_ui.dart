@@ -1,5 +1,6 @@
 export 'src/components/host4_background.dart';
 export 'src/components/host4_banner.dart';
+export 'src/components/host4_bottom_hint.dart';
 export 'src/components/host4_button.dart';
 export 'src/components/host4_card.dart';
 export 'src/components/host4_empty_state.dart';
