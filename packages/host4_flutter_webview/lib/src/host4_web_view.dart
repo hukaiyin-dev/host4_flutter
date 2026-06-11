@@ -26,6 +26,7 @@ class Host4WebView extends StatefulWidget {
     required this.initialUrl,
     this.bridge,
     this.backgroundColor,
+    this.loadingOverlayBuilder,
     this.showProgressBar = true,
     this.needTitleBar = false,
     this.title,
@@ -49,6 +50,11 @@ class Host4WebView extends StatefulWidget {
   /// Background color shown before the first page starts loading.
   /// Defaults to [Colors.black] when null.
   final Color? backgroundColor;
+
+  /// Optional overlay shown on top of the WebView while the page is loading.
+  /// Removed when [onPageFinished] fires. Use this to hide the WKWebView
+  /// platform-view frame animation on iOS.
+  final Widget Function(BuildContext context)? loadingOverlayBuilder;
 
   /// Whether to show a linear progress indicator while the page is loading.
   final bool showProgressBar;
@@ -255,7 +261,13 @@ class _Host4WebViewState extends State<Host4WebView> {
             Expanded(
               child: _hasError
                   ? _buildErrorPage()
-                  : WebViewWidget(controller: _controller),
+                  : Stack(
+                      children: [
+                        WebViewWidget(controller: _controller),
+                        if (_isLoading && widget.loadingOverlayBuilder != null)
+                          widget.loadingOverlayBuilder!(context),
+                      ],
+                    ),
             ),
           ],
         ),
