@@ -1129,8 +1129,10 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
       case Host4FlutterChannelConstants.switchLinerTrigger:
         let mode = try intArg("mode", from: arguments)
         // mode: 1=线性输出, 2=非线性输出
+        // threshold 必须 >= 1，SDK 校验 1-255，传 0 会返回 outOfRange
+        let threshold = mode == 1 ? 1 : 128
         invoke(result) { callback in
-          session.triggerLinearOutput(leftMode: mode, leftThreshold: 0, rightMode: mode, rightThreshold: 0, response: callback)
+          session.triggerLinearOutput(leftMode: mode, leftThreshold: threshold, rightMode: mode, rightThreshold: threshold, response: callback)
         }
 
       default:
