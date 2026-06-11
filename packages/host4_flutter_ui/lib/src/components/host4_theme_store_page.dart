@@ -11,6 +11,7 @@ class Host4ThemeStorePage extends StatefulWidget {
     this.onBack,
     this.onSearch,
     this.title = '主题商店',
+    this.customHeader,
     this.confirmLabel = '确定',
     this.backLabel = '返回',
     this.timeLabel = '14:51',
@@ -22,6 +23,11 @@ class Host4ThemeStorePage extends StatefulWidget {
   final VoidCallback? onBack;
   final VoidCallback? onSearch;
   final String title;
+
+  /// 自定义标题栏。若传入，则替换默认的 [_ThemeStoreHeader]，
+  /// [title]、[timeLabel]、[onSearch] 均不再生效。
+  final Widget? customHeader;
+
   final String confirmLabel;
   final String backLabel;
   final String timeLabel;
@@ -71,6 +77,7 @@ class _Host4ThemeStorePageState extends State<Host4ThemeStorePage> {
                     manager: manager,
                     pendingThemeId: _pendingThemeId,
                     title: widget.title,
+                    customHeader: widget.customHeader,
                     confirmLabel: widget.confirmLabel,
                     backLabel: widget.backLabel,
                     timeLabel: widget.timeLabel,
@@ -129,6 +136,7 @@ class _ThemeStoreScene extends StatelessWidget {
     required this.onConfirm,
     required this.onBack,
     required this.onApplyTheme,
+    this.customHeader,
     this.onSearch,
   });
 
@@ -139,6 +147,7 @@ class _ThemeStoreScene extends StatelessWidget {
   final Host4ThemeManager manager;
   final String? pendingThemeId;
   final String title;
+  final Widget? customHeader;
   final String confirmLabel;
   final String backLabel;
   final String timeLabel;
@@ -158,12 +167,12 @@ class _ThemeStoreScene extends StatelessWidget {
             color: Color(0xFFF4F7FC),
           ),
         ),
-        _ThemeStoreHeader(
-          title: title,
-          timeLabel: timeLabel,
-          onBack: onBack,
-          onSearch: onSearch,
-        ),
+        customHeader ??
+            _ThemeStoreHeader(
+              title: title,
+              timeLabel: timeLabel,
+              onSearch: onSearch,
+            ),
         Positioned(
           left: 66,
           top: 84,
@@ -194,13 +203,11 @@ class _ThemeStoreHeader extends StatelessWidget {
   const _ThemeStoreHeader({
     required this.title,
     required this.timeLabel,
-    required this.onBack,
     this.onSearch,
   });
 
   final String title;
   final String timeLabel;
-  final VoidCallback onBack;
   final VoidCallback? onSearch;
 
   @override
@@ -222,12 +229,6 @@ class _ThemeStoreHeader extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                _HeaderIconButton(
-                  keyValue: 'host4_theme_store_back',
-                  icon: Icons.chevron_left_rounded,
-                  onTap: onBack,
-                ),
-                const SizedBox(width: 8),
                 Text(
                   title,
                   key: const ValueKey<String>('host4_theme_store_title'),

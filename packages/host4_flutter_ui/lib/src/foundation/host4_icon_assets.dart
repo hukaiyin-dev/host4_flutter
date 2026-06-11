@@ -4,4 +4,7 @@ class Host4IconAssets {
 
   static const String hamburger =
       'packages/host4_flutter_ui/assets/icons/icon_hamburger.svg';
+
+  static const String chevronLeft =
+      'packages/host4_flutter_ui/assets/icons/icon_chevron_left.svg';
 }

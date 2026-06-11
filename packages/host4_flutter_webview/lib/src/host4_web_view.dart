@@ -246,6 +246,7 @@ class _Host4WebViewState extends State<Host4WebView> {
       },
       child: Scaffold(
         backgroundColor: widget.backgroundColor ?? Colors.black,
+        resizeToAvoidBottomInset: false,
         appBar: widget.needTitleBar
             ? AppBar(
                 title: Text(
