@@ -255,16 +255,12 @@ class _Host4WebViewState extends State<Host4WebView> {
             Expanded(
               child: _hasError
                   ? _buildErrorPage()
-                  : Stack(
-                      children: [
-                        WebViewWidget(controller: _controller),
-                        if (!_pageStarted)
-                          ColoredBox(
-                            color: widget.backgroundColor ?? Colors.black,
-                            child: const SizedBox.expand(),
-                          ),
-                      ],
-                    ),
+                  : _pageStarted
+                      ? WebViewWidget(controller: _controller)
+                      : ColoredBox(
+                          color: widget.backgroundColor ?? Colors.black,
+                          child: const SizedBox.expand(),
+                        ),
             ),
           ],
         ),
