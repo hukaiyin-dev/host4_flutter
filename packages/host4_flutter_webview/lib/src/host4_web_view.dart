@@ -93,7 +93,6 @@ class _Host4WebViewState extends State<Host4WebView> {
   double _progress = 0;
   bool _isLoading = true;
   bool _hasError = false;
-  bool _pageStarted = false;
   String _errorMessage = '';
   String _pageTitle = '';
 
@@ -117,7 +116,8 @@ class _Host4WebViewState extends State<Host4WebView> {
     }
 
     final controller = WebViewController.fromPlatformCreationParams(params)
-      ..setJavaScriptMode(JavaScriptMode.unrestricted);
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setBackgroundColor(widget.backgroundColor ?? Colors.black);
 
     if (widget.userAgent != null) {
       controller.setUserAgent(widget.userAgent);
@@ -142,7 +142,6 @@ class _Host4WebViewState extends State<Host4WebView> {
             _isLoading = true;
             _progress = 0;
             _hasError = false;
-            _pageStarted = true;
           });
           widget.onPageStarted?.call(url);
         },
@@ -240,6 +239,7 @@ class _Host4WebViewState extends State<Host4WebView> {
         }
       },
       child: Scaffold(
+        backgroundColor: widget.backgroundColor ?? Colors.black,
         appBar: widget.needTitleBar
             ? AppBar(
                 title: Text(
@@ -255,12 +255,7 @@ class _Host4WebViewState extends State<Host4WebView> {
             Expanded(
               child: _hasError
                   ? _buildErrorPage()
-                  : _pageStarted
-                      ? WebViewWidget(controller: _controller)
-                      : ColoredBox(
-                          color: widget.backgroundColor ?? Colors.black,
-                          child: const SizedBox.expand(),
-                        ),
+                  : WebViewWidget(controller: _controller),
             ),
           ],
         ),
