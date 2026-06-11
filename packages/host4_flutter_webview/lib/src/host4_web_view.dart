@@ -25,6 +25,7 @@ class Host4WebView extends StatefulWidget {
     super.key,
     required this.initialUrl,
     this.bridge,
+    this.backgroundColor,
     this.showProgressBar = true,
     this.needTitleBar = false,
     this.title,
@@ -44,6 +45,10 @@ class Host4WebView extends StatefulWidget {
   /// channel is registered and [Host4JsBridgeAdapter.adapterJs] is injected
   /// after each page load.
   final Host4JsBridgeAdapter? bridge;
+
+  /// Background color shown before the first page starts loading.
+  /// Defaults to [Colors.black] when null.
+  final Color? backgroundColor;
 
   /// Whether to show a linear progress indicator while the page is loading.
   final bool showProgressBar;
@@ -250,9 +255,15 @@ class _Host4WebViewState extends State<Host4WebView> {
             Expanded(
               child: _hasError
                   ? _buildErrorPage()
-                  : Opacity(
-                      opacity: _pageStarted ? 1.0 : 0.0,
-                      child: WebViewWidget(controller: _controller),
+                  : Stack(
+                      children: [
+                        WebViewWidget(controller: _controller),
+                        if (!_pageStarted)
+                          ColoredBox(
+                            color: widget.backgroundColor ?? Colors.black,
+                            child: const SizedBox.expand(),
+                          ),
+                      ],
                     ),
             ),
           ],
