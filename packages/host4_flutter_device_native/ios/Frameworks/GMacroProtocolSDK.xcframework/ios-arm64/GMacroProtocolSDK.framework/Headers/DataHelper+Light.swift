@@ -482,7 +482,6 @@ extension DataHelper{
     func analyzeCurrentLightConfig(_ data: Data) -> [String: Any] {
         
         var dic: [String: Any] = [:]
-        var groups: [[String: Any]] = []
         
         var parser = DataParser(data)
         
@@ -496,17 +495,25 @@ extension DataHelper{
         let speed = parser.next(1).toInt()
         let profile = parser.next(1).toInt()
         
-        groups.append([
-            "effect" : effect,
-            "colorR" : colorR,
-            "colorG" : colorG,
-            "colorB" : colorB,
-            "light" : light,
-            "speed" : speed,
-            "profile" : profile
-        ])
+//        groups.append([
+//            "effect" : effect,
+//            "colorR" : colorR,
+//            "colorG" : colorG,
+//            "colorB" : colorB,
+//            "light" : light,
+//            "speed" : speed,
+//            "profile" : profile
+//        ])
+//        
+//        dic["groups"] = groups
         
-        dic["groups"] = groups
+        dic["effect"] = effect
+        dic["colorR"] = colorR
+        dic["colorG"] = colorG
+        dic["colorB"] = colorB
+        dic["light"] = light
+        dic["speed"] = speed
+        dic["profile"] = profile
         
         return dic
     }

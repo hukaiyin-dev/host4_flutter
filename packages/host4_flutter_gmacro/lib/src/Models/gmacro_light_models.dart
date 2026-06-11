@@ -54,14 +54,14 @@ class LightConfigPayload {
   final int profile;
 
   Map<String, Object?> toMap() => {
-        'effect': effect,
-        'colorR': colorR,
-        'colorG': colorG,
-        'colorB': colorB,
-        'light': light,
-        'speed': speed,
-        'profile': profile,
-      };
+    'effect': effect,
+    'colorR': colorR,
+    'colorG': colorG,
+    'colorB': colorB,
+    'light': light,
+    'speed': speed,
+    'profile': profile,
+  };
 
   factory LightConfigPayload.fromMap(Map<dynamic, dynamic> map) {
     return LightConfigPayload(

@@ -443,6 +443,7 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
       let message = items.map { "\($0)" }.joined(separator: separator)
       nativeLog("[GPD] \(message)")
     }
+    GPDConstant.responseTimeout = 2
 
     let eventHandler = QueuedEventStreamHandler()
     let session: GMacroProtocolSession
