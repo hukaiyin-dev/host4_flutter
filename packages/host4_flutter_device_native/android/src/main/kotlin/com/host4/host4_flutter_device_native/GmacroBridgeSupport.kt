@@ -3,6 +3,7 @@ package com.host4.host4_flutter_device_native
 import com.host4.platform.kr.response.BaseRsp
 import com.host4.platform.kr.response.LinerTriggerRsp
 import com.host4.platform.kr.response.QueryCurrentLightEffectRsp
+import com.host4.platform.kr.response.QueryHandleInfoRsp
 import com.host4.platform.kr.response.VibrateOpenRsp
 import com.host4.platform.kr.response.WorkStyleRsp
 import com.host4.platform.listener.OnMessageCallback
@@ -42,6 +43,32 @@ internal object GmacroCallbackBridge {
             mainHandler.post { deliver(code, rsp, result) }
         }
         return callback as OnMessageCallback<T>
+    }
+
+    /**
+     * 查询设备版本（0x80），与 iOS fetchDeviceVersion 返回字段对齐。
+     */
+    fun fetchDeviceVersion(result: MethodChannel.Result): OnMessageCallback<QueryHandleInfoRsp> {
+        return OnMessageCallback { code, rsp ->
+            mainHandler.post {
+                if (code == Constants.SUCCESS || code == 80) {
+                    result.success(
+                        mapOf(
+                            "project" to (rsp.projectCoding ?: ""),
+                            "protocol" to (rsp.agreementVersion ?: ""),
+                            "firmware" to (rsp.firmwareVersion ?: ""),
+                            "hardware" to (rsp.hardwareVersion ?: ""),
+                        ),
+                    )
+                } else {
+                    result.error(
+                        "gmacro-method-failed",
+                        "GMacro method failed with code=$code",
+                        GmacroResponseSerializer.toMap(rsp),
+                    )
+                }
+            }
+        }
     }
 
     /**

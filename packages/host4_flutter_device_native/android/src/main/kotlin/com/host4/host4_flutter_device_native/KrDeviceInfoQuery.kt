@@ -5,6 +5,6 @@ import io.flutter.plugin.common.MethodChannel
 internal object KrDeviceInfoQuery {
     fun query(deviceKey: String, transportKind: String, result: MethodChannel.Result) {
         GmacroSdkAccess.commands(deviceKey, transportKind)
-            .queryHandleInfoReq(GmacroCallbackBridge.message(result))
+            .queryHandleInfoReq(GmacroCallbackBridge.fetchDeviceVersion(result))
     }
 }
