@@ -61,6 +61,27 @@ internal object GmacroCallbackBridge {
         return callback as OnMessageCallback<*>
     }
 
+    /**
+     * 查询当前灯效配置（0x71），与 iOS fetchCurrentLightConfig 返回结构对齐。
+     */
+    @Suppress("UNCHECKED_CAST")
+    fun fetchCurrentLightConfig(result: MethodChannel.Result): OnMessageCallback<*> {
+        val callback = OnMessageCallback<BaseRsp> { code, rsp ->
+            mainHandler.post {
+                if (code == Constants.SUCCESS || code == 80) {
+                    result.success(lightConfigPayload(rsp))
+                } else {
+                    result.error(
+                        "gmacro-method-failed",
+                        "GMacro method failed with code=$code",
+                        GmacroResponseSerializer.toMap(rsp),
+                    )
+                }
+            }
+        }
+        return callback as OnMessageCallback<*>
+    }
+
     //和ios 端统一字段
     private fun vibrateOpenPayload(rsp: Any?): Map<String, Any?> {
         val serialized = GmacroResponseSerializer.toMap(rsp)
@@ -72,6 +93,34 @@ internal object GmacroCallbackBridge {
         // Align with iOS: protocol value 1 means on, 2 means off.
         val isOn = status != 2
         return mapOf("isOn" to isOn)
+    }
+
+    //处理0x71灯光数据
+    private fun lightConfigPayload(rsp: Any?): Map<String, Any?> {
+        val serialized = GmacroResponseSerializer.toMap(rsp)
+        @Suppress("UNCHECKED_CAST")
+        val source = (serialized["lightEffect"] as? Map<String, Any?>) ?: serialized
+
+        fun intValue(key: String): Int = when (val raw = source[key]) {
+            is Int -> raw
+            is Number -> raw.toInt()
+            else -> 0
+        }
+
+        val light = when {
+            source.containsKey("light") -> intValue("light")
+            else -> intValue("brightness")
+        }
+
+        return mapOf(
+            "effect" to intValue("effect"),
+            "colorR" to intValue("colorR"),
+            "colorG" to intValue("colorG"),
+            "colorB" to intValue("colorB"),
+            "light" to light,
+            "speed" to intValue("speed"),
+            "profile" to intValue("profile"),
+        )
     }
 
     private fun deliver(code: Int, rsp: Any?, result: MethodChannel.Result) {

@@ -65,7 +65,8 @@ internal object GmacroMethodInvoker {
                 Host4FlutterGmacroConstants.fetchCurrentLightEffect -> commands.queryCurrentLightEffect(GmacroCallbackBridge.message(result))
 
                 //查询等效 0x71
-                Host4FlutterGmacroConstants.fetchCurrentLightConfig -> commands.queryCurrentLightEffect(GmacroCallbackBridge.message(result))
+                Host4FlutterGmacroConstants.fetchCurrentLightConfig ->
+                    commands.queryCurrentLightEffect(GmacroCallbackBridge.fetchCurrentLightConfig(result))
 
                 //设置灯光 0x72
                 Host4FlutterGmacroConstants.setLightConfig -> {
