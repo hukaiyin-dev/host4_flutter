@@ -40,6 +40,40 @@ internal object GmacroCallbackBridge {
         return callback as OnMessageCallback<T>
     }
 
+    /**
+     * 查询振动开关
+     */
+    @Suppress("UNCHECKED_CAST")
+    fun queryVibrateOpen(result: MethodChannel.Result): OnMessageCallback<*> {
+        val callback = OnMessageCallback<BaseRsp> { code, rsp ->
+            mainHandler.post {
+                if (code == Constants.SUCCESS || code == 80) {
+                    result.success(vibrateOpenPayload(rsp))
+                } else {
+                    result.error(
+                        "gmacro-method-failed",
+                        "GMacro method failed with code=$code",
+                        GmacroResponseSerializer.toMap(rsp),
+                    )
+                }
+            }
+        }
+        return callback as OnMessageCallback<*>
+    }
+
+    //和ios 端统一字段
+    private fun vibrateOpenPayload(rsp: Any?): Map<String, Any?> {
+        val serialized = GmacroResponseSerializer.toMap(rsp)
+        val status = when (val raw = serialized["status"]) {
+            is Int -> raw
+            is Number -> raw.toInt()
+            else -> null
+        }
+        // Align with iOS: protocol value 1 means on, 2 means off.
+        val isOn = status != 2
+        return mapOf("isOn" to isOn)
+    }
+
     private fun deliver(code: Int, rsp: Any?, result: MethodChannel.Result) {
         if (code == Constants.SUCCESS || code == 80) {
             result.success(GmacroResponseSerializer.toMap(rsp))

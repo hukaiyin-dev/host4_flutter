@@ -457,7 +457,7 @@ internal object GmacroMethodInvoker {
                 }
 
                 Host4FlutterGmacroConstants.queryVibrateOpen ->
-                    commands.queryVibrateOpen(GmacroCallbackBridge.message(result))
+                    commands.queryVibrateOpen(GmacroCallbackBridge.queryVibrateOpen(result))
 
                 Host4FlutterGmacroConstants.switchWorkStyle -> {
                     val mode = GmacroArgParser.intArg(arguments, "mode")
