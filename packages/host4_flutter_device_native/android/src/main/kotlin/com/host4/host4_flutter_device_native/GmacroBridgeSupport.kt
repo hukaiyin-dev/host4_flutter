@@ -1,6 +1,10 @@
 package com.host4.host4_flutter_device_native
 
 import com.host4.platform.kr.response.BaseRsp
+import com.host4.platform.kr.response.LinerTriggerRsp
+import com.host4.platform.kr.response.QueryCurrentLightEffectRsp
+import com.host4.platform.kr.response.VibrateOpenRsp
+import com.host4.platform.kr.response.WorkStyleRsp
 import com.host4.platform.listener.OnMessageCallback
 import com.host4.platform.util.Constants
 import com.host4.platform.v2.api.FullPlatformSdk
@@ -43,12 +47,11 @@ internal object GmacroCallbackBridge {
     /**
      * 查询振动开关
      */
-    @Suppress("UNCHECKED_CAST")
-    fun queryVibrateOpen(result: MethodChannel.Result): OnMessageCallback<*> {
-        val callback = OnMessageCallback<BaseRsp> { code, rsp ->
+    fun queryVibrateOpen(result: MethodChannel.Result): OnMessageCallback<VibrateOpenRsp> {
+        return OnMessageCallback{ code, rsp ->
             mainHandler.post {
                 if (code == Constants.SUCCESS || code == 80) {
-                    result.success(vibrateOpenPayload(rsp))
+                    result.success(mapOf("isOn" to (rsp.status != 2)))
                 } else {
                     result.error(
                         "gmacro-method-failed",
@@ -58,18 +61,27 @@ internal object GmacroCallbackBridge {
                 }
             }
         }
-        return callback as OnMessageCallback<*>
     }
 
     /**
      * 查询当前灯效配置（0x71），与 iOS fetchCurrentLightConfig 返回结构对齐。
      */
-    @Suppress("UNCHECKED_CAST")
-    fun fetchCurrentLightConfig(result: MethodChannel.Result): OnMessageCallback<*> {
-        val callback = OnMessageCallback<BaseRsp> { code, rsp ->
+    fun fetchCurrentLightConfig(result: MethodChannel.Result): OnMessageCallback<QueryCurrentLightEffectRsp> {
+        return OnMessageCallback { code, rsp ->
             mainHandler.post {
                 if (code == Constants.SUCCESS || code == 80) {
-                    result.success(lightConfigPayload(rsp))
+                    val effect = rsp.lightEffect
+                    result.success(
+                        mapOf(
+                            "effect" to (effect?.effect ?: 0),
+                            "colorR" to (effect?.colorR ?: 0),
+                            "colorG" to (effect?.colorG ?: 0),
+                            "colorB" to (effect?.colorB ?: 0),
+                            "light" to (effect?.brightness ?: 0),
+                            "speed" to (effect?.speed ?: 0),
+                            "profile" to (effect?.profile ?: 0),
+                        ),
+                    )
                 } else {
                     result.error(
                         "gmacro-method-failed",
@@ -79,48 +91,54 @@ internal object GmacroCallbackBridge {
                 }
             }
         }
-        return callback as OnMessageCallback<*>
     }
 
-    //和ios 端统一字段
-    private fun vibrateOpenPayload(rsp: Any?): Map<String, Any?> {
-        val serialized = GmacroResponseSerializer.toMap(rsp)
-        val status = when (val raw = serialized["status"]) {
-            is Int -> raw
-            is Number -> raw.toInt()
-            else -> null
+    /**
+     * 查询手柄工作模式（0x69），与 iOS fetchHandleWorkMode 返回结构对齐。
+     */
+    fun queryWorkStyle(result: MethodChannel.Result): OnMessageCallback<WorkStyleRsp> {
+        return OnMessageCallback { code, rsp ->
+            mainHandler.post {
+                if (code == Constants.SUCCESS || code == 80) {
+                    result.success(mapOf("mode" to rsp.mode))
+                } else {
+                    result.error(
+                        "gmacro-method-failed",
+                        "GMacro method failed with code=$code",
+                        GmacroResponseSerializer.toMap(rsp),
+                    )
+                }
+            }
         }
-        // Align with iOS: protocol value 1 means on, 2 means off.
-        val isOn = status != 2
-        return mapOf("isOn" to isOn)
     }
 
-    //处理0x71灯光数据
-    private fun lightConfigPayload(rsp: Any?): Map<String, Any?> {
-        val serialized = GmacroResponseSerializer.toMap(rsp)
-        @Suppress("UNCHECKED_CAST")
-        val source = (serialized["lightEffect"] as? Map<String, Any?>) ?: serialized
-
-        fun intValue(key: String): Int = when (val raw = source[key]) {
-            is Int -> raw
-            is Number -> raw.toInt()
-            else -> 0
+    /**
+     * 查询左右扳机线性输出
+     * final leftMode
+     * final leftThreshold
+     * final rightThreshold
+     */
+    fun queryLinerTrigger(result: MethodChannel.Result): OnMessageCallback<LinerTriggerRsp> {
+        return OnMessageCallback { code, rsp ->
+            mainHandler.post {
+                if (code == Constants.SUCCESS || code == 80) {
+                    result.success(
+                        mapOf(
+                            "leftMode" to (rsp.triggerLeft),
+                            "rightMode" to (rsp.triggerRight),
+                            "leftThreshold" to 0,
+                            "rightThreshold" to 0,
+                        ),
+                    )
+                } else {
+                    result.error(
+                        "gmacro-method-failed",
+                        "GMacro method failed with code=$code",
+                        GmacroResponseSerializer.toMap(rsp),
+                    )
+                }
+            }
         }
-
-        val light = when {
-            source.containsKey("light") -> intValue("light")
-            else -> intValue("brightness")
-        }
-
-        return mapOf(
-            "effect" to intValue("effect"),
-            "colorR" to intValue("colorR"),
-            "colorG" to intValue("colorG"),
-            "colorB" to intValue("colorB"),
-            "light" to light,
-            "speed" to intValue("speed"),
-            "profile" to intValue("profile"),
-        )
     }
 
     private fun deliver(code: Int, rsp: Any?, result: MethodChannel.Result) {

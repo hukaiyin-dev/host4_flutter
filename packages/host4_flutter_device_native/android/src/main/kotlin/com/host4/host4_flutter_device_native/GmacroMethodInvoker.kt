@@ -139,11 +139,9 @@ internal object GmacroMethodInvoker {
                 Host4FlutterGmacroConstants.startTriggerCalibration -> commands.beginAlignRockerOrTrigger(CALIB_TRIGGER_SUB_ID, 0, GmacroCallbackBridge.message(result))
                 Host4FlutterGmacroConstants.endTriggerCalibration -> commands.endAlignRockerOrTrigger(CALIB_TRIGGER_SUB_ID, 0, GmacroCallbackBridge.message(result))
 
-                Host4FlutterGmacroConstants.triggerLinearOutput -> commands.setTriggerCurveType(
+                //设置左右扳机线性输出
+                Host4FlutterGmacroConstants.triggerLinearOutput -> commands.switchLinerTrigger(
                     GmacroArgParser.intArg(arguments, "leftMode"),
-                    GmacroArgParser.intArg(arguments, "leftThreshold"),
-                    GmacroArgParser.intArg(arguments, "rightMode"),
-                    GmacroArgParser.intArg(arguments, "rightThreshold"),
                     GmacroCallbackBridge.message(result),
                 )
 
@@ -466,7 +464,7 @@ internal object GmacroMethodInvoker {
                 }
 
                 Host4FlutterGmacroConstants.queryWorkStyle ->
-                    commands.queryWorkStyle(GmacroCallbackBridge.message(result))
+                    commands.queryWorkStyle(GmacroCallbackBridge.queryWorkStyle(result))
 
                 Host4FlutterGmacroConstants.switchOutputMode -> {
                     val mode = GmacroArgParser.intArg(arguments, "mode")
@@ -491,8 +489,11 @@ internal object GmacroMethodInvoker {
                     commands.switchHandleCallbacks(method, GmacroCallbackBridge.message(result))
                 }
 
+                /**
+                 * 查询左右扳机线性输出
+                 */
                 Host4FlutterGmacroConstants.queryLinerTrigger ->
-                    commands.queryLinerTrigger(GmacroCallbackBridge.message(result))
+                    commands.queryLinerTrigger(GmacroCallbackBridge.queryLinerTrigger(result))
 
                 Host4FlutterGmacroConstants.switchLinerTrigger -> {
                     val mode = GmacroArgParser.intArg(arguments, "mode")
