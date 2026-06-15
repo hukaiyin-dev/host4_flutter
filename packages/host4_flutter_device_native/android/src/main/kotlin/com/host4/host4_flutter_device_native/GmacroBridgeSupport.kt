@@ -1,5 +1,7 @@
 package com.host4.host4_flutter_device_native
 
+import com.host4.platform.kr.response.AlignGyroscopeRsp
+import com.host4.platform.kr.response.AlignRockerOrTriggerRsp
 import com.host4.platform.kr.response.BaseRsp
 import com.host4.platform.kr.response.LinerTriggerRsp
 import com.host4.platform.kr.response.QueryCurrentLightEffectRsp
@@ -67,6 +69,41 @@ internal object GmacroCallbackBridge {
                         GmacroResponseSerializer.toMap(rsp),
                     )
                 }
+            }
+        }
+    }
+
+    /**
+     * 结束摇杆板机校准
+     */
+    fun endAlignRockerOrTrigger(result: MethodChannel.Result): OnMessageCallback<AlignRockerOrTriggerRsp>{
+        return OnMessageCallback { code, rsp ->
+            mainHandler.post {
+                result.success(
+                    mapOf(
+                        "subId" to (rsp.subId),
+                        "result" to (rsp.result),
+                        "param1" to (rsp.param1),
+                        "param2" to (rsp.param2),
+                    ),
+                )
+            }
+        }
+    }
+
+    /**
+     * 结束体感校准
+     */
+    fun endGyroCalibration(result: MethodChannel.Result): OnMessageCallback<AlignGyroscopeRsp>{
+        return OnMessageCallback { code, rsp ->
+            mainHandler.post {
+                result.success(
+                    mapOf(
+                        "subId" to (rsp.subId),
+                        "result" to (rsp.result),
+                        "param1" to (rsp.param),
+                    ),
+                )
             }
         }
     }
