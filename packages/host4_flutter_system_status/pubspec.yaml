@@ -1,0 +1,16 @@
+name: host4_flutter_system_status
+description: "Default Host4SystemStatusSource implementation using battery_plus and connectivity_plus."
+version: 0.0.1
+publish_to: none
+
+environment:
+  sdk: ">=3.9.0 <4.0.0"
+  flutter: ">=1.17.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  host4_flutter_ui:
+    path: ../host4_flutter_ui
+  battery_plus: ^6.0.0
+  connectivity_plus: ^6.0.0

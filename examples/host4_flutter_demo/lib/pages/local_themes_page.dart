@@ -117,7 +117,8 @@ class _LocalThemeDetailPageState extends State<LocalThemeDetailPage> {
           _loading = false;
         });
       }
-    } catch (_) {
+    } catch (e, st) {
+      debugPrint('[LocalTheme] Failed to load ${widget.entry.tokensAssetPath}: $e\n$st');
       if (mounted) setState(() => _loading = false);
     }
   }

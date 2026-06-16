@@ -149,6 +149,9 @@ class _Host4WebViewState extends State<Host4WebView> {
             _progress = 0;
             _hasError = false;
           });
+          // 尽早注入 adapterJs，确保 H5 任何 JS 运行前 bridge 已就位
+          // （Android @JavascriptInterface 在 WebView 创建时即可用，此处对齐该行为）
+          _injectAdapterJs();
           widget.onPageStarted?.call(url);
         },
         onPageFinished: (url) {
@@ -157,6 +160,7 @@ class _Host4WebViewState extends State<Host4WebView> {
             _isLoading = false;
             _progress = 1;
           });
+          // 再次注入，覆盖页面内部可能重置 window.JsBridge 的情况
           _injectAdapterJs();
           widget.onPageFinished?.call(url);
           _updatePageTitle();
