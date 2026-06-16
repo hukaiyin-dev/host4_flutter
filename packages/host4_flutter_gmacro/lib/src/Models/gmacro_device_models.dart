@@ -1,6 +1,6 @@
 import 'gmacro_model_parsers.dart';
 
-/// 设备版本信息（对应 0x80 fetchDeviceVersion）
+/// 设备版本信息（对应 0x84 fetchDeviceVersion）
 ///
 /// 字段与 iOS `analyzeDeviceVersion` 对齐：
 /// - [project]: 项目编码

@@ -621,7 +621,29 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
         }
 
       case Host4FlutterChannelConstants.fetchDeviceVersion:
-        invoke(result) { callback in session.fetchDeviceVersion(callback) }
+        invoke(result) { callback in
+          session.fetchDeviceVersion { res in
+            switch res {
+            case .success(var payload):
+              // project/protocol/firmware/hardware 以十进制 int 返回，转为 hex 字符串再传给 Flutter
+              if let project = payload["project"] as? Int {
+                payload["project"] = String(format: "%06X", project)
+              }
+              if let proto = payload["protocol"] as? Int {
+                payload["protocol"] = String(format: "%06X", proto)
+              }
+              if let firmware = payload["firmware"] as? Int {
+                payload["firmware"] = String(format: "%08X", firmware)
+              }
+              if let hardware = payload["hardware"] as? Int {
+                payload["hardware"] = String(format: "%06X", hardware)
+              }
+              callback(.success(payload))
+            case .failure(let error):
+              callback(.failure(error))
+            }
+          }
+        }
       case Host4FlutterChannelConstants.fetchMobapadDeviceInfo:
         let profile = try intArg("profile", from: arguments)
         invoke(result) { callback in
