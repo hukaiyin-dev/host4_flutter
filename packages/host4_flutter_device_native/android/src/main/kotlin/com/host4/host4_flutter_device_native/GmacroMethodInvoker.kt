@@ -429,11 +429,9 @@ internal object GmacroMethodInvoker {
                     val left = GmacroArgParser.intArg(arguments, "left")
                     val right = GmacroArgParser.intArg(arguments, "right")
                     val position = GmacroArgParser.intArg(arguments, "position")
-                    val relLeft = (2.55f * left).toInt()
-                    val relRight = (2.55f * right).toInt()
                     commands.forceVibrationTest(
-                        relLeft,
-                        relRight,
+                        left,
+                        right,
                         position,
                         GmacroCallbackBridge.message(result),
                     )
