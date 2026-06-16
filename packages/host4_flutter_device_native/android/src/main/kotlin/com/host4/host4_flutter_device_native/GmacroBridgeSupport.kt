@@ -99,9 +99,9 @@ internal object GmacroCallbackBridge {
             mainHandler.post {
                 result.success(
                     mapOf(
-                        "subId" to (rsp.subId),
-                        "result" to (rsp.result),
-                        "param1" to (rsp.param),
+                        "subId" to (rsp?.subId ?: 1),
+                        "result" to (rsp?.result ?: 1),
+                        "param1" to (rsp?.param ),
                     ),
                 )
             }
