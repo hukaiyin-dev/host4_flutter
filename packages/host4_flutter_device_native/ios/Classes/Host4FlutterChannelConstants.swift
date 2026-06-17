@@ -1,6 +1,7 @@
 struct Host4FlutterChannelConstants {
   // Device
   static let fetchDeviceVersion = "fetchDeviceVersion"
+  static let fetchGameMacroDefaultInfo = "fetchGameMacroDefaultInfo"
   static let fetchMobapadDeviceInfo = "fetchMobapadDeviceInfo"
   static let resetDevice = "resetDevice"
   static let fetchChargingDock = "fetchChargingDock"
@@ -96,6 +97,7 @@ struct Host4FlutterChannelConstants {
   static let queryMappableKeys = "queryMappableKeys"
   static let queryMappableGamepadKeys = "queryMappableGamepadKeys"
   static let setKeyMappings = "setKeyMappings"
+  static let setHandleKeyMapping = "setHandleKeyMapping"
   static let setMouseKeyMappings = "setMouseKeyMappings"
   static let setKeyboardKeyMappings = "setKeyboardKeyMappings"
   static let queryCurrentMapping = "queryCurrentMapping"

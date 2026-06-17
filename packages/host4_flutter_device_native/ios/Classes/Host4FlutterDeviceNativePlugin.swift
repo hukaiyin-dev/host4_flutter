@@ -644,6 +644,11 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
             }
           }
         }
+      case Host4FlutterChannelConstants.fetchGameMacroDefaultInfo:
+        let profile = try intArg("profile", from: arguments)
+        invoke(result) { callback in
+          session.fetchGameMacroDefaultInfo(profile: profile, response: callback)
+        }
       case Host4FlutterChannelConstants.fetchMobapadDeviceInfo:
         let profile = try intArg("profile", from: arguments)
         invoke(result) { callback in
@@ -1102,6 +1107,12 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
           session.setKeyMappings(keyMappings, response: callback)
         }
 
+      case Host4FlutterChannelConstants.setHandleKeyMapping:
+        let original = GamepadKey(rawValue: try intArg("original", from: arguments)) ?? .none
+        let mapped = GamepadKey(rawValue: try intArg("mapped", from: arguments)) ?? .none
+        invoke(result) { callback in
+          session.setHandleKeyMapping(original: original, mapped: mapped, response: callback)
+        }
       case Host4FlutterChannelConstants.setMouseKeyMappings:
         let keyMappings = try mouseKeyMappingsArg("keyMappings", from: arguments)
         invoke(result) { callback in

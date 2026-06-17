@@ -21,6 +21,11 @@ extension GMacroProtocolSession {
         dataHelper.deviceInfo(profile: profile, response: response)
     }
     
+    /// 获取 Game Macro 默认值（完整设备配置）7704
+    public func fetchGameMacroDefaultInfo(profile: Int, response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
+        dataHelper.fetchGameMacroDefault(profile: profile, response: response)
+    }
+    
     /// 恢复出厂设置
     public func resetDevice(_ response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
         dataHelper.resetDevice(response: response)
