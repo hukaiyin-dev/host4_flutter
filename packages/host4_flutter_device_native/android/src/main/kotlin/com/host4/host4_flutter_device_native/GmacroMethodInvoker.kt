@@ -33,7 +33,7 @@ internal object GmacroMethodInvoker {
                 // 0x77 04 查询 Game Macro 默认值
                 Host4FlutterGmacroConstants.fetchGameMacroDefaultInfo -> {
                     val profile = GmacroArgParser.intArg(arguments, "profile")
-                    //TODO: Android SDK 待补充
+                    commands.queryMacroHandleReq(profile,GmacroCallbackBridge.message(result))
                 }
 
                 Host4FlutterGmacroConstants.fetchMobapadDeviceInfo -> {
@@ -378,7 +378,10 @@ internal object GmacroMethodInvoker {
                 Host4FlutterGmacroConstants.setHandleKeyMapping -> {
                     val original = GmacroArgParser.intArg(arguments, "original")
                     val mapped = GmacroArgParser.intArg(arguments, "mapped")
-                    //TODO: Android SDK 待补充
+                    commands.sendMacroMapping(
+                        original,
+                        mapped,
+                        GmacroCallbackBridge.message(result))
                 }
 
                 Host4FlutterGmacroConstants.setMouseKeyMappings -> {
