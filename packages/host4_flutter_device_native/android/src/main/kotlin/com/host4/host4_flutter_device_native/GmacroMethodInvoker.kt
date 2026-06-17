@@ -30,6 +30,12 @@ internal object GmacroMethodInvoker {
                 Host4FlutterGmacroConstants.fetchDeviceVersion ->
                     KrDeviceInfoQuery.query(deviceKey, transportKind, result)
 
+                // 0x77 04 查询 Game Macro 默认值
+                Host4FlutterGmacroConstants.fetchGameMacroDefaultInfo -> {
+                    val profile = GmacroArgParser.intArg(arguments, "profile")
+                    //TODO: Android SDK 待补充
+                }
+
                 Host4FlutterGmacroConstants.fetchMobapadDeviceInfo -> {
                     val profile = GmacroArgParser.intArg(arguments, "profile")
                     //commands.queryMacroConfigInfoReq(profile, GmacroCallbackBridge.message(result))
@@ -366,6 +372,13 @@ internal object GmacroMethodInvoker {
                         GmacroArgParser.intArg(first, "mapped"),
                         GmacroCallbackBridge.message(result),
                     )
+                }
+
+                // 6C 0D 设置手柄按键映射（单映射）
+                Host4FlutterGmacroConstants.setHandleKeyMapping -> {
+                    val original = GmacroArgParser.intArg(arguments, "original")
+                    val mapped = GmacroArgParser.intArg(arguments, "mapped")
+                    //TODO: Android SDK 待补充
                 }
 
                 Host4FlutterGmacroConstants.setMouseKeyMappings -> {

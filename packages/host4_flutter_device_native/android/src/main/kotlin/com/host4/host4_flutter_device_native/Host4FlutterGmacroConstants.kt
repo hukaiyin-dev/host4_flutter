@@ -1,6 +1,7 @@
 internal object Host4FlutterGmacroConstants {
     // Device
     const val fetchDeviceVersion = "fetchDeviceVersion"
+    const val fetchGameMacroDefaultInfo = "fetchGameMacroDefaultInfo"
     const val fetchMobapadDeviceInfo = "fetchMobapadDeviceInfo"
     const val resetDevice = "resetDevice"
     const val fetchChargingDock = "fetchChargingDock"
@@ -89,6 +90,7 @@ internal object Host4FlutterGmacroConstants {
     const val queryMappableKeys = "queryMappableKeys"
     const val queryMappableGamepadKeys = "queryMappableGamepadKeys"
     const val setKeyMappings = "setKeyMappings"
+    const val setHandleKeyMapping = "setHandleKeyMapping"
     const val setMouseKeyMappings = "setMouseKeyMappings"
     const val setKeyboardKeyMappings = "setKeyboardKeyMappings"
     const val queryCurrentMapping = "queryCurrentMapping"

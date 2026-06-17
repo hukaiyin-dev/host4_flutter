@@ -6,6 +6,14 @@ extension GmacroSessionDevice on GmacroSession {
   Future<Map<String, Object?>> fetchDeviceVersion() =>
       invoke(GmacroMethods.fetchDeviceVersion);
 
+  /// 查询 Game Macro 默认值（完整设备配置）0x77 04
+  Future<Map<String, Object?>> fetchGameMacroDefaultInfo({
+    required int profile,
+  }) => invoke(
+    GmacroMethods.fetchGameMacroDefaultInfo,
+    arguments: {'profile': profile},
+  );
+
   /// 查询设备信息
   Future<Map<String, Object?>> fetchMobapadDeviceInfo({required int profile}) =>
       invoke(
