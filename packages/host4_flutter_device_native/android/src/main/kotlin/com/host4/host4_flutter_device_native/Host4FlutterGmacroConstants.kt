@@ -124,4 +124,6 @@ internal object Host4FlutterGmacroConstants {
     const val switchLinerTrigger = "switchLinerTrigger"
     const val queryLightingEffectPantas = "queryLightingEffectPantas"
     const val setLightGroupEffectPantas = "setLightGroupEffectPantas"
+
+    const val startOta = "startOta"
 }
