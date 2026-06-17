@@ -1,6 +1,7 @@
 abstract final class GmacroMethods {
   // Device
   static const fetchDeviceVersion = 'fetchDeviceVersion';
+  static const fetchGameMacroDefaultInfo = 'fetchGameMacroDefaultInfo';
   static const fetchMobapadDeviceInfo = 'fetchMobapadDeviceInfo';
   static const resetDevice = 'resetDevice';
   static const fetchChargingDock = 'fetchChargingDock';
@@ -91,6 +92,7 @@ abstract final class GmacroMethods {
   static const queryMappableKeys = 'queryMappableKeys';
   static const queryMappableGamepadKeys = 'queryMappableGamepadKeys';
   static const setKeyMappings = 'setKeyMappings';
+  static const setHandleKeyMapping = 'setHandleKeyMapping';
   static const setMouseKeyMappings = 'setMouseKeyMappings';
   static const setKeyboardKeyMappings = 'setKeyboardKeyMappings';
   static const queryCurrentMapping = 'queryCurrentMapping';

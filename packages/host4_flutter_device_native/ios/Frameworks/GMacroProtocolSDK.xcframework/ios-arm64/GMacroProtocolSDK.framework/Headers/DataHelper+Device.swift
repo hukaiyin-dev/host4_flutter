@@ -85,6 +85,28 @@ extension DataHelper {
                    response: response)
     }
     
+    // MARK: - 7704 获取 Game Macro 默认值（完整设备配置）
+    func fetchGameMacroDefault(profile: Int,
+                                finish: (() -> Void)? = nil,
+                                response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
+        let protocolID = GMacroProtocolID.deviceInfo
+        
+        var payload = Data()
+        
+        // subID 0x04
+        let subID = UInt8(0x04)
+        payload.append(Data.from(subID))
+        
+        // profile
+        payload.append(Data.from(UInt8(profile)))
+        
+        let all = dataFrom(protocolID: protocolID, payload: payload)
+        self.write(protocolID: protocolID,
+                   data: all,
+                   finish: finish,
+                   response: response)
+    }
+    
     func resetDevice(finish:(()->())? = nil, response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
         
         let protocolID = GMacroProtocolID.reset
@@ -251,12 +273,48 @@ extension DataHelper {
     func analyzeDeviceInfo(_ data: Data, _ subID: UInt8, _ sn: UInt8) -> [String: Any] {
         let subID = DeviceInfoSubID(rawValue: subID)
         switch subID {
+        case .gameMacroDefault:
+            return analyzeGameMacroDeviceInfo(data)
         case .mobpad:
             return analyzeMobpadDeviceInfo(data)
         case .none:
             print("未处理的 DeviceInfoSubID 0x\(String(format: "%02X", subID!.rawValue))")
             return [:]
         }
+    }
+    
+    func analyzeGameMacroDeviceInfo(_ data: Data) -> [String: Any] {
+        print("分析 Game Macro 默认值数据 \(data.count) \(data.nsDescription())")
+        var parser = DataParser(data)
+        var dic: [String: Any] = [:]
+
+        // 1️⃣ 连发参数
+        let rapidList = parseRapidFire(&parser)
+        dic["rapidList"] = rapidList
+
+        // 2️⃣ 扳机参数
+        let _ = parser.next(1).toInt()
+        let leftTrigger = parseTrigger(&parser, name: "left")
+        dic["leftTrigger"] = leftTrigger
+        let rightTrigger = parseTrigger(&parser, name: "right")
+        dic["rightTrigger"] = rightTrigger
+
+        // 3️⃣ 摇杆参数
+        let _ = parser.next(1).toInt()
+        let leftStick = parseStick(&parser, name: "left")
+        dic["leftStick"] = leftStick
+        let rightStick = parseStick(&parser, name: "right")
+        dic["rightStick"] = rightStick
+
+        // 4️⃣ 振动参数
+        let vibration = parseVibration(&parser)
+        dic["vibration"] = vibration
+
+        // 5️⃣ 体感参数
+        let motion = parseMotion(&parser)
+        dic["motion"] = motion
+        
+        return dic
     }
     
     func analyzeMobpadDeviceInfo(_ data: Data) -> [String: Any] {

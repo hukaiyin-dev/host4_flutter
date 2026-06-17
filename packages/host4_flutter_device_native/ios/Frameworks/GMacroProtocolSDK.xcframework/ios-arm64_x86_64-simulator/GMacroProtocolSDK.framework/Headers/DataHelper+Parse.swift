@@ -347,6 +347,8 @@ extension DataHelper {
                 return (.failure(invalidSubIDPacketError(protocolID, packet: all)), true)
             }
             switch subID {
+            case .setHandleMapping:
+                return analyzeResultWithSubId(payload: payload, isSubID: true, isDev: true)
             case .fetchOneMapping:
                 responseDic = analyzeMappings(payload)
             case .fetchAllMappings:

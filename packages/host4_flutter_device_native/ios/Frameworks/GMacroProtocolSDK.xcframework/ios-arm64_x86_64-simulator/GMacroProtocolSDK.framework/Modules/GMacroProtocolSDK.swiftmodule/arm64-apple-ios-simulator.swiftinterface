@@ -337,6 +337,9 @@ extension GMacroProtocolSDK.GMacroProtocolSession {
   final public func fetchMobapadDeviceInfo(profile: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
   #endif
   #if compiler(>=5.3) && $NonescapableTypes
+  final public func fetchGameMacroDefaultInfo(profile: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  #endif
+  #if compiler(>=5.3) && $NonescapableTypes
   final public func resetDevice(_ response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
   #endif
 }
@@ -504,6 +507,9 @@ extension GMacroProtocolSDK.GMacroProtocolSession {
   #endif
   #if compiler(>=5.3) && $NonescapableTypes
   final public func setKeyMappings(_ keyMappings: [GMacroProtocolSDK.GamepadKeyMapping], response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  #endif
+  #if compiler(>=5.3) && $NonescapableTypes
+  final public func setHandleKeyMapping(original: GMacroProtocolSDK.GamepadKey, mapped: GMacroProtocolSDK.GamepadKey, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
   #endif
   #if compiler(>=5.3) && $NonescapableTypes
   final public func setMouseKeyMappings(_ keyMappings: [GMacroProtocolSDK.MouseKeyMapping], response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)

@@ -37,10 +37,13 @@ enum DeviceVersionSubID: UInt8 {
 
 /// 获取设备版本信息 77
 enum DeviceInfoSubID: UInt8 {
-    case mobpad     = 0x08 // 魔派设备信息
+    case gameMacroDefault   = 0x04 // Game Macro 默认值（完整设备配置）
+    case mobpad             = 0x08 // 魔派设备信息
     
    var description: String {
         switch self {
+        case .gameMacroDefault:
+            return "Game Macro 默认值"
         case .mobpad:
             return "魔派设备信息"
         }
@@ -230,14 +233,17 @@ enum GyroSubID: UInt8 {
 }
 
 enum MappingSubID: UInt8 {
-    case setMapping             = 0x10 // 设置手柄按键映射
+    case setHandleMapping       = 0x0D // 设置手柄按键映射（单映射）
+    case setMapping             = 0x10 // 设置手柄按键映射（多映射）
     case fetchAllMappings       = 0x11 // 查询手柄所有按键映射
     case fetchOneMapping        = 0x12 // 查询单个手柄按键映射
     
     var description: String {
         switch self {
+        case .setHandleMapping:
+            return "设置手柄按键映射(单)"
         case .setMapping:
-            return "设置手柄按键映射"
+            return "设置手柄按键映射(多)"
         case .fetchAllMappings:
             return "查询手柄所有按键映射"
         case .fetchOneMapping:

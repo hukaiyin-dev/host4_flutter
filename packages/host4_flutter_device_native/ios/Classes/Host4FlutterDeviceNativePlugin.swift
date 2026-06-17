@@ -644,6 +644,11 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
             }
           }
         }
+      case Host4FlutterChannelConstants.fetchGameMacroDefaultInfo:
+        let profile = try intArg("profile", from: arguments)
+        invoke(result) { callback in
+          session.fetchGameMacroDefaultInfo(profile: profile, response: callback)
+        }
       case Host4FlutterChannelConstants.fetchMobapadDeviceInfo:
         let profile = try intArg("profile", from: arguments)
         invoke(result) { callback in
@@ -778,7 +783,35 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
       case Host4FlutterChannelConstants.queryCurrentMapping:
         let profile = try intArg("profile", from: arguments)
         invoke(result) { callback in
-          session.queryCurrentMapping(profile: profile, response: callback)
+          session.queryCurrentMapping(profile: profile) { res in
+            switch res {
+            case .success(var payload):
+              // SDK 返回的是 Swift 结构体数组，Flutter 方法通道无法序列化
+              // 需要转为 [String: Any] 字典后再传给 Flutter
+              if let gamepadMappings = payload["gamepadMappings"] as? [GamepadKeyMapping] {
+                payload["gamepadMappings"] = gamepadMappings.map {
+                  ["original": $0.original.rawValue, "mapped": $0.mapped.rawValue]
+                }
+              }
+              if let mouseMappings = payload["mouseMappings"] as? [MouseKeyMapping] {
+                payload["mouseMappings"] = mouseMappings.map {
+                  ["original": $0.original.rawValue, "mapped": Int($0.mapped.rawValue)]
+                }
+              }
+              if let keyboardMappings = payload["keyboardMappings"] as? [KeyboardKeyMapping] {
+                payload["keyboardMappings"] = keyboardMappings.map {
+                  ["original": $0.original.rawValue, "mapped": Int($0.mapped.rawValue)]
+                }
+              }
+              // 重命名 gamepadMappings → keyMappings，与 setKeyMappings 输入参数名一致
+              if let gamepad = payload.removeValue(forKey: "gamepadMappings") {
+                payload["keyMappings"] = gamepad
+              }
+              callback(.success(payload))
+            case .failure(let error):
+              callback(.failure(error))
+            }
+          }
         }
       case Host4FlutterChannelConstants.updateRockerLinear:
         invoke(result) { callback in
@@ -1074,6 +1107,12 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
           session.setKeyMappings(keyMappings, response: callback)
         }
 
+      case Host4FlutterChannelConstants.setHandleKeyMapping:
+        let original = GamepadKey(rawValue: try intArg("original", from: arguments)) ?? .none
+        let mapped = GamepadKey(rawValue: try intArg("mapped", from: arguments)) ?? .none
+        invoke(result) { callback in
+          session.setHandleKeyMapping(original: original, mapped: mapped, response: callback)
+        }
       case Host4FlutterChannelConstants.setMouseKeyMappings:
         let keyMappings = try mouseKeyMappingsArg("keyMappings", from: arguments)
         invoke(result) { callback in

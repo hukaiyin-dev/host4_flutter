@@ -8,14 +8,14 @@
 import Foundation
 import BluetoothKit
 
-// MARK: - 映射
+// MARK: - 键值映射
 extension DataHelper {
-    
+
     /// 查询支持映射的按键 0x86 0x02
     func queryMappableKeys(profile: Int,
-                           finish: (() -> Void)? = nil,
-                           response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
-
+                            finish:(()->())? = nil,
+                            response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
+        
         let subID = SupportKeySubID.queryMappableKeys
         let protocolID = subID.proID
         
@@ -24,15 +24,18 @@ extension DataHelper {
         payload.append(Data.from(profile, count: 1))
         
         let all = dataFrom(protocolID: protocolID, payload: payload)
-        self.write(protocolID: protocolID, data: all, finish: finish, response: response)
+        self.write(protocolID: protocolID,
+                   data: all,
+                   finish: finish,
+                   response: response)
     }
     
     /// 查询支持映射为手柄的按键 0x86 0x04
     func queryMappableGamepadKeys(profile: Int,
-                                  finish: (() -> Void)? = nil,
-                                  response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
-        let subID = SupportKeySubID.queryMappableGamepadKeys
+                            finish:(()->())? = nil,
+                            response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
         
+        let subID = SupportKeySubID.queryMappableGamepadKeys
         let protocolID = subID.proID
         
         var payload = Data()
@@ -40,7 +43,10 @@ extension DataHelper {
         payload.append(Data.from(profile, count: 1))
         
         let all = dataFrom(protocolID: protocolID, payload: payload)
-        self.write(protocolID: protocolID, data: all, finish: finish, response: response)
+        self.write(protocolID: protocolID,
+                   data: all,
+                   finish: finish,
+                   response: response)
     }
     
     /// 键值映射 0x3D
@@ -125,8 +131,33 @@ extension DataHelper {
                    finish: finish,
                    response: response)
     }
+    
+    // MARK: - 6C0D 设置手柄按键映射（单映射）
+    /// - Parameters:
+    ///   - original: 原始按键
+    ///   - mapped: 映射按键
+    func setHandleKeyMapping(original: GamepadKey,
+                              mapped: GamepadKey,
+                              finish: (() -> Void)? = nil,
+                              response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
+        let subID = MappingSubID.setHandleMapping
+        let protocolID = subID.proID
+        
+        var payload = Data()
+        payload.append(Data.from(Int(subID.rawValue), count: 1)) // subID 0x0D
+        payload.append(Data.from(0x00, count: 1))               // Dev 固定 0
+        payload.append(Data.from(original.gamepadOneByteKeyCode, count: 1)) // 原始按键
+        payload.append(Data.from(0, count: 1))                  // 映射键值类型 0=手柄
+        payload.append(Data.from(1, count: 1))                  // 映射键值数量 固定1
+        payload.append(Data.from(mapped.gamepadOneByteKeyCode, count: 1))   // 映射按键
+        
+        let all = dataFrom(protocolID: protocolID, payload: payload)
+        self.write(protocolID: protocolID,
+                   data: all,
+                   finish: finish,
+                   response: response)
+    }
 }
-
 
 
 extension DataHelper {
@@ -206,9 +237,12 @@ extension DataHelper {
         print("映射按键类型数量：\(types.count)")
         print("映射按键类型：\(types.sorted())")
         
-        // 映射键值总数量
+        // 映射类型数量
+        _ = types.count
+        
+        // 总键值数
         let totalValueCount = mapping.mapped.reduce(0) { $0 + $1.values.count }
-        print("映射按键键值数量：\(totalValueCount)")
+        print("总映射键值数量：\(totalValueCount)")
         
         // 映射键值数组（展开所有 values）
         let allValues = mapping.mapped.flatMap { $0.values }
@@ -285,175 +319,74 @@ extension DataHelper {
         var parser = DataParser(data)
         parser.skip(2)
         
-        
-        // 解析内容
-        while parser.remaining >= 2 {
-            let originalCode = parser.next(1).toInt()
-            guard let original = GamepadKey.from(oneByteKeyCode: originalCode) else { continue }
+        while parser.remaining > 0 {
+            guard parser.remaining >= 5 else {
+                print("⚠️ 数据不足，无法解析完整映射条目")
+                break
+            }
             
-            print("\n🔹 原始按键：\(original.gamepadKeyString) [\(originalCode)]")
+            let original = parser.next(1).toInt()
+            _ = parser.next(1).toInt() // typeCount
             
-            let typeCount = parser.next(1).toInt()
-            print("📌 映射类型数量：\(typeCount)")
+            var mappedArray: [MappedKeyBridge] = []
             
-            var mappedBridges: [MappedKeyBridge] = []
-            
-            for _ in 0..<typeCount {
-                if parser.remaining < 2 {
-                    print("❌ 剩余不足以读取类型和数量")
-                    break
-                }
-                
+            while parser.remaining >= 2 {
                 let type = parser.next(1).toInt()
                 let count = parser.next(1).toInt()
                 
                 guard parser.remaining >= count else {
-                    print("❌ 映射键值不足，剩余 \(parser.remaining)，需要 \(count)")
+                    print("⚠️ 数据不足，无法读取 \(count) 个键值")
                     break
                 }
                 
                 var values: [Int] = []
                 for _ in 0..<count {
-                    values.append(parser.next(1).toInt())
+                    let value = parser.next(1).toInt()
+                    values.append(value)
                 }
-                
-                print("  ▸ 类型：\(type)，数量：\(count)，键值：\(values)")
-                
-                switch type {
-                case MappedKeyType.gamepad.rawValue:
-                    let keys = values.compactMap { GamepadKey.from(oneByteKeyCode: $0) }
-                    if !keys.isEmpty {
-                        mappedBridges.append(MappedKeyBridge(mappedKey: .gamepad(keys)))
-                    }
-                    
-                case MappedKeyType.mouse.rawValue:
-                    let keys = values.compactMap { MouseKey(rawValue: UInt8($0)) }
-                    if !keys.isEmpty {
-                        mappedBridges.append(MappedKeyBridge(mappedKey: .mouse(keys)))
-                    }
-                    
-                case MappedKeyType.keyboard.rawValue:
-                    let keys = values.compactMap { KeyboardKey(rawValue: UInt8($0)) }
-                    if !keys.isEmpty {
-                        mappedBridges.append(MappedKeyBridge(mappedKey: .keyboard(keys)))
-                    }
-                    
-                default:
-                    print("❌ 未知映射类型：\(type)")
-                }
+                mappedArray.append(MappedKeyBridge(type: type, values: values))
             }
             
-            let mapping = MultiKeyMappingBridge(original: original, mapped: mappedBridges)
-            mappingList.append(mapping)
+            let originalKey = GamepadKey(rawValue: original) ?? .none
+            let bridge = MultiKeyMappingBridge(original: originalKey, mapped: mappedArray)
+            mappingList.append(bridge)
         }
         
         dic["mappings"] = mappingList
-        print("dic \(dic)")
         return dic
     }
     
-    // 查询手柄所有按键映射（支持同时映射多种类型键值）
+    /// 解析手柄所有按键映射（多包数据）
     func analyzeAllMappings(_ data: Data) -> [String: Any] {
-        print("analyzeAllMappings data \(data.nsDescription())")
-        
-        /**
-         分析 data
-         第一个 byte 为总长度，输出一下
-         后面是
-         [1 byte] 原始按键
-         [1 byte] 类型数量
-         {
-             [1 byte] 类型
-             [1 byte] 键值数量解析为 n
-             [n byte] 键值数组
-         } * 类型数量
-         
-         [下一个原始按键] ...
-         
-         组装一个 dic，
-         {
-             "mappings": [
-                 {
-                     "original": "填入原始按键的original.gamepadOneByteKeyCode",
-                     "mapped": {type 和 values}
-                 }
-             ]
-         }
-         mappings 在外部要能解析成 MultiKeyMappingBridge，最终转换成 MultiKeyMapping
-         */
-        
         var dic: [String: Any] = [:]
         var mappingList: [MultiKeyMappingBridge] = []
         var parser = DataParser(data)
         
-        // 1. 读取第一个字节作为总长度
-        let totalLength = parser.next(1).toInt()
-        print("📦 总长度（第一个 byte）：\(totalLength)")
-        
-        // 2. 解析内容
-        while parser.remaining >= 2 {
-            let originalCode = parser.next(1).toInt()
-            guard let original = GamepadKey.from(oneByteKeyCode: originalCode) else { continue }
-            
-            print("\n🔹 原始按键：\(original.gamepadKeyString) [\(originalCode)]")
-            
+        while parser.remaining > 7 {
+            let original = parser.next(1).toInt()
             let typeCount = parser.next(1).toInt()
-            print("📌 映射类型数量：\(typeCount)")
             
-            var mappedBridges: [MappedKeyBridge] = []
+            var mappedArray: [MappedKeyBridge] = []
             
             for _ in 0..<typeCount {
-                if parser.remaining < 2 {
-                    print("❌ 剩余不足以读取类型和数量")
-                    break
-                }
-                
+                guard parser.remaining >= 2 else { break }
                 let type = parser.next(1).toInt()
                 let count = parser.next(1).toInt()
-                
-                guard parser.remaining >= count else {
-                    print("❌ 映射键值不足，剩余 \(parser.remaining)，需要 \(count)")
-                    break
-                }
-                
+                guard parser.remaining >= count else { break }
                 var values: [Int] = []
                 for _ in 0..<count {
-                    values.append(parser.next(1).toInt())
+                    let value = parser.next(1).toInt()
+                    values.append(value)
                 }
-                
-                print("  ▸ 类型：\(type)，数量：\(count)，键值：\(values)")
-                
-                switch type {
-                case MappedKeyType.gamepad.rawValue:
-                    let keys = values.compactMap { GamepadKey.from(oneByteKeyCode: $0) }
-                    if !keys.isEmpty {
-                        mappedBridges.append(MappedKeyBridge(mappedKey: .gamepad(keys)))
-                    }
-                    
-                case MappedKeyType.mouse.rawValue:
-                    let keys = values.compactMap { MouseKey(rawValue: UInt8($0)) }
-                    if !keys.isEmpty {
-                        mappedBridges.append(MappedKeyBridge(mappedKey: .mouse(keys)))
-                    }
-                    
-                case MappedKeyType.keyboard.rawValue:
-                    let keys = values.compactMap { KeyboardKey(rawValue: UInt8($0)) }
-                    if !keys.isEmpty {
-                        mappedBridges.append(MappedKeyBridge(mappedKey: .keyboard(keys)))
-                    }
-                    
-                default:
-                    print("❌ 未知映射类型：\(type)")
-                }
+                mappedArray.append(MappedKeyBridge(type: type, values: values))
             }
             
-            let mapping = MultiKeyMappingBridge(original: original, mapped: mappedBridges)
-            mappingList.append(mapping)
+            let originalKey = GamepadKey(rawValue: original) ?? .none
+            let bridge = MultiKeyMappingBridge(original: originalKey, mapped: mappedArray)
+            mappingList.append(bridge)
         }
         
         dic["mappings"] = mappingList
-        print("dic \(dic)")
         return dic
     }
-    
 }
