@@ -3,6 +3,8 @@
 # Run `pod lib lint host4_flutter_device_native.podspec` to validate before publishing.
 #
 Pod::Spec.new do |s|
+  disable_native_sdks = ENV.fetch('HOST4_DISABLE_DEVICE_NATIVE_SDKS', '1') == '1'
+
   s.name             = 'host4_flutter_device_native'
   s.version          = '0.0.1'
   s.summary          = 'Flutter plugin shell for host4 native device communication.'
@@ -13,18 +15,27 @@ Flutter plugin shell for host4 native device communication.
   s.license          = { :file => '../LICENSE' }
   s.author           = { 'Your Company' => 'email@example.com' }
   s.source           = { :path => '.' }
-  s.source_files = 'Classes/**/*'
+  s.source_files = disable_native_sdks ? 'Classes/Host4FlutterDeviceNativePlugin.swift' : 'Classes/**/*'
   s.dependency 'Flutter'
   s.platform = :ios, '13.0'
-  s.vendored_frameworks = [
-    'Frameworks/BluetoothKit.xcframework',
-    'Frameworks/MFiKit.xcframework',
-    'Frameworks/GMacroProtocolSDK.xcframework',
-  ]
-  s.frameworks = ['CoreBluetooth', 'ExternalAccessory', 'GameController', 'UIKit']
+  unless disable_native_sdks
+    s.vendored_frameworks = [
+      'Frameworks/BluetoothKit.xcframework',
+      'Frameworks/MFiKit.xcframework',
+      'Frameworks/GMacroProtocolSDK.xcframework',
+    ]
+  end
+  s.frameworks = disable_native_sdks ? ['UIKit'] : ['CoreBluetooth', 'ExternalAccessory', 'GameController', 'UIKit']
 
   # Flutter.framework does not contain a i386 slice.
-  s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES', 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386' }
+  pod_target_xcconfig = {
+    'DEFINES_MODULE' => 'YES',
+    'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386'
+  }
+  if disable_native_sdks
+    pod_target_xcconfig['SWIFT_ACTIVE_COMPILATION_CONDITIONS'] = '$(inherited) HOST4_DISABLE_GMACRO_SDK'
+  end
+  s.pod_target_xcconfig = pod_target_xcconfig
   s.swift_version = '5.0'
 
   # If your plugin requires a privacy manifest, for example if it uses any

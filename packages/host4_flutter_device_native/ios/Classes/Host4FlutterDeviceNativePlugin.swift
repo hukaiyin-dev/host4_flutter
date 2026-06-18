@@ -1,3 +1,44 @@
+#if HOST4_DISABLE_GMACRO_SDK
+import Flutter
+import Foundation
+import UIKit
+
+public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
+  private let methodChannel: FlutterMethodChannel
+
+  private init(messenger: FlutterBinaryMessenger) {
+    methodChannel = FlutterMethodChannel(
+      name: "host4_flutter_device_native",
+      binaryMessenger: messenger
+    )
+
+    super.init()
+  }
+
+  public static func register(with registrar: FlutterPluginRegistrar) {
+    let instance = Host4FlutterDeviceNativePlugin(messenger: registrar.messenger())
+    registrar.addMethodCallDelegate(instance, channel: instance.methodChannel)
+  }
+
+  public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+    switch call.method {
+    case "getPlatformVersion":
+      result("iOS " + UIDevice.current.systemVersion)
+    case "stopBleScan":
+      result(nil)
+    default:
+      result(
+        FlutterError(
+          code: "native-sdk-disabled",
+          message:
+            "host4_flutter_device_native iOS SDK is disabled because the bundled GMacroProtocolSDK is not compatible with this Xcode.",
+          details: ["method": call.method]
+        )
+      )
+    }
+  }
+}
+#else
 import BluetoothKit
 import CoreBluetooth
 import Flutter
@@ -1616,3 +1657,4 @@ private enum BridgeArgumentError: LocalizedError {
     }
   }
 }
+#endif
