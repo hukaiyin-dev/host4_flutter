@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
@@ -31,6 +29,8 @@ class MethodChannelHost4FlutterDeviceNative
 
   final Map<String, Stream<NativeProtocolEvent>> _protocolEventStreams =
       <String, Stream<NativeProtocolEvent>>{};
+  final Map<String, Stream<NativeOtaUpgradeEvent>> _otaEventStreams =
+      <String, Stream<NativeOtaUpgradeEvent>>{};
 
   @override
   Future<String?> getPlatformVersion() async {
@@ -106,7 +106,7 @@ class MethodChannelHost4FlutterDeviceNative
     final sessionId = await methodChannel.invokeMethod<String>(
       'connectUsb',
       <String, Object?>{
-        if (deviceId != null) 'deviceId': deviceId,
+        'deviceId': deviceId,
         'options': options,
       },
     );
@@ -244,6 +244,19 @@ class MethodChannelHost4FlutterDeviceNative
   }
 
   @override
+  Stream<NativeOtaUpgradeEvent> otaUpgradeEvents(String protocolSessionId) {
+    return _otaEventStreams.putIfAbsent(protocolSessionId, () {
+      return EventChannel(
+        'host4_flutter_device_native/ota_events/$protocolSessionId',
+      ).receiveBroadcastStream().map(
+        (dynamic event) => NativeOtaUpgradeEvent.fromMap(
+          Map<String, Object?>.from(event as Map),
+        ),
+      );
+    });
+  }
+
+  @override
   Future<Map<String, Object?>> invokeGmacroMethod({
     required String protocolSessionId,
     required String method,
@@ -263,6 +276,7 @@ class MethodChannelHost4FlutterDeviceNative
   @override
   Future<void> closeProtocol(String protocolSessionId) {
     _protocolEventStreams.remove(protocolSessionId);
+    _otaEventStreams.remove(protocolSessionId);
     return methodChannel.invokeMethod<void>('closeProtocol', <String, Object?>{
       'protocolSessionId': protocolSessionId,
     });

@@ -122,6 +122,11 @@ abstract class Host4FlutterDeviceNativePlatform extends PlatformInterface {
     throw UnimplementedError('protocolEvents() has not been implemented.');
   }
 
+  /// OTA 升级进度/成功/失败事件。
+  Stream<NativeOtaUpgradeEvent> otaUpgradeEvents(String protocolSessionId) {
+    throw UnimplementedError('otaUpgradeEvents() has not been implemented.');
+  }
+
   Future<Map<String, Object?>> invokeGmacroMethod({
     required String protocolSessionId,
     required String method,

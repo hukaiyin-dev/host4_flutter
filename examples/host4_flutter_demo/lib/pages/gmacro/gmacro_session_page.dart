@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:host4_flutter_device_native/host4_flutter_device_native.dart';
 import 'package:host4_flutter_gmacro/host4_flutter_gmacro.dart';
 import 'package:host4_flutter_protocol/host4_flutter_protocol.dart';
 import 'package:host4_flutter_transport/host4_flutter_transport.dart';
@@ -39,7 +40,10 @@ class _GmacroSessionPageState extends State<GmacroSessionPage> {
   final _logs = <_LogEntry>[];
   StreamSubscription<TransportEvent>? _transportSub;
   StreamSubscription<ProtocolEvent>? _protocolSub;
+  StreamSubscription<NativeOtaUpgradeEvent>? _otaSub;
   StreamSubscription<dynamic>? _nativeLogSub;
+  bool _isOtaRunning = false;
+  double _otaPercent = 0;
 
   @override
   void initState() {
@@ -66,6 +70,7 @@ class _GmacroSessionPageState extends State<GmacroSessionPage> {
   void dispose() {
     _transportSub?.cancel();
     _protocolSub?.cancel();
+    _otaSub?.cancel();
     _nativeLogSub?.cancel();
     unawaited(_inputHub.dispose());
     _session?.close();
@@ -143,6 +148,7 @@ class _GmacroSessionPageState extends State<GmacroSessionPage> {
       _inputHub.bindSession(session);
 
       _subscribeProtocol(session);
+      _subscribeOta(session);
     } catch (e) {
       if (!mounted) return;
 
@@ -215,6 +221,35 @@ class _GmacroSessionPageState extends State<GmacroSessionPage> {
     });
   }
 
+  void _subscribeOta(GmacroSession session) {
+    _otaSub?.cancel();
+    _otaSub = session.otaUpgradeEvents.listen((event) {
+      if (!mounted) return;
+      switch (event.type) {
+        case NativeOtaUpgradeEventType.progress:
+          setState(() {
+            _isOtaRunning = true;
+            _otaPercent = event.percent;
+          });
+          _addLog(
+            '🟠 OTA 进度: ${(event.percent * 100).toStringAsFixed(1)}% '
+            '(${event.progress}/${event.total})',
+          );
+        case NativeOtaUpgradeEventType.success:
+          setState(() {
+            _isOtaRunning = false;
+            _otaPercent = 1;
+          });
+          _addLog('🟢 OTA 升级成功');
+        case NativeOtaUpgradeEventType.failed:
+          setState(() {
+            _isOtaRunning = false;
+          });
+          _addLog('🔴 OTA 升级失败，code=${event.code ?? -1}', isError: true);
+      }
+    });
+  }
+
   Future<void> _fetchDeviceVersion() async {
     final session = _session;
     if (session == null) return;
@@ -238,8 +273,7 @@ class _GmacroSessionPageState extends State<GmacroSessionPage> {
         content: const Text(
           '点击确认后选择本地 .bin 固件文件，\n'
           'Flutter 会将固件字节传给原生层执行 OTA。\n\n'
-          'OTA 进度通过 ProtocolBusy 事件上报，\n'
-          '完成后收到 ProtocolReady。',
+          '升级进度/成功/失败将通过 otaUpgradeEvents 监听。',
         ),
         actions: [
           TextButton(
@@ -270,13 +304,17 @@ class _GmacroSessionPageState extends State<GmacroSessionPage> {
     }
 
     _addLog('▶ invoke: startOta（固件 ${bytes.length} bytes）');
+    setState(() {
+      _isOtaRunning = true;
+      _otaPercent = 0;
+    });
     try {
-      final result = await session.invoke(
-        'startOta',
-        arguments: {'data': bytes},
-      );
-      _addLog('◀ result: $result');
+      await session.startOta(bytes);
+      _addLog('◀ startOta 已发起，等待 OTA 回调事件…');
     } catch (e) {
+      setState(() {
+        _isOtaRunning = false;
+      });
       _addLog('◀ error: $e', isError: true);
     }
   }
@@ -312,6 +350,8 @@ class _GmacroSessionPageState extends State<GmacroSessionPage> {
           _StatusBar(
             isAttaching: _isAttaching,
             isBusy: _isBusy,
+            isOtaRunning: _isOtaRunning,
+            otaPercent: _otaPercent,
             session: _session,
           ),
 
@@ -433,11 +473,15 @@ class _StatusBar extends StatelessWidget {
   const _StatusBar({
     required this.isAttaching,
     required this.isBusy,
+    required this.isOtaRunning,
+    required this.otaPercent,
     required this.session,
   });
 
   final bool isAttaching;
   final bool isBusy;
+  final bool isOtaRunning;
+  final double otaPercent;
   final GmacroSession? session;
 
   @override
@@ -449,6 +493,9 @@ class _StatusBar extends StatelessWidget {
     if (isAttaching) {
       dotColor = theme.colors.warning;
       label = '挂载协议中…';
+    } else if (isOtaRunning) {
+      dotColor = theme.colors.warning;
+      label = 'OTA 升级中 ${(otaPercent * 100).toStringAsFixed(1)}%';
     } else if (session == null) {
       dotColor = theme.colors.warning;
       label = '协议挂载失败';

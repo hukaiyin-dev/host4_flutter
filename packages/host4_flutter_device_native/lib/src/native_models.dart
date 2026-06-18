@@ -95,6 +95,8 @@ class NativeTransportEvent {
 
 enum NativeProtocolEventType { ready, busy, error }
 
+enum NativeOtaUpgradeEventType { progress, success, failed }
+
 /// Calibration / align progress from [DeviceAlignRsp] escalation callbacks.
 class NativeDeviceAlignEvent {
   const NativeDeviceAlignEvent({
@@ -257,6 +259,42 @@ class NativeProtocolEvent {
   }
 }
 
+class NativeOtaUpgradeEvent {
+  const NativeOtaUpgradeEvent({
+    required this.type,
+    this.progress = 0,
+    this.total = 0,
+    this.percent = 0,
+    this.code,
+  });
+
+  factory NativeOtaUpgradeEvent.fromMap(Map<String, Object?> map) {
+    return NativeOtaUpgradeEvent(
+      type: _nativeOtaUpgradeEventTypeFromName(map['type'] as String?),
+      progress: _readInt(map['progress']),
+      total: _readInt(map['total']),
+      percent: _readDouble(map['percent']),
+      code: map['code'] == null ? null : _readInt(map['code']),
+    );
+  }
+
+  final NativeOtaUpgradeEventType type;
+  final int progress;
+  final int total;
+  final double percent;
+  final int? code;
+
+  Map<String, Object?> toMap() {
+    return <String, Object?>{
+      'type': type.name,
+      'progress': progress,
+      'total': total,
+      'percent': percent,
+      'code': code,
+    };
+  }
+}
+
 NativeTransportKind _nativeTransportKindFromName(String? value) {
   return NativeTransportKind.values.firstWhere(
     (kind) => kind.name == value,
@@ -278,9 +316,22 @@ NativeProtocolEventType _nativeProtocolEventTypeFromName(String? value) {
   );
 }
 
+NativeOtaUpgradeEventType _nativeOtaUpgradeEventTypeFromName(String? value) {
+  return NativeOtaUpgradeEventType.values.firstWhere(
+    (eventType) => eventType.name == value,
+    orElse: () => NativeOtaUpgradeEventType.failed,
+  );
+}
+
 int _readInt(Object? value) {
   if (value is int) return value;
   if (value is num) return value.toInt();
+  return 0;
+}
+
+double _readDouble(Object? value) {
+  if (value is double) return value;
+  if (value is num) return value.toDouble();
   return 0;
 }
 

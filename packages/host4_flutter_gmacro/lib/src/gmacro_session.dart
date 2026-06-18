@@ -162,6 +162,10 @@ class GmacroSession implements ProtocolSession {
   Stream<DeviceCalibrationEvent> get calibrationEvents =>
       _calibrationEventController.stream;
 
+  /// OTA 升级事件（进度 / 成功 / 失败）。
+  Stream<NativeOtaUpgradeEvent> get otaUpgradeEvents =>
+      _native.otaUpgradeEvents(id);
+
   @override
   Future<void> close() async {
     await _nativeSub?.cancel();

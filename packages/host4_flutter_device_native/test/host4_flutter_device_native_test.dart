@@ -66,6 +66,11 @@ class MockHost4FlutterDeviceNativePlatform
   }
 
   @override
+  Stream<NativeOtaUpgradeEvent> otaUpgradeEvents(String protocolSessionId) {
+    return const Stream<NativeOtaUpgradeEvent>.empty();
+  }
+
+  @override
   Stream<NativeDiscoveredDevice> scanBle({
     List<String> serviceIds = const [],
     Map<String, Object?> hints = const {},
