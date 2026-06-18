@@ -17,7 +17,9 @@ class Host4ThemeLoader {
     // AssetBundle is not isolate-safe; load raw strings on the main thread.
     debugPrint('[Host4ThemeLoader] step1: loading strings for $assetPath');
     final tokensJson = await bundle.loadString(assetPath);
-    debugPrint('[Host4ThemeLoader] step2: tokens loaded (${tokensJson.length} chars)');
+    debugPrint(
+      '[Host4ThemeLoader] step2: tokens loaded (${tokensJson.length} chars)',
+    );
     final assetJson = await _loadAssetFileString(bundle, assetPath);
     debugPrint('[Host4ThemeLoader] step3: asset loaded');
     final manifestJson = await _loadManifestString(bundle, assetPath);
@@ -769,10 +771,7 @@ class Host4ThemeLoader {
             'component.top-bar.padding-horizontal',
           ),
           fontFamily: _readString(resolved, 'component.top-bar.font-family'),
-          titleStyle: _readTextToken(
-            resolved,
-            'component.top-bar.title-style',
-          ),
+          titleStyle: _readTextToken(resolved, 'component.top-bar.title-style'),
           background: _readColor(resolved, 'component.top-bar.background'),
           title: _readColor(resolved, 'component.top-bar.title'),
           chevron: _readColor(resolved, 'component.top-bar.chevron'),
@@ -1498,10 +1497,7 @@ class Host4ThemeLoader {
             'component.top-bar.padding-horizontal',
           ),
           fontFamily: _readString(resolved, 'component.top-bar.font-family'),
-          titleStyle: _readTextToken(
-            resolved,
-            'component.top-bar.title-style',
-          ),
+          titleStyle: _readTextToken(resolved, 'component.top-bar.title-style'),
           background: _readColor(resolved, 'component.top-bar.background'),
           title: _readColor(resolved, 'component.top-bar.title'),
           chevron: _readColor(resolved, 'component.top-bar.chevron'),

@@ -1,8 +1,10 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../foundation/host4_icon_assets.dart';
 import '../foundation/theme/host4_theme_scope.dart';
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
@@ -63,6 +65,112 @@ abstract class Host4SystemStatusSource {
   void dispose();
 }
 
+/// 静态系统状态数据源。
+///
+/// 适合页面只拿到一份 [Host4SystemStatusData] 快照的场景。
+class Host4StaticSystemStatusSource implements Host4SystemStatusSource {
+  const Host4StaticSystemStatusSource(this.data);
+
+  final Host4SystemStatusData data;
+
+  @override
+  String get currentTime => data.timeLabel;
+
+  @override
+  bool get currentWifi => data.wifiEnabled;
+
+  @override
+  int get currentBatteryLevel => data.batteryLevel;
+
+  @override
+  bool get currentCharging => data.batteryCharging;
+
+  @override
+  Stream<String> get timeStream => const Stream.empty();
+
+  @override
+  Stream<bool> get wifiStream => const Stream.empty();
+
+  @override
+  Stream<int> get batteryLevelStream => const Stream.empty();
+
+  @override
+  Stream<bool> get chargingStream => const Stream.empty();
+
+  @override
+  void dispose() {}
+}
+
+/// [ValueListenable] 系统状态数据源。
+///
+/// 监听 [ValueListenable<Host4SystemStatusData>]，仅在对应字段变化时
+/// 推送更新，避免无关字段触发不必要的状态栏重建。
+class Host4ValueListenableSystemStatusSource
+    implements Host4SystemStatusSource {
+  Host4ValueListenableSystemStatusSource(this.listenable) {
+    _previous = listenable.value;
+    listenable.addListener(_onStatusChanged);
+  }
+
+  final ValueListenable<Host4SystemStatusData> listenable;
+  late Host4SystemStatusData _previous;
+
+  final _timeController = StreamController<String>.broadcast();
+  final _wifiController = StreamController<bool>.broadcast();
+  final _batteryController = StreamController<int>.broadcast();
+  final _chargingController = StreamController<bool>.broadcast();
+
+  void _onStatusChanged() {
+    final next = listenable.value;
+    if (next.timeLabel != _previous.timeLabel) {
+      _timeController.add(next.timeLabel);
+    }
+    if (next.wifiEnabled != _previous.wifiEnabled) {
+      _wifiController.add(next.wifiEnabled);
+    }
+    if (next.batteryLevel != _previous.batteryLevel) {
+      _batteryController.add(next.batteryLevel);
+    }
+    if (next.batteryCharging != _previous.batteryCharging) {
+      _chargingController.add(next.batteryCharging);
+    }
+    _previous = next;
+  }
+
+  @override
+  String get currentTime => listenable.value.timeLabel;
+
+  @override
+  bool get currentWifi => listenable.value.wifiEnabled;
+
+  @override
+  int get currentBatteryLevel => listenable.value.batteryLevel;
+
+  @override
+  bool get currentCharging => listenable.value.batteryCharging;
+
+  @override
+  Stream<String> get timeStream => _timeController.stream;
+
+  @override
+  Stream<bool> get wifiStream => _wifiController.stream;
+
+  @override
+  Stream<int> get batteryLevelStream => _batteryController.stream;
+
+  @override
+  Stream<bool> get chargingStream => _chargingController.stream;
+
+  @override
+  void dispose() {
+    listenable.removeListener(_onStatusChanged);
+    _timeController.close();
+    _wifiController.close();
+    _batteryController.close();
+    _chargingController.close();
+  }
+}
+
 // ─── Widget ───────────────────────────────────────────────────────────────────
 
 /// 系统状态栏：时间 + WiFi + 电量。
@@ -75,6 +183,7 @@ abstract class Host4SystemStatusSource {
 class Host4SystemStatus extends StatefulWidget {
   const Host4SystemStatus({
     required this.source,
+
     /// 强制使用指定颜色，不跟随主题 textPrimary。
     /// 适用于背景固定为浅色的场景（如 launcher 主页），
     /// 避免系统切换 dark mode 时图标变白。
@@ -115,19 +224,27 @@ class _Host4SystemStatusState extends State<Host4SystemStatus> {
     _time = s.currentTime;
     _wifi = s.currentWifi;
     _batteryLevel = s.currentBatteryLevel;
-    _subs.add(s.timeStream.listen((v) {
-      if (mounted) setState(() => _time = v);
-    }));
-    _subs.add(s.wifiStream.listen((v) {
-      if (mounted) setState(() => _wifi = v);
-    }));
-    _subs.add(s.batteryLevelStream.listen((v) {
-      if (mounted) setState(() => _batteryLevel = v);
-    }));
+    _subs.add(
+      s.timeStream.listen((v) {
+        if (mounted) setState(() => _time = v);
+      }),
+    );
+    _subs.add(
+      s.wifiStream.listen((v) {
+        if (mounted) setState(() => _wifi = v);
+      }),
+    );
+    _subs.add(
+      s.batteryLevelStream.listen((v) {
+        if (mounted) setState(() => _batteryLevel = v);
+      }),
+    );
   }
 
   void _cancelSubs() {
-    for (final sub in _subs) sub.cancel();
+    for (final sub in _subs) {
+      sub.cancel();
+    }
     _subs.clear();
   }
 
@@ -148,17 +265,11 @@ class _Host4SystemStatusState extends State<Host4SystemStatus> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Text(
-          _time,
-          style: theme.typography.label.toTextStyle(color),
-        ),
+        Text(_time, style: theme.typography.label.toTextStyle(color)),
         SizedBox(width: gap),
         _WifiIcon(enabled: _wifi, color: color),
         SizedBox(width: gap),
-        _BatteryIcon(
-          level: _batteryLevel,
-          color: color,
-        ),
+        _BatteryIcon(level: _batteryLevel, color: color),
       ],
     );
   }
@@ -172,24 +283,21 @@ class _WifiIcon extends StatelessWidget {
   final bool enabled;
   final Color color;
 
-  // Figma: 四号主机通用控件库 / node 423-4050
-  static const _svgData = '''
-<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M10.2637 14.6002C11.2659 13.7526 12.7341 13.7527 13.7363 14.6002C13.7868 14.6458 13.816 14.711 13.8174 14.7789C13.8187 14.8467 13.7924 14.9121 13.7441 14.9596L12.1748 16.5436C12.1288 16.5901 12.0654 16.6159 12 16.6159C11.9347 16.6158 11.8721 16.59 11.8262 16.5436L10.2568 14.9596C10.2084 14.912 10.1812 14.8459 10.1826 14.778C10.1842 14.7102 10.2134 14.6457 10.2637 14.6002Z" fill="#121A29"/>
-<path d="M8.16993 12.4879C10.3293 10.4793 13.6737 10.4793 15.833 12.4879C15.8816 12.535 15.9095 12.5999 15.9102 12.6676C15.9107 12.7351 15.8844 12.8003 15.8369 12.8483L14.9287 13.7653C14.8352 13.8585 14.6847 13.8602 14.5889 13.7692C13.8798 13.1271 12.9566 12.772 12 12.7721C11.0442 12.7726 10.1226 13.1277 9.41407 13.7692C9.31816 13.8603 9.16673 13.8589 9.07325 13.7653L8.167 12.8483C8.11919 12.8003 8.09222 12.7353 8.09278 12.6676C8.09341 12.5999 8.12126 12.535 8.16993 12.4879Z" fill="#121A29"/>
-<path d="M6.0752 10.3805C9.38714 7.2065 14.6129 7.2065 17.9248 10.3805C17.9727 10.4276 17.9995 10.4921 18 10.5592C18.0004 10.6264 17.974 10.6912 17.9268 10.7389L17.0186 11.6559C16.925 11.7499 16.7728 11.7513 16.6777 11.6588C15.4159 10.4592 13.7411 9.78976 12 9.78968C10.2589 9.78977 8.58419 10.4592 7.32227 11.6588C7.22729 11.7513 7.07488 11.75 6.98145 11.6559L6.07325 10.7389C6.02596 10.6912 5.99956 10.6264 6.00001 10.5592C6.0005 10.4921 6.02733 10.4276 6.0752 10.3805Z" fill="#121A29"/>
-</svg>
-''';
-
   @override
   Widget build(BuildContext context) {
     return Opacity(
       opacity: enabled ? 1.0 : 0.35,
-      child: SvgPicture.string(
-        _svgData,
-        width: 16,
-        height: 16,
-        colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
+      child: SizedBox(
+        width: 24,
+        height: 24,
+        child: Center(
+          child: SvgPicture.asset(
+            Host4IconAssets.wifiStrong,
+            width: 16,
+            height: 16,
+            colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
+          ),
+        ),
       ),
     );
   }
@@ -198,10 +306,7 @@ class _WifiIcon extends StatelessWidget {
 // ─── Battery ──────────────────────────────────────────────────────────────────
 
 class _BatteryIcon extends StatelessWidget {
-  const _BatteryIcon({
-    required this.level,
-    required this.color,
-  });
+  const _BatteryIcon({required this.level, required this.color});
 
   final int level;
   final Color color;
@@ -214,10 +319,7 @@ class _BatteryIcon extends StatelessWidget {
       child: Center(
         child: CustomPaint(
           size: const Size(22, 11),
-          painter: _BatteryPainter(
-            level: level / 100.0,
-            color: color,
-          ),
+          painter: _BatteryPainter(level: level / 100.0, color: color),
         ),
       ),
     );
@@ -225,10 +327,7 @@ class _BatteryIcon extends StatelessWidget {
 }
 
 class _BatteryPainter extends CustomPainter {
-  const _BatteryPainter({
-    required this.level,
-    required this.color,
-  });
+  const _BatteryPainter({required this.level, required this.color});
 
   final double level; // 0.0–1.0
   final Color color;

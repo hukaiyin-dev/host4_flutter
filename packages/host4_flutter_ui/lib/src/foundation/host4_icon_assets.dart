@@ -10,4 +10,10 @@ class Host4IconAssets {
 
   static const String topBarEnter =
       'packages/host4_flutter_ui/assets/icons/icon_top_bar_enter.svg';
+
+  static const String search =
+      'packages/host4_flutter_ui/assets/icons/icon_search.svg';
+
+  static const String wifiStrong =
+      'packages/host4_flutter_ui/assets/icons/icon_wifi_strong.svg';
 }

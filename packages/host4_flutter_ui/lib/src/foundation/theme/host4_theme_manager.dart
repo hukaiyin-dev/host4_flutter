@@ -61,15 +61,19 @@ class Host4ThemeCatalog {
       throw const FormatException('Theme catalog must contain a themes list.');
     }
 
-    return themes.map((item) {
-      if (item is! Map) {
-        throw const FormatException('Theme catalog entries must be objects.');
-      }
-      return Host4ThemeCatalogEntry.fromJson(
-        Map<String, dynamic>.from(item),
-        catalogAssetPath: catalogAssetPath,
-      );
-    }).toList(growable: false);
+    return themes
+        .map((item) {
+          if (item is! Map) {
+            throw const FormatException(
+              'Theme catalog entries must be objects.',
+            );
+          }
+          return Host4ThemeCatalogEntry.fromJson(
+            Map<String, dynamic>.from(item),
+            catalogAssetPath: catalogAssetPath,
+          );
+        })
+        .toList(growable: false);
   }
 }
 
@@ -77,8 +81,8 @@ class Host4ThemeManager extends ChangeNotifier {
   Host4ThemeManager({
     required List<Host4ThemeCatalogEntry> catalog,
     required AssetBundle bundle,
-  })  : _catalog = List.unmodifiable(catalog),
-        _bundle = bundle;
+  }) : _catalog = List.unmodifiable(catalog),
+       _bundle = bundle;
 
   final List<Host4ThemeCatalogEntry> _catalog;
   final AssetBundle _bundle;
@@ -89,6 +93,7 @@ class Host4ThemeManager extends ChangeNotifier {
   Map<String, dynamic>? _generatedTokensMap;
   Host4ThemeImages? _generatedImages;
   bool _isLoading = false;
+  int _loadGeneration = 0;
 
   List<Host4ThemeCatalogEntry> get catalog => _catalog;
   Host4RuntimeTheme get theme {
@@ -125,20 +130,27 @@ class Host4ThemeManager extends ChangeNotifier {
       throw ArgumentError.value(themeId, 'themeId', 'Unknown theme id.');
     }
 
+    final generation = ++_loadGeneration;
     _isLoading = true;
     notifyListeners();
 
     try {
-      _theme = await Host4ThemeLoader.loadFromAsset(
+      final theme = await Host4ThemeLoader.loadFromAsset(
         _bundle,
         entry.tokensAssetPath,
         mode: mode,
       );
+      if (generation != _loadGeneration) {
+        return;
+      }
+      _theme = theme;
       _currentThemeId = themeId;
       _currentMode = _theme!.meta.mode;
     } finally {
-      _isLoading = false;
-      notifyListeners();
+      if (generation == _loadGeneration) {
+        _isLoading = false;
+        notifyListeners();
+      }
     }
   }
 
@@ -147,23 +159,30 @@ class Host4ThemeManager extends ChangeNotifier {
     String? mode,
     Host4ThemeImages? images,
   }) async {
+    final generation = ++_loadGeneration;
     _isLoading = true;
     notifyListeners();
 
     try {
       final targetMode = mode ?? _currentMode ?? 'light';
-      _theme = await Host4ThemeLoader.loadFromMap(
+      final theme = await Host4ThemeLoader.loadFromMap(
         tokensMap,
         mode: targetMode,
         fallbackImages: images ?? _generatedImages ?? _theme?.images,
       );
+      if (generation != _loadGeneration) {
+        return;
+      }
+      _theme = theme;
       _generatedTokensMap = tokensMap;
       _generatedImages = images;
       _currentThemeId = null;
       _currentMode = targetMode;
     } finally {
-      _isLoading = false;
-      notifyListeners();
+      if (generation == _loadGeneration) {
+        _isLoading = false;
+        notifyListeners();
+      }
     }
   }
 
