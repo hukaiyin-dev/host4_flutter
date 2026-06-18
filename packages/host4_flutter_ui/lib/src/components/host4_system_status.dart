@@ -75,15 +75,18 @@ abstract class Host4SystemStatusSource {
 class Host4SystemStatus extends StatefulWidget {
   const Host4SystemStatus({
     required this.source,
+
     /// 强制使用指定颜色，不跟随主题 textPrimary。
     /// 适用于背景固定为浅色的场景（如 launcher 主页），
     /// 避免系统切换 dark mode 时图标变白。
     this.color,
+    this.keyPrefix,
     super.key,
   });
 
   final Host4SystemStatusSource source;
   final Color? color;
+  final String? keyPrefix;
 
   @override
   State<Host4SystemStatus> createState() => _Host4SystemStatusState();
@@ -115,19 +118,27 @@ class _Host4SystemStatusState extends State<Host4SystemStatus> {
     _time = s.currentTime;
     _wifi = s.currentWifi;
     _batteryLevel = s.currentBatteryLevel;
-    _subs.add(s.timeStream.listen((v) {
-      if (mounted) setState(() => _time = v);
-    }));
-    _subs.add(s.wifiStream.listen((v) {
-      if (mounted) setState(() => _wifi = v);
-    }));
-    _subs.add(s.batteryLevelStream.listen((v) {
-      if (mounted) setState(() => _batteryLevel = v);
-    }));
+    _subs.add(
+      s.timeStream.listen((v) {
+        if (mounted) setState(() => _time = v);
+      }),
+    );
+    _subs.add(
+      s.wifiStream.listen((v) {
+        if (mounted) setState(() => _wifi = v);
+      }),
+    );
+    _subs.add(
+      s.batteryLevelStream.listen((v) {
+        if (mounted) setState(() => _batteryLevel = v);
+      }),
+    );
   }
 
   void _cancelSubs() {
-    for (final sub in _subs) sub.cancel();
+    for (final sub in _subs) {
+      sub.cancel();
+    }
     _subs.clear();
   }
 
@@ -150,24 +161,31 @@ class _Host4SystemStatusState extends State<Host4SystemStatus> {
       children: [
         Text(
           _time,
+          key: _statusKey('time'),
           style: theme.typography.label.toTextStyle(color),
         ),
         SizedBox(width: gap),
-        _WifiIcon(enabled: _wifi, color: color),
+        _WifiIcon(key: _statusKey('wifi'), enabled: _wifi, color: color),
         SizedBox(width: gap),
         _BatteryIcon(
+          key: _statusKey('battery'),
           level: _batteryLevel,
           color: color,
         ),
       ],
     );
   }
+
+  Key? _statusKey(String suffix) {
+    final prefix = widget.keyPrefix;
+    return prefix == null ? null : ValueKey<String>('${prefix}_$suffix');
+  }
 }
 
 // ─── WiFi ─────────────────────────────────────────────────────────────────────
 
 class _WifiIcon extends StatelessWidget {
-  const _WifiIcon({required this.enabled, required this.color});
+  const _WifiIcon({required this.enabled, required this.color, super.key});
 
   final bool enabled;
   final Color color;
@@ -198,10 +216,7 @@ class _WifiIcon extends StatelessWidget {
 // ─── Battery ──────────────────────────────────────────────────────────────────
 
 class _BatteryIcon extends StatelessWidget {
-  const _BatteryIcon({
-    required this.level,
-    required this.color,
-  });
+  const _BatteryIcon({required this.level, required this.color, super.key});
 
   final int level;
   final Color color;
@@ -214,10 +229,7 @@ class _BatteryIcon extends StatelessWidget {
       child: Center(
         child: CustomPaint(
           size: const Size(22, 11),
-          painter: _BatteryPainter(
-            level: level / 100.0,
-            color: color,
-          ),
+          painter: _BatteryPainter(level: level / 100.0, color: color),
         ),
       ),
     );
@@ -225,10 +237,7 @@ class _BatteryIcon extends StatelessWidget {
 }
 
 class _BatteryPainter extends CustomPainter {
-  const _BatteryPainter({
-    required this.level,
-    required this.color,
-  });
+  const _BatteryPainter({required this.level, required this.color});
 
   final double level; // 0.0–1.0
   final Color color;

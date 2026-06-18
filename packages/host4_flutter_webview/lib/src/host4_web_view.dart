@@ -32,6 +32,7 @@ class Host4WebView extends StatefulWidget {
     this.title,
     this.enableZoom = false,
     this.userAgent,
+    this.allowRoutePopGesture = false,
     this.onControllerReady,
     this.onPageStarted,
     this.onPageFinished,
@@ -70,6 +71,13 @@ class Host4WebView extends StatefulWidget {
 
   /// Custom User-Agent string. Uses the platform default when null.
   final String? userAgent;
+
+  /// Allows the host route to handle system pop gestures directly.
+  ///
+  /// Keep this disabled for ordinary web pages so system back can first walk
+  /// web history. Enable it for full-screen pages such as login where native
+  /// edge-swipe should leave the page.
+  final bool allowRoutePopGesture;
 
   /// Called once the [Host4WebController] is ready, before the first URL loads.
   final void Function(Host4WebController controller)? onControllerReady;
@@ -177,8 +185,7 @@ class _Host4WebViewState extends State<Host4WebView> {
           if (!handled) {
             setState(() {
               _hasError = true;
-              _errorMessage =
-                  '${error.description} (错误码: ${error.errorCode})';
+              _errorMessage = '${error.description} (错误码: ${error.errorCode})';
               _isLoading = false;
             });
           }
@@ -240,7 +247,7 @@ class _Host4WebViewState extends State<Host4WebView> {
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: false,
+      canPop: widget.allowRoutePopGesture,
       onPopInvokedWithResult: (didPop, _) async {
         if (didPop) return;
         final shouldPop = await _handleBackNavigation();
