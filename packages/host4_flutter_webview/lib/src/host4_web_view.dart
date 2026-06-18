@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:webview_flutter_android/webview_flutter_android.dart';
@@ -146,7 +147,16 @@ class _Host4WebViewState extends State<Host4WebView> {
         'JsBridge',
         onMessageReceived: _onJsMessage,
       );
+      controller.addJavaScriptChannel(
+        'NativeBridge',
+        onMessageReceived: _onJsMessage,
+      );
     }
+
+    controller.addJavaScriptChannel(
+      '_FlutterJsLog',
+      onMessageReceived: (msg) => debugPrint('[JS] ${msg.message}'),
+    );
 
     controller.setNavigationDelegate(
       NavigationDelegate(
@@ -217,7 +227,9 @@ class _Host4WebViewState extends State<Host4WebView> {
       if (decoded is! Map) return;
       final method = decoded['method']?.toString() ?? '';
       if (method.isEmpty) return;
-      bridge.onMessage(method, decoded['payload']);
+      // 兼容两种字段名：adapterJs 包装层用 `payload`，H5 直接调用时用 `params`
+      final payload = decoded.containsKey('payload') ? decoded['payload'] : decoded['params'];
+      bridge.onMessage(method, payload);
     } catch (_) {}
   }
 
@@ -225,7 +237,35 @@ class _Host4WebViewState extends State<Host4WebView> {
     final adapter = widget.bridge;
     if (adapter == null) return;
     _controller.runJavaScript(adapter.adapterJs);
+    if (kDebugMode) {
+      _controller.runJavaScript(_kJsDebugSnippet);
+    }
   }
+
+  static const String _kJsDebugSnippet = r'''
+(function() {
+  function _log(tag, msg) {
+    try { _FlutterJsLog.postMessage('[' + tag + '] ' + msg); } catch(e) {}
+  }
+  var _origError = console.error.bind(console);
+  console.error = function() {
+    _origError.apply(console, arguments);
+    _log('console.error', Array.prototype.join.call(arguments, ' '));
+  };
+  var _origWarn = console.warn.bind(console);
+  console.warn = function() {
+    _origWarn.apply(console, arguments);
+    _log('console.warn', Array.prototype.join.call(arguments, ' '));
+  };
+  window.addEventListener('error', function(e) {
+    _log('window.onerror', (e.message || '') + ' @ ' + (e.filename || '') + ':' + (e.lineno || ''));
+  });
+  window.addEventListener('unhandledrejection', function(e) {
+    _log('unhandledrejection', String(e.reason));
+  });
+  _log('bridge-check', 'JsBridge=' + typeof window.JsBridge + ' NativeBridge=' + typeof window.NativeBridge);
+})();
+''';
 
   Future<void> _updatePageTitle() async {
     try {
