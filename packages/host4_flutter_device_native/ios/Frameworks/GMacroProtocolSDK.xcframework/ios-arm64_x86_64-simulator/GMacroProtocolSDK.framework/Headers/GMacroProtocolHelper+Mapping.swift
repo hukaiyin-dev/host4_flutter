@@ -30,6 +30,16 @@ extension GMacroProtocolSession {
         dataHelper.keyMappingDatas(keyMappings: keyMappings, response: response)
     }
     
+    /// 设置手柄按键映射（单映射）6C0D
+    /// - Parameters:
+    ///   - original: 原始按键
+    ///   - mapped: 映射按键
+    public func setHandleKeyMapping(original: GamepadKey,
+                                    mapped: GamepadKey,
+                                    response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
+        dataHelper.setHandleKeyMapping(original: original, mapped: mapped, response: response)
+    }
+    
     /// 设置按键映射为鼠标
     /// - Parameters:
     ///   - keyMappings: 鼠标映射数组

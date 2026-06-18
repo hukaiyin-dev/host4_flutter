@@ -15,9 +15,13 @@ class Host4ThemeLoader {
     String? mode,
   }) async {
     // AssetBundle is not isolate-safe; load raw strings on the main thread.
+    debugPrint('[Host4ThemeLoader] step1: loading strings for $assetPath');
     final tokensJson = await bundle.loadString(assetPath);
+    debugPrint('[Host4ThemeLoader] step2: tokens loaded (${tokensJson.length} chars)');
     final assetJson = await _loadAssetFileString(bundle, assetPath);
+    debugPrint('[Host4ThemeLoader] step3: asset loaded');
     final manifestJson = await _loadManifestString(bundle, assetPath);
+    debugPrint('[Host4ThemeLoader] step4: manifest loaded');
 
     // Decode, normalize and resolve token references in a background isolate
     // so the main thread (and Flutter's frame scheduler) stays unblocked.
@@ -29,15 +33,18 @@ class Host4ThemeLoader {
       mode: mode,
     );
     try {
+      debugPrint('[Host4ThemeLoader] step5: starting compute()');
       result = await compute<_ThemeParseInput, _ThemeParseOutput>(
         _parseThemeInBackground,
         input,
       );
+      debugPrint('[Host4ThemeLoader] step6: compute() done');
     } catch (e, stack) {
       debugPrint(
         '[Host4ThemeLoader] compute() failed ($e), falling back to main-thread parse.\n$stack',
       );
       result = _parseThemeInBackground(input);
+      debugPrint('[Host4ThemeLoader] step6b: main-thread parse done');
     }
 
     final resolved = result.resolved;
@@ -124,7 +131,7 @@ class Host4ThemeLoader {
         xxl: _readDouble(resolved, 'primitive.spacing.xxl'),
         page: _readDouble(resolved, 'semantic.spacing.page'),
         section: _readDouble(resolved, 'semantic.spacing.section'),
-        card: _readDouble(resolved, 'semantic.spacing.card'),
+        card: _readDouble(resolved, 'semantic.spacing.card.md.horizontal'),
         buttonHorizontal: _readDouble(
           resolved,
           'semantic.spacing.interactive.horizontal',
@@ -755,6 +762,21 @@ class Host4ThemeLoader {
           background: _readColor(resolved, 'component.toolbar.background'),
           borderBottom: _readColor(resolved, 'component.toolbar.border-bottom'),
         ),
+        topBar: Host4TopBarComponentTokens(
+          barHeight: _readDouble(resolved, 'component.top-bar.bar-height'),
+          paddingHorizontal: _readDouble(
+            resolved,
+            'component.top-bar.padding-horizontal',
+          ),
+          fontFamily: _readString(resolved, 'component.top-bar.font-family'),
+          titleStyle: _readTextToken(
+            resolved,
+            'component.top-bar.title-style',
+          ),
+          background: _readColor(resolved, 'component.top-bar.background'),
+          title: _readColor(resolved, 'component.top-bar.title'),
+          chevron: _readColor(resolved, 'component.top-bar.chevron'),
+        ),
       ),
     );
   }
@@ -863,7 +885,7 @@ class Host4ThemeLoader {
         xxl: _readDouble(resolved, 'primitive.spacing.xxl'),
         page: _readDouble(resolved, 'semantic.spacing.page'),
         section: _readDouble(resolved, 'semantic.spacing.section'),
-        card: _readDouble(resolved, 'semantic.spacing.card'),
+        card: _readDouble(resolved, 'semantic.spacing.card.md.horizontal'),
         buttonHorizontal: _readDouble(
           resolved,
           'semantic.spacing.interactive.horizontal',
@@ -1469,6 +1491,21 @@ class Host4ThemeLoader {
           background: _readColor(resolved, 'component.toolbar.background'),
           borderBottom: _readColor(resolved, 'component.toolbar.border-bottom'),
         ),
+        topBar: Host4TopBarComponentTokens(
+          barHeight: _readDouble(resolved, 'component.top-bar.bar-height'),
+          paddingHorizontal: _readDouble(
+            resolved,
+            'component.top-bar.padding-horizontal',
+          ),
+          fontFamily: _readString(resolved, 'component.top-bar.font-family'),
+          titleStyle: _readTextToken(
+            resolved,
+            'component.top-bar.title-style',
+          ),
+          background: _readColor(resolved, 'component.top-bar.background'),
+          title: _readColor(resolved, 'component.top-bar.title'),
+          chevron: _readColor(resolved, 'component.top-bar.chevron'),
+        ),
       ),
     );
   }
@@ -1908,8 +1945,14 @@ bool _readBool(Map<String, dynamic> json, String path, {bool? fallback}) {
 Color _readColor(Map<String, dynamic> json, String path) {
   final value = _readString(json, path);
   final normalized = value.replaceFirst('#', '');
-  final hex = normalized.length == 6 ? 'FF$normalized' : normalized;
-  if (hex.length != 8) {
+  // Figma exports 8-digit hex as RRGGBBAA; Flutter Color uses AARRGGBB.
+  // Swap alpha from tail to head for 8-digit values.
+  final String hex;
+  if (normalized.length == 6) {
+    hex = 'FF$normalized';
+  } else if (normalized.length == 8) {
+    hex = normalized.substring(6) + normalized.substring(0, 6);
+  } else {
     throw FormatException('Expected hex color at $path.');
   }
   return Color(int.parse(hex, radix: 16));

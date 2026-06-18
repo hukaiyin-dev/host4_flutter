@@ -201,6 +201,9 @@ enum Host4FlutterBridgeSerializer {
     case let subModes as [LightSubMode]:
       return subModes.map(\.rawValue)
 
+    case let date as Date:
+      return date.timeIntervalSince1970
+
     case let dict as [String: Any]:
       return payload(dict)
 

@@ -107,11 +107,13 @@ class _Host4DemoBootstrapState extends State<Host4DemoBootstrap> {
       future: _bootstrapFuture,
       builder: (context, snapshot) {
         if (snapshot.hasError) {
+          debugPrint('[Bootstrap] ERROR: ${snapshot.error}\n${snapshot.stackTrace}');
           return _buildMaterialApp(
             home: Builder(
               builder: (context) {
                 final l10n = AppLocalizations.of(context);
                 return Scaffold(
+                  backgroundColor: Colors.white,
                   body: Padding(
                     padding: const EdgeInsets.all(24),
                     child: Center(

@@ -46,6 +46,8 @@ dependencies:
     path: ../../packages/host4_flutter_module_onboarding
   host4_flutter_ui:
     path: ../../packages/host4_flutter_ui
+  host4_flutter_system_status:
+    path: ../../packages/host4_flutter_system_status
   host4_flutter_log:
     path: ../../packages/host4_flutter_log
   host4_flutter_utils:

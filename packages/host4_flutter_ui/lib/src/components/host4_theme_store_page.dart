@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../foundation/theme/host4_theme_manager.dart';
 import '../foundation/theme/host4_theme_scope.dart';
+import 'host4_system_status.dart';
+import 'host4_top_bar.dart';
 
 class Host4ThemeStorePage extends StatefulWidget {
   const Host4ThemeStorePage({
@@ -13,7 +15,7 @@ class Host4ThemeStorePage extends StatefulWidget {
     this.title = '主题商店',
     this.confirmLabel = '确定',
     this.backLabel = '返回',
-    this.timeLabel = '14:51',
+    this.statusSource,
     this.showControllerHints = true,
   });
 
@@ -24,7 +26,8 @@ class Host4ThemeStorePage extends StatefulWidget {
   final String title;
   final String confirmLabel;
   final String backLabel;
-  final String timeLabel;
+  /// 系统状态数据源；传入则在右上角显示时间 / Wi-Fi / 电量。
+  final Host4SystemStatusSource? statusSource;
   final bool showControllerHints;
 
   @override
@@ -73,7 +76,7 @@ class _Host4ThemeStorePageState extends State<Host4ThemeStorePage> {
                     title: widget.title,
                     confirmLabel: widget.confirmLabel,
                     backLabel: widget.backLabel,
-                    timeLabel: widget.timeLabel,
+                    statusSource: widget.statusSource,
                     showControllerHints: widget.showControllerHints,
                     onConfirm:
                         widget.onConfirm ?? () => Navigator.maybePop(context),
@@ -124,24 +127,23 @@ class _ThemeStoreScene extends StatelessWidget {
     required this.title,
     required this.confirmLabel,
     required this.backLabel,
-    required this.timeLabel,
     required this.showControllerHints,
     required this.onConfirm,
     required this.onBack,
     required this.onApplyTheme,
+    this.statusSource,
     this.onSearch,
   });
 
   static const designWidth = 844.0;
   static const designHeight = 390.0;
-  static const topBarHeight = 68.0;
 
   final Host4ThemeManager manager;
   final String? pendingThemeId;
   final String title;
   final String confirmLabel;
   final String backLabel;
-  final String timeLabel;
+  final Host4SystemStatusSource? statusSource;
   final bool showControllerHints;
   final VoidCallback onConfirm;
   final VoidCallback onBack;
@@ -158,11 +160,29 @@ class _ThemeStoreScene extends StatelessWidget {
             color: Color(0xFFF4F7FC),
           ),
         ),
-        _ThemeStoreHeader(
-          title: title,
-          timeLabel: timeLabel,
-          onBack: onBack,
-          onSearch: onSearch,
+        Positioned(
+          left: 0,
+          top: 0,
+          right: 0,
+          child: Host4TopBar(
+            key: const ValueKey<String>('host4_theme_store_top_bar'),
+            safeAreaTop: 0,
+            title: title,
+            titleKey: const ValueKey<String>('host4_theme_store_title'),
+            trailing: _HeaderIconButton(
+              keyValue: 'host4_theme_store_search',
+              icon: Icons.search_rounded,
+              onTap: onSearch,
+            ),
+            status: statusSource == null
+                ? null
+                : Host4SystemStatus(
+                    key: const ValueKey<String>(
+                      'host4_theme_store_system_status',
+                    ),
+                    source: statusSource!,
+                  ),
+          ),
         ),
         Positioned(
           left: 66,
@@ -186,86 +206,6 @@ class _ThemeStoreScene extends StatelessWidget {
             ),
           ),
       ],
-    );
-  }
-}
-
-class _ThemeStoreHeader extends StatelessWidget {
-  const _ThemeStoreHeader({
-    required this.title,
-    required this.timeLabel,
-    required this.onBack,
-    this.onSearch,
-  });
-
-  final String title;
-  final String timeLabel;
-  final VoidCallback onBack;
-  final VoidCallback? onSearch;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = context.host4Theme;
-
-    return Positioned(
-      left: 0,
-      top: 0,
-      width: _ThemeStoreScene.designWidth,
-      height: _ThemeStoreScene.topBarHeight,
-      child: ColoredBox(
-        key: const ValueKey<String>('host4_theme_store_top_bar'),
-        color: Colors.white,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
-          child: SizedBox(
-            height: 48,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                _HeaderIconButton(
-                  keyValue: 'host4_theme_store_back',
-                  icon: Icons.chevron_left_rounded,
-                  onTap: onBack,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  title,
-                  key: const ValueKey<String>('host4_theme_store_title'),
-                  style: TextStyle(
-                    color: theme.colors.textPrimary,
-                    fontSize: 15.6,
-                    height: 1.38,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 0,
-                  ),
-                ),
-                const Spacer(),
-                _HeaderIconButton(
-                  keyValue: 'host4_theme_store_search',
-                  icon: Icons.search_rounded,
-                  onTap: onSearch,
-                ),
-                const SizedBox(width: 20),
-                Text(
-                  timeLabel,
-                  key: const ValueKey<String>('host4_theme_store_time'),
-                  style: TextStyle(
-                    color: theme.colors.textPrimary,
-                    fontSize: 13.6,
-                    height: 1.29,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 0,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                const _HeaderWifiIcon(),
-                const SizedBox(width: 8),
-                const _HeaderBatteryIcon(),
-              ],
-            ),
-          ),
-        ),
-      ),
     );
   }
 }
@@ -297,69 +237,6 @@ class _HeaderIconButton extends StatelessWidget {
           child: Center(
             child: Icon(icon, size: 24, color: theme.colors.textPrimary),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _HeaderWifiIcon extends StatelessWidget {
-  const _HeaderWifiIcon();
-
-  @override
-  Widget build(BuildContext context) {
-    final color = context.host4Theme.colors.textPrimary;
-    return SizedBox(
-      key: const ValueKey<String>('host4_theme_store_wifi'),
-      width: 24,
-      height: 24,
-      child: Icon(Icons.wifi_rounded, size: 18, color: color),
-    );
-  }
-}
-
-class _HeaderBatteryIcon extends StatelessWidget {
-  const _HeaderBatteryIcon();
-
-  @override
-  Widget build(BuildContext context) {
-    final color = context.host4Theme.colors.textPrimary;
-    return SizedBox(
-      key: const ValueKey<String>('host4_theme_store_battery'),
-      width: 24,
-      height: 24,
-      child: Center(
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 20,
-              height: 10,
-              padding: const EdgeInsets.all(1.5),
-              decoration: BoxDecoration(
-                border: Border.all(color: color, width: 1.2),
-                borderRadius: BorderRadius.circular(2),
-              ),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Container(
-                  width: 14,
-                  decoration: BoxDecoration(
-                    color: color,
-                    borderRadius: BorderRadius.circular(1),
-                  ),
-                ),
-              ),
-            ),
-            Container(
-              width: 2,
-              height: 5,
-              decoration: BoxDecoration(
-                color: color,
-                borderRadius: BorderRadius.circular(1),
-              ),
-            ),
-          ],
         ),
       ),
     );

@@ -25,6 +25,17 @@ extension GmacroSessionMapping on GmacroSession {
     arguments: {'keyMappings': keyMappings.map((e) => e.toMap()).toList()},
   );
 
+  /// 设置手柄按键映射（单映射）6C 0D
+  /// - [original] 原始手柄按键
+  /// - [mapped] 映射手柄按键
+  Future<Map<String, Object?>> setHandleKeyMapping({
+    required GamepadKey original,
+    required GamepadKey mapped,
+  }) => invoke(
+    GmacroMethods.setHandleKeyMapping,
+    arguments: {'original': original.value, 'mapped': mapped.value},
+  );
+
   /// 设置按键映射为鼠标
   /// - [keyMappings] 鼠标按键映射数组
   Future<Map<String, Object?>> setMouseKeyMappings({

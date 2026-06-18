@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:host4_flutter_system_status/host4_flutter_system_status.dart';
 import 'package:host4_flutter_ui/host4_flutter_ui.dart';
 
 import '../widgets/list_icon.dart';
@@ -64,6 +65,19 @@ class ComponentsPage extends StatelessWidget {
                 title: 'Host4SegmentedFilter',
                 child: _SegmentedFilterDemoPage(),
               ),
+            ),
+          ),
+        ),
+        Host4ListCell(
+          title: 'Host4TopBar',
+          subtitle: 'Page header — title, breadcrumb, icons and search',
+          leading: ListIcon(
+            icon: Icons.web_asset_rounded,
+            color: theme.colors.brandPrimary,
+          ),
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => const _TopBarDemoScaffold(),
             ),
           ),
         ),
@@ -1569,6 +1583,204 @@ class _ComponentDemoScaffold extends StatelessWidget {
           ),
           Expanded(child: child),
         ],
+      ),
+    );
+  }
+}
+
+// ─── TopBar Demo ──────────────────────────────────────────────────────────────
+
+/// 独立 Scaffold：TopBar 演示需要全宽渲染，不套 NavigationBar。
+class _TopBarDemoScaffold extends StatelessWidget {
+  const _TopBarDemoScaffold();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = context.host4Theme;
+
+    return Scaffold(
+      backgroundColor: theme.colors.pageBackground,
+      body: Column(
+        children: [
+          SafeArea(
+            bottom: false,
+            child: Host4NavigationBar(
+              title: 'Host4TopBar',
+              subtitle: 'Page header variants',
+              leading: GestureDetector(
+                onTap: () => Navigator.of(context).pop(),
+                child: Icon(
+                  Icons.arrow_back_ios_new_rounded,
+                  color: theme.components.navigationBar.icon,
+                  size: 20,
+                ),
+              ),
+            ),
+          ),
+          const Expanded(child: _TopBarDemoPage()),
+        ],
+      ),
+    );
+  }
+}
+
+class _TopBarDemoPage extends StatefulWidget {
+  const _TopBarDemoPage();
+
+  @override
+  State<_TopBarDemoPage> createState() => _TopBarDemoPageState();
+}
+
+class _TopBarDemoPageState extends State<_TopBarDemoPage> {
+  // source 由 widget 树共享，所有变体共用同一个实例
+  final _statusSource = Host4DefaultSystemStatusSource();
+
+  @override
+  void dispose() {
+    _statusSource.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = context.host4Theme;
+
+    return ListView(
+      padding: EdgeInsets.only(bottom: theme.spacing.page),
+      children: [
+        // 1. 仅标题 + 系统状态
+        _TopBarVariantSection(
+          label: '仅标题',
+          child: Host4TopBar(
+            safeAreaTop: 0,
+            title: '游戏列表',
+            status: Host4SystemStatus(source: _statusSource),
+          ),
+        ),
+
+        // 2. 标题 + 搜索（点击图标自动展开）
+        _TopBarVariantSection(
+          label: '标题 + 搜索图标',
+          child: Host4TopBar(
+            safeAreaTop: 0,
+            title: '主题商店',
+            searchPlaceholder: '搜索主题...',
+            status: Host4SystemStatus(source: _statusSource),
+          ),
+        ),
+
+        // 3. 面包屑 + 系统状态
+        _TopBarVariantSection(
+          label: '面包屑（无操作按钮）',
+          child: Host4TopBar(
+            safeAreaTop: 0,
+            parent: '游戏',
+            title: '游戏列表',
+            status: Host4SystemStatus(source: _statusSource),
+          ),
+        ),
+
+        // 4. 面包屑 + 搜索（点击图标自动展开）
+        _TopBarVariantSection(
+          label: '面包屑 + 搜索图标',
+          child: Host4TopBar(
+            safeAreaTop: 0,
+            parent: '设置',
+            title: '控制器设置',
+            searchPlaceholder: '搜索设置项...',
+            status: Host4SystemStatus(source: _statusSource),
+          ),
+        ),
+
+        // 5. 无标题，多个图标按钮靠左（leading）+ 系统状态
+        _TopBarVariantSection(
+          label: '无标题 · 多图标按钮（靠左）',
+          child: Host4TopBar(
+            safeAreaTop: 0,
+            leading: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _TopBarIconButton(icon: Icons.notifications_outlined, onTap: () {}),
+                const SizedBox(width: 4),
+                _TopBarIconButton(icon: Icons.settings_outlined, onTap: () {}),
+                const SizedBox(width: 4),
+                _TopBarIconButton(icon: Icons.more_vert_rounded, onTap: () {}),
+              ],
+            ),
+            status: Host4SystemStatus(source: _statusSource),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// 带标签的演示容器：上方显示变体名称，下方全宽渲染 TopBar。
+class _TopBarVariantSection extends StatelessWidget {
+  const _TopBarVariantSection({
+    required this.label,
+    required this.child,
+  });
+
+  final String label;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = context.host4Theme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: EdgeInsets.fromLTRB(
+            theme.spacing.page,
+            theme.spacing.section,
+            theme.spacing.page,
+            theme.spacing.sm,
+          ),
+          child: Host4Text(
+            label,
+            role: Host4TextRole.labelMedium,
+            colorRole: Host4TextColorRole.secondary,
+          ),
+        ),
+        // TopBar 全宽，带阴影便于和背景区分
+        DecoratedBox(
+          decoration: BoxDecoration(
+            boxShadow: [
+              BoxShadow(
+                color: theme.colors.textPrimary.withValues(alpha: 0.06),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: child,
+        ),
+      ],
+    );
+  }
+}
+
+/// TopBar 右侧图标按钮，点击区域 40×40。
+class _TopBarIconButton extends StatelessWidget {
+  const _TopBarIconButton({required this.icon, required this.onTap});
+
+  final IconData icon;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = context.host4Theme.components.topBar.title;
+
+    return InkResponse(
+      onTap: onTap,
+      radius: 22,
+      child: SizedBox(
+        width: 40,
+        height: 40,
+        child: Center(child: Icon(icon, size: 22, color: color)),
       ),
     );
   }

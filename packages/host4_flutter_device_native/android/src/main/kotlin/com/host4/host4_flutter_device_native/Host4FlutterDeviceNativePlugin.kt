@@ -49,8 +49,8 @@ class Host4FlutterDeviceNativePlugin :
     private var activityBinding: ActivityPluginBinding? = null
     private var pendingPermissionResult: Result? = null
 
-    @Volatile
-    private var usbHostInitialized = false
+    /** USB 连接辅助类，管理 SDK 初始化与释放 */
+    private lateinit var usbConnection: UsbConnectionHelper
 
     @Volatile
     private var activeUsbTransport: TransportSessionRecord? = null
@@ -69,6 +69,7 @@ class Host4FlutterDeviceNativePlugin :
         binaryMessenger = flutterPluginBinding.binaryMessenger
         bleScanHandler = BleScanStreamHandler(applicationContext)
         usbScanHandler = UsbScanStreamHandler(applicationContext)
+        usbConnection = UsbConnectionHelper(applicationContext)
 
         methodChannel = MethodChannel(
             flutterPluginBinding.binaryMessenger,
@@ -302,9 +303,17 @@ class Host4FlutterDeviceNativePlugin :
         result.success(sessionId)
     }
 
+    /**
+     * 建立 USB 传输会话。
+     *
+     * 流程：创建 EventChannel → 返回 sessionId → 主线程初始化 USB Host 并连接。
+     * 支持通过 deviceId（"vid:pid"）或 options.pids / options.vids 指定目标设备。
+     */
     private fun handleConnectUsb(call: MethodCall, result: Result) {
         val arguments = call.arguments as? Map<*, *>
         val deviceId = arguments?.get("deviceId") as? String
+        val options = arguments?.get("options") as? Map<*, *>
+        val filter = UsbDeviceIds.parseFilter(deviceId, options)
 
         val sessionId = UUID.randomUUID().toString()
         val eventHandler = QueuedEventStreamHandler()
@@ -321,7 +330,7 @@ class Host4FlutterDeviceNativePlugin :
         )
         escalationEventChannel.setStreamHandler(escalationEventHandler)
 
-        val usbHandle: UsbDeviceSessionHandle = platformSdk.usb()
+        val usbHandle = platformSdk.usb()
         val record = TransportSessionRecord(
             sessionId = sessionId,
             transportKind = Host4FlutterTransportKinds.USB,
@@ -334,16 +343,29 @@ class Host4FlutterDeviceNativePlugin :
         transportSessions[sessionId] = record
         activeUsbTransport = record
 
-        // Return sessionId first so Flutter can subscribe to transport_events
-        // before SDK init() runs (init triggers permission UI + connect).
+        // 先返回 sessionId，确保 Flutter 能在 init 触发权限弹窗前订阅事件
         result.success(sessionId)
 
         mainHandler.post {
-            ensureUsbHostInitialized(usbHandle, deviceId)
-            syncUsbTransportStateIfConnected(record)
+            startUsbConnection(usbHandle, filter, record)
         }
     }
 
+    /** 启动 USB 连接：注册监听 → initUsbPidVid → 同步已连接状态 */
+    private fun startUsbConnection(
+        usbHandle: UsbDeviceSessionHandle,
+        filter: UsbPidVidFilter,
+        record: TransportSessionRecord,
+    ) {
+        usbConnection.registerListeners(usbHandle, usbConnectListener, usbAllEscalationListener)
+        usbConnection.initUsbPidVid(usbHandle, filter)
+        usbConnection.syncConnectedState {
+            record.lastTransportStatus = ReliableUsbCommManager.CONNECT_COMPLETED
+            record.eventHandler.emit(mapOf("type" to "ready"))
+        }
+    }
+
+    /** 重新搜索并连接 USB 设备（拔出重插后使用） */
     private fun handleReconnectUsb(result: Result) {
         if (activeUsbTransport == null) {
             result.error(
@@ -353,7 +375,7 @@ class Host4FlutterDeviceNativePlugin :
             )
             return
         }
-        if (!usbHostInitialized) {
+        if (!usbConnection.initialized) {
             result.error(
                 "usb-not-initialized",
                 "Call connectUsb() first to initialize the USB host stack.",
@@ -362,15 +384,11 @@ class Host4FlutterDeviceNativePlugin :
             return
         }
 
-        val usbHandle = platformSdk.usb()
-        mainHandler.post {
-            usbHandle.setUsbConnectListener(usbConnectListener)
-            usbHandle.registerAllEscalationListener(usbAllEscalationListener)
-            ReliableUsbCommManager.getInstance().searchAndConnectAsync()
-        }
+        mainHandler.post { usbConnection.reconnect() }
         result.success(null)
     }
 
+    /** 释放 USB Host 资源并清理所有 USB 传输会话 */
     private fun handleReleaseUsb(result: Result) {
         handleReleaseUsbInternal()
         result.success(null)
@@ -390,40 +408,7 @@ class Host4FlutterDeviceNativePlugin :
         }
 
         activeUsbTransport = null
-        if (usbHostInitialized) {
-            runCatching { platformSdk.usb().disconnect() }
-            usbHostInitialized = false
-        }
-    }
-
-    /**
-     * Registers SDK listeners and calls [UsbDeviceSessionHandle.init] once.
-     * Permission, attach/detach, and connect are handled inside
-     * [ReliableUsbCommManager] (init → registerReceiver + searchAndConnectAsync).
-     */
-    private fun ensureUsbHostInitialized(usbHandle: UsbDeviceSessionHandle, deviceId: String?) {
-        usbHandle.setUsbConnectListener(usbConnectListener)
-        usbHandle.registerAllEscalationListener(usbAllEscalationListener)
-        if (usbHostInitialized) {
-            return
-        }
-
-        val vidPid = deviceId?.let { UsbDeviceIds.parse(it) }
-        if (vidPid != null) {
-            usbHandle.init(applicationContext, vidPid.second, vidPid.first)
-        } else {
-            usbHandle.init(applicationContext)
-        }
-        usbHostInitialized = true
-    }
-
-    /** Replays ready if connect completed before Flutter subscribed to transport events. */
-    private fun syncUsbTransportStateIfConnected(record: TransportSessionRecord) {
-        if (!ReliableUsbCommManager.getInstance().isConnected) {
-            return
-        }
-        record.lastTransportStatus = ReliableUsbCommManager.CONNECT_COMPLETED
-        record.eventHandler.emit(mapOf("type" to "ready"))
+        usbConnection.release(platformSdk.usb())
     }
 
     /**
@@ -447,6 +432,7 @@ class Host4FlutterDeviceNativePlugin :
         EscalationEventEmitter.emit(activeUsbTransport?.escalationEventHandler, message)
     }
 
+    /** USB 连接状态回调，将 SDK 状态映射为 Flutter 传输事件 */
     private val usbConnectListener = UsbConnectListener { status ->
         val record = activeUsbTransport ?: return@UsbConnectListener
         record.lastTransportStatus = status

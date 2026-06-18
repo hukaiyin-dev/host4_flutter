@@ -272,6 +272,7 @@ class Host4ThemeComponents {
     required this.segmentedFilter,
     required this.infoChip,
     required this.toolbar,
+    required this.topBar,
   });
 
   final Host4PageShellComponentTokens pageShell;
@@ -290,6 +291,7 @@ class Host4ThemeComponents {
   final Host4SegmentedFilterComponentTokens segmentedFilter;
   final Host4InfoChipComponentTokens infoChip;
   final Host4ToolbarComponentTokens toolbar;
+  final Host4TopBarComponentTokens topBar;
 }
 
 @immutable
@@ -967,4 +969,28 @@ class Host4ToolbarComponentTokens {
   final double gap;
   final Color background;
   final Color borderBottom;
+}
+
+// ─── TopBar ───────────────────────────────────────────────────────────────────
+
+@immutable
+class Host4TopBarComponentTokens {
+  const Host4TopBarComponentTokens({
+    required this.barHeight,
+    required this.paddingHorizontal,
+    required this.fontFamily,
+    required this.titleStyle,
+    required this.background,
+    required this.title,
+    required this.chevron,
+  });
+
+  /// 标题栏本体高度（不含安全区）。安全区高度由调用方在运行时传入。
+  final double barHeight;
+  final double paddingHorizontal;
+  final String fontFamily;
+  final Host4TextToken titleStyle;
+  final Color background;
+  final Color title;
+  final Color chevron;
 }
