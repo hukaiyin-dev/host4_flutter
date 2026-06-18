@@ -129,6 +129,13 @@ class Host4FlutterDeviceNative {
     );
   }
 
+  /// OTA 升级事件流：进度 / 成功 / 失败。
+  Stream<NativeOtaUpgradeEvent> otaUpgradeEvents(String protocolSessionId) {
+    return Host4FlutterDeviceNativePlatform.instance.otaUpgradeEvents(
+      protocolSessionId,
+    );
+  }
+
   Future<Map<String, Object?>> invokeGmacroMethod({
     required String protocolSessionId,
     required String method,

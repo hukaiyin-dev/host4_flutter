@@ -6,16 +6,17 @@ import android.os.Looper
 import com.host4.platform.listener.BluetoothStateListener
 import com.host4.platform.listener.MessageCallBack
 import com.host4.platform.listener.OnEscalationListener
+import com.host4.platform.listener.UpgradeCallBack
 import com.host4.platform.util.Constants
 import com.host4.platform.listener.UsbConnectListener
 import com.host4.platform.kr.response.EscalationRsp
 import com.host4.platform.manager.ReliableUsbCommManager
-import com.host4.platform.v2.api.BleDeviceSessionHandle
 import com.host4.platform.v2.api.FullPlatformSdk
 import com.host4.platform.v2.api.UsbDeviceSessionHandle
 import com.host4.platform.v2.ble.BleMacUtils
 import com.host4.platform.v2.ble.RxBleCommManager
 import android.app.Activity
+import com.host4.platform.v2.api.PlatformSdkFactory
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
@@ -59,6 +60,8 @@ class Host4FlutterDeviceNativePlugin :
 
     private fun escalationEventChannelName(sessionId: String): String =
         "host4_flutter_device_native/transport_escalation_events/$sessionId"
+    private fun otaEventChannelName(protocolSessionId: String): String =
+        "host4_flutter_device_native/ota_events/$protocolSessionId"
     private val protocolSessions = ConcurrentHashMap<String, ProtocolSessionRecord>()
 
     private val platformSdk: FullPlatformSdk
@@ -110,6 +113,7 @@ class Host4FlutterDeviceNativePlugin :
             "attachGmacroProtocol" -> handleAttachGmacroProtocol(call, result)
             "invokeGmacroMethod" -> handleInvokeGmacroMethod(call, result)
             "closeProtocol" -> handleCloseProtocol(call, result)
+            "startOta" -> handleStartOta(call, result)
             "ensureBleScanPermissions" -> handleEnsureBleScanPermissions(result)
             else -> result.notImplemented()
         }
@@ -489,6 +493,12 @@ class Host4FlutterDeviceNativePlugin :
             "host4_flutter_device_native/protocol_events/$protocolSessionId",
         )
         eventChannel.setStreamHandler(eventHandler)
+        val otaEventHandler = QueuedEventStreamHandler()
+        val otaEventChannel = EventChannel(
+            binaryMessenger,
+            otaEventChannelName(protocolSessionId),
+        )
+        otaEventChannel.setStreamHandler(otaEventHandler)
 
         protocolSessions[protocolSessionId] = ProtocolSessionRecord(
             protocolSessionId = protocolSessionId,
@@ -497,6 +507,8 @@ class Host4FlutterDeviceNativePlugin :
             transportKind = transportRecord.transportKind,
             eventChannel = eventChannel,
             eventHandler = eventHandler,
+            otaEventChannel = otaEventChannel,
+            otaEventHandler = otaEventHandler,
         )
 
         if (transportRecord.transportKind == Host4FlutterTransportKinds.BLE) {
@@ -557,7 +569,104 @@ class Host4FlutterDeviceNativePlugin :
         }
 
         record.eventChannel.setStreamHandler(null)
+        record.otaEventChannel?.setStreamHandler(null)
         result.success(null)
+    }
+
+    /**
+     * 启动 OTA 升级。
+     *
+     * 统一走 JAR v2 的 [FullPlatformSdk.otaUpgrade]：
+     * - USB：使用当前激活传输直接升级
+     * - BLE：先设置当前活跃设备，再按 MAC 发起升级
+     */
+    private fun handleStartOta(call: MethodCall, result: Result) {
+        val arguments = call.arguments as? Map<*, *>
+        val protocolSessionId = arguments?.get("protocolSessionId") as? String
+        val firmwareData = arguments?.get("firmwareData") as? ByteArray
+        val protocolRecord = protocolSessionId?.let { protocolSessions[it] }
+
+        if (protocolRecord == null || firmwareData == null) {
+            result.error(
+                "invalid-arguments",
+                "protocolSessionId and firmwareData are required.",
+                null,
+            )
+            return
+        }
+
+
+        runCatching {
+            registerOtaUpgradeListener(protocolRecord)
+            when (protocolRecord.transportKind) {
+                Host4FlutterTransportKinds.USB -> {
+                    // USB 场景：由 v2 SDK 根据当前激活传输路由到 USB 通道。
+                    platformSdk.otaUpgrade(firmwareData)
+                }
+                else -> {
+                    // BLE 场景：显式指定 MAC，避免多设备时升级到错误设备。
+                    platformSdk.setActiveBleDevice(protocolRecord.deviceKey)
+                    platformSdk.otaUpgrade(protocolRecord.deviceKey, firmwareData)
+                }
+            }
+        }.onSuccess {
+            result.success(null)
+        }.onFailure { error ->
+            result.error(
+                "ota-start-failed",
+                error.message ?: "Failed to start OTA with v2 SDK.",
+                null,
+            )
+        }
+    }
+
+    /**
+     * 注册 OTA 升级回调。
+     *
+     * 通过 v2 [FullPlatformSdk.registerUpgradeListener] 统一监听升级进度、成功、失败，
+     * 并转发到 Flutter `ota_events/{protocolSessionId}` 事件流。
+     */
+    private fun registerOtaUpgradeListener(protocolRecord: ProtocolSessionRecord) {
+        val callback = object : UpgradeCallBack {
+            override fun upgradeProgress(progress: Int, total: Int) {
+                val percent = if (total > 0) {
+                    (progress.toDouble() / total.toDouble()).coerceIn(0.0, 1.0)
+                } else {
+                    0.0
+                }
+                protocolRecord.otaEventHandler?.emit(
+                    mapOf(
+                        "type" to "progress",
+                        "progress" to progress,
+                        "total" to total,
+                        "percent" to percent,
+                    ),
+                )
+            }
+
+            override fun upgradeFail(code: Int) {
+                protocolRecord.otaEventHandler?.emit(
+                    mapOf(
+                        "type" to "failed",
+                        "code" to code,
+                    ),
+                )
+            }
+
+            override fun upgradeSuccess() {
+                protocolRecord.otaEventHandler?.emit(
+                    mapOf(
+                        "type" to "success",
+                    ),
+                )
+            }
+        }
+
+        if (protocolRecord.transportKind == Host4FlutterTransportKinds.USB) {
+            platformSdk.registerUpgradeListener(callback)
+        } else {
+            platformSdk.registerUpgradeListener(protocolRecord.deviceKey, callback)
+        }
     }
 
     private fun emitProtocolReadyForTransport(transportSessionId: String) {
@@ -569,7 +678,10 @@ class Host4FlutterDeviceNativePlugin :
     private fun removeProtocolSessionsForTransport(transportSessionId: String) {
         val toRemove = protocolSessions.filterValues { it.transportSessionId == transportSessionId }
         toRemove.keys.forEach { key ->
-            protocolSessions.remove(key)?.eventChannel?.setStreamHandler(null)
+            protocolSessions.remove(key)?.let { record ->
+                record.eventChannel.setStreamHandler(null)
+                record.otaEventChannel?.setStreamHandler(null)
+            }
         }
     }
 
@@ -591,5 +703,7 @@ class Host4FlutterDeviceNativePlugin :
         val transportKind: String,
         val eventChannel: EventChannel,
         val eventHandler: QueuedEventStreamHandler,
+        val otaEventChannel: EventChannel? = null,
+        val otaEventHandler: QueuedEventStreamHandler? = null,
     )
 }
