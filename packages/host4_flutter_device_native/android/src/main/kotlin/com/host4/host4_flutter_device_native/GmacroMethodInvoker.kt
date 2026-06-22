@@ -230,7 +230,7 @@ internal object GmacroMethodInvoker {
 
                 // 0x5C 查询手柄当前配置页
                 Host4FlutterGmacroConstants.fetchCurrentProfile ->
-                    commands.queryHandleConfig(0, GmacroCallbackBridge.message(result))
+                    commands.queryMacroProfileNum( GmacroCallbackBridge.fetchCurrentProfile(result))
 
                 // 0x36 平台设置
                 Host4FlutterGmacroConstants.startMacroPlatform -> {
