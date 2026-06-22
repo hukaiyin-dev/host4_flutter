@@ -43,9 +43,9 @@ class Host4WebView extends StatefulWidget {
   /// The URL to load on launch.
   final String initialUrl;
 
-  /// Optional JS bridge adapter. When provided, a `JsBridge` JavaScript
-  /// channel is registered and [Host4JsBridgeAdapter.adapterJs] is injected
-  /// after each page load.
+  /// Optional JS bridge adapter. When provided, `JsBridge` / `NativeBridge`
+  /// JavaScript channels are registered and a generic `JsBridge.method(arg)`
+  /// adapter is injected so H5 can call Flutter like Android JavascriptInterface.
   final Host4JsBridgeAdapter? bridge;
 
   /// Background color shown before the first page starts loading.
@@ -187,8 +187,7 @@ class _Host4WebViewState extends State<Host4WebView> {
           if (!handled) {
             setState(() {
               _hasError = true;
-              _errorMessage =
-                  '${error.description} (错误码: ${error.errorCode})';
+              _errorMessage = '${error.description} (错误码: ${error.errorCode})';
               _isLoading = false;
             });
           }
@@ -221,7 +220,9 @@ class _Host4WebViewState extends State<Host4WebView> {
       final method = decoded['method']?.toString() ?? '';
       if (method.isEmpty) return;
       // 兼容两种字段名：adapterJs 包装层用 `payload`，H5 直接调用时用 `params`
-      final payload = decoded.containsKey('payload') ? decoded['payload'] : decoded['params'];
+      final payload = decoded.containsKey('payload')
+          ? decoded['payload']
+          : decoded['params'];
       bridge.onMessage(method, payload);
     } catch (_) {}
   }
@@ -229,11 +230,57 @@ class _Host4WebViewState extends State<Host4WebView> {
   void _injectAdapterJs() {
     final adapter = widget.bridge;
     if (adapter == null) return;
+    _controller.runJavaScript(_kGenericBridgeAdapterJs);
     _controller.runJavaScript(adapter.adapterJs);
+    _controller.runJavaScript(_kGenericBridgeAdapterJs);
     if (kDebugMode) {
       _controller.runJavaScript(_kJsDebugSnippet);
     }
   }
+
+  static const String _kGenericBridgeAdapterJs = r'''
+(function() {
+  var jsChannel = window.__Host4JsBridgeChannel || window.JsBridge;
+  var nativeChannel = window.__Host4NativeBridgeChannel || window.NativeBridge;
+  if (!jsChannel || typeof jsChannel.postMessage !== 'function') return;
+
+  window.__Host4JsBridgeChannel = jsChannel;
+  if (nativeChannel && typeof nativeChannel.postMessage === 'function') {
+    window.__Host4NativeBridgeChannel = nativeChannel;
+  }
+
+  function send(method, args) {
+    var payload = null;
+    if (args.length === 1) {
+      payload = args[0];
+    } else if (args.length > 1) {
+      payload = Array.prototype.slice.call(args);
+    }
+    jsChannel.postMessage(JSON.stringify({ method: String(method), payload: payload }));
+  }
+
+  var bridge = new Proxy({
+    postMessage: function(message) {
+      jsChannel.postMessage(message);
+    }
+  }, {
+    get: function(target, prop) {
+      if (prop in target) return target[prop];
+      if (typeof prop === 'symbol') return undefined;
+      return function() { send(prop, arguments); };
+    }
+  });
+
+  window.JsBridge = bridge;
+  if (nativeChannel && typeof nativeChannel.postMessage === 'function') {
+    window.NativeBridge = {
+      postMessage: function(message) {
+        nativeChannel.postMessage(message);
+      }
+    };
+  }
+})();
+''';
 
   static const String _kJsDebugSnippet = r'''
 (function() {
