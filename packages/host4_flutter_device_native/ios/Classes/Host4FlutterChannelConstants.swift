@@ -61,6 +61,8 @@ struct Host4FlutterChannelConstants {
 
   // Macro
   static let fetchCurrentProfile = "fetchCurrentProfile"
+  static let startMacroPlatform = "startMacroPlatform"
+  static let endMacroConfig = "endMacroConfig"
   static let queryCurrentMacro = "queryCurrentMacro"
   static let queryMacroKeys = "queryMacroKeys"
   static let queryMacroRecordableKeys = "queryMacroRecordableKeys"

@@ -11,7 +11,7 @@ import _Concurrency
 import _StringProcessing
 import _SwiftConcurrencyShims
 extension Dispatch.DispatchSource {
-  #if compiler(>=5.3)
+  #if compiler(>=5.3) && $NonescapableTypes
   public class func pollingSchedule(interval: Dispatch.DispatchTimeInterval = DispatchTimeInterval.seconds(0), repeating: Swift.Double = 1, handler: @escaping ((any Dispatch.DispatchSourceTimer)?) -> Swift.Void) -> any Dispatch.DispatchSourceTimer
   #endif
 }
@@ -51,7 +51,7 @@ public enum BluetoothError : Swift.Error, Foundation.LocalizedError {
   case deviceReportedError(code: Swift.Int)
   case outOfRange
   case invalidInput
-  #if compiler(>=5.3)
+  #if compiler(>=5.3) && $NonescapableTypes
   public var errorDescription: Swift.String? {
     get
   }
@@ -68,7 +68,7 @@ extension Foundation.Data {
   public func toBytes() -> [Swift.UInt8]
   public func toInt() -> Swift.Int
   public func toBool() -> Swift.Bool
-  #if compiler(>=5.3)
+  #if compiler(>=5.3) && $NonescapableTypes
   public func toDictionary() -> Swift.Dictionary<Swift.String, Any>?
   #endif
   public func jsonString() -> Swift.String
@@ -94,12 +94,12 @@ extension Foundation.Data {
   public var hexadecimal: Swift.String {
     get
   }
-  #if compiler(>=5.3)
+  #if compiler(>=5.3) && $NonescapableTypes
   public init?(hex: Swift.String)
   #endif
 }
 extension Foundation.Data {
-  #if compiler(>=5.3)
+  #if compiler(>=5.3) && $NonescapableTypes
   public func subdata(location: Swift.Int, length: Swift.Int) -> Foundation.Data?
   #endif
 }
@@ -110,7 +110,7 @@ extension Swift.Array where Element : Swift.Equatable {
   public static let shared: BluetoothKit.TransportSessionRegistry
   final public func register(_ session: any BluetoothKit.ByteStreamTransport)
   final public func unregister(_ sessionId: Swift.String)
-  #if compiler(>=5.3)
+  #if compiler(>=5.3) && $NonescapableTypes
   final public func getSession(_ sessionId: Swift.String) -> (any BluetoothKit.ByteStreamTransport)?
   #endif
   @objc deinit
@@ -120,7 +120,7 @@ extension Swift.Array where Element : Swift.Equatable {
   final public func register(_ sessionId: Swift.String, protocolSession: Any, transportSessionId: Swift.String, closeHandler: @escaping () -> Swift.Void)
   final public func register(_ sessionId: Swift.String, protocolSession: Any)
   final public func unregister(_ sessionId: Swift.String)
-  #if compiler(>=5.3)
+  #if compiler(>=5.3) && $NonescapableTypes
   final public func getSession(_ sessionId: Swift.String) -> Any?
   #endif
   final public func invalidateSessions(boundTo transportSessionId: Swift.String)
@@ -130,11 +130,11 @@ extension Swift.Array where Element : Swift.Equatable {
   @objc public static let shared: BluetoothKit.NativeAdapterRuntime
   @objc final public func scan(onDiscovery: @escaping (_ deviceIdString: Swift.String, _ name: Swift.String, _ manufacturerData: Foundation.Data, _ rssi: Swift.Int) -> Swift.Void)
   @objc final public func stopScan()
-  #if compiler(>=5.3)
+  #if compiler(>=5.3) && $NonescapableTypes
   @discardableResult
   @objc final public func connect(deviceIdString: Swift.String, onState: @escaping (_ stateRawValue: Swift.Int) -> Swift.Void) -> Swift.String?
   #endif
-  #if compiler(>=5.3)
+  #if compiler(>=5.3) && $NonescapableTypes
   @discardableResult
   @objc final public func connectSystemConnectedDevice(deviceNames: [Swift.String], serviceUUIDs: [Swift.String], onState: @escaping (_ stateRawValue: Swift.Int) -> Swift.Void, onLog: ((_ message: Swift.String) -> Swift.Void)? = nil) -> Swift.String?
   #endif
@@ -152,18 +152,18 @@ extension Swift.Array where Element : Swift.Equatable {
   final public var currentState: CoreBluetooth.CBManagerState {
     get
   }
-  #if compiler(>=5.3)
+  #if compiler(>=5.3) && $NonescapableTypes
   final public func scan(serviceUUIDs: [CoreBluetooth.CBUUID]? = nil)
   #endif
   final public func stopScan()
-  #if compiler(>=5.3)
+  #if compiler(>=5.3) && $NonescapableTypes
   final public func getPeripheral(with id: Foundation.UUID) -> CoreBluetooth.CBPeripheral?
   #endif
-  #if compiler(>=5.3)
+  #if compiler(>=5.3) && $NonescapableTypes
   final public func makeTransportSession(deviceId: Foundation.UUID) -> BluetoothKit.BluetoothTransportSession?
   #endif
   final public func makeTransportSession(peripheral: CoreBluetooth.CBPeripheral) -> BluetoothKit.BluetoothTransportSession
-  #if compiler(>=5.3)
+  #if compiler(>=5.3) && $NonescapableTypes
   final public func retrieveSystemConnectedPeripheral(deviceNames: [Swift.String], serviceUUIDs: [Swift.String]) -> CoreBluetooth.CBPeripheral?
   #endif
   @objc deinit
@@ -172,10 +172,10 @@ extension BluetoothKit.BluetoothCentralRuntime : CoreBluetooth.CBCentralManagerD
   @objc final public func centralManagerDidUpdateState(_ central: CoreBluetooth.CBCentralManager)
   @objc final public func centralManager(_ central: CoreBluetooth.CBCentralManager, didDiscover peripheral: CoreBluetooth.CBPeripheral, advertisementData: [Swift.String : Any], rssi RSSI: Foundation.NSNumber)
   @objc final public func centralManager(_ central: CoreBluetooth.CBCentralManager, didConnect peripheral: CoreBluetooth.CBPeripheral)
-  #if compiler(>=5.3)
+  #if compiler(>=5.3) && $NonescapableTypes
   @objc final public func centralManager(_ central: CoreBluetooth.CBCentralManager, didFailToConnect peripheral: CoreBluetooth.CBPeripheral, error: (any Swift.Error)?)
   #endif
-  #if compiler(>=5.3)
+  #if compiler(>=5.3) && $NonescapableTypes
   @objc final public func centralManager(_ central: CoreBluetooth.CBCentralManager, didDisconnectPeripheral peripheral: CoreBluetooth.CBPeripheral, error: (any Swift.Error)?)
   #endif
 }
@@ -196,7 +196,7 @@ extension BluetoothKit.BluetoothCentralRuntime : CoreBluetooth.CBCentralManagerD
   final public func disconnect()
   final public func send(_ data: Foundation.Data) throws
   final public func send(_ data: Foundation.Data, to uuidString: Swift.String) throws
-  #if compiler(>=5.3)
+  #if compiler(>=5.3) && $NonescapableTypes
   final public func writeValue(_ data: Foundation.Data, to uuidString: Swift.String, type: CoreBluetooth.CBCharacteristicWriteType = .withoutResponse, sleepTime: Foundation.TimeInterval = 0, progress: ((Swift.Int, Swift.Int) -> Swift.Void)? = nil, completion: (() -> Swift.Void)? = nil) throws
   #endif
   final public func onReceive(_ handler: @escaping (Foundation.Data) -> Swift.Void)
@@ -208,29 +208,29 @@ extension BluetoothKit.BluetoothCentralRuntime : CoreBluetooth.CBCentralManagerD
   final public var onReady: (() -> Swift.Void)?
   final public var onConnectionError: (((any Swift.Error)?) -> Swift.Void)?
   public init(peripheral: CoreBluetooth.CBPeripheral)
-  #if compiler(>=5.3)
+  #if compiler(>=5.3) && $NonescapableTypes
   final public func discoverServices(_ serviceUUIDs: [CoreBluetooth.CBUUID]? = nil)
   #endif
-  #if compiler(>=5.3)
+  #if compiler(>=5.3) && $NonescapableTypes
   final public func writeValue(_ data: Foundation.Data, to uuidString: Swift.String, type: CoreBluetooth.CBCharacteristicWriteType = .withoutResponse, sleepTime: Foundation.TimeInterval = 0, progress: ((Swift.Int, Swift.Int) -> Swift.Void)? = nil, completion: (() -> Swift.Void)? = nil) throws
   #endif
   final public func setNotify(for uuidString: Swift.String, enabled: Swift.Bool)
   @objc deinit
 }
 extension BluetoothKit.PeripheralConnection : CoreBluetooth.CBPeripheralDelegate {
-  #if compiler(>=5.3)
+  #if compiler(>=5.3) && $NonescapableTypes
   @objc final public func peripheral(_ peripheral: CoreBluetooth.CBPeripheral, didDiscoverServices error: (any Swift.Error)?)
   #endif
-  #if compiler(>=5.3)
+  #if compiler(>=5.3) && $NonescapableTypes
   @objc final public func peripheral(_ peripheral: CoreBluetooth.CBPeripheral, didDiscoverCharacteristicsFor service: CoreBluetooth.CBService, error: (any Swift.Error)?)
   #endif
-  #if compiler(>=5.3)
+  #if compiler(>=5.3) && $NonescapableTypes
   @objc final public func peripheral(_ peripheral: CoreBluetooth.CBPeripheral, didUpdateValueFor characteristic: CoreBluetooth.CBCharacteristic, error: (any Swift.Error)?)
   #endif
-  #if compiler(>=5.3)
+  #if compiler(>=5.3) && $NonescapableTypes
   @objc final public func peripheral(_ peripheral: CoreBluetooth.CBPeripheral, didUpdateNotificationStateFor characteristic: CoreBluetooth.CBCharacteristic, error: (any Swift.Error)?)
   #endif
-  #if compiler(>=5.3)
+  #if compiler(>=5.3) && $NonescapableTypes
   @objc final public func peripheral(_ peripheral: CoreBluetooth.CBPeripheral, didWriteValueFor characteristic: CoreBluetooth.CBCharacteristic, error: (any Swift.Error)?)
   #endif
   @objc final public func peripheralIsReady(toSendWriteWithoutResponse peripheral: CoreBluetooth.CBPeripheral)
@@ -241,7 +241,7 @@ extension BluetoothKit.PeripheralConnection : CoreBluetooth.CBPeripheralDelegate
   case ready
   case disconnected
   case error
-  #if compiler(>=5.3)
+  #if compiler(>=5.3) && $NonescapableTypes
   public init?(rawValue: Swift.Int)
   #endif
   public typealias RawValue = Swift.Int

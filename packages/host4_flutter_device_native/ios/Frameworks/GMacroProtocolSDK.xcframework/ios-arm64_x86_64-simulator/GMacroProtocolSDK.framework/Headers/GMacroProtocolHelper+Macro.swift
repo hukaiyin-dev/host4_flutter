@@ -52,11 +52,26 @@ extension GMacroProtocolSession {
 }
 
 extension GMacroProtocolSession {
+    /// 平台设置 0x36
+    public func startMacroPlatform(profile: Int, response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
+        dataHelper.startMacroPlatform(profile: profile, response: response)
+    }
+    
+    /// 结束配置 0x34
+    public func endMacroConfig(response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
+        dataHelper.endMacroConfig(response: response)
+    }
+    
     public func startRecord(_ response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
         dataHelper.startRecord(response: response)
     }
     
     public func endRecord(_ response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
-        dataHelper.resetDevice(response: response)
+        dataHelper.endRecord(response: response)
+    }
+    
+    /// 查询手柄当前配置页 5C
+    public func fetchCurrentProfile(response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
+        dataHelper.fetchCurrentProfile(response: response)
     }
 }

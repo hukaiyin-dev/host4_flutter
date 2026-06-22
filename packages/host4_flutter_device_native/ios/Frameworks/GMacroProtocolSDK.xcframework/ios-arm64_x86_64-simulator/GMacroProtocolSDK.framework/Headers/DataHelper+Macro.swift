@@ -155,6 +155,18 @@ extension DataHelper {
         let all = dataFrom(protocolID: protocolID, payload: payload)
         self.write(protocolID: protocolID, data: all, finish: finish, response: response)
     }
+    
+    // MARK: - 5C 查询手柄当前配置页
+    func fetchCurrentProfile(finish: (() -> Void)? = nil,
+                              response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
+        let protocolID = GMacroProtocolID.fetchProfile
+        
+        let all = dataFrom(protocolID: protocolID, payload: nil)
+        self.write(protocolID: protocolID,
+                   data: all,
+                   finish: finish,
+                   response: response)
+    }
 }
 
 
@@ -279,6 +291,12 @@ extension DataHelper {
 
         return macros
     }
+    
+    // MARK: - 0x5C 查询手柄当前配置页解析
+    func analyzeProfile(_ data: Data) -> [String: Any] {
+        let profile = data.toInt()
+        return ["profile": profile]
+    }
 }
 
 
@@ -296,17 +314,37 @@ extension DataHelper {
                    response: response)
     }
     
-    // MARK: - 0x47 结束录制宏子按键
-    func endRecord(finish:(()->())? = nil, response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
-        
-        let protocolID = GMacroProtocolID.endMaco
+    // MARK: - 0x36 平台设置
+    func startMacroPlatform(profile: Int,
+                             finish: (() -> Void)? = nil,
+                             response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
+        let protocolID = GMacroProtocolID.startMacro
         
         var payload = Data()
-
-        payload.append(Data.from(UInt8(0x00)))
+        payload.append(Data.from(UInt8(profile)))
         
         let all = dataFrom(protocolID: protocolID, payload: payload)
-        
+        self.write(protocolID: protocolID,
+                   data: all,
+                   finish: finish,
+                   response: response)
+    }
+    
+    // MARK: - 0x34 结束配置
+    func endMacroConfig(finish: (() -> Void)? = nil,
+                        response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
+        let protocolID = GMacroProtocolID.endMaco
+        let all = dataFrom(protocolID: protocolID, payload: nil)
+        self.write(protocolID: protocolID,
+                   data: all,
+                   finish: finish,
+                   response: response)
+    }
+    
+    // MARK: - 0x47 结束录制宏子按键
+    func endRecord(finish:(()->())? = nil, response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
+        let protocolID = GMacroProtocolID.endRecord
+        let all = dataFrom(protocolID: protocolID, payload: nil)
         self.write(protocolID: protocolID,
                    data: all,
                    finish: finish,

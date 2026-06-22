@@ -3,7 +3,7 @@
 # Run `pod lib lint host4_flutter_device_native.podspec` to validate before publishing.
 #
 Pod::Spec.new do |s|
-  disable_native_sdks = ENV.fetch('HOST4_DISABLE_DEVICE_NATIVE_SDKS', '1') == '1'
+  disable_native_sdks = ENV.fetch('HOST4_DISABLE_DEVICE_NATIVE_SDKS', '0') == '1'
 
   s.name             = 'host4_flutter_device_native'
   s.version          = '0.0.1'

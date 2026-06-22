@@ -8,6 +8,14 @@ extension GmacroSessionMacro on GmacroSession {
   Future<Map<String, Object?>> fetchCurrentProfile() =>
       invoke(GmacroMethods.fetchCurrentProfile);
 
+  /// 平台设置 0x36
+  Future<Map<String, Object?>> startMacroPlatform({required int profile}) =>
+      invoke(GmacroMethods.startMacroPlatform, arguments: {'profile': profile});
+
+  /// 结束配置 0x34
+  Future<Map<String, Object?>> endMacroConfig() =>
+      invoke(GmacroMethods.endMacroConfig);
+
   /// 查询当前宏
   Future<Map<String, Object?>> queryCurrentMacro({required int profile}) =>
       invoke(GmacroMethods.queryCurrentMacro, arguments: {'profile': profile});

@@ -407,6 +407,8 @@ extension DataHelper {
             return analyzeResult(payload: payload)
         case .motion:
             return analyzeResult(payload: payload)
+        case .fetchProfile:
+            responseDic = analyzeProfile(payload)
         case .setVibrate:
             return analyzeResult(payload: payload)
         case .getLightConfig:

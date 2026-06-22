@@ -53,6 +53,25 @@
       ]
     },
     {
+      "name": "webview_flutter_android",
+      "version": "4.12.0",
+      "dependencies": [
+        "flutter",
+        "meta",
+        "webview_flutter_platform_interface"
+      ]
+    },
+    {
+      "name": "webview_flutter",
+      "version": "4.13.1",
+      "dependencies": [
+        "flutter",
+        "webview_flutter_android",
+        "webview_flutter_platform_interface",
+        "webview_flutter_wkwebview"
+      ]
+    },
+    {
       "name": "flutter",
       "version": "0.0.0",
       "dependencies": [
@@ -65,6 +84,11 @@
       ]
     },
     {
+      "name": "lints",
+      "version": "6.1.0",
+      "dependencies": []
+    },
+    {
       "name": "stream_channel",
       "version": "2.1.4",
       "dependencies": [
@@ -73,7 +97,7 @@
     },
     {
       "name": "meta",
-      "version": "1.18.0",
+      "version": "1.17.0",
       "dependencies": []
     },
     {
@@ -135,7 +159,7 @@
     },
     {
       "name": "test_api",
-      "version": "0.7.11",
+      "version": "0.7.10",
       "dependencies": [
         "async",
         "boolean_selector",
@@ -175,9 +199,12 @@
       "dependencies": []
     },
     {
-      "name": "lints",
-      "version": "6.1.0",
-      "dependencies": []
+      "name": "async",
+      "version": "2.13.1",
+      "dependencies": [
+        "collection",
+        "meta"
+      ]
     },
     {
       "name": "leak_tracker_testing",
@@ -200,51 +227,9 @@
       ]
     },
     {
-      "name": "plugin_platform_interface",
-      "version": "2.1.8",
-      "dependencies": [
-        "meta"
-      ]
-    },
-    {
-      "name": "webview_flutter",
-      "version": "4.13.1",
-      "dependencies": [
-        "flutter",
-        "webview_flutter_android",
-        "webview_flutter_platform_interface",
-        "webview_flutter_wkwebview"
-      ]
-    },
-    {
       "name": "term_glyph",
       "version": "1.2.2",
       "dependencies": []
-    },
-    {
-      "name": "boolean_selector",
-      "version": "2.1.2",
-      "dependencies": [
-        "source_span",
-        "string_scanner"
-      ]
-    },
-    {
-      "name": "webview_flutter_android",
-      "version": "4.13.0",
-      "dependencies": [
-        "flutter",
-        "meta",
-        "webview_flutter_platform_interface"
-      ]
-    },
-    {
-      "name": "async",
-      "version": "2.13.1",
-      "dependencies": [
-        "collection",
-        "meta"
-      ]
     },
     {
       "name": "string_scanner",
@@ -260,6 +245,21 @@
         "collection",
         "path",
         "term_glyph"
+      ]
+    },
+    {
+      "name": "boolean_selector",
+      "version": "2.1.2",
+      "dependencies": [
+        "source_span",
+        "string_scanner"
+      ]
+    },
+    {
+      "name": "plugin_platform_interface",
+      "version": "2.1.8",
+      "dependencies": [
+        "meta"
       ]
     },
     {

@@ -15,6 +15,31 @@
       "devDependencies": []
     },
     {
+      "name": "connectivity_plus",
+      "version": "6.1.5",
+      "dependencies": [
+        "collection",
+        "connectivity_plus_platform_interface",
+        "flutter",
+        "flutter_web_plugins",
+        "meta",
+        "nm",
+        "web"
+      ]
+    },
+    {
+      "name": "battery_plus",
+      "version": "6.2.3",
+      "dependencies": [
+        "battery_plus_platform_interface",
+        "flutter",
+        "flutter_web_plugins",
+        "meta",
+        "upower",
+        "web"
+      ]
+    },
+    {
       "name": "host4_flutter_ui",
       "version": "0.0.1",
       "dependencies": [
@@ -36,61 +61,34 @@
       ]
     },
     {
-      "name": "host4_flutter_utils",
-      "version": "0.0.1",
-      "dependencies": [
-        "flutter"
-      ]
-    },
-    {
-      "name": "vector_math",
-      "version": "2.2.0",
-      "dependencies": []
-    },
-    {
-      "name": "sky_engine",
-      "version": "0.0.0",
-      "dependencies": []
-    },
-    {
-      "name": "meta",
-      "version": "1.18.0",
-      "dependencies": []
-    },
-    {
-      "name": "material_color_utilities",
-      "version": "0.13.0",
-      "dependencies": [
-        "collection"
-      ]
-    },
-    {
       "name": "collection",
       "version": "1.19.1",
       "dependencies": []
     },
     {
-      "name": "characters",
-      "version": "1.4.1",
-      "dependencies": []
-    },
-    {
-      "name": "battery_plus",
-      "version": "6.2.3",
+      "name": "nm",
+      "version": "0.5.0",
       "dependencies": [
-        "battery_plus_platform_interface",
-        "flutter",
-        "flutter_web_plugins",
-        "meta",
-        "upower",
-        "web"
+        "dbus"
       ]
     },
     {
-      "name": "upower",
-      "version": "0.7.0",
+      "name": "meta",
+      "version": "1.17.0",
+      "dependencies": []
+    },
+    {
+      "name": "web",
+      "version": "1.1.1",
+      "dependencies": []
+    },
+    {
+      "name": "connectivity_plus_platform_interface",
+      "version": "2.1.0",
       "dependencies": [
-        "dbus"
+        "flutter",
+        "meta",
+        "plugin_platform_interface"
       ]
     },
     {
@@ -98,6 +96,13 @@
       "version": "0.0.0",
       "dependencies": [
         "flutter"
+      ]
+    },
+    {
+      "name": "upower",
+      "version": "0.7.0",
+      "dependencies": [
+        "dbus"
       ]
     },
     {
@@ -110,45 +115,44 @@
       ]
     },
     {
-      "name": "web",
-      "version": "1.1.1",
+      "name": "flutter_svg",
+      "version": "2.3.0",
+      "dependencies": [
+        "flutter",
+        "http",
+        "vector_graphics",
+        "vector_graphics_codec",
+        "vector_graphics_compiler"
+      ]
+    },
+    {
+      "name": "host4_flutter_utils",
+      "version": "0.0.1",
+      "dependencies": [
+        "flutter"
+      ]
+    },
+    {
+      "name": "sky_engine",
+      "version": "0.0.0",
       "dependencies": []
     },
     {
-      "name": "plugin_platform_interface",
-      "version": "2.1.8",
+      "name": "vector_math",
+      "version": "2.2.0",
+      "dependencies": []
+    },
+    {
+      "name": "material_color_utilities",
+      "version": "0.13.0",
       "dependencies": [
-        "meta"
+        "collection"
       ]
     },
     {
-      "name": "connectivity_plus",
-      "version": "6.1.5",
-      "dependencies": [
-        "collection",
-        "connectivity_plus_platform_interface",
-        "flutter",
-        "flutter_web_plugins",
-        "meta",
-        "nm",
-        "web"
-      ]
-    },
-    {
-      "name": "nm",
-      "version": "0.5.0",
-      "dependencies": [
-        "dbus"
-      ]
-    },
-    {
-      "name": "connectivity_plus_platform_interface",
-      "version": "2.1.0",
-      "dependencies": [
-        "flutter",
-        "meta",
-        "plugin_platform_interface"
-      ]
+      "name": "characters",
+      "version": "1.4.1",
+      "dependencies": []
     },
     {
       "name": "dbus",
@@ -161,41 +165,22 @@
       ]
     },
     {
-      "name": "xml",
-      "version": "6.6.1",
+      "name": "plugin_platform_interface",
+      "version": "2.1.8",
       "dependencies": [
-        "collection",
-        "meta",
-        "petitparser"
-      ]
-    },
-    {
-      "name": "petitparser",
-      "version": "7.0.2",
-      "dependencies": [
-        "collection",
         "meta"
       ]
     },
     {
-      "name": "ffi",
-      "version": "2.2.0",
-      "dependencies": []
-    },
-    {
-      "name": "args",
-      "version": "2.7.0",
-      "dependencies": []
-    },
-    {
-      "name": "flutter_svg",
-      "version": "2.3.0",
+      "name": "vector_graphics_compiler",
+      "version": "1.2.6",
       "dependencies": [
-        "flutter",
-        "http",
-        "vector_graphics",
+        "args",
+        "meta",
+        "path",
+        "path_parsing",
         "vector_graphics_codec",
-        "vector_graphics_compiler"
+        "xml"
       ]
     },
     {
@@ -213,16 +198,33 @@
       ]
     },
     {
-      "name": "vector_graphics_compiler",
-      "version": "1.2.5",
+      "name": "http",
+      "version": "1.6.0",
       "dependencies": [
-        "args",
+        "async",
+        "http_parser",
         "meta",
-        "path",
-        "path_parsing",
-        "vector_graphics_codec",
-        "xml"
+        "web"
       ]
+    },
+    {
+      "name": "xml",
+      "version": "6.6.1",
+      "dependencies": [
+        "collection",
+        "meta",
+        "petitparser"
+      ]
+    },
+    {
+      "name": "ffi",
+      "version": "2.2.0",
+      "dependencies": []
+    },
+    {
+      "name": "args",
+      "version": "2.7.0",
+      "dependencies": []
     },
     {
       "name": "path_parsing",
@@ -238,16 +240,6 @@
       "dependencies": []
     },
     {
-      "name": "http",
-      "version": "1.6.0",
-      "dependencies": [
-        "async",
-        "http_parser",
-        "meta",
-        "web"
-      ]
-    },
-    {
       "name": "http_parser",
       "version": "4.1.2",
       "dependencies": [
@@ -255,6 +247,22 @@
         "source_span",
         "string_scanner",
         "typed_data"
+      ]
+    },
+    {
+      "name": "async",
+      "version": "2.13.1",
+      "dependencies": [
+        "collection",
+        "meta"
+      ]
+    },
+    {
+      "name": "petitparser",
+      "version": "7.0.2",
+      "dependencies": [
+        "collection",
+        "meta"
       ]
     },
     {
@@ -284,14 +292,6 @@
       "name": "term_glyph",
       "version": "1.2.2",
       "dependencies": []
-    },
-    {
-      "name": "async",
-      "version": "2.13.1",
-      "dependencies": [
-        "collection",
-        "meta"
-      ]
     }
   ],
   "configVersion": 1

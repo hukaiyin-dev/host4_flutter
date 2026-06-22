@@ -56,6 +56,8 @@ abstract final class GmacroMethods {
 
   // Macro
   static const fetchCurrentProfile = 'fetchCurrentProfile';
+  static const startMacroPlatform = 'startMacroPlatform';
+  static const endMacroConfig = 'endMacroConfig';
   static const queryCurrentMacro = 'queryCurrentMacro';
   static const queryMacroKeys = 'queryMacroKeys';
   static const queryMacroRecordableKeys = 'queryMacroRecordableKeys';

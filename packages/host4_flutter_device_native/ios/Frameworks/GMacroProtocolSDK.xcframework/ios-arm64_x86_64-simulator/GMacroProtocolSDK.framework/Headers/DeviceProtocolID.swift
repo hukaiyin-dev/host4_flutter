@@ -59,6 +59,7 @@ enum GMacroProtocolID: UInt8 {
     case mouseKeyMap        = 0x5E // 键值映射(映射鼠标)
     case keyboardKeyMap     = 0x5F // 键值映射(映射键盘)
     case currentMapping     = 0x50 // 查询按键映射当前配置
+    case fetchProfile        = 0x5C // 查询手柄当前配置页
 
     case rocker             = 0x3E // 摇杆线性设置
     case rocker3D           = 0x3F // 摇杆 3D 设置（支持subid）

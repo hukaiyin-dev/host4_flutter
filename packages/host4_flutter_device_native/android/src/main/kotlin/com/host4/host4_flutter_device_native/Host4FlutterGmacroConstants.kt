@@ -54,6 +54,8 @@ internal object Host4FlutterGmacroConstants {
 
     // Macro
     const val fetchCurrentProfile = "fetchCurrentProfile"
+    const val startMacroPlatform = "startMacroPlatform"
+    const val endMacroConfig = "endMacroConfig"
     const val queryCurrentMacro = "queryCurrentMacro"
     const val queryMacroKeys = "queryMacroKeys"
     const val queryMacroRecordableKeys = "queryMacroRecordableKeys"

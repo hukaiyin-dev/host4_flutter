@@ -873,6 +873,16 @@ class _GmacroApiTestPageState extends State<GmacroApiTestPage> {
             () => s!.fetchCurrentProfile(),
           ),
           _Item(
+            'startMacroPlatform',
+            '平台设置 (profile=0)',
+            () => s!.startMacroPlatform(profile: 0),
+          ),
+          _Item(
+            'endMacroConfig',
+            '结束配置',
+            () => s!.endMacroConfig(),
+          ),
+          _Item(
             'queryCurrentMacro',
             '查询当前宏 (profile=0)',
             () => s!.queryCurrentMacro(profile: 0),

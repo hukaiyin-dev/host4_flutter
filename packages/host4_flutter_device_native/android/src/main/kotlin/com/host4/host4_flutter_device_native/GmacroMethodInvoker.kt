@@ -232,6 +232,16 @@ internal object GmacroMethodInvoker {
                 Host4FlutterGmacroConstants.fetchCurrentProfile ->
                     commands.queryHandleConfig(0, GmacroCallbackBridge.message(result))
 
+                // 0x36 平台设置
+                Host4FlutterGmacroConstants.startMacroPlatform -> {
+                    val profile = GmacroArgParser.intArg(arguments, "profile")
+                    commands.startMacroPlatform(profile, GmacroCallbackBridge.message(result))
+                }
+
+                // 0x34 结束配置
+                Host4FlutterGmacroConstants.endMacroConfig ->
+                    commands.endMacroConfig(GmacroCallbackBridge.message(result))
+
                 Host4FlutterGmacroConstants.queryCurrentMacro -> {
                     val profile = GmacroArgParser.intArg(arguments, "profile")
                     commands.startMacroProfileReq(profile, GmacroCallbackBridge.message(result))

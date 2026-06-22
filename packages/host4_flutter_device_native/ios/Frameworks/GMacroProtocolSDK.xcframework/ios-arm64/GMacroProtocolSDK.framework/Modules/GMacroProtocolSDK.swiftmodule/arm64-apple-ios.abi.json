@@ -31566,6 +31566,148 @@
           },
           {
             "kind": "Function",
+            "name": "startMacroPlatform",
+            "printedName": "startMacroPlatform(profile:response:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Int",
+                "printedName": "Swift.Int",
+                "usr": "s:Si"
+              },
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "(Swift.Result<[Swift.String : Any], any Swift.Error>) -> ()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Result",
+                    "printedName": "Swift.Result<[Swift.String : Any], any Swift.Error>",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Dictionary",
+                        "printedName": "[Swift.String : Any]",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "String",
+                            "printedName": "Swift.String",
+                            "usr": "s:SS"
+                          },
+                          {
+                            "kind": "TypeNominal",
+                            "name": "ProtocolComposition",
+                            "printedName": "Any"
+                          }
+                        ],
+                        "usr": "s:SD"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Error",
+                        "printedName": "any Swift.Error",
+                        "usr": "s:s5ErrorP"
+                      }
+                    ],
+                    "usr": "s:s6ResultO"
+                  }
+                ]
+              }
+            ],
+            "declKind": "Func",
+            "usr": "s:17GMacroProtocolSDK0aB7SessionC18startMacroPlatform7profile8responseySi_ys6ResultOySDySSypGs5Error_pGYbctF",
+            "mangledName": "$s17GMacroProtocolSDK0aB7SessionC18startMacroPlatform7profile8responseySi_ys6ResultOySDySSypGs5Error_pGYbctF",
+            "moduleName": "GMacroProtocolSDK",
+            "declAttributes": [
+              "Final",
+              "AccessControl",
+              "RawDocComment"
+            ],
+            "isFromExtension": true,
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "endMacroConfig",
+            "printedName": "endMacroConfig(response:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "(Swift.Result<[Swift.String : Any], any Swift.Error>) -> ()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Result",
+                    "printedName": "Swift.Result<[Swift.String : Any], any Swift.Error>",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Dictionary",
+                        "printedName": "[Swift.String : Any]",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "String",
+                            "printedName": "Swift.String",
+                            "usr": "s:SS"
+                          },
+                          {
+                            "kind": "TypeNominal",
+                            "name": "ProtocolComposition",
+                            "printedName": "Any"
+                          }
+                        ],
+                        "usr": "s:SD"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Error",
+                        "printedName": "any Swift.Error",
+                        "usr": "s:s5ErrorP"
+                      }
+                    ],
+                    "usr": "s:s6ResultO"
+                  }
+                ]
+              }
+            ],
+            "declKind": "Func",
+            "usr": "s:17GMacroProtocolSDK0aB7SessionC14endMacroConfig8responseyys6ResultOySDySSypGs5Error_pGYbc_tF",
+            "mangledName": "$s17GMacroProtocolSDK0aB7SessionC14endMacroConfig8responseyys6ResultOySDySSypGs5Error_pGYbc_tF",
+            "moduleName": "GMacroProtocolSDK",
+            "declAttributes": [
+              "Final",
+              "AccessControl",
+              "RawDocComment"
+            ],
+            "isFromExtension": true,
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
             "name": "startRecord",
             "printedName": "startRecord(_:)",
             "children": [
@@ -31694,6 +31836,74 @@
             "declAttributes": [
               "Final",
               "AccessControl"
+            ],
+            "isFromExtension": true,
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "fetchCurrentProfile",
+            "printedName": "fetchCurrentProfile(response:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "(Swift.Result<[Swift.String : Any], any Swift.Error>) -> ()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Result",
+                    "printedName": "Swift.Result<[Swift.String : Any], any Swift.Error>",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Dictionary",
+                        "printedName": "[Swift.String : Any]",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "String",
+                            "printedName": "Swift.String",
+                            "usr": "s:SS"
+                          },
+                          {
+                            "kind": "TypeNominal",
+                            "name": "ProtocolComposition",
+                            "printedName": "Any"
+                          }
+                        ],
+                        "usr": "s:SD"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Error",
+                        "printedName": "any Swift.Error",
+                        "usr": "s:s5ErrorP"
+                      }
+                    ],
+                    "usr": "s:s6ResultO"
+                  }
+                ]
+              }
+            ],
+            "declKind": "Func",
+            "usr": "s:17GMacroProtocolSDK0aB7SessionC19fetchCurrentProfile8responseyys6ResultOySDySSypGs5Error_pGYbc_tF",
+            "mangledName": "$s17GMacroProtocolSDK0aB7SessionC19fetchCurrentProfile8responseyys6ResultOySDySSypGs5Error_pGYbc_tF",
+            "moduleName": "GMacroProtocolSDK",
+            "declAttributes": [
+              "Final",
+              "AccessControl",
+              "RawDocComment"
             ],
             "isFromExtension": true,
             "funcSelfKind": "NonMutating"
@@ -40245,7 +40455,7 @@
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/DataHelper\/DataHelper+Parse.swift",
       "kind": "IntegerLiteral",
-      "offset": 24099,
+      "offset": 24177,
       "length": 1,
       "value": "0"
     },
@@ -41017,348 +41227,355 @@
       "kind": "IntegerLiteral",
       "offset": 2936,
       "length": 4,
+      "value": "0x5C"
+    },
+    {
+      "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
+      "kind": "IntegerLiteral",
+      "offset": 3003,
+      "length": 4,
       "value": "0x3E"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 2993,
+      "offset": 3060,
       "length": 4,
       "value": "0x3F"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 3063,
+      "offset": 3130,
       "length": 4,
       "value": "0x59"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 3126,
+      "offset": 3193,
       "length": 4,
       "value": "0x41"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 3186,
+      "offset": 3253,
       "length": 4,
       "value": "0x42"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 3246,
+      "offset": 3313,
       "length": 4,
       "value": "0x55"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 3330,
+      "offset": 3397,
       "length": 4,
       "value": "0x56"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 3418,
+      "offset": 3485,
       "length": 4,
       "value": "0x44"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 3469,
+      "offset": 3536,
       "length": 4,
       "value": "0x45"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 3523,
+      "offset": 3590,
       "length": 4,
       "value": "0x46"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 3586,
+      "offset": 3653,
       "length": 4,
       "value": "0x47"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 3649,
+      "offset": 3716,
       "length": 4,
       "value": "0x58"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 3729,
+      "offset": 3796,
       "length": 4,
       "value": "0x4C"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 3825,
+      "offset": 3892,
       "length": 4,
       "value": "0x4D"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 3888,
+      "offset": 3955,
       "length": 4,
       "value": "0x4E"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 3962,
+      "offset": 4029,
       "length": 4,
       "value": "0x4F"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 4036,
+      "offset": 4103,
       "length": 4,
       "value": "0x82"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 4131,
+      "offset": 4198,
       "length": 4,
       "value": "0x4A"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 4217,
+      "offset": 4284,
       "length": 4,
       "value": "0x71"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 4304,
+      "offset": 4371,
       "length": 4,
       "value": "0x72"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 4383,
+      "offset": 4450,
       "length": 4,
       "value": "0x70"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 4484,
+      "offset": 4551,
       "length": 4,
       "value": "0x43"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 4544,
+      "offset": 4611,
       "length": 4,
       "value": "0x57"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 4629,
+      "offset": 4696,
       "length": 4,
       "value": "0x40"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 4680,
+      "offset": 4747,
       "length": 4,
       "value": "0x48"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 4746,
+      "offset": 4813,
       "length": 4,
       "value": "0x49"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 4823,
+      "offset": 4890,
       "length": 4,
       "value": "0x84"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 4886,
+      "offset": 4953,
       "length": 4,
       "value": "0x77"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 4971,
+      "offset": 5038,
       "length": 4,
       "value": "0x79"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 5140,
+      "offset": 5207,
       "length": 4,
       "value": "0x80"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 5223,
+      "offset": 5290,
       "length": 4,
       "value": "0x85"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 5274,
+      "offset": 5341,
       "length": 4,
       "value": "0x86"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 5338,
+      "offset": 5405,
       "length": 4,
       "value": "0x5B"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 5397,
+      "offset": 5464,
       "length": 4,
       "value": "0x69"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 5459,
+      "offset": 5526,
       "length": 4,
       "value": "0x67"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 5515,
+      "offset": 5582,
       "length": 4,
       "value": "0x81"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 5569,
+      "offset": 5636,
       "length": 4,
       "value": "0x83"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 5638,
+      "offset": 5705,
       "length": 4,
       "value": "0x6A"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 5686,
+      "offset": 5753,
       "length": 4,
       "value": "0x6C"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 5743,
+      "offset": 5810,
       "length": 4,
       "value": "0x00"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 5794,
+      "offset": 5861,
       "length": 4,
       "value": "0x75"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 5907,
+      "offset": 5974,
       "length": 4,
       "value": "0x04"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 5934,
+      "offset": 6001,
       "length": 4,
       "value": "0x01"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 5961,
+      "offset": 6028,
       "length": 4,
       "value": "0x02"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 5988,
+      "offset": 6055,
       "length": 4,
       "value": "0x10"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 6038,
+      "offset": 6105,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 6062,
+      "offset": 6129,
       "length": 1,
       "value": "1"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 6121,
+      "offset": 6188,
       "length": 4,
       "value": "0x00"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 6164,
+      "offset": 6231,
       "length": 4,
       "value": "0x01"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",
       "kind": "IntegerLiteral",
-      "offset": 6201,
+      "offset": 6268,
       "length": 4,
       "value": "0x02"
     },

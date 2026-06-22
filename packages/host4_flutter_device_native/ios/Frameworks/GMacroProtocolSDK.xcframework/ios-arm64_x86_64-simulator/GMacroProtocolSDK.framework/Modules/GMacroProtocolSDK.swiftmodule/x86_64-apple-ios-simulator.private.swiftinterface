@@ -441,10 +441,19 @@ extension GMacroProtocolSDK.GMacroProtocolSession {
 }
 extension GMacroProtocolSDK.GMacroProtocolSession {
   #if compiler(>=5.3) && $NonescapableTypes
+  final public func startMacroPlatform(profile: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  #endif
+  #if compiler(>=5.3) && $NonescapableTypes
+  final public func endMacroConfig(response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  #endif
+  #if compiler(>=5.3) && $NonescapableTypes
   final public func startRecord(_ response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
   #endif
   #if compiler(>=5.3) && $NonescapableTypes
   final public func endRecord(_ response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  #endif
+  #if compiler(>=5.3) && $NonescapableTypes
+  final public func fetchCurrentProfile(response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
   #endif
 }
 extension GMacroProtocolSDK.GMacroProtocolSession {
