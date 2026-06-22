@@ -1,17 +1,14 @@
 /// Abstract adapter that defines the JS bridge protocol for a specific H5 page.
 ///
 /// Implement this class to describe the bridge between Flutter and H5:
-/// - [adapterJs]: the JS snippet injected into the page that maps the H5-side
-///   named method calls (e.g. `JsBridge.setToken(token)`) to
+/// - [adapterJs]: optional page-specific JS injected after the generic bridge.
+///   `Host4WebView` already exposes `JsBridge.anyMethod(arg)` and forwards it as
 ///   `JsBridge.postMessage(JSON.stringify({method, payload}))`.
 /// - [onMessage]: called when H5 sends a message through the bridge.
 ///
-/// Injection timing: [adapterJs] is injected on `onPageFinished`, which means
-/// the page content is fully loaded before the named method wrappers are
-/// available. For pages where H5 only calls bridge methods in response to user
-/// interaction (login, settings, etc.), this is sufficient. If H5 calls bridge
-/// methods automatically on page load, coordinate with the H5 team to ensure
-/// calls are deferred or guarded.
+/// Injection timing: the generic bridge and [adapterJs] are injected when a page
+/// starts and finishes loading. H5 should call `JsBridge[methodName](paramsStr)`
+/// without branching on Flutter-specific bridge objects.
 ///
 /// Note: `JsBridge.postMessage` itself is always available from document-start
 /// (injected by the Flutter JavaScriptChannel infrastructure), so H5 can use
@@ -19,10 +16,11 @@
 abstract class Host4JsBridgeAdapter {
   const Host4JsBridgeAdapter();
 
-  /// JS code injected after page load to expose named bridge methods on
-  /// `window.JsBridge`.
+  /// Optional JS code for page-specific compatibility.
   ///
-  /// Must produce a self-contained IIFE. Example:
+  /// Must produce a self-contained IIFE. New pages usually don't need to define
+  /// named methods here because the generic bridge handles arbitrary method
+  /// names. Example:
   /// ```javascript
   /// (function() {
   ///   var ch = window.JsBridge;
