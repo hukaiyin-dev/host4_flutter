@@ -60,6 +60,7 @@ struct Host4FlutterChannelConstants {
   static let updateRockerAdditional = "updateRockerAdditional"
 
   // Macro
+  static let fetchCurrentProfile = "fetchCurrentProfile"
   static let queryCurrentMacro = "queryCurrentMacro"
   static let queryMacroKeys = "queryMacroKeys"
   static let queryMacroRecordableKeys = "queryMacroRecordableKeys"

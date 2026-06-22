@@ -55,6 +55,7 @@ abstract final class GmacroMethods {
   static const updateRockerAdditional = 'updateRockerAdditional';
 
   // Macro
+  static const fetchCurrentProfile = 'fetchCurrentProfile';
   static const queryCurrentMacro = 'queryCurrentMacro';
   static const queryMacroKeys = 'queryMacroKeys';
   static const queryMacroRecordableKeys = 'queryMacroRecordableKeys';

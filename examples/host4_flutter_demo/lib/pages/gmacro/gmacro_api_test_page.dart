@@ -503,6 +503,11 @@ class _GmacroApiTestPageState extends State<GmacroApiTestPage> {
             '查询设备信息 (profile=0)',
             () => s!.fetchMobapadDeviceInfo(profile: 0),
           ),
+          _Item(
+            'fetchGameMacroDefaultInfo',
+            '查询 GameMacro 默认值 (profile=0)',
+            () => s!.fetchGameMacroDefaultInfo(profile: 0),
+          ),
           _Item('resetDevice', '恢复默认设置', () => s!.resetDevice()),
           _Item('switchToNormalMode', '切换普通模式', () => s!.switchToNormalMode()),
           _Item('switchToTestMode', '切换测试模式', () => s!.switchToTestMode()),
@@ -863,6 +868,11 @@ class _GmacroApiTestPageState extends State<GmacroApiTestPage> {
         title: '宏',
         items: [
           _Item(
+            'fetchCurrentProfile',
+            '查询当前配置页',
+            () => s!.fetchCurrentProfile(),
+          ),
+          _Item(
             'queryCurrentMacro',
             '查询当前宏 (profile=0)',
             () => s!.queryCurrentMacro(profile: 0),
@@ -946,6 +956,14 @@ class _GmacroApiTestPageState extends State<GmacroApiTestPage> {
                   mapped: GamepadKey.b,
                 ),
               ],
+            ),
+          ),
+          _Item(
+            'setHandleKeyMapping',
+            '设置手柄单键映射 A→B',
+            () => s!.setHandleKeyMapping(
+              original: GamepadKey.a,
+              mapped: GamepadKey.b,
             ),
           ),
           _Item(

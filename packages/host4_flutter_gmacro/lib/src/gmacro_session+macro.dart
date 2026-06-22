@@ -4,6 +4,10 @@ import 'Models/gmacro_methods.dart';
 import 'gmacro_session.dart';
 
 extension GmacroSessionMacro on GmacroSession {
+  /// 查询手柄当前配置页 0x5C
+  Future<Map<String, Object?>> fetchCurrentProfile() =>
+      invoke(GmacroMethods.fetchCurrentProfile);
+
   /// 查询当前宏
   Future<Map<String, Object?>> queryCurrentMacro({required int profile}) =>
       invoke(GmacroMethods.queryCurrentMacro, arguments: {'profile': profile});

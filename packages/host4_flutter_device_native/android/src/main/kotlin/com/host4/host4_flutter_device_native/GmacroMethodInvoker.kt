@@ -228,6 +228,10 @@ internal object GmacroMethodInvoker {
                     GmacroCallbackBridge.message(result),
                 )
 
+                // 0x5C 查询手柄当前配置页
+                Host4FlutterGmacroConstants.fetchCurrentProfile ->
+                    commands.queryHandleConfig(0, GmacroCallbackBridge.message(result))
+
                 Host4FlutterGmacroConstants.queryCurrentMacro -> {
                     val profile = GmacroArgParser.intArg(arguments, "profile")
                     commands.startMacroProfileReq(profile, GmacroCallbackBridge.message(result))

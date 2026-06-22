@@ -53,6 +53,7 @@ internal object Host4FlutterGmacroConstants {
     const val updateRockerAdditional = "updateRockerAdditional"
 
     // Macro
+    const val fetchCurrentProfile = "fetchCurrentProfile"
     const val queryCurrentMacro = "queryCurrentMacro"
     const val queryMacroKeys = "queryMacroKeys"
     const val queryMacroRecordableKeys = "queryMacroRecordableKeys"

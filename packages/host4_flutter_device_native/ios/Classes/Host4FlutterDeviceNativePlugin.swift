@@ -735,6 +735,8 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
       case Host4FlutterChannelConstants.getSleepTime:
         let profile = try intArg("profile", from: arguments)
         invoke(result) { callback in session.getSleepTime(profile: profile, response: callback) }
+      case Host4FlutterChannelConstants.fetchCurrentProfile:
+        invoke(result) { callback in session.fetchCurrentProfile(response: callback) }
       case Host4FlutterChannelConstants.queryCurrentMacro:
         let profile = try intArg("profile", from: arguments)
         invoke(result) { callback in session.queryCurrentMacro(profile: profile, response: callback) }
