@@ -688,12 +688,26 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
       case Host4FlutterChannelConstants.fetchGameMacroDefaultInfo:
         let profile = try intArg("profile", from: arguments)
         invoke(result) { callback in
-          session.fetchGameMacroDefaultInfo(profile: profile, response: callback)
+          session.fetchGameMacroDefaultInfo(profile: profile) { res in
+            switch res {
+            case .success(var payload):
+              callback(.success(gmacroConvertDeviceInfoEnums(payload)))
+            case .failure(let error):
+              callback(.failure(error))
+            }
+          }
         }
       case Host4FlutterChannelConstants.fetchMobapadDeviceInfo:
         let profile = try intArg("profile", from: arguments)
         invoke(result) { callback in
-          session.fetchMobapadDeviceInfo(profile: profile, response: callback)
+          session.fetchMobapadDeviceInfo(profile: profile) { res in
+            switch res {
+            case .success(var payload):
+              callback(.success(gmacroConvertDeviceInfoEnums(payload)))
+            case .failure(let error):
+              callback(.failure(error))
+            }
+          }
         }
       case Host4FlutterChannelConstants.resetDevice:
         invoke(result) { callback in session.resetDevice(callback) }
@@ -1725,5 +1739,45 @@ private enum BridgeArgumentError: LocalizedError {
       return "Argument '\(key)' contains an unsupported enum raw value."
     }
   }
+}
+
+/// 将 0x77 设备信息响应中的 Swift 枚举转为 Int rawValue，便于 Flutter 方法通道序列化
+private func gmacroConvertDeviceInfoEnums(_ payload: [String: Any]) -> [String: Any] {
+  var result = payload
+
+  // rapidList: key(GamepadKey), turbo(TurboMode) → rawValue
+  if let rapidList = result["rapidList"] as? [[String: Any]] {
+    result["rapidList"] = rapidList.map { item in
+      var m = item
+      if let key = m["key"] as? GamepadKey { m["key"] = key.rawValue }
+      if let turbo = m["turbo"] as? TurboMode { m["turbo"] = Int(turbo.rawValue) }
+      return m
+    }
+  }
+
+  // stick 子字段转换
+  func convertStick(_ stick: [String: Any]?) -> [String: Any]? {
+    guard var s = stick else { return nil }
+    if let v = s["triggerMode"] as? CurveTriggerMode { s["triggerMode"] = Int(v.rawValue) }
+    if let v = s["triggerKey"] as? GamepadKey { s["triggerKey"] = v.rawValue }
+    if let v = s["outputGraphic"] as? OutputGraphics { s["outputGraphic"] = Int(v.rawValue) }
+    return s
+  }
+
+  result["leftStick"] = convertStick(result["leftStick"] as? [String: Any])
+  result["rightStick"] = convertStick(result["rightStick"] as? [String: Any])
+
+  // motion 子字段转换
+  if var motion = result["motion"] as? [String: Any] {
+    if let v = motion["triggerMode"] as? MotionTriggerMode { motion["triggerMode"] = Int(v.rawValue) }
+    if let v = motion["triggerKey"] as? GamepadKey { motion["triggerKey"] = v.rawValue }
+    if let v = motion["mappingMode"] as? MotionMappingMode { motion["mappingMode"] = Int(v.rawValue) }
+    if let v = motion["axis"] as? GyroAxis { motion["axis"] = Int(v.rawValue) }
+    if let v = motion["secondaryTriggerMode"] as? MotionTriggerMode { motion["secondaryTriggerMode"] = Int(v.rawValue) }
+    if let v = motion["secondaryTriggerKey"] as? GamepadKey { motion["secondaryTriggerKey"] = v.rawValue }
+    result["motion"] = motion
+  }
+
+  return result
 }
 #endif

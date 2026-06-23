@@ -1,3 +1,4 @@
+import 'Models/gmacro_default_info.dart';
 import 'Models/gmacro_methods.dart';
 import 'gmacro_session.dart';
 
@@ -7,12 +8,15 @@ extension GmacroSessionDevice on GmacroSession {
       invoke(GmacroMethods.fetchDeviceVersion);
 
   /// 查询 Game Macro 默认值（完整设备配置）0x77 04
-  Future<Map<String, Object?>> fetchGameMacroDefaultInfo({
+  Future<GmacroDefaultInfo> fetchGameMacroDefaultInfo({
     required int profile,
-  }) => invoke(
-    GmacroMethods.fetchGameMacroDefaultInfo,
-    arguments: {'profile': profile},
-  );
+  }) async {
+    final raw = await invoke(
+      GmacroMethods.fetchGameMacroDefaultInfo,
+      arguments: {'profile': profile},
+    );
+    return GmacroDefaultInfo.fromMap(raw);
+  }
 
   /// 查询设备信息
   Future<Map<String, Object?>> fetchMobapadDeviceInfo({required int profile}) =>
