@@ -223,7 +223,6 @@ extension DataHelper {
         
         var payload = Data()
         payload.append(Data.from(subID, count: 1))     // subID
-        payload.append(Data.from(0x05, count: 1))      // Dev
         payload.append(Data.from(profile, count: 1))   // profile
         
         let all = dataFrom(protocolID: protocolID, payload: payload)
@@ -239,7 +238,6 @@ extension DataHelper {
         
         var payload = Data()
         payload.append(Data.from(subID, count: 1))     // subID
-        payload.append(Data.from(0x05, count: 1))      // Dev
         payload.append(Data.from(profile, count: 1))   // profile
         
         let all = dataFrom(protocolID: protocolID, payload: payload)
@@ -447,13 +445,11 @@ extension DataHelper {
     }
     
     // MARK: - 手柄配置页解析 0x81
-    /// 格式: [subID][dev][result]
-    /// subID 0x01/0x02 → value = result 直接传出
+    /// 格式: [subID][result]
     func analyzeHandleProfile(_ data: Data) -> [String: Any] {
         var parser = DataParser(data)
         
         _ = parser.next(1)   // subID
-        _ = parser.next(1)   // dev
         
         let result = parser.next(1).toInt()
         
