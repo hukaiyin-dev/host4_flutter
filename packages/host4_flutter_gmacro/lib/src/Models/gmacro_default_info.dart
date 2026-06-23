@@ -229,6 +229,25 @@ class GmacroMotionDefaultConfig {
     secondarySensitivity:  gmacroToInt(map['secondarySensitivity']),
   );
 
+  Map<String, Object?> toMap() => {
+    'enabled': enabled,
+    'mappingEnabled': mappingEnabled,
+    'triggerMode': triggerMode,
+    'triggerKey': triggerKey,
+    'deadzone': deadzone,
+    'sensitivity': sensitivity,
+    'mappingMode': mappingMode,
+    'axis': axis,
+    'reverseX': reverseX,
+    'reverseY': reverseY,
+    'deadzoneComp': deadzoneComp,
+    'curve': curve.map((e) => e.toMap()).toList(),
+    'secondaryEnabled': secondaryEnabled,
+    'secondaryTriggerMode': secondaryTriggerMode,
+    'secondaryTriggerKey': secondaryTriggerKey,
+    'secondarySensitivity': secondarySensitivity,
+  };
+
   @override
   String toString() =>
       'Motion(enabled: $enabled, sens: $sensitivity, mode: $mappingMode)';
