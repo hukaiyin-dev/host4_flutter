@@ -4,6 +4,7 @@ import com.host4.platform.kr.response.AlignGyroscopeRsp
 import com.host4.platform.kr.response.AlignRockerOrTriggerRsp
 import com.host4.platform.kr.response.BaseRsp
 import com.host4.platform.kr.response.LinerTriggerRsp
+import com.host4.platform.kr.response.MacroHandleConfigRsp
 import com.host4.platform.kr.response.MacroProfileRsp
 import com.host4.platform.kr.response.QueryCurrentLightEffectRsp
 import com.host4.platform.kr.response.QueryHandleInfoRsp
@@ -197,6 +198,25 @@ internal object GmacroCallbackBridge {
     }
 
     /**
+     * 0x77 04 查询 Game Macro 默认值，与 Dart GmacroDefaultInfo 字段对齐。
+     */
+    fun fetchGameMacroDefaultInfo(result: MethodChannel.Result): OnMessageCallback<MacroHandleConfigRsp> {
+        return OnMessageCallback { code, rsp ->
+            mainHandler.post {
+                if (code == Constants.SUCCESS || code == 80) {
+                    result.success(GmacroDefaultInfoMapper.toMap(rsp))
+                } else {
+                    result.error(
+                        "gmacro-method-failed",
+                        "GMacro method failed with code=$code",
+                        GmacroResponseSerializer.toMap(rsp),
+                    )
+                }
+            }
+        }
+    }
+
+    /**
      * 查询左右扳机线性输出
      * final leftMode
      * final leftThreshold
@@ -233,6 +253,96 @@ internal object GmacroCallbackBridge {
                 "gmacro-method-failed",
                 "GMacro method failed with code=$code",
                 GmacroResponseSerializer.toMap(rsp),
+            )
+        }
+    }
+}
+
+private object GmacroDefaultInfoMapper {
+    fun toMap(rsp: MacroHandleConfigRsp): Map<String, Any?> {
+        val trigger = rsp.macroTrigger
+        val rocker = rsp.macroRocker
+        val vibration = rsp.macroVibrate
+        val motion = rsp.macroKinect
+
+        return mapOf(
+            "rapidList" to rsp.torrents.orEmpty().map {
+                mapOf(
+                    "key" to it.code,
+                    "turbo" to it.mode,
+                    "speed" to it.speed,
+                )
+            },
+            "leftTrigger" to mapOf(
+                "start" to (trigger?.startLeft ?: 0),
+                "end" to (trigger?.terminationLeft ?: 0),
+                "pointCount" to (trigger?.pointCountLeft ?: 0),
+                "points" to points(trigger?.leftPointList),
+                "fastTrigger" to (trigger?.isMacroSwitchLeft ?: false),
+            ),
+            "rightTrigger" to mapOf(
+                "start" to (trigger?.startRight ?: 0),
+                "end" to (trigger?.terminationRight ?: 0),
+                "pointCount" to (trigger?.pointCountRight ?: 0),
+                "points" to points(trigger?.rightPointList),
+                "fastTrigger" to (trigger?.isMacroSwitchRight ?: false),
+            ),
+            "leftStick" to mapOf(
+                "deadzoneComp" to (rocker?.deathZoneLeft ?: 0),
+                "returnComp" to (rocker?.maxOutLeft ?: 0),
+                "start" to (rocker?.x_startLeft ?: 0),
+                "end" to (rocker?.x_terminationLeft ?: 0),
+                "reverseX" to (rocker?.isX_isExchangeLeft ?: false),
+                "reverseY" to (rocker?.isY_isExchangeLeft ?: false),
+                "triggerMode" to (rocker?.curveApplyLeft ?: 0),
+                "triggerKey" to (rocker?.curveKeyLeft ?: 0),
+                "outputGraphic" to if (rocker?.isLineCorrectionLeft == true) 1 else 0,
+                "pointCount" to (rocker?.pointCountLeft ?: 0),
+                "points" to points(rocker?.leftPointList),
+            ),
+            "rightStick" to mapOf(
+                "deadzoneComp" to (rocker?.deathZoneRight ?: 0),
+                "returnComp" to (rocker?.maxOutRight ?: 0),
+                "start" to (rocker?.x_startRight ?: 0),
+                "end" to (rocker?.x_terminationRight ?: 0),
+                "reverseX" to (rocker?.isX_isExchangeRight ?: false),
+                "reverseY" to (rocker?.isY_isExchangeRight ?: false),
+                "triggerMode" to (rocker?.curveApplyRight ?: 0),
+                "triggerKey" to (rocker?.curveKeyRight ?: 0),
+                "outputGraphic" to if (rocker?.isLineCorrectionRight == true) 1 else 0,
+                "pointCount" to (rocker?.pointCountRight ?: 0),
+                "points" to points(rocker?.rightPointList),
+            ),
+            "vibration" to mapOf(
+                "left" to (vibration?.vibrationLeft ?: 0),
+                "right" to (vibration?.vibrationRight ?: 0),
+            ),
+            "motion" to mapOf(
+                "enabled" to (motion?.isMotionSwitch ?: false),
+                "mappingEnabled" to (motion?.isMotionMapperSwitch ?: false),
+                "triggerMode" to (motion?.motionMethod ?: 0),
+                "triggerKey" to (motion?.motionKey ?: 0),
+                "deadzone" to (motion?.motionDeathZone ?: 0),
+                "sensitivity" to (motion?.motionSensitivity ?: 0),
+                "mappingMode" to (motion?.motionMapperModel ?: 0),
+                "axis" to 0,
+                "reverseX" to false,
+                "reverseY" to (motion?.isMotionYaxisSwitch ?: false),
+                "deadzoneComp" to 0,
+                "curve" to emptyList<Map<String, Int>>(),
+                "secondaryEnabled" to false,
+                "secondaryTriggerMode" to 0,
+                "secondaryTriggerKey" to 0,
+                "secondarySensitivity" to 0,
+            ),
+        )
+    }
+
+    private fun points(points: List<com.host4.platform.kr.model.MacroPoint>?): List<Map<String, Int>> {
+        return points.orEmpty().map {
+            mapOf(
+                "x" to it.x_axis,
+                "y" to it.y_axis,
             )
         }
     }

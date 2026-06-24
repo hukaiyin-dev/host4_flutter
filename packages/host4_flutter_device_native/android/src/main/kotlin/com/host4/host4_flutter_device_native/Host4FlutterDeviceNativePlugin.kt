@@ -290,9 +290,6 @@ class Host4FlutterDeviceNativePlugin :
         val stateListener = BluetoothStateListener { _, status ->
             record.lastTransportStatus = status
             eventHandler.emit(TransportEventMapper.mapTransportEvent(status))
-            if (status == Constants.COMPLETE_CONNECT) {
-                emitProtocolReadyForTransport(sessionId)
-            }
         }
 
         platformSdk.connectBle(
@@ -441,9 +438,6 @@ class Host4FlutterDeviceNativePlugin :
         val record = activeUsbTransport ?: return@UsbConnectListener
         record.lastTransportStatus = status
         record.eventHandler.emit(UsbTransportEventMapper.mapTransportEvent(status))
-        if (status == ReliableUsbCommManager.CONNECT_COMPLETED) {
-            emitProtocolReadyForTransport(record.sessionId)
-        }
     }
 
     private fun handleDisconnectTransport(call: MethodCall, result: Result) {
@@ -667,12 +661,6 @@ class Host4FlutterDeviceNativePlugin :
         } else {
             platformSdk.registerUpgradeListener(protocolRecord.deviceKey, callback)
         }
-    }
-
-    private fun emitProtocolReadyForTransport(transportSessionId: String) {
-        protocolSessions.values
-            .filter { it.transportSessionId == transportSessionId }
-            .forEach { it.eventHandler.emit(mapOf("type" to "ready")) }
     }
 
     private fun removeProtocolSessionsForTransport(transportSessionId: String) {

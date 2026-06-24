@@ -33,7 +33,10 @@ internal object GmacroMethodInvoker {
                 // 0x77 04 查询 Game Macro 默认值
                 Host4FlutterGmacroConstants.fetchGameMacroDefaultInfo -> {
                     val profile = GmacroArgParser.intArg(arguments, "profile")
-                    commands.queryMacroHandleReq(profile,GmacroCallbackBridge.message(result))
+                    commands.queryMacroHandleReq(
+                        profile,
+                        GmacroCallbackBridge.fetchGameMacroDefaultInfo(result),
+                    )
                 }
                 //0x77 08
                 Host4FlutterGmacroConstants.fetchMobapadDeviceInfo -> {
