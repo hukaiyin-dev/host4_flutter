@@ -1745,37 +1745,16 @@ private enum BridgeArgumentError: LocalizedError {
 private func gmacroConvertDeviceInfoEnums(_ payload: [String: Any]) -> [String: Any] {
   var result = payload
 
-  // rapidList: key(GamepadKey), turbo(TurboMode) → rawValue
+  // rapidList: key(GamepadKey), mode(TurboMode) → rawValue
   if let rapidList = result["rapidList"] as? [[String: Any]] {
     result["rapidList"] = rapidList.map { item in
       var m = item
       if let key = m["key"] as? GamepadKey { m["key"] = key.rawValue }
-      if let turbo = m["turbo"] as? TurboMode { m["turbo"] = Int(turbo.rawValue) }
+      if let mode = m["mode"] as? TurboMode { m["mode"] = Int(mode.rawValue) }
+      // 兼容旧字段名 turbo
+      if let turbo = m["turbo"] as? TurboMode { m["mode"] = Int(turbo.rawValue); m.removeValue(forKey: "turbo") }
       return m
     }
-  }
-
-  // stick 子字段转换
-  func convertStick(_ stick: [String: Any]?) -> [String: Any]? {
-    guard var s = stick else { return nil }
-    if let v = s["triggerMode"] as? CurveTriggerMode { s["triggerMode"] = Int(v.rawValue) }
-    if let v = s["triggerKey"] as? GamepadKey { s["triggerKey"] = v.rawValue }
-    if let v = s["outputGraphic"] as? OutputGraphics { s["outputGraphic"] = Int(v.rawValue) }
-    return s
-  }
-
-  result["leftStick"] = convertStick(result["leftStick"] as? [String: Any])
-  result["rightStick"] = convertStick(result["rightStick"] as? [String: Any])
-
-  // motion 子字段转换
-  if var motion = result["motion"] as? [String: Any] {
-    if let v = motion["triggerMode"] as? MotionTriggerMode { motion["triggerMode"] = Int(v.rawValue) }
-    if let v = motion["triggerKey"] as? GamepadKey { motion["triggerKey"] = v.rawValue }
-    if let v = motion["mappingMode"] as? MotionMappingMode { motion["mappingMode"] = Int(v.rawValue) }
-    if let v = motion["axis"] as? GyroAxis { motion["axis"] = Int(v.rawValue) }
-    if let v = motion["secondaryTriggerMode"] as? MotionTriggerMode { motion["secondaryTriggerMode"] = Int(v.rawValue) }
-    if let v = motion["secondaryTriggerKey"] as? GamepadKey { motion["secondaryTriggerKey"] = v.rawValue }
-    result["motion"] = motion
   }
 
   return result

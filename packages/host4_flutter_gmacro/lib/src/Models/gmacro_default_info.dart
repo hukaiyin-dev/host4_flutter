@@ -1,162 +1,148 @@
 /// 0x77 04 fetchGameMacroDefaultInfo 响应数据模型
 ///
-/// 对应 iOS SDK `analyzeGameMacroDeviceInfo` 的解析结果。
-/// 所有枚举字段已在 iOS Plugin 层转为 Int rawValue，直接使用即可。
+/// 对应 iOS SDK `analyzeGameMacroDeviceInfo` 解析结果。
+/// 枚举字段已在 iOS Plugin 层转为 Int rawValue。
 ///
 /// 使用示例:
 /// ```dart
 /// final info = await session.fetchGameMacroDefaultInfo(profile: 0);
-/// print(info.vibration.left);       // int, 0-100
-/// print(info.leftStick.reverseX);   // bool
-/// print(info.motion.sensitivity);   // int
+/// print(info.vibration.left);         // int
+/// print(info.leftStickX.reverse);     // int
+/// print(info.motion.sensitivity);     // int
 /// ```
 import 'gmacro_model_parsers.dart';
 
-/// 0x77 04 曲线坐标点（int 版，0-100）
-class GmacroDefaultCurvePoint {
-  final int x;
-  final int y;
-  const GmacroDefaultCurvePoint({required this.x, required this.y});
+// ─── 连发 ───
 
-  factory GmacroDefaultCurvePoint.fromMap(Map map) => GmacroDefaultCurvePoint(
-    x: gmacroToInt(map['x']),
-    y: gmacroToInt(map['y']),
-  );
-
-  Map<String, Object?> toMap() => {'x': x, 'y': y};
-
-  @override
-  String toString() => '($x, $y)';
-}
-
-// ─── 连发配置 ───
-
-/// 0x77 04 连发配置
-class GmacroRapidFireConfig {
-  final int key;      // GamepadKey rawValue
-  final int turbo;    // TurboMode rawValue
+class GmacroRapidFireItem {
+  final int key;   // GamepadKey rawValue
+  final int mode;  // TurboMode rawValue
   final int speed;
-  const GmacroRapidFireConfig({required this.key, required this.turbo, required this.speed});
+  const GmacroRapidFireItem({required this.key, required this.mode, required this.speed});
 
-  factory GmacroRapidFireConfig.fromMap(Map map) => GmacroRapidFireConfig(
+  factory GmacroRapidFireItem.fromMap(Map map) => GmacroRapidFireItem(
     key:   gmacroToInt(map['key']),
-    turbo: gmacroToInt(map['turbo']),
+    mode:  gmacroToInt(map['mode']),
     speed: gmacroToInt(map['speed']),
   );
 
-  Map<String, Object?> toMap() => {'key': key, 'turbo': turbo, 'speed': speed};
+  Map<String, Object?> toMap() => {'key': key, 'mode': mode, 'speed': speed};
 
   @override
-  String toString() => 'RapidFire(key: $key, turbo: $turbo, speed: $speed)';
+  String toString() => 'RapidFire(key: $key, mode: $mode, speed: $speed)';
 }
 
-// ─── 扳机配置 ───
+// ─── 扳机 ───
 
-/// 0x77 04 扳机配置
 class GmacroTriggerDefaultConfig {
   final int start;
   final int end;
+  final bool macroOn;
+  final int macroThreshold;
   final int pointCount;
-  final List<GmacroDefaultCurvePoint> points;
-  final bool fastTrigger;
+  final List<List<int>> points;
+
   const GmacroTriggerDefaultConfig({
     required this.start,
     required this.end,
+    required this.macroOn,
+    required this.macroThreshold,
     required this.pointCount,
     required this.points,
-    required this.fastTrigger,
   });
 
   factory GmacroTriggerDefaultConfig.fromMap(Map map) => GmacroTriggerDefaultConfig(
-    start:      gmacroToInt(map['start']),
-    end:        gmacroToInt(map['end']),
-    pointCount: gmacroToInt(map['pointCount']),
-    fastTrigger: map['fastTrigger'] == true,
-    points:     _parsePoints(map['points']),
+    start:          gmacroToInt(map['start']),
+    end:            gmacroToInt(map['end']),
+    macroOn:        map['macroOn'] == true,
+    macroThreshold: gmacroToInt(map['macroThreshold']),
+    pointCount:     gmacroToInt(map['pointCount']),
+    points:         _parsePointPairs(map['points']),
   );
 
   Map<String, Object?> toMap() => {
-    'start': start,
-    'end': end,
-    'pointCount': pointCount,
-    'points': points.map((e) => e.toMap()).toList(),
-    'fastTrigger': fastTrigger,
+    'start': start, 'end': end,
+    'macroOn': macroOn, 'macroThreshold': macroThreshold,
+    'pointCount': pointCount, 'points': points,
   };
 
   @override
   String toString() =>
-      'Trigger(start: $start, end: $end, points: $pointCount, fast: $fastTrigger)';
+      'Trigger(start: $start-$end, macro: $macroOn, points: $pointCount)';
 }
 
-// ─── 摇杆配置 ───
+// ─── 摇杆轴向 ───
 
-/// 0x77 04 摇杆默认配置
-class GmacroStickDefaultConfig {
-  final int deadzoneComp;
-  final int returnComp;
+class GmacroStickAxisConfig {
   final int start;
   final int end;
-  final bool reverseX;
-  final bool reverseY;
-  final int triggerMode;    // CurveTriggerMode rawValue
-  final int triggerKey;     // GamepadKey rawValue
-  final int outputGraphic;  // OutputGraphics rawValue
-  final int pointCount;
-  final List<GmacroDefaultCurvePoint> points;
+  final int sensitivity;
+  final int reverse; // 0/1
 
-  const GmacroStickDefaultConfig({
-    required this.deadzoneComp,
-    required this.returnComp,
-    required this.start,
-    required this.end,
-    required this.reverseX,
-    required this.reverseY,
-    required this.triggerMode,
-    required this.triggerKey,
-    required this.outputGraphic,
-    required this.pointCount,
+  const GmacroStickAxisConfig({
+    required this.start, required this.end,
+    required this.sensitivity, required this.reverse,
+  });
+
+  factory GmacroStickAxisConfig.fromMap(Map map) => GmacroStickAxisConfig(
+    start:       gmacroToInt(map['start']),
+    end:         gmacroToInt(map['end']),
+    sensitivity: gmacroToInt(map['sensitivity']),
+    reverse:     gmacroToInt(map['reverse']),
+  );
+
+  Map<String, Object?> toMap() =>
+      {'start': start, 'end': end, 'sensitivity': sensitivity, 'reverse': reverse};
+
+  @override
+  String toString() =>
+      'StickAxis(start: $start-$end, sens: $sensitivity, reverse: $reverse)';
+}
+
+// ─── 摇杆按键附加 ───
+
+class GmacroStickKeyConfig {
+  final int deadZoneShape;
+  final int maxOutput;
+  final int curveApply;
+  final int curveApplyKey;
+  final int lineCorrection;
+  final int pointCount;
+  final List<List<int>> points;
+
+  const GmacroStickKeyConfig({
+    required this.deadZoneShape, required this.maxOutput,
+    required this.curveApply, required this.curveApplyKey,
+    required this.lineCorrection, required this.pointCount,
     required this.points,
   });
 
-  factory GmacroStickDefaultConfig.fromMap(Map map) => GmacroStickDefaultConfig(
-    deadzoneComp:  gmacroToInt(map['deadzoneComp']),
-    returnComp:    gmacroToInt(map['returnComp']),
-    start:         gmacroToInt(map['start']),
-    end:           gmacroToInt(map['end']),
-    reverseX:      map['reverseX'] == true,
-    reverseY:      map['reverseY'] == true,
-    triggerMode:   gmacroToInt(map['triggerMode']),
-    triggerKey:    gmacroToInt(map['triggerKey']),
-    outputGraphic: gmacroToInt(map['outputGraphic']),
-    pointCount:    gmacroToInt(map['pointCount']),
-    points:        _parsePoints(map['points']),
+  factory GmacroStickKeyConfig.fromMap(Map map) => GmacroStickKeyConfig(
+    deadZoneShape:  gmacroToInt(map['deadZoneShape']),
+    maxOutput:      gmacroToInt(map['maxOutput']),
+    curveApply:     gmacroToInt(map['curveApply']),
+    curveApplyKey:  gmacroToInt(map['curveApplyKey']),
+    lineCorrection: gmacroToInt(map['lineCorrection']),
+    pointCount:     gmacroToInt(map['pointCount']),
+    points:         _parsePointPairs(map['points']),
   );
 
   Map<String, Object?> toMap() => {
-    'deadzoneComp': deadzoneComp,
-    'returnComp': returnComp,
-    'start': start,
-    'end': end,
-    'reverseX': reverseX,
-    'reverseY': reverseY,
-    'triggerMode': triggerMode,
-    'triggerKey': triggerKey,
-    'outputGraphic': outputGraphic,
-    'pointCount': pointCount,
-    'points': points.map((e) => e.toMap()).toList(),
+    'deadZoneShape': deadZoneShape, 'maxOutput': maxOutput,
+    'curveApply': curveApply, 'curveApplyKey': curveApplyKey,
+    'lineCorrection': lineCorrection, 'pointCount': pointCount, 'points': points,
   };
 
   @override
   String toString() =>
-      'Stick(start: $start-$end, dead: $deadzoneComp, revX: $reverseX, revY: $reverseY)';
+      'StickKey(dead: $deadZoneShape, max: $maxOutput, curve: $curveApply)';
 }
 
-// ─── 振动配置 ───
+// ─── 振动 ───
 
-/// 0x77 04 振动配置
 class GmacroVibrationDefaultConfig {
-  final int left;   // 0-100
-  final int right;  // 0-100
+  final int left;
+  final int right;
   const GmacroVibrationDefaultConfig({required this.left, required this.right});
 
   factory GmacroVibrationDefaultConfig.fromMap(Map map) => GmacroVibrationDefaultConfig(
@@ -170,107 +156,64 @@ class GmacroVibrationDefaultConfig {
   String toString() => 'Vibration(left: $left, right: $right)';
 }
 
-// ─── 体感配置 ───
+// ─── 体感 ───
 
-/// 0x77 04 体感默认配置
 class GmacroMotionDefaultConfig {
-  final bool enabled;
-  final bool mappingEnabled;
-  final int triggerMode;         // MotionTriggerMode rawValue
-  final int triggerKey;          // GamepadKey rawValue
-  final int deadzone;
   final int sensitivity;
-  final int mappingMode;         // MotionMappingMode rawValue
-  final int axis;                // GyroAxis rawValue
-  final bool reverseX;
-  final bool reverseY;
-  final int deadzoneComp;
-  final List<GmacroDefaultCurvePoint> curve;
-  final bool secondaryEnabled;
-  final int secondaryTriggerMode;
-  final int secondaryTriggerKey;
-  final int secondarySensitivity;
+  final int yReverse;
+  final int motionSwitch;
+  final int mappingSwitch;
+  final int triggerMode;
+  final int triggerKey;
+  final int deadZone;
+  final int mapping;
 
   const GmacroMotionDefaultConfig({
-    required this.enabled,
-    required this.mappingEnabled,
-    required this.triggerMode,
-    required this.triggerKey,
-    required this.deadzone,
-    required this.sensitivity,
-    required this.mappingMode,
-    required this.axis,
-    required this.reverseX,
-    required this.reverseY,
-    required this.deadzoneComp,
-    required this.curve,
-    required this.secondaryEnabled,
-    required this.secondaryTriggerMode,
-    required this.secondaryTriggerKey,
-    required this.secondarySensitivity,
+    required this.sensitivity, required this.yReverse,
+    required this.motionSwitch, required this.mappingSwitch,
+    required this.triggerMode, required this.triggerKey,
+    required this.deadZone, required this.mapping,
   });
 
   factory GmacroMotionDefaultConfig.fromMap(Map map) => GmacroMotionDefaultConfig(
-    enabled:               map['enabled'] == true,
-    mappingEnabled:        map['mappingEnabled'] == true,
-    triggerMode:           gmacroToInt(map['triggerMode']),
-    triggerKey:            gmacroToInt(map['triggerKey']),
-    deadzone:              gmacroToInt(map['deadzone']),
-    sensitivity:           gmacroToInt(map['sensitivity']),
-    mappingMode:           gmacroToInt(map['mappingMode']),
-    axis:                  gmacroToInt(map['axis']),
-    reverseX:              map['reverseX'] == true,
-    reverseY:              map['reverseY'] == true,
-    deadzoneComp:          gmacroToInt(map['deadzoneComp']),
-    curve:                 _parsePoints(map['curve']),
-    secondaryEnabled:      map['secondaryEnabled'] == true,
-    secondaryTriggerMode:  gmacroToInt(map['secondaryTriggerMode']),
-    secondaryTriggerKey:   gmacroToInt(map['secondaryTriggerKey']),
-    secondarySensitivity:  gmacroToInt(map['secondarySensitivity']),
+    sensitivity:   gmacroToInt(map['sensitivity']),
+    yReverse:      gmacroToInt(map['yReverse']),
+    motionSwitch:  gmacroToInt(map['switch']),
+    mappingSwitch: gmacroToInt(map['mappingSwitch']),
+    triggerMode:   gmacroToInt(map['triggerMode']),
+    triggerKey:    gmacroToInt(map['triggerKey']),
+    deadZone:      gmacroToInt(map['deadZone']),
+    mapping:       gmacroToInt(map['mapping']),
   );
-
-  Map<String, Object?> toMap() => {
-    'enabled': enabled,
-    'mappingEnabled': mappingEnabled,
-    'triggerMode': triggerMode,
-    'triggerKey': triggerKey,
-    'deadzone': deadzone,
-    'sensitivity': sensitivity,
-    'mappingMode': mappingMode,
-    'axis': axis,
-    'reverseX': reverseX,
-    'reverseY': reverseY,
-    'deadzoneComp': deadzoneComp,
-    'curve': curve.map((e) => e.toMap()).toList(),
-    'secondaryEnabled': secondaryEnabled,
-    'secondaryTriggerMode': secondaryTriggerMode,
-    'secondaryTriggerKey': secondaryTriggerKey,
-    'secondarySensitivity': secondarySensitivity,
-  };
 
   @override
   String toString() =>
-      'Motion(enabled: $enabled, sens: $sensitivity, mode: $mappingMode)';
+      'Motion(sens: $sensitivity, switch: $motionSwitch, mode: $triggerMode)';
 }
 
 // ─── 总体返回 ───
 
-/// 0x77 04 fetchGameMacroDefaultInfo 完整响应
 class GmacroDefaultInfo {
-  final List<GmacroRapidFireConfig> rapidList;
+  final List<GmacroRapidFireItem> rapidList;
   final GmacroTriggerDefaultConfig leftTrigger;
   final GmacroTriggerDefaultConfig rightTrigger;
-  final GmacroStickDefaultConfig leftStick;
-  final GmacroStickDefaultConfig rightStick;
+  final int stickSwap;
+  final GmacroStickAxisConfig leftStickX;
+  final GmacroStickAxisConfig leftStickY;
+  final GmacroStickAxisConfig rightStickX;
+  final GmacroStickAxisConfig rightStickY;
+  final GmacroStickKeyConfig leftStickKey;
+  final GmacroStickKeyConfig rightStickKey;
   final GmacroVibrationDefaultConfig vibration;
   final GmacroMotionDefaultConfig motion;
 
   const GmacroDefaultInfo({
     required this.rapidList,
-    required this.leftTrigger,
-    required this.rightTrigger,
-    required this.leftStick,
-    required this.rightStick,
+    required this.leftTrigger, required this.rightTrigger,
+    required this.stickSwap,
+    required this.leftStickX, required this.leftStickY,
+    required this.rightStickX, required this.rightStickY,
+    required this.leftStickKey, required this.rightStickKey,
     required this.vibration,
     required this.motion,
   });
@@ -278,35 +221,43 @@ class GmacroDefaultInfo {
   factory GmacroDefaultInfo.fromMap(Map<dynamic, dynamic> map) {
     final raw = Map<String, dynamic>.from(map);
     return GmacroDefaultInfo(
-      rapidList:    _parseList<GmacroRapidFireConfig>(raw['rapidList'], GmacroRapidFireConfig.fromMap),
-      leftTrigger:  GmacroTriggerDefaultConfig.fromMap(_safeMap(raw['leftTrigger'])),
-      rightTrigger: GmacroTriggerDefaultConfig.fromMap(_safeMap(raw['rightTrigger'])),
-      leftStick:    GmacroStickDefaultConfig.fromMap(_safeMap(raw['leftStick'])),
-      rightStick:   GmacroStickDefaultConfig.fromMap(_safeMap(raw['rightStick'])),
-      vibration:    GmacroVibrationDefaultConfig.fromMap(_safeMap(raw['vibration'])),
-      motion:       GmacroMotionDefaultConfig.fromMap(_safeMap(raw['motion'])),
+      rapidList:    _parseRapidList(raw['rapidList']),
+      leftTrigger:  GmacroTriggerDefaultConfig.fromMap(_m(raw['leftTrigger'])),
+      rightTrigger: GmacroTriggerDefaultConfig.fromMap(_m(raw['rightTrigger'])),
+      stickSwap:    gmacroToInt(raw['stickSwap']),
+      leftStickX:   GmacroStickAxisConfig.fromMap(_m(raw['leftStickX'])),
+      leftStickY:   GmacroStickAxisConfig.fromMap(_m(raw['leftStickY'])),
+      rightStickX:  GmacroStickAxisConfig.fromMap(_m(raw['rightStickX'])),
+      rightStickY:  GmacroStickAxisConfig.fromMap(_m(raw['rightStickY'])),
+      leftStickKey: GmacroStickKeyConfig.fromMap(_m(raw['leftStickKey'])),
+      rightStickKey:GmacroStickKeyConfig.fromMap(_m(raw['rightStickKey'])),
+      vibration:    GmacroVibrationDefaultConfig.fromMap(_m(raw['vibration'])),
+      motion:       GmacroMotionDefaultConfig.fromMap(_m(raw['motion'])),
     );
   }
 
   @override
   String toString() =>
-      'GmacroDefaultInfo(rapid: ${rapidList.length}, '
-      'vib: $vibration, motion: $motion)';
+      'GmacroDefaultInfo(rapid: ${rapidList.length}, vib: $vibration, motion: $motion)';
 }
 
-// ─── 内部工具函数 ───
+// ─── 工具函数 ───
 
-List<GmacroDefaultCurvePoint> _parsePoints(dynamic raw) {
-  if (raw is! List) return const [];
-  return raw.whereType<Map>().map(GmacroDefaultCurvePoint.fromMap).toList();
-}
-
-List<T> _parseList<T>(dynamic raw, T Function(Map) fromMap) {
-  if (raw is! List) return const [];
-  return raw.whereType<Map>().map(fromMap).toList();
-}
-
-Map<String, dynamic> _safeMap(dynamic value) {
+Map<String, dynamic> _m(dynamic value) {
   if (value is Map) return Map<String, dynamic>.from(value);
   return {};
+}
+
+List<GmacroRapidFireItem> _parseRapidList(dynamic raw) {
+  if (raw is! List) return const [];
+  return raw.whereType<Map>().map(GmacroRapidFireItem.fromMap).toList();
+}
+
+/// points 格式: [[x1,y1], [x2,y2], ...]
+List<List<int>> _parsePointPairs(dynamic raw) {
+  if (raw is! List) return const [];
+  return raw.whereType<List>().map((p) {
+    return [gmacroToInt(p.elementAtOrNull(0)),
+            gmacroToInt(p.elementAtOrNull(1))];
+  }).toList();
 }
