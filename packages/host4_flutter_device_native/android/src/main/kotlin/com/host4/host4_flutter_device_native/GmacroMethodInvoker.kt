@@ -399,16 +399,19 @@ internal object GmacroMethodInvoker {
 
                 Host4FlutterGmacroConstants.fetchGyroMappingType -> commands.queryMotionMappingType(GmacroCallbackBridge.message(result))
 
+                //查询支持映射的按键
                 Host4FlutterGmacroConstants.queryMappableKeys -> {
                     val profile = GmacroArgParser.intArg(arguments, "profile")
                     commands.queryMapperSupportReq(profile, GmacroCallbackBridge.message(result))
                 }
 
+                //查询支持映射为手柄的按键
                 Host4FlutterGmacroConstants.queryMappableGamepadKeys -> {
                     val profile = GmacroArgParser.intArg(arguments, "profile")
                     commands.queryMapperSettingReq(profile, GmacroCallbackBridge.message(result))
                 }
 
+                //设置按键映射为手柄
                 Host4FlutterGmacroConstants.setKeyMappings -> {
                     val mappings = GmacroArgParser.mapList(arguments, "keyMappings")
                     val first = mappings.firstOrNull()
@@ -430,6 +433,7 @@ internal object GmacroMethodInvoker {
                         GmacroCallbackBridge.message(result))
                 }
 
+                //设置按键映射为鼠标
                 Host4FlutterGmacroConstants.setMouseKeyMappings -> {
                     val mappings = GmacroArgParser.mapList(arguments, "keyMappings")
                     val first = mappings.firstOrNull()
@@ -452,11 +456,13 @@ internal object GmacroMethodInvoker {
                     )
                 }
 
+                //查询当前按键映射配置
                 Host4FlutterGmacroConstants.queryCurrentMapping -> {
                     val profile = GmacroArgParser.intArg(arguments, "profile")
                     commands.queryMappingKeyReq(profile, GmacroCallbackBridge.message(result))
                 }
 
+                //设置手柄按键映射（支持同时映射多种类型键值）
                 Host4FlutterGmacroConstants.setMultiKeyMapping -> {
                     val mapping = com.host4.platform.kr.model.MultiKeyMapping().apply {
                         setOriginalKey(GmacroArgParser.intArg(arguments, "original"))
@@ -465,8 +471,10 @@ internal object GmacroMethodInvoker {
                     commands.setMultiKeyMapping(mapping, GmacroCallbackBridge.message(result))
                 }
 
+                //获取手柄按键映射
                 Host4FlutterGmacroConstants.queryAllMultiMappings -> commands.queryAllMultiMappingKey(GmacroCallbackBridge.message(result))
 
+                //查询某个手柄按键的多映射配置
                 Host4FlutterGmacroConstants.queryMultiMapping -> commands.queryMultiMappingByKey(
                     GmacroArgParser.intArg(arguments, "original"),
                     GmacroCallbackBridge.message(result),
@@ -499,6 +507,7 @@ internal object GmacroMethodInvoker {
                     )
                 }
 
+                //设置连发
                 Host4FlutterGmacroConstants.setTurboDatas -> {
                     val turbos = GmacroArgParser.mapList(arguments, "keyTurbos")
                     val first = turbos.firstOrNull()
@@ -511,6 +520,7 @@ internal object GmacroMethodInvoker {
                     )
                 }
 
+                //查询支持连发的按键
                 Host4FlutterGmacroConstants.querySupportedTurboKeys -> {
                     val profile = GmacroArgParser.intArg(arguments, "profile")
                     commands.queryBurstSupportReq(profile, GmacroCallbackBridge.message(result))

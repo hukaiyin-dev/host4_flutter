@@ -10,6 +10,17 @@ CLAUDE.md
 .claude
 .vscode
 
+# Dart/Flutter generated local files
+.dart_tool/
+**/.dart_tool/
+
+# Local temp files
+.tmp_jar/
+
+# JetBrains IDE
+.idea/
+*.iml
+
 scripts/
 Server/
 

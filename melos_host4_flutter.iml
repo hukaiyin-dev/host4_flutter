@@ -64,6 +64,12 @@
       <excludeFolder url="file://$MODULE_DIR$/packages/host4_flutter_aivoice/.dart_tool" />
       <excludeFolder url="file://$MODULE_DIR$/packages/host4_flutter_aivoice/.pub" />
       <excludeFolder url="file://$MODULE_DIR$/packages/host4_flutter_aivoice/build" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/host4_flutter_webview/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/host4_flutter_webview/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/host4_flutter_webview/build" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/host4_flutter_system_status/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/host4_flutter_system_status/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/host4_flutter_system_status/build" />
     </content>
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="Dart SDK" level="project" />
