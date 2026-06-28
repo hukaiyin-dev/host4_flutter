@@ -12,14 +12,14 @@
       "id": "obsidian",
       "name": "曜石主题",
       "tokens": "obsidian/tokens.json",
-      "preview": "default/images/theme_preview_obsidian.png",
+      "preview": "obsidian/theme_preview_obsidian.png",
       "previewColor": "#EEF8FF"
     },
     {
       "id": "mint",
       "name": "薄荷主题",
       "tokens": "mint/tokens.json",
-      "preview": "default/images/theme_preview_mint.png",
+      "preview": "mint/theme_preview_mint.png",
       "previewColor": "#FFF4E6"
     }
   ]

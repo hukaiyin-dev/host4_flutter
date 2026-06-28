@@ -27,7 +27,7 @@ class Host4ThemeAssets {
       tokensAssetPath:
           'packages/host4_flutter_ui/assets/themes/obsidian/tokens.json',
       previewAssetPath:
-          'packages/host4_flutter_ui/assets/themes/default/images/theme_preview_obsidian.png',
+          'packages/host4_flutter_ui/assets/themes/obsidian/theme_preview_obsidian.png',
       previewColor: '#EEF8FF',
     ),
     Host4ThemeCatalogEntry(
@@ -36,7 +36,7 @@ class Host4ThemeAssets {
       tokensAssetPath:
           'packages/host4_flutter_ui/assets/themes/mint/tokens.json',
       previewAssetPath:
-          'packages/host4_flutter_ui/assets/themes/default/images/theme_preview_mint.png',
+          'packages/host4_flutter_ui/assets/themes/mint/theme_preview_mint.png',
       previewColor: '#FFF4E6',
     ),
   ];
