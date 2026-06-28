@@ -240,7 +240,6 @@ class _Host4WebViewState extends State<Host4WebView> {
     if (adapter == null) return;
     _controller.runJavaScript(_kGenericBridgeAdapterJs);
     _controller.runJavaScript(adapter.adapterJs);
-    _controller.runJavaScript(_kGenericBridgeAdapterJs);
     if (kDebugMode) {
       _controller.runJavaScript(_kJsDebugSnippet);
     }
