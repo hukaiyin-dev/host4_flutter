@@ -1586,8 +1586,12 @@ class Host4ThemeLoader {
     Map<String, dynamic> json,
     String path,
   ) {
+    // Figma exports use background-primary; fall back to background for older tokens.
+    final backgroundKey = _hasTokenPath(json, '$path.background-primary')
+        ? '$path.background-primary'
+        : '$path.background';
     return Host4ButtonStateTokens(
-      background: _readColor(json, '$path.background'),
+      background: _readColor(json, backgroundKey),
       foreground: _readColor(json, '$path.foreground'),
       border: _readColor(json, '$path.border'),
       opacity: _readDouble(json, '$path.opacity', fallback: 1),
