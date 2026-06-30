@@ -109,33 +109,8 @@ class _Host4DemoBootstrapState extends State<Host4DemoBootstrap> {
         if (snapshot.hasError) {
           debugPrint('[Bootstrap] ERROR: ${snapshot.error}\n${snapshot.stackTrace}');
           return _buildMaterialApp(
-            home: Builder(
-              builder: (context) {
-                final l10n = AppLocalizations.of(context);
-                return Scaffold(
-                  backgroundColor: Colors.white,
-                  body: Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            l10n.themeBootstrapFailed,
-                            style: const TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          Text('${snapshot.error}'),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              },
+            home: const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
             ),
           );
         }

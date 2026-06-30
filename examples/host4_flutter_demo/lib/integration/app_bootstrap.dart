@@ -94,4 +94,13 @@ bool _supportsNativeFirebase(TargetPlatform platform) {
 
 // ── Theme catalog ─────────────────────────────────────────────────────────────
 
-const defaultThemeCatalog = Host4ThemeAssets.defaultCatalog;
+const defaultThemeCatalog = [
+  ...Host4ThemeAssets.defaultCatalog,
+  Host4ThemeCatalogEntry(
+    id: 'grassland',
+    name: 'Grassland Drift',
+    tokensAssetPath: 'assets/themes/grassland/tokens.json',
+    previewAssetPath: null,
+    previewColor: '#D4EDDA',
+  ),
+];
