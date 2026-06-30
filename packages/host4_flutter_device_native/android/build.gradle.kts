@@ -1,3 +1,5 @@
+import java.util.Properties
+
 group = "com.host4.host4_flutter_device_native"
 version = "1.0-SNAPSHOT"
 
@@ -5,6 +7,20 @@ plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
 }
+
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.inputStream().use { localProperties.load(it) }
+}
+
+val flutterSdkPath =
+    localProperties.getProperty("flutter.sdk")
+        ?: error(
+            "flutter.sdk not set in local.properties. " +
+                "Add flutter.sdk=/path/to/flutter (e.g. flutter.sdk=/opt/homebrew/share/flutter)",
+        )
+val engineVersion = file("$flutterSdkPath/bin/cache/engine.stamp").readText().trim()
 
 android {
     namespace = "com.host4.host4_flutter_device_native"
@@ -57,6 +73,15 @@ dependencies {
     implementation("io.reactivex.rxjava2:rxjava:2.2.21")
     implementation("com.polidea.rxandroidble2:rxandroidble:1.19.0")
 
+    // Flutter embedding: normally injected by the Flutter app build; required when opening
+    // this android/ folder standalone in Android Studio.
+    compileOnly("io.flutter:flutter_embedding_debug:1.0.0-$engineVersion") {
+        isTransitive = false
+    }
+
     testImplementation("org.jetbrains.kotlin:kotlin-test")
     testImplementation("org.mockito:mockito-core:5.0.0")
+    testImplementation("io.flutter:flutter_embedding_debug:1.0.0-$engineVersion") {
+        isTransitive = false
+    }
 }
