@@ -1,0 +1,21 @@
+name: host4_flutter_physical_overlay
+description: "Physical-size overlay layout and preview widgets for Host4 Flutter apps."
+version: 0.0.1
+publish_to: none
+homepage:
+
+environment:
+  sdk: ">=3.9.0 <4.0.0"
+  flutter: ">=1.17.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  display_metrics: ^2.3.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:

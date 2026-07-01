@@ -5,6 +5,7 @@ import '../l10n/generated/app_localizations.dart';
 import '../widgets/sub_page_scaffold.dart';
 import 'aivoice_test_page.dart';
 import 'gmacro/gmacro_entry_page.dart';
+import 'silicone_overlay_page.dart';
 import 'tester_page.dart';
 import 'usb_drive_page.dart';
 
@@ -25,6 +26,18 @@ class HomePage extends StatelessWidget {
         color: theme.colors.brandPrimary,
         minHeight: 220,
         builder: (_) => const GmacroEntryPage(),
+      ),
+      _LabEntry(
+        title: '硅胶贴片',
+        subtitle: '物理尺寸热区预研',
+        icon: Icons.control_camera_outlined,
+        color: theme.colors.brandAccent,
+        minHeight: 210,
+        builder: (_) => const SubPageScaffold(
+          title: '硅胶贴片',
+          subtitle: '物理尺寸热区预研',
+          child: SiliconeOverlayPage(),
+        ),
       ),
       _LabEntry(
         title: l10n.labUsbDriveTitle,

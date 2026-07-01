@@ -44,6 +44,8 @@ dependencies:
     path: ../../packages/host4_flutter_crypto
   host4_flutter_module_onboarding:
     path: ../../packages/host4_flutter_module_onboarding
+  host4_flutter_physical_overlay:
+    path: ../../packages/host4_flutter_physical_overlay
   host4_flutter_ui:
     path: ../../packages/host4_flutter_ui
   host4_flutter_system_status:
