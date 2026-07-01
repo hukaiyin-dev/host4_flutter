@@ -71,6 +71,7 @@ extension GmacroSessionTouchMapping on GmacroSession {
   );
 
   /// 设置触点宏按键触发方式。
+  ///touchType 0按下触发 1松开触发 2按住循环
   Future<Map<String, Object?>> setMacroKeyTrigger({
     required int keyCode,
     required int touchType,
@@ -86,6 +87,16 @@ extension GmacroSessionTouchMapping on GmacroSession {
   }) => invoke(
     GmacroMethods.setMacroTerminationKey,
     arguments: {'keyCode': keyCode, 'terminateKey': terminateKey},
+  );
+
+  ///设置触点映射的 turbo 速率
+  ///turbo 速率：1-30
+  Future<Map<String, Object?>> setKeyTurboSpeed({
+    required int keyCode,
+    required int turbo,
+  }) =>invoke(
+    GmacroMethods.setKeyTurboSpeed,
+    arguments: {'keyCode':keyCode,'turbo':turbo}
   );
 
   /// 结束触点映射配置。

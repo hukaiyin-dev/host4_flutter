@@ -107,6 +107,7 @@ internal object Host4FlutterGmacroConstants {
     const val setMacroKey = "setMacroKey"
     const val setMacroKeyTrigger = "setMacroKeyTrigger"
     const val setMacroTerminationKey = "setMacroTerminationKey"
+    const val setKeyTurboSpeed = "setKeyTurboSpeed"
     const val keyMappingEnd = "keyMappingEnd"
 
     // Sleep

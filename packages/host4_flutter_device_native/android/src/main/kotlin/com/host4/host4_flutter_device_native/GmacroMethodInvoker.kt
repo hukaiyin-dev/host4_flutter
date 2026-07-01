@@ -533,6 +533,13 @@ internal object GmacroMethodInvoker {
                     GmacroCallbackBridge.message(result),
                 )
 
+                //设置触点映射的 turbo 速率
+                Host4FlutterGmacroConstants.setKeyTurboSpeed -> commands.setKeyTurboSpeed(
+                    GmacroArgParser.longArg(arguments, "keyCode"),
+                    GmacroArgParser.intArg(arguments, "turbo"),
+                    GmacroCallbackBridge.message(result),
+                )
+
                 //结束触点映射配置
                 Host4FlutterGmacroConstants.keyMappingEnd -> commands.keyMappingEnd(
                     GmacroArgParser.intArg(arguments, "page"),

@@ -109,6 +109,7 @@ abstract final class GmacroMethods {
   static const setMacroKey = 'setMacroKey';
   static const setMacroKeyTrigger = 'setMacroKeyTrigger';
   static const setMacroTerminationKey = 'setMacroTerminationKey';
+  static const setKeyTurboSpeed = 'setKeyTurboSpeed';
   static const keyMappingEnd = 'keyMappingEnd';
 
   // Sleep
