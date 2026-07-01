@@ -11,6 +11,8 @@ abstract final class GmacroMethods {
   static const switchToNormalMode = 'switchToNormalMode';
   static const switchToTestMode = 'switchToTestMode';
   static const switchToConfigMode = 'switchToConfigMode';
+  static const switchToSettingMode = 'switchToSettingMode';
+  static const switchToTouchMappingMode = 'switchToTouchMappingMode';
 
   // Report rate
   static const fetchReportRate = 'fetchReportRate';

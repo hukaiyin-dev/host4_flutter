@@ -7,6 +7,8 @@ internal object GmacroMethodInvoker {
     private const val MODE_NORMAL = 0x04
     private const val MODE_TEST = 0x02
     private const val MODE_MACRO = 0x10
+    private const val MODE_SETTING = 0x01
+    private const val MODE_TOUCH_MAPPING = 0x00
 
     private const val CALIB_ROCKER_SUB_ID = 0x02
     private const val CALIB_TRIGGER_SUB_ID = 0x03
@@ -52,6 +54,9 @@ internal object GmacroMethodInvoker {
                 Host4FlutterGmacroConstants.switchToNormalMode -> commands.setKeyBoardMode(MODE_NORMAL, GmacroCallbackBridge.message(result))
                 Host4FlutterGmacroConstants.switchToTestMode -> commands.setKeyBoardMode(MODE_TEST, GmacroCallbackBridge.message(result))
                 Host4FlutterGmacroConstants.switchToConfigMode -> commands.setKeyBoardMode(MODE_MACRO, GmacroCallbackBridge.message(result))
+                //触点映射配置模式
+                Host4FlutterGmacroConstants.switchToSettingMode -> commands.setKeyBoardMode(MODE_SETTING, GmacroCallbackBridge.message(result))
+                Host4FlutterGmacroConstants.switchToTouchMappingMode -> commands.setKeyBoardMode(MODE_TOUCH_MAPPING, GmacroCallbackBridge.message(result))
 
                 //查询上报率
                 Host4FlutterGmacroConstants.fetchReportRate -> commands.QueryRateOfReturn(GmacroCallbackBridge.message(result))

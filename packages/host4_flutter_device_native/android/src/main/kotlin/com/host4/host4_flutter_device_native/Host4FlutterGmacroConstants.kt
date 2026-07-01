@@ -11,6 +11,8 @@ internal object Host4FlutterGmacroConstants {
     const val switchToNormalMode = "switchToNormalMode"
     const val switchToTestMode = "switchToTestMode"
     const val switchToConfigMode = "switchToConfigMode"
+    const val switchToSettingMode = "switchToSettingMode"
+    const val switchToTouchMappingMode = "switchToTouchMappingMode"
 
     // Report rate
     const val fetchReportRate = "fetchReportRate"

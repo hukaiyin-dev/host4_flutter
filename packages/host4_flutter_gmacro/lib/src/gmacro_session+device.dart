@@ -41,6 +41,14 @@ extension GmacroSessionDevice on GmacroSession {
   Future<Map<String, Object?>> switchToConfigMode() =>
       invoke(GmacroMethods.switchToConfigMode);
 
+  /// 切换到配置触点映射
+  Future<Map<String, Object?>> switchToSettingMode() =>
+      invoke(GmacroMethods.switchToSettingMode);
+
+  ///切换到触点映射模式
+  Future<Map<String,Object?>> switchToTouchMappingMode() =>
+      invoke(GmacroMethods.switchToTouchMappingMode);
+
   /// 查询上报率
   Future<Map<String, Object?>> fetchReportRate() =>
       invoke(GmacroMethods.fetchReportRate);
