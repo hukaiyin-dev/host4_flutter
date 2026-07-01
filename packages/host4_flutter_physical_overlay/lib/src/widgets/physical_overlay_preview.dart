@@ -110,15 +110,20 @@ class _HotZoneView extends StatelessWidget {
         ),
         child: Center(
           child: showLabel
-              ? Text(
-                  zone.label,
-                  maxLines: 1,
-                  overflow: TextOverflow.clip,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: borderColor,
-                    fontSize: (rect.height * 0.34).clamp(8.0, 12.0),
-                    fontWeight: FontWeight.w700,
+              ? Padding(
+                  padding: const EdgeInsets.all(1),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      zone.label,
+                      maxLines: 1,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: const Color(0xFFFFFFFF),
+                        fontSize: (rect.shortestSide * 0.32).clamp(5.0, 9.0),
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                   ),
                 )
               : const SizedBox.shrink(),

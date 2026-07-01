@@ -60,6 +60,15 @@ PhysicalOverlaySpec _tenKeySpec() {
   return const PhysicalOverlaySpec(
     size: PhysicalSizeMm(width: 64, height: 30),
     borderRadiusMm: 4,
+    modules: [
+      PhysicalModuleSpec(
+        id: 'dpad',
+        buttonIds: ['up', 'down', 'left', 'right'],
+      ),
+      PhysicalModuleSpec(id: 'start', buttonIds: ['start']),
+      PhysicalModuleSpec(id: 'select', buttonIds: ['select']),
+      PhysicalModuleSpec(id: 'face', buttonIds: ['a', 'b', 'x', 'y']),
+    ],
     hotZones: [
       PhysicalHotZoneSpec(
         id: 'up',

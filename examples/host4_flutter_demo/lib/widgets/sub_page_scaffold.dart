@@ -8,12 +8,14 @@ class SubPageScaffold extends StatelessWidget {
     required this.title,
     required this.child,
     this.subtitle,
+    this.trailing,
     super.key,
   });
 
   final String title;
   final String? subtitle;
   final Widget child;
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
@@ -36,6 +38,7 @@ class SubPageScaffold extends StatelessWidget {
                   size: 20,
                 ),
               ),
+              trailing: trailing,
             ),
           ),
           Expanded(child: child),

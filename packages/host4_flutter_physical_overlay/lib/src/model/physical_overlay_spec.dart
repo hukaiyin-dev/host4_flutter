@@ -69,18 +69,41 @@ class PhysicalHotZoneSpec {
   final double? borderRadiusMm;
 }
 
+class PhysicalModuleSpec {
+  const PhysicalModuleSpec({required this.id, required this.buttonIds});
+
+  final String id;
+  final List<String> buttonIds;
+}
+
 class PhysicalOverlaySpec {
   const PhysicalOverlaySpec({
     required this.size,
     required this.borderRadiusMm,
     required this.hotZones,
+    required this.modules,
   });
 
   final PhysicalSizeMm size;
   final double borderRadiusMm;
   final List<PhysicalHotZoneSpec> hotZones;
+  final List<PhysicalModuleSpec> modules;
 
   double borderRadiusLogical(PhysicalMetricsProvider provider) {
     return provider.mmToLogicalPixels(borderRadiusMm);
+  }
+
+  /// Returns the module ID for the given button id, or null if not found.
+  String? moduleIdForButton(String buttonId) {
+    for (final m in modules) {
+      if (m.buttonIds.contains(buttonId)) return m.id;
+    }
+    return null;
+  }
+
+  /// Returns all hot zones belonging to the given module.
+  List<PhysicalHotZoneSpec> hotZonesInModule(String moduleId) {
+    final module = modules.firstWhere((m) => m.id == moduleId);
+    return hotZones.where((z) => module.buttonIds.contains(z.id)).toList();
   }
 }

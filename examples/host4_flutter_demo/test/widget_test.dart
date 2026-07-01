@@ -74,7 +74,7 @@ void main() {
     await tester.tap(find.text('硅胶贴片'));
     await tester.pumpAndSettle();
 
-    expect(find.text('64mm x 30mm'), findsOneWidget);
+    expect(find.text('编辑'), findsOneWidget);
     expect(
       find.byWidgetPredicate(
         (widget) =>
@@ -85,6 +85,17 @@ void main() {
     );
     expect(find.text('UP'), findsNothing);
 
+    await tester.tap(find.text('编辑'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('整体'), findsOneWidget);
+    expect(find.text('模块'), findsOneWidget);
+    expect(find.text('按钮'), findsOneWidget);
+    expect(find.text('保存'), findsOneWidget);
+    expect(find.text('重置'), findsOneWidget);
+
+    await tester.tap(find.byIcon(Icons.arrow_back_ios_new_rounded));
+    await tester.pumpAndSettle();
     await tester.tap(find.byIcon(Icons.arrow_back_ios_new_rounded));
     await tester.pumpAndSettle();
 

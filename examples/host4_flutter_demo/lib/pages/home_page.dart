@@ -33,11 +33,7 @@ class HomePage extends StatelessWidget {
         icon: Icons.control_camera_outlined,
         color: theme.colors.brandAccent,
         minHeight: 210,
-        builder: (_) => const SubPageScaffold(
-          title: '硅胶贴片',
-          subtitle: '物理尺寸热区预研',
-          child: SiliconeOverlayPage(),
-        ),
+        builder: (_) => const SiliconeOverlayPage(),
       ),
       _LabEntry(
         title: l10n.labUsbDriveTitle,
