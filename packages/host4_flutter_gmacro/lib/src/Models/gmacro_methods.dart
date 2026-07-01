@@ -11,6 +11,8 @@ abstract final class GmacroMethods {
   static const switchToNormalMode = 'switchToNormalMode';
   static const switchToTestMode = 'switchToTestMode';
   static const switchToConfigMode = 'switchToConfigMode';
+  static const switchToSettingMode = 'switchToSettingMode';
+  static const switchToTouchMappingMode = 'switchToTouchMappingMode';
 
   // Report rate
   static const fetchReportRate = 'fetchReportRate';
@@ -102,6 +104,15 @@ abstract final class GmacroMethods {
   static const setMultiKeyMapping = 'setMultiKeyMapping';
   static const queryAllMultiMappings = 'queryAllMultiMappings';
   static const queryMultiMapping = 'queryMultiMapping';
+
+  // Touch Mapping
+  static const setScreenSize = 'setScreenSize';
+  static const setKeyMapping = 'setKeyMapping';
+  static const setMacroKey = 'setMacroKey';
+  static const setMacroKeyTrigger = 'setMacroKeyTrigger';
+  static const setMacroTerminationKey = 'setMacroTerminationKey';
+  static const setKeyTurboSpeed = 'setKeyTurboSpeed';
+  static const keyMappingEnd = 'keyMappingEnd';
 
   // Sleep
   static const getSleepTime = 'getSleepTime';

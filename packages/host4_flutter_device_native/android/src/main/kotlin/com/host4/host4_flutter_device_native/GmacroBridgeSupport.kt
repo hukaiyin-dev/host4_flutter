@@ -363,6 +363,16 @@ internal object GmacroArgParser {
         return if (arguments.containsKey(key)) intArg(arguments, key) else fallback
     }
 
+    fun longArg(arguments: Map<String, Any?>, key: String): Long {
+        val value = arguments[key] ?: throw IllegalArgumentException("Missing required argument: $key")
+        return when (value) {
+            is Long -> value
+            is Number -> value.toLong()
+            is String -> value.toLong()
+            else -> throw IllegalArgumentException("Invalid long argument '$key': $value")
+        }
+    }
+
     fun boolArg(arguments: Map<String, Any?>, key: String): Boolean {
         val value = arguments[key] ?: throw IllegalArgumentException("Missing required argument: $key")
         return when (value) {

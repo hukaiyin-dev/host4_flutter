@@ -11,6 +11,8 @@ internal object Host4FlutterGmacroConstants {
     const val switchToNormalMode = "switchToNormalMode"
     const val switchToTestMode = "switchToTestMode"
     const val switchToConfigMode = "switchToConfigMode"
+    const val switchToSettingMode = "switchToSettingMode"
+    const val switchToTouchMappingMode = "switchToTouchMappingMode"
 
     // Report rate
     const val fetchReportRate = "fetchReportRate"
@@ -100,6 +102,15 @@ internal object Host4FlutterGmacroConstants {
     const val setMultiKeyMapping = "setMultiKeyMapping"
     const val queryAllMultiMappings = "queryAllMultiMappings"
     const val queryMultiMapping = "queryMultiMapping"
+
+    // Touch Mapping
+    const val setScreenSize = "setScreenSize"
+    const val setKeyMapping = "setKeyMapping"
+    const val setMacroKey = "setMacroKey"
+    const val setMacroKeyTrigger = "setMacroKeyTrigger"
+    const val setMacroTerminationKey = "setMacroTerminationKey"
+    const val setKeyTurboSpeed = "setKeyTurboSpeed"
+    const val keyMappingEnd = "keyMappingEnd"
 
     // Sleep
     const val getSleepTime = "getSleepTime"
