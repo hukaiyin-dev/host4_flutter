@@ -185,11 +185,13 @@ class GmacroSession implements ProtocolSession {
     String method, {
     Map<String, Object?> arguments = const <String, Object?>{},
   }) {
-    return _native.invokeGmacroMethod(
-      protocolSessionId: id,
-      method: method,
-      arguments: arguments,
-    );
+    return _native
+        .invokeGmacroMethod(
+          protocolSessionId: id,
+          method: method,
+          arguments: arguments,
+        )
+        .timeout(const Duration(seconds: 3));
   }
 
   ProtocolEvent _mapProtocolEvent(NativeProtocolEvent event) {
