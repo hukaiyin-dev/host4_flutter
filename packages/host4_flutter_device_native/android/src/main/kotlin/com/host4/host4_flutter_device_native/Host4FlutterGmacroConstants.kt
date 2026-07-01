@@ -101,6 +101,14 @@ internal object Host4FlutterGmacroConstants {
     const val queryAllMultiMappings = "queryAllMultiMappings"
     const val queryMultiMapping = "queryMultiMapping"
 
+    // Touch Mapping
+    const val setScreenSize = "setScreenSize"
+    const val setKeyMapping = "setKeyMapping"
+    const val setMacroKey = "setMacroKey"
+    const val setMacroKeyTrigger = "setMacroKeyTrigger"
+    const val setMacroTerminationKey = "setMacroTerminationKey"
+    const val keyMappingEnd = "keyMappingEnd"
+
     // Sleep
     const val getSleepTime = "getSleepTime"
     const val setSleepTime = "setSleepTime"

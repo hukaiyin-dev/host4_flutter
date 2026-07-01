@@ -23,6 +23,7 @@ export 'src/gmacro_session+device.dart';
 export 'src/gmacro_session+rocker.dart';
 export 'src/gmacro_session+turbo.dart';
 export 'src/gmacro_session+mapping.dart';
+export 'src/gmacro_session+touch_mapping.dart';
 export 'src/gmacro_session+vibration.dart';
 export 'src/gmacro_session+gyro.dart';
 export 'src/host4_gmacro.dart';

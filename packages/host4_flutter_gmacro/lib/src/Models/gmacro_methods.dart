@@ -103,6 +103,14 @@ abstract final class GmacroMethods {
   static const queryAllMultiMappings = 'queryAllMultiMappings';
   static const queryMultiMapping = 'queryMultiMapping';
 
+  // Touch Mapping
+  static const setScreenSize = 'setScreenSize';
+  static const setKeyMapping = 'setKeyMapping';
+  static const setMacroKey = 'setMacroKey';
+  static const setMacroKeyTrigger = 'setMacroKeyTrigger';
+  static const setMacroTerminationKey = 'setMacroTerminationKey';
+  static const keyMappingEnd = 'keyMappingEnd';
+
   // Sleep
   static const getSleepTime = 'getSleepTime';
   static const setSleepTime = 'setSleepTime';

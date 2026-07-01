@@ -27,8 +27,9 @@ internal object GmacroMethodInvoker {
         try {
             when (method) {
                 //手柄信息
-                Host4FlutterGmacroConstants.fetchDeviceVersion ->
-                    KrDeviceInfoQuery.query(deviceKey, transportKind, result)
+                Host4FlutterGmacroConstants.fetchDeviceVersion ->{
+                    commands.queryHandleInfoReq(GmacroCallbackBridge.fetchDeviceVersion(result))
+                }
 
                 // 0x77 04 查询 Game Macro 默认值
                 Host4FlutterGmacroConstants.fetchGameMacroDefaultInfo -> {
@@ -477,6 +478,65 @@ internal object GmacroMethodInvoker {
                 //查询某个手柄按键的多映射配置
                 Host4FlutterGmacroConstants.queryMultiMapping -> commands.queryMultiMappingByKey(
                     GmacroArgParser.intArg(arguments, "original"),
+                    GmacroCallbackBridge.message(result),
+                )
+
+                //设置触点映射屏幕尺寸
+                Host4FlutterGmacroConstants.setScreenSize -> commands.setScreenSize(
+                    GmacroArgParser.intArg(arguments, "orientation"),
+                    GmacroArgParser.intArg(arguments, "width"),
+                    GmacroArgParser.intArg(arguments, "height"),
+                    GmacroCallbackBridge.message(result),
+                )
+
+                //设置触点映射按键
+                Host4FlutterGmacroConstants.setKeyMapping -> commands.setKeyMapping(
+                    GmacroArgParser.intArg(arguments, "type"),
+                    GmacroArgParser.longArg(arguments, "keyCode"),
+                    GmacroArgParser.intArg(arguments, "x"),
+                    GmacroArgParser.intArg(arguments, "y"),
+                    GmacroArgParser.intArg(arguments, "range"),
+                    GmacroArgParser.intArg(arguments, "sensitivity"),
+                    GmacroArgParser.intArg(arguments, "x1"),
+                    GmacroArgParser.intArg(arguments, "y1"),
+                    GmacroArgParser.intArg(arguments, "attribute"),
+                    GmacroArgParser.intArg(arguments, "page"),
+                    GmacroCallbackBridge.message(result),
+                )
+
+                //设置触点宏按键
+                Host4FlutterGmacroConstants.setMacroKey -> commands.setMacroKey(
+                    GmacroArgParser.longArg(arguments, "keyCode"),
+                    GmacroArgParser.intArg(arguments, "x"),
+                    GmacroArgParser.intArg(arguments, "y"),
+                    GmacroArgParser.intArg(arguments, "flag"),
+                    GmacroArgParser.intArg(arguments, "interval"),
+                    GmacroArgParser.intArg(arguments, "during"),
+                    GmacroArgParser.intArg(arguments, "attribute"),
+                    GmacroArgParser.intArg(arguments, "range"),
+                    GmacroArgParser.intArg(arguments, "sensitivity"),
+                    GmacroArgParser.intArg(arguments, "opposite"),
+                    GmacroCallbackBridge.message(result),
+                )
+
+                //设置触点宏按键触发方式
+                Host4FlutterGmacroConstants.setMacroKeyTrigger -> commands.setMacroKeyTrigger(
+                    GmacroArgParser.longArg(arguments, "keyCode"),
+                    GmacroArgParser.intArg(arguments, "touchType"),
+                    GmacroCallbackBridge.message(result),
+                )
+
+                //设置触点宏终止按键
+                Host4FlutterGmacroConstants.setMacroTerminationKey -> commands.setMacroTerminationKey(
+                    GmacroArgParser.longArg(arguments, "keyCode"),
+                    GmacroArgParser.longArg(arguments, "terminateKey"),
+                    GmacroCallbackBridge.message(result),
+                )
+
+                //结束触点映射配置
+                Host4FlutterGmacroConstants.keyMappingEnd -> commands.keyMappingEnd(
+                    GmacroArgParser.intArg(arguments, "page"),
+                    GmacroArgParser.intArg(arguments, "packet"),
                     GmacroCallbackBridge.message(result),
                 )
 
