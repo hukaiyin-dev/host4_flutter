@@ -519,6 +519,7 @@ class _SiliconeOverlayEditPageState extends State<SiliconeOverlayEditPage> {
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           TextButton(
+                            // TODO: 使用 shared_preferences 做设备本地校准数据保存和读取。
                             onPressed: () => Navigator.of(context).maybePop(),
                             child: const Text('保存'),
                           ),
