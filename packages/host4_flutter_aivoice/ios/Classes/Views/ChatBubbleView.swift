@@ -4,15 +4,22 @@ import UIKit
 class ChatBubbleView: UIView {
 
   weak var delegate: ChatBubbleViewDelegate?
-  private var messages: [SubtitleMsgData] = []
-  private var convMessage: ConversationStatusMessage?
+
+  /// 消息列表（文本 + 是否用户）
+  private var messages: [(text: String, isUser: Bool)] = []
+
+  /// "roundId-msgType" → texts index，用于消息去重合并
+  private var roundIndexMap: [String: Int] = [:]
 
   private lazy var tableView: UITableView = {
     let tv = UITableView()
     tv.backgroundColor = .clear
     tv.separatorStyle = .none
-    tv.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
+    tv.register(ChatBubbleCell.self, forCellReuseIdentifier: "ChatBubbleCell")
     tv.dataSource = self
+    tv.delegate = self
+    tv.rowHeight = UITableView.automaticDimension
+    tv.estimatedRowHeight = 44
     return tv
   }()
 
@@ -28,19 +35,31 @@ class ChatBubbleView: UIView {
     tableView.frame = bounds
   }
 
+  /// 添加/更新字幕消息（支持去重和拼接）
   func addMessage(_ msg: SubtitleMsgData) {
+    let fullText = SubtitleTextAssembler.shared.assembleText(msg)
+    let key = "\(msg.roundId)-\(msg.msgType)"
+    let isUser = msg.msgType == 0
+
     DispatchQueue.main.async { [weak self] in
       guard let self = self else { return }
-      self.messages.append(msg)
-      self.tableView.reloadData()
-      let idx = IndexPath(row: self.messages.count - 1, section: 0)
-      self.tableView.scrollToRow(at: idx, at: .bottom, animated: true)
-    }
-  }
 
-  func updateConvMessage(_ conv: ConversationStatusMessage) {
-    DispatchQueue.main.async { [weak self] in
-      self?.convMessage = conv
+      if let existingIndex = self.roundIndexMap[key] {
+        // 更新已有消息
+        self.messages[existingIndex] = (text: fullText, isUser: isUser)
+        self.tableView.reloadRows(at: [IndexPath(row: existingIndex, section: 0)], with: .none)
+      } else {
+        // 新消息
+        let index = self.messages.count
+        self.messages.append((text: fullText, isUser: isUser))
+        self.roundIndexMap[key] = index
+        self.tableView.insertRows(at: [IndexPath(row: index, section: 0)], with: .fade)
+      }
+
+      if !self.messages.isEmpty {
+        let last = IndexPath(row: self.messages.count - 1, section: 0)
+        self.tableView.scrollToRow(at: last, at: .bottom, animated: true)
+      }
     }
   }
 
@@ -48,24 +67,21 @@ class ChatBubbleView: UIView {
     DispatchQueue.main.async { [weak self] in
       guard let self = self else { return }
       self.messages.removeAll()
+      self.roundIndexMap.removeAll()
       self.tableView.reloadData()
     }
   }
 }
 
-extension ChatBubbleView: UITableViewDataSource {
+extension ChatBubbleView: UITableViewDataSource, UITableViewDelegate {
   func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
     return messages.count
   }
 
   func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-    let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
+    let cell = tableView.dequeueReusableCell(withIdentifier: "ChatBubbleCell", for: indexPath) as! ChatBubbleCell
     let msg = messages[indexPath.row]
-    cell.textLabel?.text = msg.text
-    cell.textLabel?.font = .systemFont(ofSize: 14)
-    cell.textLabel?.numberOfLines = 0
-    cell.backgroundColor = .clear
-    cell.textLabel?.textColor = .white
+    cell.configure(text: msg.text, isUser: msg.isUser)
     return cell
   }
 }

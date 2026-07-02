@@ -54,6 +54,8 @@ class ChatAssistantView: UIView {
   }
   private var isThinking = false
   private var lastMsg: String?
+  /// 当前状态消息（仅用于内部工具栏状态更新，不显示在气泡列表）
+  private var latestConvMsg: ConversationStatusMessage?
 
   // MARK: - UI 元素
   private let containerView = UIView()
@@ -100,22 +102,29 @@ class ChatAssistantView: UIView {
   private func setupSubviews() {
     // 背景图
     backImgV.contentMode = .scaleAspectFill
+    backImgV.backgroundColor = UIColor.black.withAlphaComponent(0.85)
+    backImgV.layer.cornerRadius = 16
+    backImgV.clipsToBounds = true
     containerView.addSubview(backImgV)
 
     // 关闭按钮
     closeButton.setImage(UIImage(systemName: "xmark.circle.fill"), for: .normal)
     closeButton.tintColor = .white
+    closeButton.translatesAutoresizingMaskIntoConstraints = false
     containerView.addSubview(closeButton)
 
-    // 全屏按钮
+    // 全屏/缩小按钮
     fullscreenButton.setImage(UIImage(systemName: "arrow.up.backward.and.arrow.down.forward"), for: .normal)
+    fullscreenButton.setImage(UIImage(systemName: "arrow.down.right.and.arrow.up.left"), for: .selected)
     fullscreenButton.tintColor = .white
+    fullscreenButton.translatesAutoresizingMaskIntoConstraints = false
     containerView.addSubview(fullscreenButton)
 
     // 音量按钮
     volumeButton.setImage(UIImage(systemName: "speaker.wave.2.fill"), for: .normal)
     volumeButton.setImage(UIImage(systemName: "speaker.slash.fill"), for: .selected)
     volumeButton.tintColor = .white
+    volumeButton.translatesAutoresizingMaskIntoConstraints = false
     containerView.addSubview(volumeButton)
 
     // AI 标题
@@ -123,10 +132,12 @@ class ChatAssistantView: UIView {
     aiChatLab.textColor = .white
     aiChatLab.font = .systemFont(ofSize: 16, weight: .medium)
     aiChatLab.textAlignment = .center
+    aiChatLab.translatesAutoresizingMaskIntoConstraints = false
     containerView.addSubview(aiChatLab)
 
     // 等待动画
     waitView.isHidden = true
+    waitView.translatesAutoresizingMaskIntoConstraints = false
     containerView.addSubview(waitView)
 
     // 状态标签
@@ -134,14 +145,17 @@ class ChatAssistantView: UIView {
     statusLabel.textColor = .lightGray
     statusLabel.font = .systemFont(ofSize: 12)
     statusLabel.textAlignment = .center
+    statusLabel.translatesAutoresizingMaskIntoConstraints = false
     containerView.addSubview(statusLabel)
 
     // 聊天界面
     chatView.isHidden = true
+    chatView.translatesAutoresizingMaskIntoConstraints = false
     containerView.addSubview(chatView)
 
     // 工具栏
     toolsView.isHidden = true
+    toolsView.translatesAutoresizingMaskIntoConstraints = false
     containerView.addSubview(toolsView)
 
     // VIP 标签
@@ -149,22 +163,95 @@ class ChatAssistantView: UIView {
     vipLab.font = .systemFont(ofSize: 12)
     vipLab.textAlignment = .center
     vipLab.numberOfLines = 0
+    vipLab.isHidden = true
+    vipLab.translatesAutoresizingMaskIntoConstraints = false
     containerView.addSubview(vipLab)
 
     // VIP 按钮
     vipBtn.setTitle("解锁无限畅聊", for: .normal)
     vipBtn.setTitleColor(.orange, for: .normal)
     vipBtn.titleLabel?.font = .systemFont(ofSize: 14)
+    vipBtn.isHidden = true
+    vipBtn.translatesAutoresizingMaskIntoConstraints = false
     containerView.addSubview(vipBtn)
   }
 
   private func setupLayout() {
     containerView.translatesAutoresizingMaskIntoConstraints = false
+    let views = [
+      containerView, backImgV, closeButton, fullscreenButton, volumeButton,
+      aiChatLab, waitView, statusLabel, chatView, toolsView, vipLab, vipBtn,
+    ]
+    for v in views {
+      v.translatesAutoresizingMaskIntoConstraints = false
+    }
+
     NSLayoutConstraint.activate([
+      // containerView 填满 self
       containerView.topAnchor.constraint(equalTo: topAnchor),
       containerView.leadingAnchor.constraint(equalTo: leadingAnchor),
       containerView.trailingAnchor.constraint(equalTo: trailingAnchor),
       containerView.bottomAnchor.constraint(equalTo: bottomAnchor),
+
+      // 背景图
+      backImgV.topAnchor.constraint(equalTo: containerView.topAnchor),
+      backImgV.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
+      backImgV.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
+      backImgV.bottomAnchor.constraint(equalTo: containerView.bottomAnchor),
+
+      // 关闭按钮：左上角
+      closeButton.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 8),
+      closeButton.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 8),
+      closeButton.widthAnchor.constraint(equalToConstant: 24),
+      closeButton.heightAnchor.constraint(equalToConstant: 24),
+
+      // 全屏按钮：右上角
+      fullscreenButton.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 8),
+      fullscreenButton.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -8),
+      fullscreenButton.widthAnchor.constraint(equalToConstant: 24),
+      fullscreenButton.heightAnchor.constraint(equalToConstant: 24),
+
+      // 音量按钮：全屏按钮左侧
+      volumeButton.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 8),
+      volumeButton.trailingAnchor.constraint(equalTo: fullscreenButton.leadingAnchor, constant: -6),
+      volumeButton.widthAnchor.constraint(equalToConstant: 24),
+      volumeButton.heightAnchor.constraint(equalToConstant: 24),
+
+      // 标题：顶部居中
+      aiChatLab.centerYAnchor.constraint(equalTo: closeButton.centerYAnchor),
+      aiChatLab.centerXAnchor.constraint(equalTo: containerView.centerXAnchor),
+      aiChatLab.leadingAnchor.constraint(greaterThanOrEqualTo: closeButton.trailingAnchor, constant: 4),
+      aiChatLab.trailingAnchor.constraint(lessThanOrEqualTo: volumeButton.leadingAnchor, constant: -4),
+
+      // 工具栏：底部
+      toolsView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 8),
+      toolsView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -8),
+      toolsView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -4),
+      toolsView.heightAnchor.constraint(equalToConstant: 36),
+
+      // 等待动画：中间
+      waitView.centerXAnchor.constraint(equalTo: containerView.centerXAnchor),
+      waitView.centerYAnchor.constraint(equalTo: containerView.centerYAnchor, constant: -20),
+      waitView.widthAnchor.constraint(equalToConstant: 120),
+      waitView.heightAnchor.constraint(equalToConstant: 120),
+
+      // 状态标签：动画下方
+      statusLabel.topAnchor.constraint(equalTo: waitView.bottomAnchor, constant: 8),
+      statusLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 12),
+      statusLabel.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -12),
+
+      // 聊天气泡：顶部标题和底部工具栏之间
+      chatView.topAnchor.constraint(equalTo: closeButton.bottomAnchor, constant: 4),
+      chatView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 4),
+      chatView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -4),
+      chatView.bottomAnchor.constraint(equalTo: toolsView.topAnchor, constant: -4),
+
+      // VIP 标签和按钮
+      vipLab.topAnchor.constraint(equalTo: chatView.bottomAnchor, constant: 4),
+      vipLab.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 12),
+      vipLab.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -12),
+      vipBtn.topAnchor.constraint(equalTo: vipLab.bottomAnchor, constant: 4),
+      vipBtn.centerXAnchor.constraint(equalTo: containerView.centerXAnchor),
     ])
   }
 
@@ -191,6 +278,33 @@ class ChatAssistantView: UIView {
 
   @objc private func vipTapped() {
     delegate?.chatAssistantViewVipButtonTapped(self)
+  }
+
+  // MARK: - 切换展开/缩小
+
+  /// 切换展开/缩小状态（带动画）
+  func toggleExpanded() {
+    let centerPoint = center
+    let willExpand = !isExpanded
+    let newSize: CGSize
+    if willExpand {
+      let screenW = UIScreen.main.bounds.width
+      let screenH = UIScreen.main.bounds.height
+      newSize = CGSize(width: min(360, screenW - 32), height: min(520, screenH - 120))
+    } else {
+      newSize = CGSize(width: 200, height: 60)
+    }
+
+    UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseInOut) {
+      self.frame = CGRect(origin: .zero, size: newSize)
+      self.center = centerPoint
+    } completion: { _ in
+      self.isExpanded = willExpand
+      self.chatView.isHidden = !willExpand
+      self.toolsView.isHidden = !willExpand
+      self.waitView.isHidden = willExpand
+      self.statusLabel.isHidden = willExpand
+    }
   }
 
   // MARK: - 显示方法
@@ -291,12 +405,35 @@ class ChatAssistantView: UIView {
 
   func updateConvMessage(_ convMsg: ConversationStatusMessage) {
     DispatchQueue.main.async { [weak self] in
-      self?.chatView.updateConvMessage(convMsg)
+      // 状态消息仅用于更新工具栏状态，不显示在气泡列表中
+      self?.latestConvMsg = convMsg
     }
   }
 
   func updateSubvMessage(_ subvMsg: SubtitleMsgData) {
-    chatView.addMessage(subvMsg) // addMessage 内部已处理主线程
+    // 特殊字符替换（对齐 OC 版 isBotCompleteSentenceAndPlayAudio 逻辑）
+    if subvMsg.isBotCompleteSentenceAndPlayAudio(botUserId: AiVoiceManager.shared.chatbotId ?? "") {
+      subvMsg.text = NSLocalizedString("ReplySpecial", comment: "")
+      AiVoiceManager.shared.playSpecialAudio()
+    }
+
+    // 空文本过滤
+    if subvMsg.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+      return
+    }
+
+    chatView.addMessage(subvMsg)
+
+    // 对齐 OC：更新 lastMsg 用于缩小窗口显示
+    DispatchQueue.main.async { [weak self] in
+      guard let self = self else { return }
+      self.isThinking = false
+      self.lastMsg = SubtitleTextAssembler.shared.assembleText(subvMsg)
+      // 缩小状态时显示最新字幕在 aiChatLab
+      if !self.isExpanded {
+        self.aiChatLab.text = self.lastMsg
+      }
+    }
   }
 
   func updateChatTitle(_ title: String) {

@@ -1,6 +1,7 @@
 import Foundation
 import VolcEngineRTC
 import AVFoundation
+import Flutter
 
 /// AI 语音管理（单例）
 class AiVoiceManager: NSObject {
@@ -34,6 +35,7 @@ class AiVoiceManager: NSObject {
     }
   }
   var boostingTableID = ""
+  var language: String?
 
   var isSpeaking: Bool = false {
     didSet {
@@ -49,6 +51,9 @@ class AiVoiceManager: NSObject {
   var isJoinRoom = false
 
   var eventCallback: (([String: Any]) -> Void)?
+
+  /// MethodChannel 引用，用于调用 Flutter 端的 VIP 处理器
+  weak var vipMethodChannel: FlutterMethodChannel?
 
   private override init() {
     super.init()
@@ -152,7 +157,7 @@ class AiVoiceManager: NSObject {
   // MARK: - 麦克风控制
   func switchAudioCapture(_ isOpen: Bool) {
     guard rtcEngine != nil, rtcRoom != nil else {
-      print("[AiVoice] ❌ 引擎或房间未初始化")
+      print("[AiVoice] ⚠️ 引擎或房间未初始化（可能已关闭），跳过")
       return
     }
     if isUserVip == isOpen {
@@ -162,7 +167,7 @@ class AiVoiceManager: NSObject {
     isUserVip = isOpen
 
     if isOpen {
-      print("[AiVoice] ✅ 开启麦克风")
+      print("[AiVoice] ✅ 开启麦克风（publishStreamAudio）")
       rtcRoom?.publishStreamAudio(true)
       ChatAssistantView.shared.updateToolWithChatState(.normal)
     } else {
@@ -188,7 +193,12 @@ class AiVoiceManager: NSObject {
 
     ChatAssistantView.shared.updateToolWithChatState(.notVip)
 
-    let lang = NSLocale.current.languageCode ?? "zh"
+    let lang: String = {
+      if let explicit = language { return explicit }
+      let preferred = Locale.preferredLanguages.first ?? "zh"
+      return String(preferred.prefix(2))  // "zh-Hans-CN" → "zh"
+    }()
+    print("[AiVoice] 🌐 语言: \(lang)")
     AgentRequestManager.agentJoinRoom(
       boostingTableID: boostingTableID,
       roomID: rid,
@@ -216,12 +226,29 @@ class AiVoiceManager: NSObject {
     chatbotId = nil
   }
 
-  // MARK: - VIP 检查
+  // MARK: - VIP 检查（通过 MethodChannel 回调宿主项目）
   func getVipUseInfo(_ type: Int) {
-    // 实际项目中调后端接口
-    // 这里简化处理，默认有权限
-    switchAudioCapture(true)
-    ChatAssistantView.shared.updateVipTitle(nil)
+    guard let channel = vipMethodChannel else {
+      // 未设置 VIP 处理器，默认放行
+      switchAudioCapture(true)
+      ChatAssistantView.shared.updateVipTitle(nil)
+      return
+    }
+
+    let action = type == 0 ? "check" : "deduction"
+    channel.invokeMethod("vipAction", arguments: [
+      "type": action,
+      "chatbotId": chatbotId ?? "",
+    ]) { [weak self] result in
+      guard let self = self else { return }
+      let allowed = (result as? [String: Any])?["allowed"] as? Bool ?? false
+      if allowed {
+        self.switchAudioCapture(true)
+        ChatAssistantView.shared.updateVipTitle(nil)
+      } else {
+        ChatAssistantView.shared.updateToolWithChatState(.notVip)
+      }
+    }
   }
 
   func checkVipDeduction(_ subvModel: SubtitleMsgData) {
@@ -229,7 +256,6 @@ class AiVoiceManager: NSObject {
       isUserAsk = true
     }
     if subvModel.isBotCompleteSentenceNeedsSpecialHandling(botUserId: chatbotId ?? ""), isUserAsk {
-      // TODO: 上报扣费
       getVipUseInfo(1)
     }
   }
@@ -265,6 +291,7 @@ extension AiVoiceManager: ByteRTCEngineDelegate {
   }
 
   func rtcEngine(_ engine: ByteRTCEngine, onConnectionStateChanged state: ByteRTCConnectionState) {
+    print("[AiVoice] 🔗 连接状态变化: \(state)")
     switch state {
     case .connecting, .reconnecting: connectState = .connecting
     case .connected, .reconnected:   connectState = .connected
@@ -275,9 +302,17 @@ extension AiVoiceManager: ByteRTCEngineDelegate {
   func rtcEngine(_ engine: ByteRTCEngine, onLocalAudioPropertiesReport infos: [ByteRTCLocalAudioPropertiesInfo]) {
     var speaking = false
     for info in infos {
-      if info.audioPropertiesInfo.vad == 1, info.audioPropertiesInfo.linearVolume > 10 {
+      let vol = info.audioPropertiesInfo.linearVolume
+      let vad = info.audioPropertiesInfo.vad
+      if vol > 0 || vad > 0 {
+        print("[AiVoice] 🎤 VAD=\(vad) vol=\(vol)")
+      }
+      if vad == 1, vol > 10 {
         speaking = true
       }
+    }
+    if speaking != isSpeaking {
+      print("[AiVoice] 🗣️ isSpeaking: \(isSpeaking) → \(speaking)")
     }
     isSpeaking = speaking
   }
@@ -286,6 +321,7 @@ extension AiVoiceManager: ByteRTCEngineDelegate {
 // MARK: - ByteRTCRoomDelegate
 extension AiVoiceManager: ByteRTCRoomDelegate {
   func rtcRoom(_ rtcRoom: ByteRTCRoom, onRoomStateChanged roomId: String, withUid uid: String, state: Int, extraInfo: String) {
+    print("[AiVoice] 🏠 房间状态变化: state=\(state) uid=\(uid) roomId=\(roomId)")
     if state == 0 {
       isJoinRoom = true
       if taskId == nil { taskId = RtcUtils.generateTaskId() }
@@ -306,7 +342,10 @@ extension AiVoiceManager: ByteRTCRoomDelegate {
   }
 
   func rtcRoom(_ rtcRoom: ByteRTCRoom, onRoomBinaryMessageReceived uid: String, message: Data) {
+    print("[AiVoice] 📩 收到二进制消息 size=\(message.count) uid=\(uid)")
+
     if let subtitles = SubtitleMsgData.unpack(from: message) {
+      print("[AiVoice] 📝 字幕: \(subtitles)")
       let items = SubtitleMsgData.parse(json: subtitles, currentUserId: userId ?? "")
       for item in items {
         checkVipDeduction(item)
@@ -317,6 +356,7 @@ extension AiVoiceManager: ByteRTCRoomDelegate {
 
     if let convStr = ConversationStatusMessage.unpack(from: message),
        let conv = ConversationStatusMessage.parse(json: convStr) {
+      print("[AiVoice] 💬 状态: \(convStr)")
       latestConvModel = conv
       ChatAssistantView.shared.updateConvMessage(conv)
 
@@ -325,6 +365,14 @@ extension AiVoiceManager: ByteRTCRoomDelegate {
       } else if conv.stage.code == 4 || conv.stage.code == 5 {
         ChatAssistantView.shared.updateToolWithChatState(.normal)
       }
+      return
+    }
+
+    // 未识别的消息
+    if let raw = String(data: message, encoding: .utf8) {
+      print("[AiVoice] ⚠️ 未识别消息: \(raw)")
+    } else {
+      print("[AiVoice] ⚠️ 未识别消息 \(message.count) bytes")
     }
   }
 }

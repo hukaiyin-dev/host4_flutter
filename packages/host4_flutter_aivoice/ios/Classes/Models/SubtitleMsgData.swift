@@ -2,7 +2,7 @@ import Foundation
 
 /// subv 消息 - 字幕数据
 class SubtitleMsgData {
-  let text: String
+  var text: String      /// 可变，用于特殊字符替换
   let language: String
   let userId: String
   let sequence: Int
