@@ -16,6 +16,8 @@ class AiViewManager: NSObject {
   /// 当前状态
   var floatState: AiFloatingViewState = .floating
 
+  private var didPreloadAnimation = false
+
   /// 兼容 iOS 13+ 的 keyWindow
   private var currentKeyWindow: UIWindow? {
     if #available(iOS 13.0, *) {
@@ -48,6 +50,9 @@ class AiViewManager: NSObject {
       return
     }
 
+    // 首次显示悬浮球时后台预缓存动画帧（点击后秒开）
+    preloadAnimationIfNeeded()
+
     switch floatState {
     case .floating:
       showFloatingBall(target: targetVC)
@@ -63,10 +68,13 @@ class AiViewManager: NSObject {
     XHFloatWindow.xh_addWindowOnTarget(target ?? UIViewController()) { [weak self] in
       guard let self = self else { return }
       if self.isPushNothing() {
+        print("[AiView] 🚫 需要登录，跳转 pushController(0)")
         self.pushController(0)
       } else {
         let frame = XHFloatWindow.xh_getCurrentFrame()
+        print("[AiView] 👆 点击悬浮球, frame: \(frame)")
         XHFloatWindow.xh_destroyWindow()
+        print("[AiView] 🗑️ 悬浮窗已销毁，开始播放动画")
         self.playAnimation(from: frame)
       }
     }
@@ -97,43 +105,51 @@ class AiViewManager: NSObject {
     }
   }
 
-  /// 播放帧动画（点击悬浮球后的展开动画）
+  /// 播放帧动画（点击悬浮球后的展开动画）— 完全对齐 OC playAnimalImage
   private func playAnimation(from frame: CGRect) {
-    DispatchQueue.main.async { [weak self] in
-      guard let self = self else { return }
-      // 帧动画: 使用 "思考状态-出现_" + 124 帧 png
-      let animView = FrameAnimationView(
-        imagePrefix: "思考状态-出现_",
-        startIndex: 0,
-        count: 124,
-        numberFormat: "%05d",
-        extension: "png"
-      )
-      animView.frameRate = 40
-      animView.animationMode = .once
+    let t0 = CACurrentMediaTime()
 
-      guard let window = self.currentKeyWindow else { return }
-      window.addSubview(animView)
+    // OC: FrameAnimationView *view = [[FrameAnimationView alloc] initWithImagePrefix:...];
+    let animView = FrameAnimationView(
+      imagePrefix: "思考状态-出现_",
+      startIndex: 0,
+      count: 124,
+      numberFormat: "%05d",
+      extension: "png"
+    )
+    print("[AiView] ⏱ init 耗时: \(String(format: "%.0f", (CACurrentMediaTime()-t0)*1000))ms")
 
-      let center = CGPoint(
-        x: frame.origin.x + frame.size.width / 2,
-        y: frame.origin.y + frame.size.height / 2
-      )
+    animView.frameRate = 40
+    animView.animationMode = .once
 
-      animView.animate(
-        fromCenter: center,
-        toSize: CGSize(width: 100 * kCoefi, height: 100 * kCoefi),
-        duration: 3,
-        damping: 3,
-        autoPlay: true,
-        completion: { [weak self] in
-          self?.showFloatWindow(false)
-          animView.removeFromSuperview()
-          self?.floatState = .chatMinimized
-          self?.showChatView()
-        }
-      )
+    guard let window = currentKeyWindow else {
+      print("[AiView] ❌ 无 keyWindow")
+      return
     }
+    window.addSubview(animView)
+    print("[AiView] ➕ addSubview 完成")
+
+    let center = CGPoint(
+      x: frame.origin.x + frame.size.width / 2,
+      y: frame.origin.y + frame.size.height / 2
+    )
+
+    print("[AiView] 🎬 开始 animate, center=\(center)")
+    animView.animate(
+      fromCenter: center,
+      toSize: CGSize(width: 100 * kCoefi, height: 100 * kCoefi),
+      duration: 1.5,
+      damping: 0.7,
+      autoPlay: true,
+      completion: { [weak self] in
+        print("[AiView] ✅ 动画结束, 显示聊天窗")
+        self?.showFloatWindow(false)
+        animView.removeFromSuperview()
+        self?.floatState = .chatMinimized
+        self?.showChatView()
+      }
+    )
+    print("[AiView] 📐 animate 方法返回")
   }
 
   /// 显示聊天界面
@@ -176,6 +192,19 @@ class AiViewManager: NSObject {
   func isPushNothing() -> Bool {
     return onCheckShouldBlockTap?() ?? false
   }
+
+  // MARK: - 预缓存动画帧
+  private func preloadAnimationIfNeeded() {
+    guard !didPreloadAnimation else { return }
+    didPreloadAnimation = true
+    DispatchQueue.global(qos: .utility).async {
+      _ = FrameAnimationView.loadCached(
+        prefix: "思考状态-出现_", start: 0, count: 124,
+        format: "%05d", ext: "png"
+      )
+      print("[AiView] ✅ 动画帧预缓存完成")
+    }
+  }
 }
 
 // MARK: - ChatAssistantViewDelegate
@@ -196,7 +225,7 @@ extension AiViewManager: ChatAssistantViewDelegate {
   }
 
   func chatAssistantViewFullscreenButtonTapped(_ view: ChatAssistantView) {
-    // 切换展开/缩小
+    view.toggleExpanded()
   }
 
   func chatAssistantViewVipButtonTapped(_ view: ChatAssistantView) {

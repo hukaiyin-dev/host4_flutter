@@ -45,6 +45,7 @@ class _AiVoiceTestPageState extends State<AiVoiceTestPage> {
       try {
         final success = await Host4FlutterAiVoice.showAI(
           boostingTableID: 'GameMacro',
+          language: 'zh',
         );
         if (success) {
           _subscribeEvents();

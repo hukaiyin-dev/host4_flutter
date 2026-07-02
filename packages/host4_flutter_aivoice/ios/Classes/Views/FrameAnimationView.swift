@@ -1,21 +1,14 @@
 import UIKit
 
-/// 帧动画视图
+private var frameImageCache = NSCache<NSString, NSArray>()
+
 class FrameAnimationView: UIImageView {
 
-  enum AnimationMode {
-    case once      // 播放一次
-    case loop      // 循环播放
-  }
+  enum AnimationMode { case once, loop }
 
-  var frameRate: Int = 30
+  var frameRate: Int = 40
   var animationMode: AnimationMode = .once
 
-  private var imagePrefix: String
-  private var startIndex: Int
-  private var count: Int
-  private var numberFormat: String
-  private var ext: String
   private var images: [UIImage] = []
   private var currentIndex = 0
   private var timer: CADisplayLink?
@@ -23,90 +16,81 @@ class FrameAnimationView: UIImageView {
 
   init(imagePrefix: String, startIndex: Int, count: Int,
        numberFormat: String = "%05d", extension ext: String = "png") {
-    self.imagePrefix = imagePrefix
-    self.startIndex = startIndex
-    self.count = count
-    self.numberFormat = numberFormat
-    self.ext = ext
     super.init(frame: .zero)
-    self.contentMode = .scaleAspectFit
-    loadImages()
+    contentMode = .scaleAspectFit
+    isHidden = true
+    images = Self.loadCached(prefix: imagePrefix, start: startIndex, count: count,
+                             format: numberFormat, ext: ext)
   }
 
-  required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+  required init?(coder: NSCoder) { fatalError() }
 
-  private func loadImages() {
+  static func loadCached(prefix: String, start: Int, count: Int, format: String, ext: String) -> [UIImage] {
+    let key = "\(prefix)_\(start)_\(count)" as NSString
+    if let cached = frameImageCache.object(forKey: key) as? [UIImage], !cached.isEmpty { return cached }
+    var r: [UIImage] = []
+    r.reserveCapacity(count)
     for i in 0..<count {
-      let idx = startIndex + i
-      let name = "\(imagePrefix)\(String(format: numberFormat, idx)).\(ext)"
-      if let img = UIImage(named: name) {
-        images.append(img)
-      }
+      let name = "\(prefix)\(String(format: format, start + i)).\(ext)"
+      if let img = pluginImage(name) { r.append(img) }
     }
+    print("[Anim] loadCached \(r.count)/\(count)")
+    frameImageCache.setObject(r as NSArray, forKey: key)
+    return r
   }
 
   func play(completion: (() -> Void)? = nil) {
-    DispatchQueue.main.async { [weak self] in
-      guard let self = self else { return }
-      self.animateCompletion = completion
-      self.currentIndex = 0
-      self.image = self.images.first
-
-      self.timer = CADisplayLink(target: self, selector: #selector(self.nextFrame))
-      self.timer?.preferredFramesPerSecond = self.frameRate
-      self.timer?.add(to: .main, forMode: .common)
-    }
+    guard !images.isEmpty else { completion?(); return }
+    backgroundColor = .clear  // 移除调试底色
+    layer.cornerRadius = 0
+    animateCompletion = completion
+    currentIndex = 0
+    image = images.first
+    timer = CADisplayLink(target: self, selector: #selector(nextFrame))
+    timer?.preferredFramesPerSecond = frameRate
+    timer?.add(to: .main, forMode: .common)
   }
 
   @objc private func nextFrame() {
     guard currentIndex < images.count else {
-      if animationMode == .loop {
-        currentIndex = 0
-        self.image = images.first
-      } else {
-        stop()
-        animateCompletion?()
-      }
+      stop()
+      if animationMode == .loop { currentIndex = 0; image = images.first }
+      else { animateCompletion?() }
       return
     }
-    self.image = images[currentIndex]
+    image = images[currentIndex]
     currentIndex += 1
   }
 
-  func stop() {
-    timer?.invalidate()
-    timer = nil
-  }
+  func stop() { timer?.invalidate(); timer = nil }
+  deinit { stop() }
 
-  deinit {
-    stop()
-  }
+  // MARK: - Animation (transform scale 0.01→1.0, alpha 0→1)
 
-  /// 从中心展开动画（自动在主线程执行）
   func animate(fromCenter center: CGPoint, toSize size: CGSize,
                duration: TimeInterval, damping: CGFloat,
                autoPlay: Bool, completion: @escaping () -> Void) {
-    DispatchQueue.main.async { [weak self] in
-      guard let self = self else { return }
-      self.frame = CGRect(origin: .zero, size: .zero)
-      self.center = center
-      self.alpha = 0
+    let t0 = CACurrentMediaTime()
+    frame = CGRect(x: center.x - size.width / 2,
+                   y: center.y - size.height / 2,
+                   width: size.width, height: size.height)
+    alpha = 0
+    transform = CGAffineTransform(scaleX: 0.01, y: 0.01)
+    isHidden = false
+    clipsToBounds = true
+    layer.cornerRadius = size.width / 2  // 圆形
+    backgroundColor = UIColor(red: 0.3, green: 0.6, blue: 1.0, alpha: 0.4) // 淡蓝色调试底
+    print("[Anim] start fullSize=\(size), alpha=0, scale=0.01, debug=on")
 
-      UIView.animate(withDuration: duration, delay: 0,
-                     usingSpringWithDamping: damping,
-                     initialSpringVelocity: 0,
-                     options: .curveEaseInOut) {
-        self.frame = CGRect(x: center.x - size.width / 2,
-                            y: center.y - size.height / 2,
-                            width: size.width, height: size.height)
-        self.alpha = 1
-      } completion: { _ in
-        if autoPlay {
-          self.play(completion: completion)
-        } else {
-          completion()
-        }
-      }
+    UIView.animate(withDuration: duration, delay: 0,
+                   options: .curveEaseOut) {
+      self.alpha = 1
+      self.transform = .identity
+    } completion: { [weak self] _ in
+      let t = String(format: "%.1f", CACurrentMediaTime() - t0)
+      print("[Anim] expand done \(t)s images=\(self?.images.count ?? 0)")
+      guard let self = self else { return }
+      if autoPlay { self.play(completion: completion) } else { completion() }
     }
   }
 }

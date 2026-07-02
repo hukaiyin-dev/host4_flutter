@@ -34,8 +34,11 @@ class XHFloatWindowController: NSObject {
       return
     }
 
-    let container = UIView(frame: UIScreen.main.bounds)
-    container.isUserInteractionEnabled = false
+    let container = XHFloatContainer(frame: UIScreen.main.bounds)
+    container.isUserInteractionEnabled = true
+    container.passThroughDelegate = { [weak self] point in
+      return self?.button?.frame.contains(point) ?? false
+    }
     window.addSubview(container)
     floatingView = container
     isShowing = true
@@ -59,9 +62,10 @@ class XHFloatWindowController: NSObject {
     btn.frame = CGRect(x: 0, y: 0, width: btnSize, height: btnSize)
     btn.layer.cornerRadius = btnSize / 2
     btn.clipsToBounds = true
+    btn.adjustsImageWhenHighlighted = false  // 防止拖拽时变暗
 
-    // 先尝试加载图片，失败则用默认背景
-    if let icon = UIImage(named: "AINotClick") {
+    // 从插件 bundle 加载图片
+    if let icon = pluginImage("AINotClick") {
       print("[FloatWindow] ✅ 加载 AINotClick 图片成功")
       btn.setImage(icon, for: .normal)
       btn.backgroundColor = .clear
