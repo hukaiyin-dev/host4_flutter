@@ -44,12 +44,20 @@ public class Host4FlutterAiVoicePlugin: NSObject, FlutterPlugin {
       AiVoiceManager.shared.eventCallback = { [weak self] event in
         self?.eventSink?(event)
       }
+      if let language = args["language"] as? String, !language.isEmpty {
+        AiVoiceManager.shared.language = language
+      }
       AiViewManager.shared.showFloatWindow(true)
       result(true)
 
     case "hideAI":
+      AiVoiceManager.shared.vipMethodChannel = nil
       AiViewManager.shared.showFloatWindow(false)
       result(true)
+
+    case "registerVip":
+      AiVoiceManager.shared.vipMethodChannel = methodChannel
+      result(nil)
 
     default:
       result(FlutterMethodNotImplemented)

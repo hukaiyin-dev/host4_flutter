@@ -26,7 +26,7 @@ class XHFloatWindowSingleton: NSObject {
     floatVC.show(callback: { [weak self] in
       self?.floatWindowCallBack?()
     })
-    floatVC.createButton(size: 50)
+    floatVC.createButton(size: kNormalSize)
     isShowing = true
   }
 
@@ -46,7 +46,7 @@ class XHFloatWindowSingleton: NSObject {
 
   func xh_setBackgroundImage(_ imageName: String?, for state: UIControl.State) {
     guard let name = imageName else { return }
-    let image = UIImage(named: name)
+    let image = pluginImage(name)
     floatVC.setButtonImage(image, for: state)
   }
 

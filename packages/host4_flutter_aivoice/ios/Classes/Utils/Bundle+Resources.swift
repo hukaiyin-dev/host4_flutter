@@ -6,21 +6,42 @@ import UIKit
 /// 插件资源包
 var pluginResourceBundle: Bundle {
   let frameworkBundle = Bundle(for: Host4FlutterAiVoicePlugin.self)
-  if let url = frameworkBundle.url(forResource: "host4_flutter_aivoice", withExtension: "bundle"),
+
+  // CocoaPods 资源 bundle 命名: pod_name.bundle
+  let podName = "host4_flutter_aivoice"
+  if let url = frameworkBundle.url(forResource: podName, withExtension: "bundle"),
      let bundle = Bundle(url: url) {
     return bundle
   }
+
+  // 备选：直接搜索包含图片的子 bundle
+  if let allBundles = frameworkBundle.urls(forResourcesWithExtension: "bundle", subdirectory: nil) {
+    for url in allBundles {
+      if let bundle = Bundle(url: url) {
+        return bundle
+      }
+    }
+  }
+
+  // 最终回退：framework bundle 本身
   return frameworkBundle
 }
 
 /// 从插件资源包加载图片
 func pluginImage(_ name: String) -> UIImage? {
   let bundle = pluginResourceBundle
-  let image = UIImage(named: name, in: bundle, compatibleWith: nil)
-  if image == nil {
-    print("[资源] ⚠️ 找不到图片: \(name)")
-  } else {
-    print("[资源] ✅ 加载图片: \(name)")
+
+  // 优先在资源 bundle 中查找
+  if let img = UIImage(named: name, in: bundle, compatibleWith: nil) {
+    return img
   }
-  return image
+
+  // 备选：主 bundle（如果通过 s.resources 全局复制）
+  if let img = UIImage(named: name) {
+    print("[资源] ✅ 从主 bundle 加载: \(name)")
+    return img
+  }
+
+  print("[资源] ⚠️ 找不到图片: \(name) in bundle: \(bundle.bundlePath)")
+  return nil
 }
