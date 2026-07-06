@@ -8,13 +8,15 @@ import 'silicone_overlay_edit_page.dart';
 class SiliconeOverlayPage extends StatelessWidget {
   const SiliconeOverlayPage({super.key});
 
-  // All coordinates from A4 PDF scan in Figma (node 2122-5).
-  // Outer: 62.31 x 29.91 mm, capsule/stadium shape (corner radius ≈ half height).
+  // All coordinates from the rescanned A4 PDF and physical calibration in
+  // Figma (node 2122-5).
+  // Outer: 63.9 x 30.5 mm, capsule/stadium shape (corner radius ≈ half height).
   // Button coords: center x/y converted to left/top = center - size/2.
-  // Tolerance: ±0.5–1.0 mm (scan estimate).
+  // Width and horizontal distances are physically verified; height is the
+  // scanned 31.5mm corrected to 30.5mm after physical calibration.
   static const _spec = PhysicalOverlaySpec(
-    size: PhysicalSizeMm(width: 62.31, height: 29.91),
-    borderRadiusMm: 14.95,
+    size: PhysicalSizeMm(width: 63.9, height: 30.5),
+    borderRadiusMm: 15.25,
     modules: [
       PhysicalModuleSpec(
         id: 'dpad',
@@ -29,7 +31,7 @@ class SiliconeOverlayPage extends StatelessWidget {
       PhysicalHotZoneSpec(
         id: 'up',
         label: '↑',
-        rect: PhysicalRectMm(left: 11.84, top: 4.83, width: 5.83, height: 7.20),
+        rect: PhysicalRectMm(left: 12.38, top: 4.52, width: 6.22, height: 7.49),
         shape: HotZoneShape.dpad,
         borderRadiusMm: 2.1,
       ),
@@ -37,10 +39,10 @@ class SiliconeOverlayPage extends StatelessWidget {
         id: 'down',
         label: '↓',
         rect: PhysicalRectMm(
-          left: 11.92,
-          top: 17.88,
-          width: 5.66,
-          height: 7.20,
+          left: 12.13,
+          top: 17.60,
+          width: 6.10,
+          height: 7.49,
         ),
         shape: HotZoneShape.dpad,
         borderRadiusMm: 2.1,
@@ -48,7 +50,7 @@ class SiliconeOverlayPage extends StatelessWidget {
       PhysicalHotZoneSpec(
         id: 'left',
         label: '←',
-        rect: PhysicalRectMm(left: 4.74, top: 12.04, width: 7.10, height: 5.85),
+        rect: PhysicalRectMm(left: 4.89, top: 11.50, width: 7.62, height: 6.22),
         shape: HotZoneShape.dpad,
         borderRadiusMm: 2.1,
       ),
@@ -56,10 +58,10 @@ class SiliconeOverlayPage extends StatelessWidget {
         id: 'right',
         label: '→',
         rect: PhysicalRectMm(
-          left: 17.59,
-          top: 12.12,
-          width: 7.19,
-          height: 5.76,
+          left: 18.10,
+          top: 11.88,
+          width: 7.62,
+          height: 6.10,
         ),
         shape: HotZoneShape.dpad,
         borderRadiusMm: 2.1,
@@ -68,7 +70,7 @@ class SiliconeOverlayPage extends StatelessWidget {
       PhysicalHotZoneSpec(
         id: 'start',
         label: 'START',
-        rect: PhysicalRectMm(left: 26.88, top: 4.07, width: 8.54, height: 3.39),
+        rect: PhysicalRectMm(left: 27.62, top: 4.01, width: 9.02, height: 3.94),
         shape: HotZoneShape.dpad,
         borderRadiusMm: 1.7,
       ),
@@ -76,10 +78,10 @@ class SiliconeOverlayPage extends StatelessWidget {
         id: 'select',
         label: 'SELECT',
         rect: PhysicalRectMm(
-          left: 26.88,
-          top: 22.38,
-          width: 8.54,
-          height: 3.47,
+          left: 27.24,
+          top: 22.42,
+          width: 9.02,
+          height: 3.94,
         ),
         shape: HotZoneShape.dpad,
         borderRadiusMm: 1.7,
@@ -89,35 +91,35 @@ class SiliconeOverlayPage extends StatelessWidget {
         id: 'y',
         label: 'Y',
         rect: PhysicalRectMm(
-          left: 36.44,
-          top: 11.36,
-          width: 7.19,
-          height: 7.20,
+          left: 37.28,
+          top: 11.63,
+          width: 7.49,
+          height: 7.62,
         ),
       ),
       PhysicalHotZoneSpec(
         id: 'x',
         label: 'X',
-        rect: PhysicalRectMm(left: 43.88, top: 3.81, width: 7.19, height: 7.20),
+        rect: PhysicalRectMm(left: 44.90, top: 4.26, width: 7.49, height: 7.62),
       ),
       PhysicalHotZoneSpec(
         id: 'a',
         label: 'A',
         rect: PhysicalRectMm(
-          left: 51.32,
-          top: 11.36,
-          width: 7.10,
-          height: 7.20,
+          left: 52.26,
+          top: 12.01,
+          width: 7.62,
+          height: 7.62,
         ),
       ),
       PhysicalHotZoneSpec(
         id: 'b',
         label: 'B',
         rect: PhysicalRectMm(
-          left: 43.96,
-          top: 18.90,
-          width: 7.02,
-          height: 7.12,
+          left: 44.64,
+          top: 19.38,
+          width: 7.49,
+          height: 7.62,
         ),
       ),
     ],
