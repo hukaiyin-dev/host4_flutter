@@ -30,7 +30,7 @@ internal object GmacroMethodInvoker {
             when (method) {
                 //手柄信息
                 Host4FlutterGmacroConstants.fetchDeviceVersion ->{
-                    commands.queryHandleInfoReq(GmacroCallbackBridge.fetchDeviceVersion(result))
+                    commands.queryDeviceInfo(GmacroCallbackBridge.fetchDeviceVersion(result))
                 }
 
                 // 0x77 04 查询 Game Macro 默认值
@@ -161,9 +161,9 @@ internal object GmacroMethodInvoker {
 
                 //板机校准
                 Host4FlutterGmacroConstants.startTriggerCalibration ->
-                    commands.beginAlignRockerOrTrigger(CALIB_TRIGGER_SUB_ID, 0, GmacroCallbackBridge.message(result))
+                    commands.beginAlignRockerOrTrigger(CALIB_TRIGGER_SUB_ID,  GmacroCallbackBridge.message(result))
                 Host4FlutterGmacroConstants.endTriggerCalibration ->
-                    commands.endAlignRockerOrTrigger(CALIB_TRIGGER_SUB_ID, 0, GmacroCallbackBridge.endAlignRockerOrTrigger(result))
+                    commands.endAlignRockerOrTrigger(CALIB_TRIGGER_SUB_ID,  GmacroCallbackBridge.endAlignRockerOrTrigger(result))
 
                 //设置左右扳机线性输出
                 Host4FlutterGmacroConstants.triggerLinearOutput -> commands.switchLinerTrigger(
@@ -228,9 +228,9 @@ internal object GmacroMethodInvoker {
 
                 //摇杆校准
                 Host4FlutterGmacroConstants.startRockerCalibration ->
-                    commands.beginAlignRockerOrTrigger(CALIB_ROCKER_SUB_ID,0 , GmacroCallbackBridge.message(result))
+                    commands.beginAlignRockerOrTrigger(CALIB_ROCKER_SUB_ID, GmacroCallbackBridge.message(result))
                 Host4FlutterGmacroConstants.endRockerCalibration ->
-                    commands.endAlignRockerOrTrigger(CALIB_ROCKER_SUB_ID, 0, GmacroCallbackBridge.endAlignRockerOrTrigger(result))
+                    commands.endAlignRockerOrTrigger(CALIB_ROCKER_SUB_ID,  GmacroCallbackBridge.endAlignRockerOrTrigger(result))
 
                 Host4FlutterGmacroConstants.updateRockerAdditional -> commands.setRockerAdditionalReq(
                     GmacroModelFactory.rockerParam(arguments),
@@ -388,8 +388,8 @@ internal object GmacroMethodInvoker {
 
                 Host4FlutterGmacroConstants.fetchGyroOuterDeadZone -> commands.queryMotionOuterDeadZone(GmacroCallbackBridge.message(result))
 
-                Host4FlutterGmacroConstants.startGyroCalibration -> commands.beginAlignGyroscope(CALIB_GYRO_SUB_ID, 0, GmacroCallbackBridge.message(result))
-                Host4FlutterGmacroConstants.endGyroCalibration -> commands.endAlignGyroscope(CALIB_GYRO_SUB_ID, 0, GmacroCallbackBridge.endGyroCalibration(result))
+                Host4FlutterGmacroConstants.startGyroCalibration -> commands.beginAlignGyroscope( GmacroCallbackBridge.message(result))
+                Host4FlutterGmacroConstants.endGyroCalibration -> commands.endAlignGyroscope( GmacroCallbackBridge.endGyroCalibration(result))
 
                 Host4FlutterGmacroConstants.updateGyroXYRatio -> commands.setMotionXYAxisRatio(
                     GmacroArgParser.intArg(arguments, "gyroXYRatio"),

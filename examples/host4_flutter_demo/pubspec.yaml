@@ -107,6 +107,7 @@ flutter:
     - assets/themes/grassland/tokens.json
     - assets/themes/grassland/asset.json
     - assets/themes/grassland/images/
+    - assets/ota/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

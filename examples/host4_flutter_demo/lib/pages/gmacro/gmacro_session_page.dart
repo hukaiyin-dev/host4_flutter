@@ -12,6 +12,8 @@ import 'package:host4_flutter_ui/host4_flutter_ui.dart';
 import '../../widgets/sub_page_scaffold.dart';
 import 'gmacro_api_test_page.dart';
 
+enum _OtaFirmwareSource { bundled, picker }
+
 class GmacroSessionPage extends StatefulWidget {
   const GmacroSessionPage({required this.transport, super.key});
 
@@ -22,6 +24,11 @@ class GmacroSessionPage extends StatefulWidget {
 }
 
 class _GmacroSessionPageState extends State<GmacroSessionPage> {
+  static const _bundledOtaAssetPath =
+      'assets/ota/OTA_GDF-G911405_C738_V1.0_260702A.bin.signed';
+  static const _bundledOtaFileName =
+      'OTA_GDF-G911405_C738_V1.0_260702A.bin.signed';
+
   final _gmacro = Host4Gmacro();
   final GmacroInputHub _inputHub = GmacroInputHub();
 
@@ -266,44 +273,65 @@ class _GmacroSessionPageState extends State<GmacroSessionPage> {
     final session = _session;
     if (session == null) return;
 
-    final confirmed = await showDialog<bool>(
+    final source = await showDialog<_OtaFirmwareSource>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('OTA 测试'),
         content: const Text(
-          '点击确认后选择本地 .bin 固件文件，\n'
+          '可以直接使用项目内置测试固件，或选择本地 .bin 固件文件。\n'
           'Flutter 会将固件字节传给原生层执行 OTA。\n\n'
           '升级进度/成功/失败将通过 otaUpgradeEvents 监听。',
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
+            onPressed: () => Navigator.pop(ctx),
             child: const Text('取消'),
           ),
           TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
+            onPressed: () => Navigator.pop(ctx, _OtaFirmwareSource.bundled),
+            child: const Text('已有文件'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, _OtaFirmwareSource.picker),
             child: const Text('选择固件'),
           ),
         ],
       ),
     );
 
-    if (confirmed != true) return;
+    if (source == null) return;
 
-    // 让用户选 .bin 固件文件
-    final picked = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['bin'],
-      withData: true,
-    );
-    if (!mounted) return;
-    final bytes = picked?.files.firstOrNull?.bytes;
-    if (bytes == null) {
-      _addLog('⚠ 未选择固件文件，已取消');
+    late final Uint8List bytes;
+    late final String firmwareName;
+    switch (source) {
+      case _OtaFirmwareSource.bundled:
+        final data = await rootBundle.load(_bundledOtaAssetPath);
+        if (!mounted) return;
+        bytes = data.buffer.asUint8List();
+        firmwareName = _bundledOtaFileName;
+      case _OtaFirmwareSource.picker:
+        final picked = await FilePicker.platform.pickFiles(
+          type: FileType.custom,
+          allowedExtensions: ['bin', 'signed'],
+          withData: true,
+        );
+        if (!mounted) return;
+        final file = picked?.files.firstOrNull;
+        final pickedBytes = file?.bytes;
+        if (pickedBytes == null) {
+          _addLog('⚠ 未选择固件文件，已取消');
+          return;
+        }
+        bytes = pickedBytes;
+        firmwareName = file?.name ?? 'selected firmware';
+    }
+
+    if (bytes.isEmpty) {
+      _addLog('⚠ 固件文件为空，已取消', isError: true);
       return;
     }
 
-    _addLog('▶ invoke: startOta（固件 ${bytes.length} bytes）');
+    _addLog('▶ invoke: startOta（$firmwareName，${bytes.length} bytes）');
     setState(() {
       _isOtaRunning = true;
       _otaPercent = 0;
@@ -321,10 +349,7 @@ class _GmacroSessionPageState extends State<GmacroSessionPage> {
 
   void _openApiTestPage() {
     Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) =>
-            GmacroApiTestPage(session: _session),
-      ),
+      MaterialPageRoute(builder: (_) => GmacroApiTestPage(session: _session)),
     );
   }
 
