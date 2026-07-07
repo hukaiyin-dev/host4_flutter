@@ -30,7 +30,7 @@ internal object GmacroMethodInvoker {
             when (method) {
                 //手柄信息
                 Host4FlutterGmacroConstants.fetchDeviceVersion ->{
-                    commands.queryHandleInfoReq(GmacroCallbackBridge.fetchDeviceVersion(result))
+                    commands.queryDeviceInfo(GmacroCallbackBridge.fetchDeviceVersion(result))
                 }
 
                 // 0x77 04 查询 Game Macro 默认值
