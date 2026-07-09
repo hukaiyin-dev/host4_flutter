@@ -467,7 +467,7 @@ internal object GmacroMethodInvoker {
                 //查询当前按键映射配置
                 Host4FlutterGmacroConstants.queryCurrentMapping -> {
                     val profile = GmacroArgParser.intArg(arguments, "profile")
-                    commands.queryMappingKeyReq(profile, GmacroCallbackBridge.message(result))
+                    commands.queryMappingKeyReq(profile, GmacroCallbackBridge.queryCurrentMapping(result))
                 }
 
                 //设置手柄按键映射（支持同时映射多种类型键值）

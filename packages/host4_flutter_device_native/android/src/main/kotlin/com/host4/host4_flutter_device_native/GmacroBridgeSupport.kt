@@ -5,6 +5,7 @@ import com.host4.platform.kr.response.AlignRockerOrTriggerRsp
 import com.host4.platform.kr.response.BaseRsp
 import com.host4.platform.kr.response.LinerTriggerRsp
 import com.host4.platform.kr.response.MacroHandleConfigRsp
+import com.host4.platform.kr.response.MacroMappingKeyRsp
 import com.host4.platform.kr.response.MacroProfileRsp
 import com.host4.platform.kr.response.QueryCurrentLightEffectRsp
 import com.host4.platform.kr.response.QueryHandleInfoRsp
@@ -17,6 +18,8 @@ import com.host4.platform.v2.api.PlatformSdkFactory
 import com.host4.platform.v2.protocol.V2KrCmdController
 import io.flutter.plugin.common.MethodChannel
 import java.util.Collections.emptyMap
+import kotlin.collections.map
+import kotlin.collections.orEmpty
 
 internal object GmacroSdkAccess {
     const val USB_DEVICE_KEY = "__usb__"
@@ -118,6 +121,34 @@ internal object GmacroCallbackBridge {
             mainHandler.post {
                 if (code == Constants.SUCCESS || code == 80) {
                     result.success(mapOf("isOn" to (rsp.status != 2)))
+                } else {
+                    result.error(
+                        "gmacro-method-failed",
+                        "GMacro method failed with code=$code",
+                        GmacroResponseSerializer.toMap(rsp),
+                    )
+                }
+            }
+        }
+    }
+
+    /**
+     * 查询振动开关
+     */
+    fun queryCurrentMapping(result: MethodChannel.Result): OnMessageCallback<MacroMappingKeyRsp> {
+        return OnMessageCallback{ code, rsp ->
+            mainHandler.post {
+                if (code == Constants.SUCCESS || code == 80) {
+                    result.success(
+                        mapOf(
+                            "keyMappings" to rsp.macroMappings.orEmpty().map {
+                                mapOf(
+                                    "original" to it.original,
+                                    "mapped" to it.mapping,
+                                    "type" to it.type,
+                                )
+                            }),
+                    )
                 } else {
                     result.error(
                         "gmacro-method-failed",
