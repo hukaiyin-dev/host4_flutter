@@ -14,8 +14,10 @@ internal object GmacroMethodInvoker {
     private const val CALIB_TRIGGER_SUB_ID = 0x03
     private const val CALIB_GYRO_SUB_ID = 0x01
 
-    private const val SIDE_LEFT = 0
-    private const val SIDE_RIGHT = 1
+    private const val SIDE_LEFT = 13
+    private const val SIDE_RIGHT = 14
+    private const val TRIGGER_LEFT = 3
+    private const val TRIGGER_RIGHT = 4
 
     fun invoke(
         deviceKey: String,
@@ -143,12 +145,12 @@ internal object GmacroMethodInvoker {
 
                 Host4FlutterGmacroConstants.leftTriggerCurve -> {
                     val points = GmacroModelFactory.macroPoints(GmacroArgParser.mapList(arguments, "cgPoints"))
-                    commands.setMacroTriggerPointReq(SIDE_LEFT, points.size, points, GmacroCallbackBridge.message(result))
+                    commands.setMacroTriggerPointReq(TRIGGER_LEFT, points.size, points, GmacroCallbackBridge.message(result))
                 }
 
                 Host4FlutterGmacroConstants.rightTriggerCurve -> {
                     val points = GmacroModelFactory.macroPoints(GmacroArgParser.mapList(arguments, "cgPoints"))
-                    commands.setMacroTriggerPointReq(SIDE_RIGHT, points.size, points, GmacroCallbackBridge.message(result))
+                    commands.setMacroTriggerPointReq(TRIGGER_RIGHT, points.size, points, GmacroCallbackBridge.message(result))
                 }
 
                 Host4FlutterGmacroConstants.triggerQuickSwitch -> commands.SetQuickTriggerSwitchReq(
