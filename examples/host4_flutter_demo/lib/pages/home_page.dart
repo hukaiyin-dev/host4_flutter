@@ -5,6 +5,7 @@ import '../l10n/generated/app_localizations.dart';
 import '../widgets/sub_page_scaffold.dart';
 import 'aivoice_test_page.dart';
 import 'gmacro/gmacro_entry_page.dart';
+import 'ios_tf_card_page.dart';
 import 'silicone_overlay_page.dart';
 import 'tester_page.dart';
 import 'usb_drive_page.dart';
@@ -45,6 +46,18 @@ class HomePage extends StatelessWidget {
           title: l10n.usbDrivePageTitle,
           subtitle: l10n.usbDrivePageSubtitle,
           child: const UsbDrivePage(),
+        ),
+      ),
+      _LabEntry(
+        title: 'iOS TF 卡',
+        subtitle: '按规则读取 TF 卡内的游戏',
+        icon: Icons.sd_storage_rounded,
+        color: theme.colors.brandSecondary,
+        minHeight: 230,
+        builder: (_) => const SubPageScaffold(
+          title: 'iOS TF 卡',
+          subtitle: '按规则读取 TF 卡内的游戏',
+          child: IosTfCardPage(),
         ),
       ),
       _LabEntry(
