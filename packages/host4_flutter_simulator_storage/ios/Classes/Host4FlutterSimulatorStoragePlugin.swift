@@ -213,31 +213,43 @@ public final class Host4FlutterSimulatorStoragePlugin: NSObject, FlutterPlugin, 
   }
 
   private func parseSystems(_ rawSystems: [Any]) -> [Host4RomSystemSpec] {
-    return rawSystems.compactMap { raw in
-      guard let item = raw as? [String: Any],
-        let type = item["type"] as? Int else { return nil }
+    var systems: [Host4RomSystemSpec] = []
+
+    for rawSystem in rawSystems {
+      guard let item = rawSystem as? [String: Any],
+            let type = item["type"] as? Int else {
+        continue
+      }
+
       let name = item["name"] as? String ?? ""
       let fullName = item["fullName"] as? String ?? name
       let dir = (item["dir"] as? String ?? "")
         .trimmingCharacters(in: .whitespacesAndNewlines)
-    let rawExtensions = item["extensions"] as? [Any] ?? []
-    let extensions = rawExtensions
-      .compactMap { $0 as? String }
-      .map { $0.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() }
-      .compactMap { ext in
-        guard !ext.isEmpty else { return nil }
-        return ext.hasPrefix(".") ? ext : ".\(ext)"
+      let rawExtensions = item["extensions"] as? [Any] ?? []
+      var extensions: [String] = []
+      for case let rawExtension as String in rawExtensions {
+        let ext = rawExtension
+          .trimmingCharacters(in: .whitespacesAndNewlines)
+          .lowercased()
+        guard !ext.isEmpty else { continue }
+        let normalizedExt = ext.hasPrefix(".") ? ext : ".\(ext)"
+        if normalizedExt.count > 1 {
+          extensions.append(normalizedExt)
+        }
       }
-      .filter { $0.count > 1 }
-      guard !dir.isEmpty, !extensions.isEmpty else { return nil }
-      return Host4RomSystemSpec(
-        type: type,
-        name: name,
-        fullName: fullName,
-        dir: dir,
-        extensions: Set(extensions)
+
+      guard !dir.isEmpty, !extensions.isEmpty else { continue }
+      systems.append(
+        Host4RomSystemSpec(
+          type: type,
+          name: name,
+          fullName: fullName,
+          dir: dir,
+          extensions: Set(extensions)
+        )
       )
     }
+    return systems
   }
 
   private func scanStoredBookmark(systems: [Host4RomSystemSpec]) -> [String: Any]? {
