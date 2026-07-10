@@ -3,10 +3,16 @@ import Foundation
 import UIKit
 import UniformTypeIdentifiers
 
-public final class Host4FlutterSimulatorStoragePlugin: NSObject, FlutterPlugin, UIDocumentPickerDelegate {
+public final class Host4FlutterSimulatorStoragePlugin: NSObject, FlutterPlugin, FlutterStreamHandler, UIDocumentPickerDelegate {
   private let bookmarkStore = Host4TfCardBookmarkStore()
   private var pendingResult: FlutterResult?
   private var pendingSystems: [Host4RomSystemSpec] = []
+  private var pendingStreamingResult: FlutterResult?
+  private var pendingStreamingSystems: [Host4RomSystemSpec] = []
+  private var pendingStreamingScanId = ""
+  private var eventSink: FlutterEventSink?
+  private var bufferedStreamingEvents: [[String: Any]] = []
+  private var streamingScanActive = false
 
   public static func register(with registrar: FlutterPluginRegistrar) {
     let channel = FlutterMethodChannel(
@@ -15,14 +21,164 @@ public final class Host4FlutterSimulatorStoragePlugin: NSObject, FlutterPlugin, 
     )
     let instance = Host4FlutterSimulatorStoragePlugin()
     registrar.addMethodCallDelegate(instance, channel: channel)
+    let eventChannel = FlutterEventChannel(
+      name: "host4_flutter_simulator_storage/tf_card_scan_events",
+      binaryMessenger: registrar.messenger()
+    )
+    eventChannel.setStreamHandler(instance)
   }
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
     switch call.method {
     case "scanTfCardRoms":
       handleScanTfCardRoms(call: call, result: result)
+    case "startTfCardRomScan":
+      handleStartTfCardRomScan(call: call, result: result)
+    case "isTfCardAccessible":
+      result(isStoredTfCardAccessible())
     default:
       result(FlutterMethodNotImplemented)
+    }
+  }
+
+  private func isStoredTfCardAccessible() -> Bool {
+    guard let resolved = bookmarkStore.resolve() else { return false }
+    let didStartAccessing = resolved.url.startAccessingSecurityScopedResource()
+    defer {
+      if didStartAccessing { resolved.url.stopAccessingSecurityScopedResource() }
+    }
+    var isDirectory: ObjCBool = false
+    return didStartAccessing && FileManager.default.fileExists(
+      atPath: resolved.url.path,
+      isDirectory: &isDirectory
+    ) && isDirectory.boolValue
+  }
+
+  private func hasUsableTfCardRomsDirectory(at url: URL) -> Bool {
+    let didStartAccessing = url.startAccessingSecurityScopedResource()
+    defer {
+      if didStartAccessing {
+        url.stopAccessingSecurityScopedResource()
+      }
+    }
+    guard didStartAccessing else { return false }
+
+    var isDirectory: ObjCBool = false
+    let selectedDirectory = url.standardizedFileURL
+    guard FileManager.default.fileExists(
+      atPath: selectedDirectory.path,
+      isDirectory: &isDirectory
+    ), isDirectory.boolValue else {
+      return false
+    }
+
+    if selectedDirectory.lastPathComponent.lowercased() == "roms" {
+      return true
+    }
+
+    var hasRomsDirectory: ObjCBool = false
+    let directRomsURL = selectedDirectory.appendingPathComponent("roms", isDirectory: true)
+    return FileManager.default.fileExists(atPath: directRomsURL.path, isDirectory: &hasRomsDirectory) && hasRomsDirectory.boolValue
+  }
+
+  private func resolveUsableStoredTfCardURL() -> URL? {
+    guard let resolved = bookmarkStore.resolve() else { return nil }
+    if !hasUsableTfCardRomsDirectory(at: resolved.url) {
+      bookmarkStore.clear()
+      return nil
+    }
+    return resolved.url
+  }
+
+  public func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
+    eventSink = events
+    let bufferedEvents = bufferedStreamingEvents
+    bufferedStreamingEvents = []
+    for event in bufferedEvents {
+      events(event)
+    }
+    return nil
+  }
+
+  public func onCancel(withArguments arguments: Any?) -> FlutterError? {
+    eventSink = nil
+    return nil
+  }
+
+  private func handleStartTfCardRomScan(call: FlutterMethodCall, result: @escaping FlutterResult) {
+    guard !streamingScanActive, pendingStreamingResult == nil else {
+      result(FlutterError(code: "scan_in_progress", message: "Another TF card scan is already active.", details: nil))
+      return
+    }
+
+    let arguments = call.arguments as? [String: Any]
+    let systems = parseSystems(arguments?["systems"] as? [Any] ?? [])
+    guard !systems.isEmpty else {
+      result(FlutterError(code: "systems_required", message: "At least one simulator system spec is required.", details: nil))
+      return
+    }
+
+    let scanId = "ios_tf_scan_\(Int(Date().timeIntervalSince1970))"
+    let forcePick = arguments?["forcePick"] as? Bool ?? false
+    if !forcePick, let resolved = resolveUsableStoredTfCardURL() {
+      streamingScanActive = true
+      result(["scanId": scanId])
+      beginStreamingScan(url: resolved, systems: systems, scanId: scanId)
+      return
+    }
+
+    guard let presenter = topViewController() else {
+      result(FlutterError(code: "unavailable", message: "Unable to present folder picker.", details: nil))
+      return
+    }
+    pendingStreamingResult = result
+    pendingStreamingSystems = systems
+    pendingStreamingScanId = scanId
+    let picker = UIDocumentPickerViewController(forOpeningContentTypes: [UTType.folder], asCopy: false)
+    picker.delegate = self
+    picker.allowsMultipleSelection = false
+    if let lastURL = bookmarkStore.lastURL() {
+      picker.directoryURL = lastURL
+    }
+    presenter.present(picker, animated: true)
+  }
+
+  private func beginStreamingScan(url: URL, systems: [Host4RomSystemSpec], scanId: String) {
+    DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+      guard let self else { return }
+      let didStartAccessing = url.startAccessingSecurityScopedResource()
+      defer {
+        if didStartAccessing {
+          url.stopAccessingSecurityScopedResource()
+        }
+      }
+      do {
+        try Host4TfCardRomScanner(systems: systems).scanStreaming(selectedURL: url, scanId: scanId) { event in
+          self.emitStreamingEvent(event)
+        }
+      } catch let error as Host4TfCardScanError {
+        self.emitStreamingEvent([
+          "phase": "failed", "scanId": scanId, "message": error.message,
+        ])
+      } catch {
+        self.emitStreamingEvent([
+          "phase": "failed", "scanId": scanId, "message": error.localizedDescription,
+        ])
+      }
+      DispatchQueue.main.async {
+        self.streamingScanActive = false
+      }
+    }
+  }
+
+  private func emitStreamingEvent(_ event: [String: Any]) {
+    DispatchQueue.main.async { [weak self] in
+      guard let self else { return }
+      if let eventSink = self.eventSink {
+        eventSink(event)
+      } else {
+        self.bufferedStreamingEvents.append(event)
+      }
     }
   }
 
@@ -64,11 +220,15 @@ public final class Host4FlutterSimulatorStoragePlugin: NSObject, FlutterPlugin, 
       let fullName = item["fullName"] as? String ?? name
       let dir = (item["dir"] as? String ?? "")
         .trimmingCharacters(in: .whitespacesAndNewlines)
-      let rawExtensions = item["extensions"] as? [Any] ?? []
-      let extensions = rawExtensions
-        .compactMap { $0 as? String }
-        .map { $0.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() }
-        .filter { $0.hasPrefix(".") && $0.count > 1 }
+    let rawExtensions = item["extensions"] as? [Any] ?? []
+    let extensions = rawExtensions
+      .compactMap { $0 as? String }
+      .map { $0.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() }
+      .compactMap { ext in
+        guard !ext.isEmpty else { return nil }
+        return ext.hasPrefix(".") ? ext : ".\(ext)"
+      }
+      .filter { $0.count > 1 }
       guard !dir.isEmpty, !extensions.isEmpty else { return nil }
       return Host4RomSystemSpec(
         type: type,
@@ -130,6 +290,23 @@ public final class Host4FlutterSimulatorStoragePlugin: NSObject, FlutterPlugin, 
     _ controller: UIDocumentPickerViewController,
     didPickDocumentsAt urls: [URL]
   ) {
+    if let streamingResult = pendingStreamingResult {
+      let systems = pendingStreamingSystems
+      let scanId = pendingStreamingScanId
+      pendingStreamingResult = nil
+      pendingStreamingSystems = []
+      pendingStreamingScanId = ""
+      guard let url = urls.first else {
+        streamingResult(FlutterError(code: "cancelled", message: "Folder selection was cancelled.", details: nil))
+        return
+      }
+      bookmarkStore.save(url: url)
+      streamingScanActive = true
+      streamingResult(["scanId": scanId])
+      beginStreamingScan(url: url, systems: systems, scanId: scanId)
+      return
+    }
+
     guard let result = pendingResult else { return }
     let systems = pendingSystems
     pendingResult = nil
@@ -159,6 +336,14 @@ public final class Host4FlutterSimulatorStoragePlugin: NSObject, FlutterPlugin, 
   }
 
   public func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
+    if let streamingResult = pendingStreamingResult {
+      pendingStreamingResult = nil
+      pendingStreamingSystems = []
+      pendingStreamingScanId = ""
+      streamingResult(FlutterError(code: "cancelled", message: "Folder selection was cancelled.", details: nil))
+      return
+    }
+
     guard let result = pendingResult else { return }
     pendingResult = nil
     pendingSystems = []
@@ -300,6 +485,117 @@ private final class Host4TfCardRomScanner {
     ]
   }
 
+  func scanStreaming(
+    selectedURL: URL,
+    scanId: String,
+    onEvent: ([String: Any]) -> Void
+  ) throws {
+    let selectedDirectory = try directoryURL(from: selectedURL.standardizedFileURL)
+    let romsURL: URL
+    do {
+      romsURL = try findRomsDirectory(from: selectedDirectory)
+    } catch let error as Host4TfCardScanError where error.code == "roms_not_found" {
+      onEvent([
+        "phase": "completed",
+        "scanId": scanId,
+        "platformCount": 0,
+        "gameCount": 0,
+      ])
+      return
+    }
+    let rootURL = romsURL.deletingLastPathComponent()
+    var platformCount = 0
+    var gameCount = 0
+
+    onEvent([
+      "phase": "started",
+      "scanId": scanId,
+      "rootPath": rootURL.standardizedFileURL.path,
+      "romsPath": romsURL.standardizedFileURL.path,
+    ])
+
+    for system in systems {
+      let platformURL = romsURL.appendingPathComponent(system.dir, isDirectory: true)
+      guard isDirectory(platformURL) else { continue }
+      platformCount += 1
+      onEvent([
+        "phase": "platformStarted",
+        "scanId": scanId,
+        "type": system.type,
+        "platformName": system.name,
+        "path": platformURL.standardizedFileURL.path,
+      ])
+
+      do {
+        let metadata = Host4GameListParser.parse(
+          fileURL: platformURL.appendingPathComponent("gamelist.xml")
+        )
+        var platformGameCount = 0
+        try enumerateRomFiles(in: platformURL, allowedExtensions: system.extensions) { fileURL in
+          let game = self.gamePayload(
+            system: system,
+            platformURL: platformURL,
+            fileURL: fileURL,
+            metadata: metadata
+          )
+          platformGameCount += 1
+          gameCount += 1
+          onEvent([
+            "phase": "gameFound",
+            "scanId": scanId,
+            "type": system.type,
+            "platformName": system.name,
+            "game": game,
+          ])
+        }
+        onEvent([
+          "phase": "platformCompleted",
+          "scanId": scanId,
+          "type": system.type,
+          "platformName": system.name,
+          "gameCount": platformGameCount,
+        ])
+      } catch let error as Host4TfCardScanError {
+        onEvent([
+          "phase": "platformError",
+          "scanId": scanId,
+          "type": system.type,
+          "platformName": system.name,
+          "message": error.message,
+        ])
+        onEvent([
+          "phase": "platformCompleted",
+          "scanId": scanId,
+          "type": system.type,
+          "platformName": system.name,
+          "gameCount": 0,
+        ])
+      } catch {
+        onEvent([
+          "phase": "platformError",
+          "scanId": scanId,
+          "type": system.type,
+          "platformName": system.name,
+          "message": error.localizedDescription,
+        ])
+        onEvent([
+          "phase": "platformCompleted",
+          "scanId": scanId,
+          "type": system.type,
+          "platformName": system.name,
+          "gameCount": 0,
+        ])
+      }
+    }
+
+    onEvent([
+      "phase": "completed",
+      "scanId": scanId,
+      "platformCount": platformCount,
+      "gameCount": gameCount,
+    ])
+  }
+
   private func directoryURL(from url: URL) throws -> URL {
     let values = try url.resourceValues(forKeys: [.isDirectoryKey])
     guard values.isDirectory == true else {
@@ -333,32 +629,35 @@ private final class Host4TfCardRomScanner {
       fileURL: platformURL.appendingPathComponent("gamelist.xml")
     )
     let files = try romFiles(in: platformURL, allowedExtensions: system.extensions)
-    return files.map { fileURL in
-      let resourcePath = relativePath(from: platformURL, to: fileURL)
-      let gameMetadata = metadata[resourcePath] ??
-        metadata["./\(resourcePath)"] ??
-        metadata.first(where: { resourcePath.hasSuffix($0.key.trimmingPrefix("./")) })?.value
-      var game: [String: Any] = [
-        "type": system.type,
-        "platformName": system.name,
-        "platformFullName": system.fullName,
-        "name": gameMetadata?.name ?? fileURL.deletingPathExtension().lastPathComponent,
-        "fileName": fileURL.lastPathComponent,
-        "rootPath": platformURL.standardizedFileURL.path,
-        "resourcePath": resourcePath,
-        "romPath": fileURL.standardizedFileURL.path,
-      ]
-      if let imagePath = gameMetadata?.imagePath, !imagePath.isEmpty {
-        game["imagePath"] = imagePath
-      }
-      if let videoPath = gameMetadata?.videoPath, !videoPath.isEmpty {
-        game["videoPath"] = videoPath
-      }
-      if let description = gameMetadata?.description, !description.isEmpty {
-        game["description"] = description
-      }
-      return game
+    return files.map {
+      gamePayload(system: system, platformURL: platformURL, fileURL: $0, metadata: metadata)
     }
+  }
+
+  private func gamePayload(
+    system: Host4RomSystemSpec,
+    platformURL: URL,
+    fileURL: URL,
+    metadata: [String: Host4GameMetadata]
+  ) -> [String: Any] {
+    let resourcePath = relativePath(from: platformURL, to: fileURL)
+    let gameMetadata = metadata[resourcePath] ??
+      metadata["./\(resourcePath)"] ??
+      metadata.first(where: { resourcePath.hasSuffix($0.key.trimmingPrefix("./")) })?.value
+    var game: [String: Any] = [
+      "type": system.type,
+      "platformName": system.name,
+      "platformFullName": system.fullName,
+      "name": gameMetadata?.name ?? fileURL.deletingPathExtension().lastPathComponent,
+      "fileName": fileURL.lastPathComponent,
+      "rootPath": platformURL.standardizedFileURL.path,
+      "resourcePath": resourcePath,
+      "romPath": fileURL.standardizedFileURL.path,
+    ]
+    if let imagePath = gameMetadata?.imagePath, !imagePath.isEmpty { game["imagePath"] = imagePath }
+    if let videoPath = gameMetadata?.videoPath, !videoPath.isEmpty { game["videoPath"] = videoPath }
+    if let description = gameMetadata?.description, !description.isEmpty { game["description"] = description }
+    return game
   }
 
   private func romFiles(in directoryURL: URL, allowedExtensions: Set<String>) throws -> [URL] {
@@ -380,6 +679,26 @@ private final class Host4TfCardRomScanner {
       }
     }
     return files.sorted { $0.path.localizedStandardCompare($1.path) == .orderedAscending }
+  }
+
+  private func enumerateRomFiles(
+    in directoryURL: URL,
+    allowedExtensions: Set<String>,
+    onFile: (URL) -> Void
+  ) throws {
+    guard let enumerator = fileManager.enumerator(
+      at: directoryURL,
+      includingPropertiesForKeys: [.isRegularFileKey, .isHiddenKey],
+      options: [.skipsHiddenFiles]
+    ) else { return }
+
+    for case let fileURL as URL in enumerator {
+      let values = try fileURL.resourceValues(forKeys: [.isRegularFileKey, .isHiddenKey])
+      guard values.isRegularFile == true, values.isHidden != true else { continue }
+      if allowedExtensions.contains(".\(fileURL.pathExtension.lowercased())") {
+        onFile(fileURL)
+      }
+    }
   }
 
   private func isDirectory(_ url: URL) -> Bool {
