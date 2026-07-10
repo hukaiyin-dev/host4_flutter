@@ -1,9 +1,49 @@
 import 'package:flutter/services.dart';
 
 const MethodChannel _channel = MethodChannel('host4_flutter_simulator_storage');
+const EventChannel _events = EventChannel(
+  'host4_flutter_simulator_storage/tf_card_scan_events',
+);
 
 class Host4SimulatorStorage {
   const Host4SimulatorStorage._();
+
+  /// Emits TF-card scan progress. Subscribe before starting a scan so no
+  /// discovered ROM is missed.
+  static Stream<Host4TfCardScanEvent> get tfCardRomScanEvents {
+    return _events
+        .receiveBroadcastStream()
+        .where((event) => event is Map)
+        .cast<Map>()
+        .map(Host4TfCardScanEvent.fromMap);
+  }
+
+  /// Starts an iOS TF-card scan. Results arrive through [tfCardRomScanEvents].
+  static Future<String> startTfCardRomScan({
+    required List<Host4RomSystemSpec> systems,
+    bool forcePick = false,
+  }) async {
+    if (systems.isEmpty) {
+      throw ArgumentError.value(systems, 'systems', 'must not be empty');
+    }
+    final payload = await _channel
+        .invokeMethod<Object?>('startTfCardRomScan', <String, Object?>{
+          'forcePick': forcePick,
+          'systems': systems.map((system) => system.toMap()).toList(),
+        });
+    if (payload is! Map) {
+      throw const FormatException('Invalid TF card scan start payload.');
+    }
+    final scanId = _readString(payload['scanId']);
+    if (scanId.isEmpty) {
+      throw const FormatException('Missing TF card scan ID.');
+    }
+    return scanId;
+  }
+
+  static Future<bool> isTfCardAccessible() async {
+    return await _channel.invokeMethod<bool>('isTfCardAccessible') ?? false;
+  }
 
   static Future<Host4TfCardScanResult> scanTfCardRoms({
     required List<Host4RomSystemSpec> systems,
@@ -22,6 +62,51 @@ class Host4SimulatorStorage {
     }
     return Host4TfCardScanResult.fromMap(payload);
   }
+}
+
+enum Host4TfCardScanPhase {
+  started,
+  platformStarted,
+  gameFound,
+  platformCompleted,
+  completed,
+  failed,
+  unknown,
+}
+
+class Host4TfCardScanEvent {
+  const Host4TfCardScanEvent({
+    required this.phase,
+    required this.scanId,
+    this.game,
+    this.type = 0,
+    this.platformName,
+    this.message,
+  });
+
+  factory Host4TfCardScanEvent.fromMap(Map<dynamic, dynamic> map) {
+    final phaseName = _readString(map['phase']);
+    return Host4TfCardScanEvent(
+      phase: Host4TfCardScanPhase.values.firstWhere(
+        (phase) => phase.name == phaseName,
+        orElse: () => Host4TfCardScanPhase.unknown,
+      ),
+      scanId: _readString(map['scanId']),
+      game: map['game'] is Map
+          ? Host4ScannedRom.fromMap(map['game'] as Map<dynamic, dynamic>)
+          : null,
+      type: _readInt(map['type']),
+      platformName: _readNullableString(map['platformName']),
+      message: _readNullableString(map['message']),
+    );
+  }
+
+  final Host4TfCardScanPhase phase;
+  final String scanId;
+  final Host4ScannedRom? game;
+  final int type;
+  final String? platformName;
+  final String? message;
 }
 
 class Host4RomSystemSpec {
