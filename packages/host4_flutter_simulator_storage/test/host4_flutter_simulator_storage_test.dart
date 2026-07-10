@@ -91,4 +91,26 @@ void main() {
       throwsArgumentError,
     );
   });
+
+  test('TF scan event parses a discovered ROM immediately', () {
+    final event = Host4TfCardScanEvent.fromMap(<String, Object?>{
+      'phase': 'gameFound',
+      'scanId': 'ios_tf_scan_1',
+      'game': <String, Object?>{
+        'type': 21,
+        'platformName': 'GBA',
+        'platformFullName': 'Game Boy Advance',
+        'name': 'Zelda',
+        'fileName': 'Zelda.gba',
+        'rootPath': '/Volumes/TF/roms/gba',
+        'resourcePath': 'Zelda.gba',
+        'romPath': '/Volumes/TF/roms/gba/Zelda.gba',
+      },
+    });
+
+    expect(event.phase, Host4TfCardScanPhase.gameFound);
+    expect(event.scanId, 'ios_tf_scan_1');
+    expect(event.game?.name, 'Zelda');
+    expect(event.game?.resourcePath, 'Zelda.gba');
+  });
 }
