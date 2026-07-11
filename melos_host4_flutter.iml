@@ -73,6 +73,9 @@
       <excludeFolder url="file://$MODULE_DIR$/packages/host4_flutter_physical_overlay/.dart_tool" />
       <excludeFolder url="file://$MODULE_DIR$/packages/host4_flutter_physical_overlay/.pub" />
       <excludeFolder url="file://$MODULE_DIR$/packages/host4_flutter_physical_overlay/build" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/host4_flutter_simulator_storage/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/host4_flutter_simulator_storage/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/host4_flutter_simulator_storage/build" />
     </content>
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="Dart SDK" level="project" />
