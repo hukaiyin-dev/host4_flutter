@@ -1,5 +1,6 @@
 package com.host4.host4_flutter_device_native
 
+import com.host4.platform.kr.model.MacroPoint
 import com.host4.platform.kr.response.AlignGyroscopeRsp
 import com.host4.platform.kr.response.AlignRockerOrTriggerRsp
 import com.host4.platform.kr.response.BaseRsp
@@ -307,6 +308,8 @@ private object GmacroDefaultInfoMapper {
             "leftTrigger" to mapOf(
                 "start" to (trigger?.startLeft ?: 0),
                 "end" to (trigger?.terminationLeft ?: 0),
+                "macroOn" to (trigger?.isMacroSwitchLeft ?: false),
+                "macroThreshold" to (trigger?.macroThresholdLeft ?: 0),
                 "pointCount" to (trigger?.pointCountLeft ?: 0),
                 "points" to points(trigger?.leftPointList),
                 "fastTrigger" to (trigger?.isMacroSwitchLeft ?: false),
@@ -314,6 +317,8 @@ private object GmacroDefaultInfoMapper {
             "rightTrigger" to mapOf(
                 "start" to (trigger?.startRight ?: 0),
                 "end" to (trigger?.terminationRight ?: 0),
+                "macroOn" to (trigger?.isMacroSwitchRight ?: false),
+                "macroThreshold" to (trigger?.macroThresholdRight ?: 0),
                 "pointCount" to (trigger?.pointCountRight ?: 0),
                 "points" to points(trigger?.rightPointList),
                 "fastTrigger" to (trigger?.isMacroSwitchRight ?: false),
@@ -377,13 +382,9 @@ private object GmacroDefaultInfoMapper {
             ),
         )
     }
-
-    private fun points(points: List<com.host4.platform.kr.model.MacroPoint>?): List<Map<String, Int>> {
+    private fun points(points: List<MacroPoint>?): List<List<Int>> {
         return points.orEmpty().map {
-            mapOf(
-                "x" to it.x_axis,
-                "y" to it.y_axis,
-            )
+            listOf(it.x_axis, it.y_axis)
         }
     }
 }
