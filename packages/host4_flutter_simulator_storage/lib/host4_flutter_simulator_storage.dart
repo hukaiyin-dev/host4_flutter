@@ -45,6 +45,66 @@ class Host4SimulatorStorage {
     return await _channel.invokeMethod<bool>('isTfCardAccessible') ?? false;
   }
 
+  /// Returns the user-authorized ROM folders configured for one simulator.
+  static Future<List<Host4SimulatorRomFolder>> loadSimulatorRomFolders({
+    required int systemType,
+  }) async {
+    final payload = await _channel.invokeMethod<Object?>(
+      'loadSimulatorRomFolders',
+      <String, Object?>{'systemType': systemType},
+    );
+    return _readMapList(
+      payload,
+    ).map(Host4SimulatorRomFolder.fromMap).toList(growable: false);
+  }
+
+  /// Opens the iOS system folder picker for one of a simulator's three slots.
+  static Future<List<Host4SimulatorRomFolder>> pickSimulatorRomFolder({
+    required int systemType,
+    String? replacingPath,
+  }) async {
+    final payload = await _channel
+        .invokeMethod<Object?>('pickSimulatorRomFolder', <String, Object?>{
+          'systemType': systemType,
+          if (replacingPath != null && replacingPath.trim().isNotEmpty)
+            'replacingPath': replacingPath,
+        });
+    return _readMapList(
+      payload,
+    ).map(Host4SimulatorRomFolder.fromMap).toList(growable: false);
+  }
+
+  static Future<List<Host4SimulatorRomFolder>> removeSimulatorRomFolder({
+    required int systemType,
+    required String path,
+  }) async {
+    final payload = await _channel.invokeMethod<Object?>(
+      'removeSimulatorRomFolder',
+      <String, Object?>{'systemType': systemType, 'path': path},
+    );
+    return _readMapList(
+      payload,
+    ).map(Host4SimulatorRomFolder.fromMap).toList(growable: false);
+  }
+
+  /// Scans every system folder configured for this simulator progressively.
+  static Future<String> startSimulatorRomFolderScan({
+    required Host4RomSystemSpec system,
+  }) async {
+    final payload = await _channel.invokeMethod<Object?>(
+      'startSimulatorRomFolderScan',
+      <String, Object?>{'system': system.toMap()},
+    );
+    if (payload is! Map) {
+      throw const FormatException('Invalid simulator ROM folder scan payload.');
+    }
+    final scanId = _readString(payload['scanId']);
+    if (scanId.isEmpty) {
+      throw const FormatException('Missing simulator ROM folder scan ID.');
+    }
+    return scanId;
+  }
+
   static Future<Host4TfCardScanResult> scanTfCardRoms({
     required List<Host4RomSystemSpec> systems,
     bool forcePick = false,
@@ -134,6 +194,23 @@ class Host4RomSystemSpec {
       'extensions': extensions,
     };
   }
+}
+
+class Host4SimulatorRomFolder {
+  const Host4SimulatorRomFolder({
+    required this.path,
+    required this.displayName,
+  });
+
+  factory Host4SimulatorRomFolder.fromMap(Map<dynamic, dynamic> map) {
+    return Host4SimulatorRomFolder(
+      path: _readString(map['path']),
+      displayName: _readString(map['displayName']),
+    );
+  }
+
+  final String path;
+  final String displayName;
 }
 
 class Host4TfCardScanResult {

@@ -95,6 +95,125 @@ void main() {
   });
 
   test(
+    'simulator ROM folder picker uses the requested platform slot',
+    () async {
+      final calls = <MethodCall>[];
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (call) async {
+            calls.add(call);
+            return <Object?>[
+              <String, Object?>{
+                'path': '/private/var/mobile/Media/TF/gb',
+                'displayName': 'gb',
+              },
+            ];
+          });
+
+      final folders = await Host4SimulatorStorage.pickSimulatorRomFolder(
+        systemType: 9,
+        replacingPath: '/private/var/mobile/Media/TF/old-gb',
+      );
+
+      expect(folders.single.path, '/private/var/mobile/Media/TF/gb');
+      expect(folders.single.displayName, 'gb');
+      expect(calls.single.method, 'pickSimulatorRomFolder');
+      expect(calls.single.arguments, <String, Object?>{
+        'systemType': 9,
+        'replacingPath': '/private/var/mobile/Media/TF/old-gb',
+      });
+    },
+  );
+
+  test(
+    'simulator ROM scan sends one platform spec and returns its scan id',
+    () async {
+      final calls = <MethodCall>[];
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (call) async {
+            calls.add(call);
+            return <String, Object?>{'scanId': 'ios_simulator_path_scan_1'};
+          });
+
+      final scanId = await Host4SimulatorStorage.startSimulatorRomFolderScan(
+        system: const Host4RomSystemSpec(
+          type: 9,
+          name: 'GB',
+          fullName: 'Game Boy',
+          dir: 'gb',
+          extensions: <String>['.gb', '.zip'],
+        ),
+      );
+
+      expect(scanId, 'ios_simulator_path_scan_1');
+      expect(calls.single.method, 'startSimulatorRomFolderScan');
+      expect(calls.single.arguments, <String, Object?>{
+        'system': <String, Object?>{
+          'type': 9,
+          'name': 'GB',
+          'fullName': 'Game Boy',
+          'dir': 'gb',
+          'extensions': <String>['.gb', '.zip'],
+        },
+      });
+    },
+  );
+
+  test(
+    'iOS stores up to three folders independently for each simulator',
+    () async {
+      final pluginSource = await File(
+        'ios/Classes/Host4FlutterSimulatorStoragePlugin.swift',
+      ).readAsString();
+
+      expect(pluginSource, contains('Host4SimulatorRomFolderBookmarkStore'));
+      expect(pluginSource, contains('case "pickSimulatorRomFolder"'));
+      expect(pluginSource, contains('case "startSimulatorRomFolderScan"'));
+      expect(pluginSource, contains('private let maximumFolderCount = 3'));
+    },
+  );
+
+  test('iOS keeps a replaced ROM folder in its original UI slot', () async {
+    final pluginSource = await File(
+      'ios/Classes/Host4FlutterSimulatorStoragePlugin.swift',
+    ).readAsString();
+
+    expect(pluginSource, contains('systemEntries[index] = Entry('));
+  });
+
+  test(
+    'iOS keeps a selected folder visible even before access is retained',
+    () async {
+      final pluginSource = await File(
+        'ios/Classes/Host4FlutterSimulatorStoragePlugin.swift',
+      ).readAsString();
+
+      expect(
+        pluginSource,
+        isNot(
+          contains(
+            'guard didStartAccessing else {\n'
+            '        simulatorFolderResult(FlutterError(',
+          ),
+        ),
+      );
+    },
+  );
+
+  test('replacing a folder keeps the previous session access alive', () async {
+    final pluginSource = await File(
+      'ios/Classes/Host4FlutterSimulatorStoragePlugin.swift',
+    ).readAsString();
+    final start = pluginSource.indexOf('public func documentPicker(');
+    final end = pluginSource.indexOf('if let streamingResult', start);
+    final folderSelectionFlow = pluginSource.substring(start, end);
+
+    expect(
+      folderSelectionFlow,
+      isNot(contains('Host4TfCardFileAccessRegistry.clearActiveDirectory(')),
+    );
+  });
+
+  test(
     'iOS persists TF folders while their security scope is active',
     () async {
       final pluginSource = await File(
@@ -148,7 +267,7 @@ void main() {
       );
       expect(
         pluginSource,
-        contains('activeDirectoryAccess = Host4TfCardRetainedFileAccess('),
+        contains('guard let access = Host4TfCardRetainedFileAccess('),
       );
       expect(pluginSource, contains('ownsExistingSecurityScope: Bool = false'));
       expect(pluginSource, contains('ownsExistingSecurityScope: true'));
@@ -156,7 +275,7 @@ void main() {
   );
 
   test(
-    'iOS treats a readable TF directory as available without a scope token',
+    'iOS verifies TF availability by reading the retained directory',
     () async {
       final pluginSource = await File(
         'ios/Classes/Host4FlutterSimulatorStoragePlugin.swift',
@@ -164,7 +283,7 @@ void main() {
 
       expect(
         pluginSource,
-        contains('let isAccessible = FileManager.default.fileExists('),
+        contains('FileManager.default.contentsOfDirectory('),
       );
     },
   );
