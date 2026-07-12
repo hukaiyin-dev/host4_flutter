@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:host4_flutter_simulator_storage/host4_flutter_simulator_storage.dart';
@@ -92,6 +94,103 @@ void main() {
     );
   });
 
+  test(
+    'iOS persists TF folders while their security scope is active',
+    () async {
+      final pluginSource = await File(
+        'ios/Classes/Host4FlutterSimulatorStoragePlugin.swift',
+      ).readAsString();
+
+      expect(
+        pluginSource,
+        contains('normalizedURL.startAccessingSecurityScopedResource()'),
+      );
+      expect(pluginSource, contains('guard didStartAccessing else'));
+      expect(pluginSource, contains('options: []'));
+    },
+  );
+
+  test(
+    'iOS checks the TF folder selected in the current session first',
+    () async {
+      final pluginSource = await File(
+        'ios/Classes/Host4FlutterSimulatorStoragePlugin.swift',
+      ).readAsString();
+
+      expect(pluginSource, contains('private var activeTfCardURL: URL?'));
+      expect(
+        pluginSource,
+        contains('let url = activeTfCardURL ?? bookmarkStore.resolve()?.url'),
+      );
+    },
+  );
+
+  test(
+    'iOS keeps selected TF directory access for the entire app session',
+    () async {
+      final pluginSource = await File(
+        'ios/Classes/Host4FlutterSimulatorStoragePlugin.swift',
+      ).readAsString();
+
+      expect(
+        pluginSource,
+        contains('public enum Host4TfCardFileAccessRegistry'),
+      );
+      expect(
+        pluginSource,
+        contains('public static func retainAccess(forROMPath romPath: String)'),
+      );
+      expect(
+        pluginSource,
+        contains(
+          'private static var activeDirectoryAccess: Host4TfCardRetainedFileAccess?',
+        ),
+      );
+      expect(
+        pluginSource,
+        contains('activeDirectoryAccess = Host4TfCardRetainedFileAccess('),
+      );
+      expect(pluginSource, contains('ownsExistingSecurityScope: Bool = false'));
+      expect(pluginSource, contains('ownsExistingSecurityScope: true'));
+    },
+  );
+
+  test(
+    'iOS treats a readable TF directory as available without a scope token',
+    () async {
+      final pluginSource = await File(
+        'ios/Classes/Host4FlutterSimulatorStoragePlugin.swift',
+      ).readAsString();
+
+      expect(
+        pluginSource,
+        contains('let isAccessible = FileManager.default.fileExists('),
+      );
+    },
+  );
+
+  test(
+    'iOS checks an active TF session through its retained security scope first',
+    () async {
+      final pluginSource = await File(
+        'ios/Classes/Host4FlutterSimulatorStoragePlugin.swift',
+      ).readAsString();
+
+      expect(
+        pluginSource,
+        contains(
+          'public static func isActiveDirectoryAccessible(at directoryURL: URL) -> Bool?',
+        ),
+      );
+      expect(
+        pluginSource,
+        contains(
+          'Host4TfCardFileAccessRegistry.isActiveDirectoryAccessible(at: url)',
+        ),
+      );
+    },
+  );
+
   test('TF scan event parses a discovered ROM immediately', () {
     final event = Host4TfCardScanEvent.fromMap(<String, Object?>{
       'phase': 'gameFound',
@@ -112,5 +211,16 @@ void main() {
     expect(event.scanId, 'ios_tf_scan_1');
     expect(event.game?.name, 'Zelda');
     expect(event.game?.resourcePath, 'Zelda.gba');
+  });
+
+  test('TF scan event preserves a skipped directory selection', () {
+    final event = Host4TfCardScanEvent.fromMap(<String, Object?>{
+      'phase': 'skipped',
+      'scanId': 'ios_tf_scan_1',
+      'message': 'No roms folder was found in the selected TF card folder.',
+    });
+
+    expect(event.phase, Host4TfCardScanPhase.skipped);
+    expect(event.message, contains('No roms folder'));
   });
 }

@@ -3,6 +3,82 @@ import Foundation
 import UIKit
 import UniformTypeIdentifiers
 
+/// Keeps the selected TF-card directory available for the current app session.
+/// It deliberately stores no game data, so an app restart still drops TF games.
+public enum Host4TfCardFileAccessRegistry {
+  private static var activeDirectoryURL: URL?
+  private static var activeDirectoryAccess: Host4TfCardRetainedFileAccess?
+
+  @discardableResult
+  public static func activate(
+    directoryURL: URL,
+    ownsExistingSecurityScope: Bool = false
+  ) -> Bool {
+    let normalizedURL = directoryURL.standardizedFileURL
+    activeDirectoryURL = normalizedURL
+    activeDirectoryAccess = Host4TfCardRetainedFileAccess(
+      directoryURL: normalizedURL,
+      ownsExistingSecurityScope: ownsExistingSecurityScope
+    )
+    return activeDirectoryAccess != nil
+  }
+
+  public static func clearActiveDirectory() {
+    activeDirectoryAccess = nil
+    activeDirectoryURL = nil
+  }
+
+  public static func retainAccess(forROMPath romPath: String) -> AnyObject? {
+    guard let directoryURL = activeDirectoryURL else { return nil }
+    let rootPath = directoryURL.path
+    let romURL = URL(fileURLWithPath: romPath).standardizedFileURL
+    guard romURL.path.hasPrefix(rootPath + "/") else { return nil }
+    return activeDirectoryAccess
+  }
+
+  /// Checks the directory through the scope already retained for this session.
+  /// Returning nil means this URL is not the active directory and callers may
+  /// fall back to resolving a bookmark.
+  public static func isActiveDirectoryAccessible(at directoryURL: URL) -> Bool? {
+    let normalizedURL = directoryURL.standardizedFileURL
+    guard
+      let activeDirectoryURL,
+      activeDirectoryURL.path == normalizedURL.path,
+      activeDirectoryAccess != nil
+    else {
+      return nil
+    }
+
+    var isDirectory: ObjCBool = false
+    return FileManager.default.fileExists(
+      atPath: activeDirectoryURL.path,
+      isDirectory: &isDirectory
+    ) && isDirectory.boolValue
+  }
+}
+
+private final class Host4TfCardRetainedFileAccess: NSObject {
+  private let directoryURL: URL
+  private let didStartAccessing: Bool
+
+  init?(
+    directoryURL: URL,
+    ownsExistingSecurityScope: Bool = false
+  ) {
+    self.directoryURL = directoryURL
+    didStartAccessing = ownsExistingSecurityScope
+      || directoryURL.startAccessingSecurityScopedResource()
+    super.init()
+    guard didStartAccessing else { return nil }
+  }
+
+  deinit {
+    if didStartAccessing {
+      directoryURL.stopAccessingSecurityScopedResource()
+    }
+  }
+}
+
 public final class Host4FlutterSimulatorStoragePlugin: NSObject, FlutterPlugin, FlutterStreamHandler, UIDocumentPickerDelegate {
   private let bookmarkStore = Host4TfCardBookmarkStore()
   private var pendingResult: FlutterResult?
@@ -13,6 +89,7 @@ public final class Host4FlutterSimulatorStoragePlugin: NSObject, FlutterPlugin, 
   private var eventSink: FlutterEventSink?
   private var bufferedStreamingEvents: [[String: Any]] = []
   private var streamingScanActive = false
+  private var activeTfCardURL: URL?
 
   public static func register(with registrar: FlutterPluginRegistrar) {
     let channel = FlutterMethodChannel(
@@ -42,16 +119,24 @@ public final class Host4FlutterSimulatorStoragePlugin: NSObject, FlutterPlugin, 
   }
 
   private func isStoredTfCardAccessible() -> Bool {
-    guard let resolved = bookmarkStore.resolve() else { return false }
-    let didStartAccessing = resolved.url.startAccessingSecurityScopedResource()
+    guard let url = activeTfCardURL ?? bookmarkStore.resolve()?.url else {
+      return false
+    }
+
+    if let isAccessible = Host4TfCardFileAccessRegistry.isActiveDirectoryAccessible(at: url) {
+      return isAccessible
+    }
+
+    let didStartAccessing = url.startAccessingSecurityScopedResource()
     defer {
-      if didStartAccessing { resolved.url.stopAccessingSecurityScopedResource() }
+      if didStartAccessing { url.stopAccessingSecurityScopedResource() }
     }
     var isDirectory: ObjCBool = false
-    return didStartAccessing && FileManager.default.fileExists(
-      atPath: resolved.url.path,
+    let isAccessible = FileManager.default.fileExists(
+      atPath: url.path,
       isDirectory: &isDirectory
     ) && isDirectory.boolValue
+    return isAccessible
   }
 
   private func hasUsableTfCardRomsDirectory(at url: URL) -> Bool {
@@ -121,6 +206,7 @@ public final class Host4FlutterSimulatorStoragePlugin: NSObject, FlutterPlugin, 
     let scanId = "ios_tf_scan_\(Int(Date().timeIntervalSince1970))"
     let forcePick = arguments?["forcePick"] as? Bool ?? false
     if !forcePick, let resolved = resolveUsableStoredTfCardURL() {
+      setActiveTfCardURL(resolved)
       streamingScanActive = true
       result(["scanId": scanId])
       beginStreamingScan(url: resolved, systems: systems, scanId: scanId)
@@ -147,8 +233,13 @@ public final class Host4FlutterSimulatorStoragePlugin: NSObject, FlutterPlugin, 
     DispatchQueue.global(qos: .userInitiated).async { [weak self] in
       guard let self else { return }
       let didStartAccessing = url.startAccessingSecurityScopedResource()
+      let didTransferSecurityScope = didStartAccessing &&
+        Host4TfCardFileAccessRegistry.activate(
+          directoryURL: url,
+          ownsExistingSecurityScope: true
+        )
       defer {
-        if didStartAccessing {
+        if didStartAccessing && !didTransferSecurityScope {
           url.stopAccessingSecurityScopedResource()
         }
       }
@@ -169,6 +260,12 @@ public final class Host4FlutterSimulatorStoragePlugin: NSObject, FlutterPlugin, 
         self.streamingScanActive = false
       }
     }
+  }
+
+  private func setActiveTfCardURL(_ url: URL) {
+    let normalizedURL = url.standardizedFileURL
+    activeTfCardURL = normalizedURL
+    Host4TfCardFileAccessRegistry.activate(directoryURL: normalizedURL)
   }
 
   private func emitStreamingEvent(_ event: [String: Any]) {
@@ -254,6 +351,7 @@ public final class Host4FlutterSimulatorStoragePlugin: NSObject, FlutterPlugin, 
 
   private func scanStoredBookmark(systems: [Host4RomSystemSpec]) -> [String: Any]? {
     guard let resolved = bookmarkStore.resolve() else { return nil }
+    setActiveTfCardURL(resolved.url)
     let didStartAccessing = resolved.url.startAccessingSecurityScopedResource()
     defer {
       if didStartAccessing {
@@ -312,6 +410,7 @@ public final class Host4FlutterSimulatorStoragePlugin: NSObject, FlutterPlugin, 
         streamingResult(FlutterError(code: "cancelled", message: "Folder selection was cancelled.", details: nil))
         return
       }
+      setActiveTfCardURL(url)
       bookmarkStore.save(url: url)
       streamingScanActive = true
       streamingResult(["scanId": scanId])
@@ -328,6 +427,7 @@ public final class Host4FlutterSimulatorStoragePlugin: NSObject, FlutterPlugin, 
       result(FlutterError(code: "cancelled", message: "Folder selection was cancelled.", details: nil))
       return
     }
+    setActiveTfCardURL(url)
 
     let didStartAccessing = url.startAccessingSecurityScopedResource()
     defer {
@@ -407,7 +507,18 @@ private final class Host4TfCardBookmarkStore {
 
   func save(url: URL) {
     let normalizedURL = url.standardizedFileURL
-    UserDefaults.standard.set(normalizedURL.path, forKey: pathKey)
+    // iOS has no .withSecurityScope bookmark option. Create the bookmark
+    // while the document picker's temporary security scope is active.
+    let didStartAccessing = normalizedURL.startAccessingSecurityScopedResource()
+    defer {
+      if didStartAccessing {
+        normalizedURL.stopAccessingSecurityScopedResource()
+      }
+    }
+    guard didStartAccessing else {
+      clear()
+      return
+    }
     do {
       let data = try normalizedURL.bookmarkData(
         options: [],
@@ -415,8 +526,9 @@ private final class Host4TfCardBookmarkStore {
         relativeTo: nil
       )
       UserDefaults.standard.set(data, forKey: dataKey)
+      UserDefaults.standard.set(normalizedURL.path, forKey: pathKey)
     } catch {
-      UserDefaults.standard.removeObject(forKey: dataKey)
+      clear()
     }
   }
 
@@ -508,10 +620,9 @@ private final class Host4TfCardRomScanner {
       romsURL = try findRomsDirectory(from: selectedDirectory)
     } catch let error as Host4TfCardScanError where error.code == "roms_not_found" {
       onEvent([
-        "phase": "completed",
+        "phase": "skipped",
         "scanId": scanId,
-        "platformCount": 0,
-        "gameCount": 0,
+        "message": error.message,
       ])
       return
     }
