@@ -117,7 +117,13 @@ class _Host4WebViewState extends State<Host4WebView> {
     _controller = _buildController();
     _webController = Host4WebController(_controller);
     widget.onControllerReady?.call(_webController);
-    _controller.loadRequest(Uri.parse(widget.initialUrl));
+    final uri = Uri.parse(widget.initialUrl);
+    debugPrint('[Host4WebView] loadRequest uri=$uri scheme=${uri.scheme} hasScheme=${uri.hasScheme}');
+    try {
+      _controller.loadRequest(uri);
+    } catch (e, st) {
+      debugPrint('[Host4WebView] loadRequest failed: $e\n$st');
+    }
   }
 
   WebViewController _buildController() {

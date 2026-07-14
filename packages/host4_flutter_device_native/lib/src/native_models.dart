@@ -1,5 +1,36 @@
 enum NativeTransportKind { ble, mfi, usb }
 
+enum NativeMfiAccessoryEventType { connected, disconnected, failed }
+
+class NativeMfiAccessoryEvent {
+  const NativeMfiAccessoryEvent({
+    required this.type,
+    required this.name,
+    this.failure,
+  });
+
+  factory NativeMfiAccessoryEvent.fromMap(Map<String, Object?> map) {
+    final typeStr = map['type'] as String? ?? '';
+    final type = switch (typeStr) {
+      'connected' => NativeMfiAccessoryEventType.connected,
+      'disconnected' => NativeMfiAccessoryEventType.disconnected,
+      _ => NativeMfiAccessoryEventType.failed,
+    };
+    final failureMap = map['failure'];
+    return NativeMfiAccessoryEvent(
+      type: type,
+      name: map['name'] as String? ?? '',
+      failure: failureMap is Map
+          ? NativeFailure.fromMap(Map<String, Object?>.from(failureMap))
+          : null,
+    );
+  }
+
+  final NativeMfiAccessoryEventType type;
+  final String name;
+  final NativeFailure? failure;
+}
+
 class NativeFailure {
   const NativeFailure({
     required this.code,

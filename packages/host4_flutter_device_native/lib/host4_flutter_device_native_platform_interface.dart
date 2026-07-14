@@ -88,6 +88,25 @@ abstract class Host4FlutterDeviceNativePlatform extends PlatformInterface {
     throw UnimplementedError('transportEvents() has not been implemented.');
   }
 
+  Stream<NativeMfiAccessoryEvent> mfiAccessoryEvents({
+    required String protocolString,
+  }) {
+    throw UnimplementedError('mfiAccessoryEvents() has not been implemented.');
+  }
+
+  Future<bool> isMfiAccessoryConnected({required String protocolString}) {
+    throw UnimplementedError(
+      'isMfiAccessoryConnected() has not been implemented.',
+    );
+  }
+
+  Future<String> connectMfi({
+    required String protocolString,
+    Map<String, Object?> options = const {},
+  }) {
+    throw UnimplementedError('connectMfi() has not been implemented.');
+  }
+
   Stream<NativeDpKeyEvent> usbDpKeyEvents(String transportSessionId) {
     throw UnimplementedError('usbDpKeyEvents() has not been implemented.');
   }

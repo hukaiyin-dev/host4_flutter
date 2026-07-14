@@ -301,4 +301,46 @@ class MethodChannelHost4FlutterDeviceNative
     );
     return granted ?? false;
   }
+
+  static const EventChannel _mfiAccessoryEventChannel = EventChannel(
+    'host4_flutter_device_native/mfi_accessory_events',
+  );
+
+  @override
+  Stream<NativeMfiAccessoryEvent> mfiAccessoryEvents({
+    required String protocolString,
+  }) {
+    return _mfiAccessoryEventChannel
+        .receiveBroadcastStream(<String, Object?>{
+          'protocolString': protocolString,
+        })
+        .map(
+          (dynamic event) => NativeMfiAccessoryEvent.fromMap(
+            Map<String, Object?>.from(event as Map),
+          ),
+        );
+  }
+
+  @override
+  Future<bool> isMfiAccessoryConnected({
+    required String protocolString,
+  }) async {
+    final result = await methodChannel.invokeMethod<bool>(
+      'isMfiAccessoryConnected',
+      <String, Object?>{'protocolString': protocolString},
+    );
+    return result ?? false;
+  }
+
+  @override
+  Future<String> connectMfi({
+    required String protocolString,
+    Map<String, Object?> options = const {},
+  }) async {
+    final sessionId = await methodChannel.invokeMethod<String>(
+      'connectMfi',
+      <String, Object?>{'protocolString': protocolString, 'options': options},
+    );
+    return sessionId!;
+  }
 }
