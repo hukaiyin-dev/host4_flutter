@@ -107,6 +107,8 @@ enum GMacroProtocolID: UInt8 {
     
     case motion             = 0x5B // 体感设置二
     
+    case usbOta             = 0x53 // MFI/USB 双备份升级（Dual Bank Update）
+    
     case handleMode         = 0x69 // 手柄工作模式
     
     case vibration          = 0x67 // 振动状态
@@ -170,7 +172,8 @@ extension GMacroProtocolID {
              .vibration,          // 0x67
              .beginCalibration,   // 0x55
              .stopCalibration,    // 0x56
-             .gpDeviceKeysState:  // 0x74
+             .gpDeviceKeysState,  // 0x74
+             .motion:             // 0x5B
             return true
         default:
             return false

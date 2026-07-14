@@ -399,17 +399,17 @@
           },
           {
             "kind": "Conformance",
-            "name": "Equatable",
-            "printedName": "Equatable",
-            "usr": "s:SQ",
-            "mangledName": "$sSQ"
-          },
-          {
-            "kind": "Conformance",
             "name": "Escapable",
             "printedName": "Escapable",
             "usr": "s:s9EscapableP",
             "mangledName": "$ss9EscapableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Equatable",
+            "printedName": "Equatable",
+            "usr": "s:SQ",
+            "mangledName": "$sSQ"
           },
           {
             "kind": "Conformance",
@@ -621,17 +621,17 @@
           },
           {
             "kind": "Conformance",
-            "name": "Equatable",
-            "printedName": "Equatable",
-            "usr": "s:SQ",
-            "mangledName": "$sSQ"
-          },
-          {
-            "kind": "Conformance",
             "name": "Escapable",
             "printedName": "Escapable",
             "usr": "s:s9EscapableP",
             "mangledName": "$ss9EscapableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Equatable",
+            "printedName": "Equatable",
+            "usr": "s:SQ",
+            "mangledName": "$sSQ"
           },
           {
             "kind": "Conformance",
@@ -1976,17 +1976,17 @@
           },
           {
             "kind": "Conformance",
-            "name": "Equatable",
-            "printedName": "Equatable",
-            "usr": "s:SQ",
-            "mangledName": "$sSQ"
-          },
-          {
-            "kind": "Conformance",
             "name": "Escapable",
             "printedName": "Escapable",
             "usr": "s:s9EscapableP",
             "mangledName": "$ss9EscapableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Equatable",
+            "printedName": "Equatable",
+            "usr": "s:SQ",
+            "mangledName": "$sSQ"
           },
           {
             "kind": "Conformance",
@@ -2356,6 +2356,67 @@
           },
           {
             "kind": "Function",
+            "name": "writeValue",
+            "printedName": "writeValue(_:to:completion:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Data",
+                "printedName": "Foundation.Data",
+                "usr": "s:10Foundation4DataV"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "String",
+                "printedName": "Swift.String",
+                "usr": "s:SS"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "(() -> ())?",
+                "children": [
+                  {
+                    "kind": "TypeFunc",
+                    "name": "Function",
+                    "printedName": "() -> ()",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Void",
+                        "printedName": "()"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Void",
+                        "printedName": "()"
+                      }
+                    ]
+                  }
+                ],
+                "hasDefaultArg": true,
+                "usr": "s:Sq"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "s:6MFiKit0A16TransportSessionC10writeValue_2to10completiony10Foundation4DataV_SSyycSgtKF",
+            "mangledName": "$s6MFiKit0A16TransportSessionC10writeValue_2to10completiony10Foundation4DataV_SSyycSgtKF",
+            "moduleName": "MFiKit",
+            "declAttributes": [
+              "Final",
+              "AccessControl",
+              "RawDocComment"
+            ],
+            "throwing": true,
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
             "name": "onReceive",
             "printedName": "onReceive(_:)",
             "children": [
@@ -2467,6 +2528,220 @@
               "Override"
             ],
             "init_kind": "Designated"
+          },
+          {
+            "kind": "Var",
+            "name": "commandCharacteristic",
+            "printedName": "commandCharacteristic",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "String",
+                "printedName": "Swift.String",
+                "usr": "s:SS"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "s:6MFiKit0A16TransportSessionC21commandCharacteristicSSvpZ",
+            "mangledName": "$s6MFiKit0A16TransportSessionC21commandCharacteristicSSvpZ",
+            "moduleName": "MFiKit",
+            "static": true,
+            "declAttributes": [
+              "HasInitialValue",
+              "Final",
+              "HasStorage",
+              "AccessControl",
+              "RawDocComment"
+            ],
+            "isFromExtension": true,
+            "isLet": true,
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:6MFiKit0A16TransportSessionC21commandCharacteristicSSvgZ",
+                "mangledName": "$s6MFiKit0A16TransportSessionC21commandCharacteristicSSvgZ",
+                "moduleName": "MFiKit",
+                "static": true,
+                "implicit": true,
+                "declAttributes": [
+                  "Final"
+                ],
+                "isFromExtension": true,
+                "accessorKind": "get"
+              }
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "dataCharacteristic",
+            "printedName": "dataCharacteristic",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "String",
+                "printedName": "Swift.String",
+                "usr": "s:SS"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "s:6MFiKit0A16TransportSessionC18dataCharacteristicSSvpZ",
+            "mangledName": "$s6MFiKit0A16TransportSessionC18dataCharacteristicSSvpZ",
+            "moduleName": "MFiKit",
+            "static": true,
+            "declAttributes": [
+              "HasInitialValue",
+              "Final",
+              "HasStorage",
+              "AccessControl"
+            ],
+            "isFromExtension": true,
+            "isLet": true,
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:6MFiKit0A16TransportSessionC18dataCharacteristicSSvgZ",
+                "mangledName": "$s6MFiKit0A16TransportSessionC18dataCharacteristicSSvgZ",
+                "moduleName": "MFiKit",
+                "static": true,
+                "implicit": true,
+                "declAttributes": [
+                  "Final"
+                ],
+                "isFromExtension": true,
+                "accessorKind": "get"
+              }
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "otaCommandCharacteristic",
+            "printedName": "otaCommandCharacteristic",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "String",
+                "printedName": "Swift.String",
+                "usr": "s:SS"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "s:6MFiKit0A16TransportSessionC24otaCommandCharacteristicSSvpZ",
+            "mangledName": "$s6MFiKit0A16TransportSessionC24otaCommandCharacteristicSSvpZ",
+            "moduleName": "MFiKit",
+            "static": true,
+            "declAttributes": [
+              "HasInitialValue",
+              "Final",
+              "HasStorage",
+              "AccessControl",
+              "RawDocComment"
+            ],
+            "isFromExtension": true,
+            "isLet": true,
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:6MFiKit0A16TransportSessionC24otaCommandCharacteristicSSvgZ",
+                "mangledName": "$s6MFiKit0A16TransportSessionC24otaCommandCharacteristicSSvgZ",
+                "moduleName": "MFiKit",
+                "static": true,
+                "implicit": true,
+                "declAttributes": [
+                  "Final"
+                ],
+                "isFromExtension": true,
+                "accessorKind": "get"
+              }
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "otaDataCharacteristic",
+            "printedName": "otaDataCharacteristic",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "String",
+                "printedName": "Swift.String",
+                "usr": "s:SS"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "s:6MFiKit0A16TransportSessionC21otaDataCharacteristicSSvpZ",
+            "mangledName": "$s6MFiKit0A16TransportSessionC21otaDataCharacteristicSSvpZ",
+            "moduleName": "MFiKit",
+            "static": true,
+            "declAttributes": [
+              "HasInitialValue",
+              "Final",
+              "HasStorage",
+              "AccessControl"
+            ],
+            "isFromExtension": true,
+            "isLet": true,
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:6MFiKit0A16TransportSessionC21otaDataCharacteristicSSvgZ",
+                "mangledName": "$s6MFiKit0A16TransportSessionC21otaDataCharacteristicSSvgZ",
+                "moduleName": "MFiKit",
+                "static": true,
+                "implicit": true,
+                "declAttributes": [
+                  "Final"
+                ],
+                "isFromExtension": true,
+                "accessorKind": "get"
+              }
+            ]
           }
         ],
         "declKind": "Class",
@@ -2486,52 +2761,10 @@
         "conformances": [
           {
             "kind": "Conformance",
-            "name": "_KeyValueCodingAndObserving",
-            "printedName": "_KeyValueCodingAndObserving",
-            "usr": "s:10Foundation27_KeyValueCodingAndObservingP",
-            "mangledName": "$s10Foundation27_KeyValueCodingAndObservingP"
-          },
-          {
-            "kind": "Conformance",
-            "name": "_KeyValueCodingAndObservingPublishing",
-            "printedName": "_KeyValueCodingAndObservingPublishing",
-            "usr": "s:10Foundation37_KeyValueCodingAndObservingPublishingP",
-            "mangledName": "$s10Foundation37_KeyValueCodingAndObservingPublishingP"
-          },
-          {
-            "kind": "Conformance",
-            "name": "CVarArg",
-            "printedName": "CVarArg",
-            "usr": "s:s7CVarArgP",
-            "mangledName": "$ss7CVarArgP"
-          },
-          {
-            "kind": "Conformance",
             "name": "Copyable",
             "printedName": "Copyable",
             "usr": "s:s8CopyableP",
             "mangledName": "$ss8CopyableP"
-          },
-          {
-            "kind": "Conformance",
-            "name": "CustomDebugStringConvertible",
-            "printedName": "CustomDebugStringConvertible",
-            "usr": "s:s28CustomDebugStringConvertibleP",
-            "mangledName": "$ss28CustomDebugStringConvertibleP"
-          },
-          {
-            "kind": "Conformance",
-            "name": "CustomStringConvertible",
-            "printedName": "CustomStringConvertible",
-            "usr": "s:s23CustomStringConvertibleP",
-            "mangledName": "$ss23CustomStringConvertibleP"
-          },
-          {
-            "kind": "Conformance",
-            "name": "Equatable",
-            "printedName": "Equatable",
-            "usr": "s:SQ",
-            "mangledName": "$sSQ"
           },
           {
             "kind": "Conformance",
@@ -2542,10 +2775,52 @@
           },
           {
             "kind": "Conformance",
+            "name": "Equatable",
+            "printedName": "Equatable",
+            "usr": "s:SQ",
+            "mangledName": "$sSQ"
+          },
+          {
+            "kind": "Conformance",
             "name": "Hashable",
             "printedName": "Hashable",
             "usr": "s:SH",
             "mangledName": "$sSH"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CVarArg",
+            "printedName": "CVarArg",
+            "usr": "s:s7CVarArgP",
+            "mangledName": "$ss7CVarArgP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "_KeyValueCodingAndObservingPublishing",
+            "printedName": "_KeyValueCodingAndObservingPublishing",
+            "usr": "s:10Foundation37_KeyValueCodingAndObservingPublishingP",
+            "mangledName": "$s10Foundation37_KeyValueCodingAndObservingPublishingP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "_KeyValueCodingAndObserving",
+            "printedName": "_KeyValueCodingAndObserving",
+            "usr": "s:10Foundation27_KeyValueCodingAndObservingP",
+            "mangledName": "$s10Foundation27_KeyValueCodingAndObservingP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CustomStringConvertible",
+            "printedName": "CustomStringConvertible",
+            "usr": "s:s23CustomStringConvertibleP",
+            "mangledName": "$ss23CustomStringConvertibleP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CustomDebugStringConvertible",
+            "printedName": "CustomDebugStringConvertible",
+            "usr": "s:s28CustomDebugStringConvertibleP",
+            "mangledName": "$ss28CustomDebugStringConvertibleP"
           }
         ]
       }
@@ -2554,144 +2829,186 @@
   },
   "ConstValues": [
     {
-      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/MFiKit\/MFiKit\/MFiKitHelperDelegate.swift",
+      "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/MFiKit\/MFiKit\/MFiKitHelperDelegate.swift",
       "kind": "IntegerLiteral",
       "offset": 579,
       "length": 12,
       "value": "1"
     },
     {
-      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/MFiKit\/MFiKit\/MFiKitHelperDelegate.swift",
+      "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/MFiKit\/MFiKit\/MFiKitHelperDelegate.swift",
       "kind": "IntegerLiteral",
       "offset": 616,
       "length": 6,
       "value": "2"
     },
     {
-      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/MFiKit\/MFiKit\/MFiKitHelperDelegate.swift",
+      "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/MFiKit\/MFiKit\/MFiKitHelperDelegate.swift",
       "kind": "IntegerLiteral",
       "offset": 713,
       "length": 4,
       "value": "1"
     },
     {
-      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/MFiKit\/MFiKit\/IAP2Manager.swift",
+      "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/MFiKit\/MFiKit\/IAP2Manager.swift",
       "kind": "BooleanLiteral",
       "offset": 6470,
       "length": 5,
       "value": "false"
     },
     {
-      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/MFiKit\/MFiKit\/IAP2Manager.swift",
+      "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/MFiKit\/MFiKit\/IAP2Manager.swift",
       "kind": "BooleanLiteral",
       "offset": 6509,
       "length": 5,
       "value": "false"
     },
     {
-      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/MFiKit\/MFiKit\/IAP2Manager.swift",
+      "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/MFiKit\/MFiKit\/IAP2Manager.swift",
       "kind": "BooleanLiteral",
       "offset": 6674,
       "length": 5,
       "value": "false"
     },
     {
-      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/MFiKit\/MFiKit\/IAP2Manager.swift",
+      "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/MFiKit\/MFiKit\/IAP2Manager.swift",
       "kind": "BooleanLiteral",
       "offset": 7152,
       "length": 5,
       "value": "false"
     },
     {
-      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/MFiKit\/MFiKit\/IAP2Manager.swift",
+      "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/MFiKit\/MFiKit\/IAP2Manager.swift",
       "kind": "BooleanLiteral",
       "offset": 7493,
       "length": 5,
       "value": "false"
     },
     {
-      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/MFiKit\/MFiKit\/HIDManager.swift",
+      "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/MFiKit\/MFiKit\/HIDManager.swift",
       "kind": "IntegerLiteral",
       "offset": 539,
       "length": 1,
       "value": "0"
     },
     {
-      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/MFiKit\/MFiKit\/HIDManager.swift",
+      "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/MFiKit\/MFiKit\/HIDManager.swift",
       "kind": "IntegerLiteral",
       "offset": 558,
       "length": 1,
       "value": "0"
     },
     {
-      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/MFiKit\/MFiKit\/HIDManager.swift",
+      "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/MFiKit\/MFiKit\/HIDManager.swift",
       "kind": "IntegerLiteral",
       "offset": 592,
       "length": 1,
       "value": "0"
     },
     {
-      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/MFiKit\/MFiKit\/HIDManager.swift",
+      "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/MFiKit\/MFiKit\/HIDManager.swift",
       "kind": "IntegerLiteral",
       "offset": 611,
       "length": 1,
       "value": "0"
     },
     {
-      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/MFiKit\/MFiKit\/HIDManager.swift",
+      "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/MFiKit\/MFiKit\/HIDManager.swift",
       "kind": "IntegerLiteral",
       "offset": 645,
       "length": 1,
       "value": "0"
     },
     {
-      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/MFiKit\/MFiKit\/HIDManager.swift",
+      "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/MFiKit\/MFiKit\/HIDManager.swift",
       "kind": "IntegerLiteral",
       "offset": 664,
       "length": 1,
       "value": "0"
     },
     {
-      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/MFiKit\/MFiKit\/HIDManager.swift",
+      "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/MFiKit\/MFiKit\/HIDManager.swift",
       "kind": "FloatLiteral",
       "offset": 700,
       "length": 4,
       "value": "0.15"
     },
     {
-      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/MFiKit\/MFiKit\/HIDManager.swift",
+      "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/MFiKit\/MFiKit\/HIDManager.swift",
       "kind": "FloatLiteral",
       "offset": 773,
       "length": 4,
       "value": "0.10"
     },
     {
-      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/MFiKit\/MFiKit\/MFiTransportSession.swift",
+      "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/MFiKit\/MFiKit\/MFiTransportSession.swift",
       "kind": "IntegerLiteral",
       "offset": 214,
       "length": 9,
       "value": "1"
     },
     {
-      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/MFiKit\/MFiKit\/MFiTransportSession.swift",
+      "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/MFiKit\/MFiKit\/MFiTransportSession.swift",
       "kind": "IntegerLiteral",
       "offset": 233,
       "length": 5,
       "value": "2"
     },
     {
-      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/MFiKit\/MFiKit\/MFiTransportSession.swift",
+      "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/MFiKit\/MFiKit\/MFiTransportSession.swift",
       "kind": "IntegerLiteral",
       "offset": 248,
       "length": 12,
       "value": "3"
     },
     {
-      "filePath": "\/Users\/hukaiyin\/Developer\/Company\/iOSCommonModules\/Bluetooth\/MFiKit\/MFiKit\/MFiTransportSession.swift",
+      "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/MFiKit\/MFiKit\/MFiTransportSession.swift",
       "kind": "IntegerLiteral",
       "offset": 270,
       "length": 5,
       "value": "4"
+    },
+    {
+      "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/MFiKit\/MFiKit\/MFiTransportSession.swift",
+      "kind": "StringLiteral",
+      "offset": 501,
+      "length": 6,
+      "value": "\"FF01\""
+    },
+    {
+      "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/MFiKit\/MFiKit\/MFiTransportSession.swift",
+      "kind": "StringLiteral",
+      "offset": 551,
+      "length": 6,
+      "value": "\"FF02\""
+    },
+    {
+      "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/MFiKit\/MFiKit\/MFiTransportSession.swift",
+      "kind": "StringLiteral",
+      "offset": 631,
+      "length": 6,
+      "value": "\"FF11\""
+    },
+    {
+      "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/MFiKit\/MFiKit\/MFiTransportSession.swift",
+      "kind": "StringLiteral",
+      "offset": 684,
+      "length": 6,
+      "value": "\"FF12\""
+    },
+    {
+      "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/MFiKit\/MFiKit\/MFiTransportSession.swift",
+      "kind": "BooleanLiteral",
+      "offset": 1154,
+      "length": 5,
+      "value": "false"
+    },
+    {
+      "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/MFiKit\/MFiKit\/MFiTransportSession.swift",
+      "kind": "Array",
+      "offset": 1199,
+      "length": 2,
+      "value": "[]"
     }
   ]
 }

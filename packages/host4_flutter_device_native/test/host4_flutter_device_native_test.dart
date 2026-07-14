@@ -49,6 +49,33 @@ class MockHost4FlutterDeviceNativePlatform
   }
 
   @override
+  Future<String> connectMfi({
+    required String protocolString,
+    Map<String, Object?> options = const {},
+  }) async {
+    return 'transport-mfi-1';
+  }
+
+  @override
+  Future<bool> isMfiAccessoryConnected({required String protocolString}) async {
+    return protocolString == 'customer.protocol';
+  }
+
+  @override
+  Stream<NativeMfiAccessoryEvent> mfiAccessoryEvents({
+    required String protocolString,
+  }) {
+    return Stream<NativeMfiAccessoryEvent>.value(
+      NativeMfiAccessoryEvent(
+        type: NativeMfiAccessoryEventType.connected,
+        protocolString: protocolString,
+        name: 'MFi Pad',
+        metadata: const <String, Object?>{'serialNumber': 'SN-1'},
+      ),
+    );
+  }
+
+  @override
   Future<void> disconnectTransport(String transportSessionId) async {}
 
   @override
@@ -148,5 +175,42 @@ void main() {
     Host4FlutterDeviceNativePlatform.instance = fakePlatform;
 
     expect(await host4FlutterDeviceNativePlugin.getPlatformVersion(), '42');
+  });
+
+  test('connectMfi returns native MFi transport session id', () async {
+    final plugin = Host4FlutterDeviceNative();
+    final fakePlatform = MockHost4FlutterDeviceNativePlatform();
+    Host4FlutterDeviceNativePlatform.instance = fakePlatform;
+
+    expect(
+      await plugin.connectMfi(protocolString: 'customer.protocol'),
+      'transport-mfi-1',
+    );
+  });
+
+  test('isMfiAccessoryConnected forwards protocol string', () async {
+    final plugin = Host4FlutterDeviceNative();
+    final fakePlatform = MockHost4FlutterDeviceNativePlatform();
+    Host4FlutterDeviceNativePlatform.instance = fakePlatform;
+
+    expect(
+      await plugin.isMfiAccessoryConnected(protocolString: 'customer.protocol'),
+      isTrue,
+    );
+  });
+
+  test('mfiAccessoryEvents forwards protocol string and maps events', () async {
+    final plugin = Host4FlutterDeviceNative();
+    final fakePlatform = MockHost4FlutterDeviceNativePlatform();
+    Host4FlutterDeviceNativePlatform.instance = fakePlatform;
+
+    final event = await plugin
+        .mfiAccessoryEvents(protocolString: 'customer.protocol')
+        .first;
+
+    expect(event.type, NativeMfiAccessoryEventType.connected);
+    expect(event.protocolString, 'customer.protocol');
+    expect(event.name, 'MFi Pad');
+    expect(event.metadata['serialNumber'], 'SN-1');
   });
 }

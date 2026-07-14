@@ -10,7 +10,7 @@
 		</data>
 		<key>Headers/IAP2Manager.swift</key>
 		<data>
-		/98+tiyW1Cfs//vrdLnfYwbuqdw=
+		laJRHu+hThDOrW5DCuipJLVal5M=
 		</data>
 		<key>Headers/MFiKitHelper.swift</key>
 		<data>
@@ -22,33 +22,37 @@
 		</data>
 		<key>Info.plist</key>
 		<data>
-		KmWrwXRGuW0usIRMoT6tE4SugTA=
+		cx7D5nIJ+QGg+UiQ4YJ0gUeE674=
 		</data>
 		<key>Modules/MFiKit.swiftmodule/arm64-apple-ios.abi.json</key>
 		<data>
-		yda6BfGp2UTBWQjaFyEMLaHH9MY=
+		SjcUkgRbJiLOKNXSTvWGY4fupJs=
 		</data>
 		<key>Modules/MFiKit.swiftmodule/arm64-apple-ios.private.swiftinterface</key>
 		<data>
-		Epa0Whdg4ucYNUCASp92M061YeY=
+		BAmcNy8o/kLy537SzB9AcoVserg=
 		</data>
 		<key>Modules/MFiKit.swiftmodule/arm64-apple-ios.swiftdoc</key>
 		<data>
-		fjmH7xyF9RXMi3rlf8dzSIGD6nc=
+		ePaFeD5BYY5zrz1Qd67/CBpAlm8=
 		</data>
 		<key>Modules/MFiKit.swiftmodule/arm64-apple-ios.swiftinterface</key>
 		<data>
-		Epa0Whdg4ucYNUCASp92M061YeY=
+		BAmcNy8o/kLy537SzB9AcoVserg=
 		</data>
 		<key>Modules/MFiKit.swiftmodule/arm64-apple-ios.swiftmodule</key>
 		<data>
-		ixfIN6UBBeHJbRciAywdlSjkmyg=
+		rE4OHPH3j1uHzbRreTrvqcc+Ngk=
 		</data>
 	</dict>
 	<key>files2</key>
 	<dict>
 		<key>Headers/HIDManager.swift</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			tyK0yGOKn/gJexQjGXHD0g0SBEs=
+			</data>
 			<key>hash2</key>
 			<data>
 			/EnQgKCWxxLgOJwKFSl3zr9h4a8ZVNaZxYSePgMtlsg=
@@ -56,13 +60,21 @@
 		</dict>
 		<key>Headers/IAP2Manager.swift</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			laJRHu+hThDOrW5DCuipJLVal5M=
+			</data>
 			<key>hash2</key>
 			<data>
-			peMqjtbEy18ZWyVDWHq5VLMIHYllUfGiDsDE0d+euVc=
+			qtOD3tioabw2p+aWsyXRhSjqXzhrU0lWtwKdpHj0j5g=
 			</data>
 		</dict>
 		<key>Headers/MFiKitHelper.swift</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			inZInM31nHgpruN1X8Vco2OaEp4=
+			</data>
 			<key>hash2</key>
 			<data>
 			RQU3qlBjJb+u8iMxrnO4OJpdcLJC/fy2aVpFw3Bdw3w=
@@ -70,6 +82,10 @@
 		</dict>
 		<key>Headers/MFiKitHelperDelegate.swift</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			vtZrZceDG3gXCno25/4o2LMQ3N4=
+			</data>
 			<key>hash2</key>
 			<data>
 			KkrS2Pj79f2c8PHjp8w6oPfDUDtypQw8yLfid9LNbqE=
@@ -77,37 +93,57 @@
 		</dict>
 		<key>Modules/MFiKit.swiftmodule/arm64-apple-ios.abi.json</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			SjcUkgRbJiLOKNXSTvWGY4fupJs=
+			</data>
 			<key>hash2</key>
 			<data>
-			cGFQCuq+o3NciEjkVbXQN+kYw9TOgDLwGwxmZkxDfbY=
+			ZT+kP+9HfhCPlDrMw17h2ID6e/qxFVZPZTaOM8A3Q2c=
 			</data>
 		</dict>
 		<key>Modules/MFiKit.swiftmodule/arm64-apple-ios.private.swiftinterface</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			BAmcNy8o/kLy537SzB9AcoVserg=
+			</data>
 			<key>hash2</key>
 			<data>
-			fb8Qr8/vvqVmJ3w1pHCIPl5yBdxftFboye0AoeTwDrs=
+			1wxCSdUYqjfWAqRDPjJ0XfNa2V7ZJNuR2SLzGnX1cPA=
 			</data>
 		</dict>
 		<key>Modules/MFiKit.swiftmodule/arm64-apple-ios.swiftdoc</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			ePaFeD5BYY5zrz1Qd67/CBpAlm8=
+			</data>
 			<key>hash2</key>
 			<data>
-			NhnhfySuhDgCXQV4eskNVR7xsQ29DGDzR2Lpz1vcQiw=
+			P9U/GDAoOCYdfxYqRUbRaTpmLbOySrKP5h7wDW0NoJs=
 			</data>
 		</dict>
 		<key>Modules/MFiKit.swiftmodule/arm64-apple-ios.swiftinterface</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			BAmcNy8o/kLy537SzB9AcoVserg=
+			</data>
 			<key>hash2</key>
 			<data>
-			fb8Qr8/vvqVmJ3w1pHCIPl5yBdxftFboye0AoeTwDrs=
+			1wxCSdUYqjfWAqRDPjJ0XfNa2V7ZJNuR2SLzGnX1cPA=
 			</data>
 		</dict>
 		<key>Modules/MFiKit.swiftmodule/arm64-apple-ios.swiftmodule</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			rE4OHPH3j1uHzbRreTrvqcc+Ngk=
+			</data>
 			<key>hash2</key>
 			<data>
-			uurCunLsq7RJEYuuNlX5qMAXuIgAZHLaRvxmJEZOy8w=
+			54h0wI2Z8n0nKC7TlHBEZBJyGtbYbMewQUbUpjbaTh0=
 			</data>
 		</dict>
 	</dict>

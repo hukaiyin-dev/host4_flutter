@@ -84,6 +84,25 @@ abstract class Host4FlutterDeviceNativePlatform extends PlatformInterface {
     );
   }
 
+  Future<String> connectMfi({
+    required String protocolString,
+    Map<String, Object?> options = const {},
+  }) {
+    throw UnimplementedError('connectMfi() has not been implemented.');
+  }
+
+  Future<bool> isMfiAccessoryConnected({required String protocolString}) {
+    throw UnimplementedError(
+      'isMfiAccessoryConnected() has not been implemented.',
+    );
+  }
+
+  Stream<NativeMfiAccessoryEvent> mfiAccessoryEvents({
+    required String protocolString,
+  }) {
+    throw UnimplementedError('mfiAccessoryEvents() has not been implemented.');
+  }
+
   Stream<NativeTransportEvent> transportEvents(String transportSessionId) {
     throw UnimplementedError('transportEvents() has not been implemented.');
   }
@@ -148,6 +167,8 @@ abstract class Host4FlutterDeviceNativePlatform extends PlatformInterface {
 
   /// Android only: requests Bluetooth + location permissions required for BLE scan.
   Future<bool> ensureBleScanPermissions() {
-    throw UnimplementedError('ensureBleScanPermissions() has not been implemented.');
+    throw UnimplementedError(
+      'ensureBleScanPermissions() has not been implemented.',
+    );
   }
 }

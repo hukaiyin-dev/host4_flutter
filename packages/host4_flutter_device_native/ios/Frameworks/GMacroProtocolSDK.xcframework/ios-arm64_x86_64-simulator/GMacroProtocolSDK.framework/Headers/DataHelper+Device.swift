@@ -290,28 +290,150 @@ extension DataHelper {
         let rapidList = parseRapidFire(&parser)
         dic["rapidList"] = rapidList
 
-        // 2️⃣ 扳机参数
-        let _ = parser.next(1).toInt()
-        let leftTrigger = parseTrigger(&parser, name: "left")
-        dic["leftTrigger"] = leftTrigger
-        let rightTrigger = parseTrigger(&parser, name: "right")
-        dic["rightTrigger"] = rightTrigger
+        // 2️⃣ 左扳机: length(1) + start(1) + end(1) + macroOn(1) + macroThreshold(1) + pointCount(1) + X1,Y1...
+        let _ = parser.next(1).toInt() // leftTriggerLength（跳过，不输出）
+        let leftTriggerStart = parser.next(1).toInt()
+        let leftTriggerEnd = parser.next(1).toInt()
+        let leftTriggerMacroOn = parser.next(1).toInt() != 0
+        let leftTriggerMacroThreshold = parser.next(1).toInt()
+        let leftTriggerPointCount = parser.next(1).toInt()
+        var leftTriggerPoints: [[Int]] = []
+        for _ in 0..<leftTriggerPointCount {
+            let x = parser.next(1).toInt()
+            let y = parser.next(1).toInt()
+            leftTriggerPoints.append([x, y])
+        }
+        dic["leftTrigger"] = [
+            "start": leftTriggerStart,
+            "end": leftTriggerEnd,
+            "macroOn": leftTriggerMacroOn,
+            "macroThreshold": leftTriggerMacroThreshold,
+            "pointCount": leftTriggerPointCount,
+            "points": leftTriggerPoints
+        ]
 
-        // 3️⃣ 摇杆参数
-        let _ = parser.next(1).toInt()
-        let leftStick = parseStick(&parser, name: "left")
-        dic["leftStick"] = leftStick
-        let rightStick = parseStick(&parser, name: "right")
-        dic["rightStick"] = rightStick
+        // 3️⃣ 右扳机: start(1) + end(1) + macroOn(1) + macroThreshold(1) + pointCount(1) + X1,Y1...
+        let rightTriggerStart = parser.next(1).toInt()
+        let rightTriggerEnd = parser.next(1).toInt()
+        let rightTriggerMacroOn = parser.next(1).toInt() != 0
+        let rightTriggerMacroThreshold = parser.next(1).toInt()
+        let rightTriggerPointCount = parser.next(1).toInt()
+        var rightTriggerPoints: [[Int]] = []
+        for _ in 0..<rightTriggerPointCount {
+            let x = parser.next(1).toInt()
+            let y = parser.next(1).toInt()
+            rightTriggerPoints.append([x, y])
+        }
+        dic["rightTrigger"] = [
+            "start": rightTriggerStart,
+            "end": rightTriggerEnd,
+            "macroOn": rightTriggerMacroOn,
+            "macroThreshold": rightTriggerMacroThreshold,
+            "pointCount": rightTriggerPointCount,
+            "points": rightTriggerPoints
+        ]
 
-        // 4️⃣ 振动参数
-        let vibration = parseVibration(&parser)
-        dic["vibration"] = vibration
+        // 4️⃣ 摇杆长度头(1) + 摇杆交换(1)
+        let _ = parser.next(1).toInt() // stickLength（跳过，不输出）
+        let stickSwap = parser.next(1).toInt()
+        dic["stickSwap"] = stickSwap
 
-        // 5️⃣ 体感参数
-        let motion = parseMotion(&parser)
-        dic["motion"] = motion
-        
+        // 5️⃣ 左摇杆X: start(1) + end(1) + sensitivity(1) + reverseX(1)
+        let lxStart = parser.next(1).toInt()
+        let lxEnd = parser.next(1).toInt()
+        let lxSensitivity = parser.next(1).toInt()
+        let lxReverse = parser.next(1).toInt()
+        dic["leftStickX"] = ["start": lxStart, "end": lxEnd, "sensitivity": lxSensitivity, "reverse": lxReverse]
+
+        // 6️⃣ 左摇杆Y: start(1) + end(1) + sensitivity(1) + reverseX(1)
+        let lyStart = parser.next(1).toInt()
+        let lyEnd = parser.next(1).toInt()
+        let lySensitivity = parser.next(1).toInt()
+        let lyReverse = parser.next(1).toInt()
+        dic["leftStickY"] = ["start": lyStart, "end": lyEnd, "sensitivity": lySensitivity, "reverse": lyReverse]
+
+        // 7️⃣ 右摇杆X: start(1) + end(1) + sensitivity(1) + reverse(1)（与左摇杆顺序一致）
+        let rxStart = parser.next(1).toInt()
+        let rxEnd = parser.next(1).toInt()
+        let rxSensitivity = parser.next(1).toInt()
+        let rxReverse = parser.next(1).toInt()
+        dic["rightStickX"] = ["start": rxStart, "end": rxEnd, "sensitivity": rxSensitivity, "reverse": rxReverse]
+
+        // 8️⃣ 右摇杆Y: start(1) + end(1) + sensitivity(1) + reverse(1)
+        let ryStart = parser.next(1).toInt()
+        let ryEnd = parser.next(1).toInt()
+        let rySensitivity = parser.next(1).toInt()
+        let ryReverse = parser.next(1).toInt()
+        dic["rightStickY"] = ["start": ryStart, "end": ryEnd, "sensitivity": rySensitivity, "reverse": ryReverse]
+
+        // 9️⃣ 左摇杆按键: deadZoneShape(1)+maxOutput(1)+curveApply(1)+curveApplyKey(1)+lineCorrection(1)+pointCount(1)+X1,Y1...
+        let lkDeadZoneShape = parser.next(1).toInt()
+        let lkMaxOutput = parser.next(1).toInt()
+        let lkCurveApply = parser.next(1).toInt()
+        let lkCurveApplyKey = parser.next(1).toInt()
+        let lkLineCorrection = parser.next(1).toInt()
+        let lkPointCount = parser.next(1).toInt()
+        var lkPoints: [[Int]] = []
+        for _ in 0..<lkPointCount {
+            let x = parser.next(1).toInt()
+            let y = parser.next(1).toInt()
+            lkPoints.append([x, y])
+        }
+        dic["leftStickKey"] = [
+            "deadZoneShape": lkDeadZoneShape,
+            "maxOutput": lkMaxOutput,
+            "curveApply": lkCurveApply,
+            "curveApplyKey": lkCurveApplyKey,
+            "lineCorrection": lkLineCorrection,
+            "pointCount": lkPointCount,
+            "points": lkPoints
+        ]
+
+        // 🔟 右摇杆按键: deadZoneShape(1)+maxOutput(1)+curveApply(1)+curveApplyKey(1)+lineCorrection(1)+pointCount(1)+X1,Y1...
+        let rkDeadZoneShape = parser.next(1).toInt()
+        let rkMaxOutput = parser.next(1).toInt()
+        let rkCurveApply = parser.next(1).toInt()
+        let rkCurveApplyKey = parser.next(1).toInt()
+        let rkLineCorrection = parser.next(1).toInt()
+        let rkPointCount = parser.next(1).toInt()
+        var rkPoints: [[Int]] = []
+        for _ in 0..<rkPointCount {
+            let x = parser.next(1).toInt()
+            let y = parser.next(1).toInt()
+            rkPoints.append([x, y])
+        }
+        dic["rightStickKey"] = [
+            "deadZoneShape": rkDeadZoneShape,
+            "maxOutput": rkMaxOutput,
+            "curveApply": rkCurveApply,
+            "curveApplyKey": rkCurveApplyKey,
+            "lineCorrection": rkLineCorrection,
+            "pointCount": rkPointCount,
+            "points": rkPoints
+        ]
+
+        // 1️⃣1️⃣ 振动: length(1)+left(1)+right(1)
+        let _ = parser.next(1).toInt() // vibrationLength（跳过，不输出）
+        let vibrationLeft = parser.next(1).toInt()
+        let vibrationRight = parser.next(1).toInt()
+        dic["vibration"] = ["left": vibrationLeft, "right": vibrationRight]
+
+        // 1️⃣2️⃣ 体感: length(1)+sensitivity(2B)+yReverse(1)+switch(1)+mappingSwitch(1)+triggerMode(1)+triggerKey(1)+deadZone(1)+mapping(1)
+        let _ = parser.next(1).toInt() // motionLength（跳过，不输出）
+        let motionSensitivityHi = parser.next(1).toInt()
+        let motionSensitivityLo = parser.next(1).toInt()
+        let motionSensitivity = (motionSensitivityHi << 8) | motionSensitivityLo
+        dic["motion"] = [
+            "sensitivity": motionSensitivity,
+            "yReverse": parser.next(1).toInt(),
+            "switch": parser.next(1).toInt(),
+            "mappingSwitch": parser.next(1).toInt(),
+            "triggerMode": parser.next(1).toInt(),
+            "triggerKey": parser.next(1).toInt(),
+            "deadZone": parser.next(1).toInt(),
+            "mapping": parser.next(1).toInt()
+        ]
+
         return dic
     }
     

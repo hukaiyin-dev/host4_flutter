@@ -1,14 +1,118 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:host4_flutter_mfi/host4_flutter_mfi.dart';
 import 'package:host4_flutter_ui/host4_flutter_ui.dart';
 
 import '../../widgets/sub_page_scaffold.dart';
 import 'gmacro_ble_scan_page.dart';
+import 'gmacro_placeholder_values.dart';
+import 'gmacro_session_page.dart';
 import 'gmacro_usb_scan_page.dart';
 
-class GmacroEntryPage extends StatelessWidget {
+class GmacroEntryPage extends StatefulWidget {
   const GmacroEntryPage({super.key});
+
+  @override
+  State<GmacroEntryPage> createState() => _GmacroEntryPageState();
+}
+
+class _GmacroEntryPageState extends State<GmacroEntryPage> {
+  final Host4Mfi _mfi = Host4Mfi();
+  StreamSubscription<MfiAccessoryEvent>? _mfiAccessorySub;
+  bool _isMfiConnecting = false;
+  bool _isMfiAccessoryConnected = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (Platform.isIOS) {
+      unawaited(_subscribeMfiAccessoryEvents());
+    }
+  }
+
+  @override
+  void dispose() {
+    _mfiAccessorySub?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _subscribeMfiAccessoryEvents() async {
+    try {
+      await _mfi.start();
+      await _mfi.updateProtocol(GmacroPlaceholderValues.mfiProtocolString);
+      final connected = await _mfi.isAccessoryConnected();
+      if (!mounted) {
+        return;
+      }
+      setState(() => _isMfiAccessoryConnected = connected);
+      if (connected) {
+        unawaited(_autoConnectMfiIfCurrentPage());
+      }
+
+      _mfiAccessorySub = _mfi.accessoryEvents.listen((event) {
+        if (!mounted) {
+          return;
+        }
+        final connected = event.type == MfiAccessoryEventType.connected;
+        setState(() {
+          _isMfiAccessoryConnected = connected;
+        });
+        if (connected) {
+          unawaited(_autoConnectMfiIfCurrentPage());
+        }
+      });
+    } catch (_) {
+      // 监听失败不影响用户手动点击 MFi 连接。
+    }
+  }
+
+  Future<void> _autoConnectMfiIfCurrentPage() async {
+    if (_isMfiConnecting) {
+      return;
+    }
+    final route = ModalRoute.of(context);
+    if (route?.isCurrent != true) {
+      return;
+    }
+    await _connectMfi();
+  }
+
+  Future<void> _connectMfi() async {
+    if (_isMfiConnecting) {
+      return;
+    }
+
+    setState(() => _isMfiConnecting = true);
+    try {
+      await _mfi.start();
+      await _mfi.updateProtocol(GmacroPlaceholderValues.mfiProtocolString);
+      final transport = await _mfi.connect(
+        options: const <String, Object?>{'protocolType': 'gmacro'},
+      );
+      if (!mounted) {
+        return;
+      }
+
+      await Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => GmacroSessionPage(transport: transport),
+        ),
+      );
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('MFi 连接失败：$error')));
+    } finally {
+      if (mounted) {
+        setState(() => _isMfiConnecting = false);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,12 +142,14 @@ class GmacroEntryPage extends StatelessWidget {
                 : 'USB 有线连接（Android），自动连接已插入设备后测试 GMacro',
             icon: isMfiPlatform ? Icons.cable_rounded : Icons.usb_rounded,
             color: theme.colors.brandSecondary,
-            badge: isMfiPlatform ? '即将支持' : null,
+            badge: isMfiPlatform
+                ? (_isMfiConnecting
+                      ? '连接中'
+                      : (_isMfiAccessoryConnected ? '已检测到' : null))
+                : null,
             onTap: () {
               if (isMfiPlatform) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('MFi 接入进行中，暂不可用')),
-                );
+                _connectMfi();
                 return;
               }
               Navigator.of(context).push(

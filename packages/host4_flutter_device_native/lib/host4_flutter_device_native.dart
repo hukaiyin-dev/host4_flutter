@@ -75,6 +75,30 @@ class Host4FlutterDeviceNative {
     );
   }
 
+  Future<String> connectMfi({
+    required String protocolString,
+    Map<String, Object?> options = const {},
+  }) {
+    return Host4FlutterDeviceNativePlatform.instance.connectMfi(
+      protocolString: protocolString,
+      options: options,
+    );
+  }
+
+  Future<bool> isMfiAccessoryConnected({required String protocolString}) {
+    return Host4FlutterDeviceNativePlatform.instance.isMfiAccessoryConnected(
+      protocolString: protocolString,
+    );
+  }
+
+  Stream<NativeMfiAccessoryEvent> mfiAccessoryEvents({
+    required String protocolString,
+  }) {
+    return Host4FlutterDeviceNativePlatform.instance.mfiAccessoryEvents(
+      protocolString: protocolString,
+    );
+  }
+
   Stream<NativeTransportEvent> transportEvents(String transportSessionId) {
     return Host4FlutterDeviceNativePlatform.instance.transportEvents(
       transportSessionId,

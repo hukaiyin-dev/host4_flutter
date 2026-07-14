@@ -1,7 +1,7 @@
 // swift-interface-format-version: 1.0
-// swift-compiler-version: Apple Swift version 6.3.1 effective-5.10 (swiftlang-6.3.1.1.2 clang-2100.0.123.102)
-// swift-module-flags: -target arm64-apple-ios13.0-simulator -enable-objc-interop -enable-library-evolution -swift-version 5 -O -enable-upcoming-feature DisableOutwardActorInference -enable-upcoming-feature InferSendableFromCaptures -enable-upcoming-feature GlobalActorIsolatedTypesUsability -enable-upcoming-feature MemberImportVisibility -enable-upcoming-feature InferIsolatedConformances -enable-upcoming-feature NonisolatedNonsendingByDefault -enable-experimental-feature DebugDescriptionMacro -enable-bare-slash-regex -module-name MFiKit
-// swift-module-flags-ignorable:  -formal-cxx-interoperability-mode=off -interface-compiler-version 6.3.1
+// swift-compiler-version: Apple Swift version 6.2.3 effective-5.10 (swiftlang-6.2.3.3.21 clang-1700.6.3.2)
+// swift-module-flags: -target arm64-apple-ios13.0-simulator -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -O -enable-upcoming-feature DisableOutwardActorInference -enable-upcoming-feature InferSendableFromCaptures -enable-upcoming-feature GlobalActorIsolatedTypesUsability -enable-upcoming-feature MemberImportVisibility -enable-upcoming-feature InferIsolatedConformances -enable-upcoming-feature NonisolatedNonsendingByDefault -enable-experimental-feature DebugDescriptionMacro -enable-bare-slash-regex -module-name MFiKit
+// swift-module-flags-ignorable:  -formal-cxx-interoperability-mode=off -interface-compiler-version 6.2.3
 import ExternalAccessory
 import Foundation
 import GameController
@@ -19,7 +19,9 @@ import _SwiftConcurrencyShims
   case connected
   case disconnected
   case failed
+  #if compiler(>=5.3) && $NonescapableTypes
   public init?(rawValue: Swift.Int)
+  #endif
   public typealias RawValue = Swift.Int
   public var rawValue: Swift.Int {
     get
@@ -28,7 +30,9 @@ import _SwiftConcurrencyShims
 @objc public enum MFiProtocolType : Swift.Int {
   case hid
   case iap2
+  #if compiler(>=5.3) && $NonescapableTypes
   public init?(rawValue: Swift.Int)
+  #endif
   public typealias RawValue = Swift.Int
   public var rawValue: Swift.Int {
     get
@@ -52,11 +56,19 @@ import _SwiftConcurrencyShims
   case ready
   case disconnected
   case error
+  #if compiler(>=5.3) && $NonescapableTypes
   public init?(rawValue: Swift.Int)
+  #endif
   public typealias RawValue = Swift.Int
   public var rawValue: Swift.Int {
     get
   }
+}
+extension MFiKit.MFiTransportSession {
+  public static let commandCharacteristic: Swift.String
+  public static let dataCharacteristic: Swift.String
+  public static let otaCommandCharacteristic: Swift.String
+  public static let otaDataCharacteristic: Swift.String
 }
 @objc final public class MFiTransportSession : ObjectiveC.NSObject {
   final public var transportId: Swift.String {
@@ -67,6 +79,9 @@ import _SwiftConcurrencyShims
   public init(sessionId: Swift.String, protocolString: Swift.String)
   final public func connect()
   final public func send(_ data: Foundation.Data) throws
+  #if compiler(>=5.3) && $NonescapableTypes
+  final public func writeValue(_ data: Foundation.Data, to uuidString: Swift.String, completion: (() -> Swift.Void)? = nil) throws
+  #endif
   final public func onReceive(_ handler: @escaping (Foundation.Data) -> Swift.Void)
   final public func setCompleted(_ completed: Swift.Bool)
   final public func disconnect()
