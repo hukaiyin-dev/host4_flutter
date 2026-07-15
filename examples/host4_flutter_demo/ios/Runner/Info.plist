@@ -41,6 +41,10 @@
 	<string>需要蓝牙权限以扫描并连接 GMacro 设备</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>AI 语音对话功能需要使用麦克风进行语音输入</string>
+	<key>UISupportedExternalAccessoryProtocols</key>
+	<array>
+		<string>com.OSYN</string>
+	</array>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

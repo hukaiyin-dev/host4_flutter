@@ -57,6 +57,7 @@ public class DataHelper: NSObject, @unchecked Sendable {
         _ response: ((NSDictionary?, NSError?) -> Void)?
     ) -> Void
     var sendPacketHandler: SendPacketHandler?
+    var mfiOTAUnsolicitedHandler: (([String: Any]) -> Void)?
 
     var sn: Int = 1
     var oneByteSN: Int = 1

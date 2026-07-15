@@ -19,6 +19,10 @@ class MethodChannelHost4FlutterDeviceNative
     'host4_flutter_device_native/usb_scan',
   );
 
+  static const EventChannel _mfiAccessoryChannel = EventChannel(
+    'host4_flutter_device_native/mfi_accessory_events',
+  );
+
   /// One cached stream per session — multiple Dart listeners must not open
   /// duplicate native [EventChannel] subscriptions (that overwrites [eventSink]).
   final Map<String, Stream<NativeTransportEvent>> _transportEventStreams =
@@ -105,10 +109,7 @@ class MethodChannelHost4FlutterDeviceNative
   }) async {
     final sessionId = await methodChannel.invokeMethod<String>(
       'connectUsb',
-      <String, Object?>{
-        'deviceId': deviceId,
-        'options': options,
-      },
+      <String, Object?>{'deviceId': deviceId, 'options': options},
     );
     if (sessionId == null || sessionId.isEmpty) {
       throw PlatformException(
@@ -151,6 +152,48 @@ class MethodChannelHost4FlutterDeviceNative
       );
     }
     return sessionId;
+  }
+
+  @override
+  Future<String> connectMfi({
+    required String protocolString,
+    Map<String, Object?> options = const {},
+  }) async {
+    final sessionId = await methodChannel.invokeMethod<String>(
+      'connectMfi',
+      <String, Object?>{'protocolString': protocolString, 'options': options},
+    );
+    if (sessionId == null || sessionId.isEmpty) {
+      throw PlatformException(
+        code: 'missing-transport-session-id',
+        message: 'Native MFi bridge returned an empty transport session id.',
+      );
+    }
+    return sessionId;
+  }
+
+  @override
+  Future<bool> isMfiAccessoryConnected({required String protocolString}) async {
+    final connected = await methodChannel.invokeMethod<bool>(
+      'isMfiAccessoryConnected',
+      <String, Object?>{'protocolString': protocolString},
+    );
+    return connected ?? false;
+  }
+
+  @override
+  Stream<NativeMfiAccessoryEvent> mfiAccessoryEvents({
+    required String protocolString,
+  }) {
+    return _mfiAccessoryChannel
+        .receiveBroadcastStream(<String, Object?>{
+          'protocolString': protocolString,
+        })
+        .map(
+          (dynamic event) => NativeMfiAccessoryEvent.fromMap(
+            Map<String, Object?>.from(event as Map),
+          ),
+        );
   }
 
   @override
@@ -216,10 +259,7 @@ class MethodChannelHost4FlutterDeviceNative
   }) async {
     final sessionId = await methodChannel.invokeMethod<String>(
       'attachGmacroProtocol',
-      <String, Object?>{
-        'transportSessionId': transportSessionId,
-        ...options,
-      },
+      <String, Object?>{'transportSessionId': transportSessionId, ...options},
     );
     if (sessionId == null || sessionId.isEmpty) {
       throw PlatformException(
@@ -300,47 +340,5 @@ class MethodChannelHost4FlutterDeviceNative
       'ensureBleScanPermissions',
     );
     return granted ?? false;
-  }
-
-  static const EventChannel _mfiAccessoryEventChannel = EventChannel(
-    'host4_flutter_device_native/mfi_accessory_events',
-  );
-
-  @override
-  Stream<NativeMfiAccessoryEvent> mfiAccessoryEvents({
-    required String protocolString,
-  }) {
-    return _mfiAccessoryEventChannel
-        .receiveBroadcastStream(<String, Object?>{
-          'protocolString': protocolString,
-        })
-        .map(
-          (dynamic event) => NativeMfiAccessoryEvent.fromMap(
-            Map<String, Object?>.from(event as Map),
-          ),
-        );
-  }
-
-  @override
-  Future<bool> isMfiAccessoryConnected({
-    required String protocolString,
-  }) async {
-    final result = await methodChannel.invokeMethod<bool>(
-      'isMfiAccessoryConnected',
-      <String, Object?>{'protocolString': protocolString},
-    );
-    return result ?? false;
-  }
-
-  @override
-  Future<String> connectMfi({
-    required String protocolString,
-    Map<String, Object?> options = const {},
-  }) async {
-    final sessionId = await methodChannel.invokeMethod<String>(
-      'connectMfi',
-      <String, Object?>{'protocolString': protocolString, 'options': options},
-    );
-    return sessionId!;
   }
 }

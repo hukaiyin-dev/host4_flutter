@@ -72,7 +72,6 @@ extension DataHelper {
     /// 查询回报率 8409
     func fetchReportRate(finish: (() -> Void)? = nil,
                          response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
-        
         var payload = Data()
         
         // subID

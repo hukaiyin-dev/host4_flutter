@@ -4,6 +4,7 @@ import 'package:host4_flutter_gmacro/host4_flutter_gmacro.dart';
 /// 对应 iOS 侧的 PlaceholderValues.swift，不属于 SDK 本身。
 abstract final class GmacroPlaceholderValues {
   static const String service = 'FF00';
+  static const String mfiProtocolString = 'com.OSYN';
 
   static const config = GmacroConfig(service: service);
 

@@ -60,6 +60,8 @@ dependencies:
     path: ../../packages/host4_flutter_protocol
   host4_flutter_ble:
     path: ../../packages/host4_flutter_ble
+  host4_flutter_mfi:
+    path: ../../packages/host4_flutter_mfi
   host4_flutter_usb:
     path: ../../packages/host4_flutter_usb
   host4_flutter_device_native:

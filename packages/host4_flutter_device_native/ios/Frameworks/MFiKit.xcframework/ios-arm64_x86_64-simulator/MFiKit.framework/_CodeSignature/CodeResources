@@ -10,7 +10,7 @@
 		</data>
 		<key>Headers/IAP2Manager.swift</key>
 		<data>
-		/98+tiyW1Cfs//vrdLnfYwbuqdw=
+		laJRHu+hThDOrW5DCuipJLVal5M=
 		</data>
 		<key>Headers/MFiKitHelper.swift</key>
 		<data>
@@ -22,53 +22,57 @@
 		</data>
 		<key>Info.plist</key>
 		<data>
-		A0+s4pvYcCP//pEBCygwHafyJgw=
+		ZEjGrbZfp//OZOw3MmBGNwN/LOI=
 		</data>
 		<key>Modules/MFiKit.swiftmodule/arm64-apple-ios-simulator.abi.json</key>
 		<data>
-		yda6BfGp2UTBWQjaFyEMLaHH9MY=
+		SjcUkgRbJiLOKNXSTvWGY4fupJs=
 		</data>
 		<key>Modules/MFiKit.swiftmodule/arm64-apple-ios-simulator.private.swiftinterface</key>
 		<data>
-		Qeq4DDuyci66hwcEW7mR/W1qQ1w=
+		YZuOF3bwgqrHDtC5ItbeiPLxpaY=
 		</data>
 		<key>Modules/MFiKit.swiftmodule/arm64-apple-ios-simulator.swiftdoc</key>
 		<data>
-		mhXSBwgApBsd/Q0Qplyd05hvb8A=
+		8rmJ701UYJQDpy61rwZ0Z+EEGXg=
 		</data>
 		<key>Modules/MFiKit.swiftmodule/arm64-apple-ios-simulator.swiftinterface</key>
 		<data>
-		Qeq4DDuyci66hwcEW7mR/W1qQ1w=
+		YZuOF3bwgqrHDtC5ItbeiPLxpaY=
 		</data>
 		<key>Modules/MFiKit.swiftmodule/arm64-apple-ios-simulator.swiftmodule</key>
 		<data>
-		yGTCFmGT9ZuSyRKRmTVCnZXatX0=
+		+mNuILC6dzSPyq4edE+YzWLLU04=
 		</data>
 		<key>Modules/MFiKit.swiftmodule/x86_64-apple-ios-simulator.abi.json</key>
 		<data>
-		yda6BfGp2UTBWQjaFyEMLaHH9MY=
+		SjcUkgRbJiLOKNXSTvWGY4fupJs=
 		</data>
 		<key>Modules/MFiKit.swiftmodule/x86_64-apple-ios-simulator.private.swiftinterface</key>
 		<data>
-		odrDrz2yHOexSjybeq8nqqb1LIU=
+		m6boRcdSiREza6B/MijFbWshBCc=
 		</data>
 		<key>Modules/MFiKit.swiftmodule/x86_64-apple-ios-simulator.swiftdoc</key>
 		<data>
-		yScCB8PFqbqXDQKLAziZ7BBswVY=
+		ByX7Co/rYJ3QmQD4kZkJwh6grs4=
 		</data>
 		<key>Modules/MFiKit.swiftmodule/x86_64-apple-ios-simulator.swiftinterface</key>
 		<data>
-		odrDrz2yHOexSjybeq8nqqb1LIU=
+		m6boRcdSiREza6B/MijFbWshBCc=
 		</data>
 		<key>Modules/MFiKit.swiftmodule/x86_64-apple-ios-simulator.swiftmodule</key>
 		<data>
-		rjcqhbPT12ZVKYW++yMz5kohgvs=
+		+nGRfqTALwNAJr0F2ffVEehhaRg=
 		</data>
 	</dict>
 	<key>files2</key>
 	<dict>
 		<key>Headers/HIDManager.swift</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			tyK0yGOKn/gJexQjGXHD0g0SBEs=
+			</data>
 			<key>hash2</key>
 			<data>
 			/EnQgKCWxxLgOJwKFSl3zr9h4a8ZVNaZxYSePgMtlsg=
@@ -76,13 +80,21 @@
 		</dict>
 		<key>Headers/IAP2Manager.swift</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			laJRHu+hThDOrW5DCuipJLVal5M=
+			</data>
 			<key>hash2</key>
 			<data>
-			peMqjtbEy18ZWyVDWHq5VLMIHYllUfGiDsDE0d+euVc=
+			qtOD3tioabw2p+aWsyXRhSjqXzhrU0lWtwKdpHj0j5g=
 			</data>
 		</dict>
 		<key>Headers/MFiKitHelper.swift</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			inZInM31nHgpruN1X8Vco2OaEp4=
+			</data>
 			<key>hash2</key>
 			<data>
 			RQU3qlBjJb+u8iMxrnO4OJpdcLJC/fy2aVpFw3Bdw3w=
@@ -90,6 +102,10 @@
 		</dict>
 		<key>Headers/MFiKitHelperDelegate.swift</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			vtZrZceDG3gXCno25/4o2LMQ3N4=
+			</data>
 			<key>hash2</key>
 			<data>
 			KkrS2Pj79f2c8PHjp8w6oPfDUDtypQw8yLfid9LNbqE=
@@ -97,72 +113,112 @@
 		</dict>
 		<key>Modules/MFiKit.swiftmodule/arm64-apple-ios-simulator.abi.json</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			SjcUkgRbJiLOKNXSTvWGY4fupJs=
+			</data>
 			<key>hash2</key>
 			<data>
-			cGFQCuq+o3NciEjkVbXQN+kYw9TOgDLwGwxmZkxDfbY=
+			ZT+kP+9HfhCPlDrMw17h2ID6e/qxFVZPZTaOM8A3Q2c=
 			</data>
 		</dict>
 		<key>Modules/MFiKit.swiftmodule/arm64-apple-ios-simulator.private.swiftinterface</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			YZuOF3bwgqrHDtC5ItbeiPLxpaY=
+			</data>
 			<key>hash2</key>
 			<data>
-			mdjTMuseRIbvFKQ17aor7D+fVEk8mzTjQqip08vJFg0=
+			X60GMMUyY98nG9r/ENIwBkVqJH99mPHov77gI0UZUWU=
 			</data>
 		</dict>
 		<key>Modules/MFiKit.swiftmodule/arm64-apple-ios-simulator.swiftdoc</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			8rmJ701UYJQDpy61rwZ0Z+EEGXg=
+			</data>
 			<key>hash2</key>
 			<data>
-			/gzlzyKYBZU5wSNDXxnraRHREmT04sdXvOqljIQlI9s=
+			7mgT3XDnFTukewm3JeYXbQPEl1XLXgvV76zrhlymhXo=
 			</data>
 		</dict>
 		<key>Modules/MFiKit.swiftmodule/arm64-apple-ios-simulator.swiftinterface</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			YZuOF3bwgqrHDtC5ItbeiPLxpaY=
+			</data>
 			<key>hash2</key>
 			<data>
-			mdjTMuseRIbvFKQ17aor7D+fVEk8mzTjQqip08vJFg0=
+			X60GMMUyY98nG9r/ENIwBkVqJH99mPHov77gI0UZUWU=
 			</data>
 		</dict>
 		<key>Modules/MFiKit.swiftmodule/arm64-apple-ios-simulator.swiftmodule</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			+mNuILC6dzSPyq4edE+YzWLLU04=
+			</data>
 			<key>hash2</key>
 			<data>
-			lQ0HdCi9VDsXRbL3QyogvPlqw8Kn+BW2ixyvdpmTMHE=
+			EHESLHbPWSuMUnVXQIVJt/QZ/M2IZv2cCigGcNx6wIo=
 			</data>
 		</dict>
 		<key>Modules/MFiKit.swiftmodule/x86_64-apple-ios-simulator.abi.json</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			SjcUkgRbJiLOKNXSTvWGY4fupJs=
+			</data>
 			<key>hash2</key>
 			<data>
-			cGFQCuq+o3NciEjkVbXQN+kYw9TOgDLwGwxmZkxDfbY=
+			ZT+kP+9HfhCPlDrMw17h2ID6e/qxFVZPZTaOM8A3Q2c=
 			</data>
 		</dict>
 		<key>Modules/MFiKit.swiftmodule/x86_64-apple-ios-simulator.private.swiftinterface</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			m6boRcdSiREza6B/MijFbWshBCc=
+			</data>
 			<key>hash2</key>
 			<data>
-			XQoyQmP3rZmZjdInOuNvxuZ01ejbyRSVpsUp1sv00GM=
+			Ny+0MM1L8KeBXq88JrcsB0JWAO7VDGCztZ1O47rQQlU=
 			</data>
 		</dict>
 		<key>Modules/MFiKit.swiftmodule/x86_64-apple-ios-simulator.swiftdoc</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			ByX7Co/rYJ3QmQD4kZkJwh6grs4=
+			</data>
 			<key>hash2</key>
 			<data>
-			MvVnUziwNM+qNVAoUppWiD2Yu+0SPnFgAA2uIrFqIus=
+			a0b8sk4bTKqKD5siIcDOgjQA4WDp1xPIKyU6Dlor+Nc=
 			</data>
 		</dict>
 		<key>Modules/MFiKit.swiftmodule/x86_64-apple-ios-simulator.swiftinterface</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			m6boRcdSiREza6B/MijFbWshBCc=
+			</data>
 			<key>hash2</key>
 			<data>
-			XQoyQmP3rZmZjdInOuNvxuZ01ejbyRSVpsUp1sv00GM=
+			Ny+0MM1L8KeBXq88JrcsB0JWAO7VDGCztZ1O47rQQlU=
 			</data>
 		</dict>
 		<key>Modules/MFiKit.swiftmodule/x86_64-apple-ios-simulator.swiftmodule</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			+nGRfqTALwNAJr0F2ffVEehhaRg=
+			</data>
 			<key>hash2</key>
 			<data>
-			69gYQkkIrwkNhfhDOUWJ42uAoKetKijYfjHcDQMyA/c=
+			2/T03uSUrEMt7jzRNLaynY84yQgIaqupLtzKKOC+wHA=
 			</data>
 		</dict>
 	</dict>

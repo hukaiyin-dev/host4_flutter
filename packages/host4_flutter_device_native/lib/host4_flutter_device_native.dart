@@ -75,6 +75,34 @@ class Host4FlutterDeviceNative {
     );
   }
 
+  /// iOS only: opens a transport session with the MFi accessory matching [protocolString].
+  /// Returns the transport session ID.
+  Future<String> connectMfi({
+    required String protocolString,
+    Map<String, Object?> options = const {},
+  }) {
+    return Host4FlutterDeviceNativePlatform.instance.connectMfi(
+      protocolString: protocolString,
+      options: options,
+    );
+  }
+
+  /// iOS only: returns true if an MFi accessory matching [protocolString] is connected.
+  Future<bool> isMfiAccessoryConnected({required String protocolString}) {
+    return Host4FlutterDeviceNativePlatform.instance.isMfiAccessoryConnected(
+      protocolString: protocolString,
+    );
+  }
+
+  /// iOS only: stream of MFi accessory connect/disconnect events for [protocolString].
+  Stream<NativeMfiAccessoryEvent> mfiAccessoryEvents({
+    required String protocolString,
+  }) {
+    return Host4FlutterDeviceNativePlatform.instance.mfiAccessoryEvents(
+      protocolString: protocolString,
+    );
+  }
+
   Stream<NativeTransportEvent> transportEvents(String transportSessionId) {
     return Host4FlutterDeviceNativePlatform.instance.transportEvents(
       transportSessionId,
@@ -168,33 +196,5 @@ class Host4FlutterDeviceNative {
   /// Returns `true` when all required permissions are granted.
   Future<bool> ensureBleScanPermissions() {
     return Host4FlutterDeviceNativePlatform.instance.ensureBleScanPermissions();
-  }
-
-  /// iOS only: stream of MFi accessory connect/disconnect events for [protocolString].
-  Stream<NativeMfiAccessoryEvent> mfiAccessoryEvents({
-    required String protocolString,
-  }) {
-    return Host4FlutterDeviceNativePlatform.instance.mfiAccessoryEvents(
-      protocolString: protocolString,
-    );
-  }
-
-  /// iOS only: returns true if an MFi accessory matching [protocolString] is connected.
-  Future<bool> isMfiAccessoryConnected({required String protocolString}) {
-    return Host4FlutterDeviceNativePlatform.instance.isMfiAccessoryConnected(
-      protocolString: protocolString,
-    );
-  }
-
-  /// iOS only: opens a transport session with the MFi accessory matching [protocolString].
-  /// Returns the transport session ID.
-  Future<String> connectMfi({
-    required String protocolString,
-    Map<String, Object?> options = const {},
-  }) {
-    return Host4FlutterDeviceNativePlatform.instance.connectMfi(
-      protocolString: protocolString,
-      options: options,
-    );
   }
 }

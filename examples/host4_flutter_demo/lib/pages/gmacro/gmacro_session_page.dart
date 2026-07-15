@@ -25,9 +25,8 @@ class GmacroSessionPage extends StatefulWidget {
 
 class _GmacroSessionPageState extends State<GmacroSessionPage> {
   static const _bundledOtaAssetPath =
-      'assets/ota/OTA_GDF-G911405_C738_V1.0_260702A.bin.signed';
-  static const _bundledOtaFileName =
-      'OTA_GDF-G911405_C738_V1.0_260702A.bin.signed';
+      'assets/ota/OTA_GDF-G910202_F542_V1.0_260708c.bin';
+  static const _bundledOtaFileName = 'OTA_GDF-G910202_F542_V1.0_260708c.bin';
 
   final _gmacro = Host4Gmacro();
   final GmacroInputHub _inputHub = GmacroInputHub();
@@ -219,13 +218,40 @@ class _GmacroSessionPageState extends State<GmacroSessionPage> {
           _addLog('🟢 Protocol: Ready');
           if (mounted) setState(() => _isBusy = false);
         case ProtocolBusy(reason: final r):
+          _handleProtocolOtaEvent(event);
           _addLog('🟡 Protocol: Busy — $r');
           if (mounted) setState(() => _isBusy = true);
         case ProtocolError(failure: final f):
           _addLog('🔴 Protocol: Error ${f.code} - ${f.message}', isError: true);
-          if (mounted) setState(() => _isBusy = false);
+          if (mounted) {
+            setState(() {
+              _isBusy = false;
+              if (_isOtaRunning) {
+                _isOtaRunning = false;
+              }
+            });
+          }
       }
     });
+  }
+
+  void _handleProtocolOtaEvent(ProtocolBusy event) {
+    final payload = event.payload;
+
+    switch (payload['event']) {
+      case 'progress':
+        final progress = payload['progress'];
+        final percent = progress is num ? progress.toDouble() : 0.0;
+        setState(() {
+          _isOtaRunning = true;
+          _otaPercent = percent.clamp(0.0, 1.0).toDouble();
+        });
+      case 'success':
+        setState(() {
+          _isOtaRunning = false;
+          _otaPercent = 1;
+        });
+    }
   }
 
   void _subscribeOta(GmacroSession session) {

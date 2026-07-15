@@ -358,36 +358,83 @@ final class IAP2Manager: NSObject {
     }
     
     //发送数据
-    func sendData(_ data: Data) -> String {
+    func sendData(_ data: Data) throws -> String {
         guard let outStream = outStream else {
             print("[IAP2] sendData: 尚未连接")
-            return "尚未连接"
+            throw NSError(
+                domain: "IAP2Manager",
+                code: -10,
+                userInfo: [NSLocalizedDescriptionKey: "尚未连接"]
+            )
         }
         
         if !isCompleted {
             print("[IAP2] sendData: IAP2 尚未完成握手，无法发送数据")
-            return "IAP2 尚未完成握手，无法发送数据"
-        }
-        
-        let bytesWritten = data.withUnsafeBytes {
-            outStream.write($0.bindMemory(to: UInt8.self).baseAddress!, maxLength: data.count)
-        }
-        
-        if bytesWritten < 0 {
-            let error = outStream.streamError ?? NSError(
+            throw NSError(
                 domain: "IAP2Manager",
-                code: -1,
-                userInfo: [NSLocalizedDescriptionKey: "发送失败"]
+                code: -11,
+                userInfo: [NSLocalizedDescriptionKey: "IAP2 尚未完成握手，无法发送数据"]
             )
-            print("[IAP2] sendData: 发送失败，error = \(String(describing: outStream.streamError))")
-            onErrorOccurred?(error)
-            return "发送失败"
-        } else {
-            
-            print("[IAP2] sendData: 已发送 \(bytesWritten)/\(data.count) 字节")
-            onTx?(data)
-            return "已发送 \(bytesWritten)/\(data.count) 字节"
         }
+        
+        if !Thread.isMainThread {
+            var result: Result<String, Error>!
+            DispatchQueue.main.sync {
+                result = Result { try self.performWrite(data) }
+            }
+            return try result.get()
+        }
+        return try performWrite(data)
+    }
+
+    private func performWrite(_ data: Data) throws -> String {
+        guard let outStream = outStream else {
+            print("[IAP2] performWrite: 流已释放")
+            throw NSError(
+                domain: "IAP2Manager",
+                code: -12,
+                userInfo: [NSLocalizedDescriptionKey: "流已释放"]
+            )
+        }
+
+        let bytesWritten = try data.withUnsafeBytes { rawBuffer -> Int in
+            guard let baseAddress = rawBuffer.bindMemory(to: UInt8.self).baseAddress else {
+                return 0
+            }
+
+            var totalWritten = 0
+            while totalWritten < data.count {
+                let count = outStream.write(baseAddress.advanced(by: totalWritten),
+                                            maxLength: data.count - totalWritten)
+                if count < 0 {
+                    let error = outStream.streamError ?? NSError(
+                        domain: "IAP2Manager",
+                        code: -1,
+                        userInfo: [NSLocalizedDescriptionKey: "发送失败"]
+                    )
+                    print("[IAP2] sendData: 发送失败，error = \(String(describing: outStream.streamError))")
+                    onErrorOccurred?(error)
+                    throw error
+                }
+                if count == 0 {
+                    let error = NSError(
+                        domain: "IAP2Manager",
+                        code: -13,
+                        userInfo: [NSLocalizedDescriptionKey: "发送失败：输出流未写入数据"]
+                    )
+                    print("[IAP2] sendData: 发送失败，write 返回 0")
+                    onErrorOccurred?(error)
+                    throw error
+                }
+                totalWritten += count
+            }
+            return totalWritten
+        }
+
+        print("[IAP2] sendData: 发送 \(data.count) 字节: \(data.map { String(format: "%02X", $0) }.joined())")
+        print("[IAP2] sendData: 已发送 \(bytesWritten)/\(data.count) 字节")
+        onTx?(data)
+        return "已发送 \(bytesWritten)/\(data.count) 字节"
     }
     
     //发送连接测试数据
