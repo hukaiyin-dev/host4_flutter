@@ -196,12 +196,12 @@ extension DataHelper {
         var all = Data([len])
         all.append(body)
 
-        if sn >= 0xFF {
-            resetData()
-        }
-
         all.append(UInt8(clamping: sn))
         sn += 1
+        // SN 是 1 字节，允许本包使用 0xFF；下一次再回到 0x01，避免超过 0xFF 后被 clamping 一直压成 0xFF。
+        if sn > 0xFF {
+            sn = 1
+        }
 
         return all
     }

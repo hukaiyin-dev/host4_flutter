@@ -193,6 +193,8 @@ final class IAP2Manager: NSObject {
     
     // 是否在等待设备插入（用户已经点击“连接”，但暂时没找到设备）
     private var isPendingConnect = false
+    // 主动断开时不等待自动重连；固件升级完成后设备重启导致的被动断开需要等待重连。
+    private var isClosingIntentionally = false
     
     // MARK: - 生命周期
     
@@ -246,6 +248,8 @@ final class IAP2Manager: NSObject {
     
     public func connect() {
         print("[IAP2] connect() called, isPendingConnect = \(isPendingConnect)")
+        // 每次主动发起连接时清掉历史主动断开标记，避免后续固件重启造成的 endEncountered 被误判为主动断开。
+        isClosingIntentionally = false
         
         guard let protocolString = protocolString else {
             let error = NSError(
@@ -298,6 +302,8 @@ final class IAP2Manager: NSObject {
     // 真正创建 EASession 的逻辑单独抽出来
     private func openSession(with accessory: EAAccessory, protocolString: String) {
         print("[IAP2] openSession: accessory = \(accessory.name), protocol = \(protocolString)")
+        // 新 session 已经开始建立，后续流结束应按当前连接状态重新判断，不能沿用旧的主动断开标记。
+        isClosingIntentionally = false
         
         // 如果已经有活跃会话，直接复用，不再创建新的
         if isSessionActive() {
@@ -466,9 +472,12 @@ final class IAP2Manager: NSObject {
     }
     
     // 断开连接
-    func disconnect() {
+    func disconnect(keepPendingConnect: Bool = false) {
         print("[IAP2] disconnect called")
-        isPendingConnect = false
+        isPendingConnect = keepPendingConnect
+        if !keepPendingConnect {
+            isClosingIntentionally = true
+        }
         
 //        MFiKitHelper.shared.isIap2Completed = false
 //        MFiKitHelper.shared.iap2SendCount = 0
@@ -606,8 +615,16 @@ extension IAP2Manager: StreamDelegate {
 
         // 流结束
         if eventCode.contains(.endEncountered) {
-            print("[IAP2] stream: \(streamDesc) endEncountered，准备断开连接")
-            disconnect()
+            let shouldWaitForReconnect = !isClosingIntentionally
+            if shouldWaitForReconnect {
+                print("[IAP2] stream: \(streamDesc) endEncountered，准备断开连接并等待设备重新建立 MFi session")
+            } else {
+                print("[IAP2] stream: \(streamDesc) endEncountered，主动断开流程，不等待重连")
+            }
+            disconnect(keepPendingConnect: shouldWaitForReconnect)
+            if !shouldWaitForReconnect {
+                isClosingIntentionally = false
+            }
         }
     }
 }

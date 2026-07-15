@@ -2885,6 +2885,20 @@
       "value": "false"
     },
     {
+      "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/MFiKit\/MFiKit\/IAP2Manager.swift",
+      "kind": "BooleanLiteral",
+      "offset": 7662,
+      "length": 5,
+      "value": "false"
+    },
+    {
+      "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/MFiKit\/MFiKit\/IAP2Manager.swift",
+      "kind": "BooleanLiteral",
+      "offset": 18154,
+      "length": 5,
+      "value": "false"
+    },
+    {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/MFiKit\/MFiKit\/HIDManager.swift",
       "kind": "IntegerLiteral",
       "offset": 539,

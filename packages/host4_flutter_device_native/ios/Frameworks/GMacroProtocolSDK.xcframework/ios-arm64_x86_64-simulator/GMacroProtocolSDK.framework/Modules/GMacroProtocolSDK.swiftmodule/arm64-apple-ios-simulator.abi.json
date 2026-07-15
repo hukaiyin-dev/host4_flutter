@@ -40834,7 +40834,7 @@
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/DataHelper\/Protocol\/DataHelper+MFIOTA.swift",
       "kind": "IntegerLiteral",
-      "offset": 4667,
+      "offset": 5360,
       "length": 4,
       "value": "0x01"
     },
@@ -41347,7 +41347,7 @@
       "kind": "FloatLiteral",
       "offset": 773,
       "length": 4,
-      "value": "0.01"
+      "value": "0.00"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/LinearInfo.swift",
