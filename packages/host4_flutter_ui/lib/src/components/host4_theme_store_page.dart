@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../foundation/theme/host4_theme_manager.dart';
 import '../foundation/theme/host4_theme_scope.dart';
@@ -26,6 +27,7 @@ class Host4ThemeStorePage extends StatefulWidget {
   final String title;
   final String confirmLabel;
   final String backLabel;
+
   /// 系统状态数据源；传入则在右上角显示时间 / Wi-Fi / 电量。
   final Host4SystemStatusSource? statusSource;
   final bool showControllerHints;
@@ -243,7 +245,7 @@ class _HeaderIconButton extends StatelessWidget {
   }
 }
 
-class _ThemeStoreGrid extends StatelessWidget {
+class _ThemeStoreGrid extends StatefulWidget {
   const _ThemeStoreGrid({
     required this.manager,
     required this.pendingThemeId,
@@ -255,35 +257,107 @@ class _ThemeStoreGrid extends StatelessWidget {
   final void Function(Host4ThemeManager, Host4ThemeCatalogEntry) onApplyTheme;
 
   @override
+  State<_ThemeStoreGrid> createState() => _ThemeStoreGridState();
+}
+
+class _ThemeStoreGridState extends State<_ThemeStoreGrid> {
+  final Map<String, FocusNode> _focusNodes = <String, FocusNode>{};
+
+  List<Host4ThemeCatalogEntry> get _entries => widget.manager.catalog;
+
+  @override
+  void initState() {
+    super.initState();
+    _syncFocusNodes();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _requestInitialFocus();
+      }
+    });
+  }
+
+  @override
+  void didUpdateWidget(covariant _ThemeStoreGrid oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _syncFocusNodes();
+  }
+
+  @override
+  void dispose() {
+    for (final node in _focusNodes.values) {
+      node.dispose();
+    }
+    _focusNodes.clear();
+    super.dispose();
+  }
+
+  void _syncFocusNodes() {
+    final ids = _entries.map((entry) => entry.id).toSet();
+    for (final id in ids) {
+      _focusNodes.putIfAbsent(
+        id,
+        () => FocusNode(debugLabel: 'host4_theme_card_$id'),
+      );
+    }
+    final removedIds = _focusNodes.keys
+        .where((id) => !ids.contains(id))
+        .toList(growable: false);
+    for (final id in removedIds) {
+      _focusNodes.remove(id)?.dispose();
+    }
+  }
+
+  void _requestInitialFocus() {
+    if (_entries.isEmpty) {
+      return;
+    }
+    final selected = _entries.firstWhere(
+      (entry) => entry.id == widget.manager.currentThemeId,
+      orElse: () => _entries.first,
+    );
+    _focusNodes[selected.id]?.requestFocus();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Wrap(
       spacing: 8,
       runSpacing: 8,
       children: [
-        for (final entry in manager.catalog)
+        for (final indexed in _entries.indexed)
           _ThemeCard(
-            entry: entry,
-            selected: manager.currentThemeId == entry.id,
-            loading: pendingThemeId == entry.id,
-            onTap: () => onApplyTheme(manager, entry),
+            focusNode: _focusNodes[indexed.$2.id],
+            entry: indexed.$2,
+            selected: widget.manager.currentThemeId == indexed.$2.id,
+            loading: widget.pendingThemeId == indexed.$2.id,
+            onTap: () => widget.onApplyTheme(widget.manager, indexed.$2),
           ),
       ],
     );
   }
 }
 
-class _ThemeCard extends StatelessWidget {
+class _ThemeCard extends StatefulWidget {
   const _ThemeCard({
+    required this.focusNode,
     required this.entry,
     required this.selected,
     required this.loading,
     required this.onTap,
   });
 
+  final FocusNode? focusNode;
   final Host4ThemeCatalogEntry entry;
   final bool selected;
   final bool loading;
   final VoidCallback onTap;
+
+  @override
+  State<_ThemeCard> createState() => _ThemeCardState();
+}
+
+class _ThemeCardState extends State<_ThemeCard> {
+  bool _focused = false;
 
   @override
   Widget build(BuildContext context) {
@@ -291,64 +365,103 @@ class _ThemeCard extends StatelessWidget {
 
     return Semantics(
       button: true,
-      selected: selected,
-      child: InkWell(
-        key: ValueKey<String>('host4_theme_card_${entry.id}'),
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(8),
-        child: SizedBox(
-          width: 172,
-          height: 124,
-          child: Stack(
-            children: [
-              Positioned.fill(
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    color:
-                        Colors.white.withValues(alpha: selected ? 0.88 : 0.68),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: selected
-                          ? theme.colors.brandPrimary
-                          : theme.colors.borderDefault,
-                      width: selected ? 2 : 1,
+      selected: widget.selected,
+      child: Shortcuts(
+        shortcuts: const <ShortcutActivator, Intent>{
+          SingleActivator(LogicalKeyboardKey.enter): ActivateIntent(),
+          SingleActivator(LogicalKeyboardKey.keyA): ActivateIntent(),
+          SingleActivator(LogicalKeyboardKey.gameButtonA): ActivateIntent(),
+          SingleActivator(LogicalKeyboardKey.select): ActivateIntent(),
+        },
+        child: Actions(
+          actions: <Type, Action<Intent>>{
+            ActivateIntent: CallbackAction<ActivateIntent>(
+              onInvoke: (_) {
+                widget.onTap();
+                return null;
+              },
+            ),
+          },
+          child: InkWell(
+            key: ValueKey<String>('host4_theme_card_${widget.entry.id}'),
+            focusNode: widget.focusNode,
+            onFocusChange: (focused) {
+              if (_focused != focused && mounted) {
+                setState(() => _focused = focused);
+              }
+            },
+            onTap: widget.onTap,
+            borderRadius: BorderRadius.circular(8),
+            child: SizedBox(
+              width: 172,
+              height: 124,
+              child: Stack(
+                children: [
+                  Positioned.fill(
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(
+                          alpha: widget.selected ? 0.88 : 0.68,
+                        ),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: _focused
+                              ? theme.colors.focus
+                              : theme.colors.borderDefault,
+                          width: _focused ? 2 : 1,
+                        ),
+                        boxShadow: _focused
+                            ? [
+                                BoxShadow(
+                                  color: theme.colors.focus.withValues(
+                                    alpha: 0.2,
+                                  ),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ]
+                            : null,
+                      ),
                     ),
                   ),
-                ),
-              ),
-              Positioned(
-                left: 4,
-                top: 4,
-                width: 164,
-                height: 89,
-                child: _ThemePreview(entry: entry),
-              ),
-              Positioned(
-                left: 11,
-                top: 98,
-                width: 96,
-                height: 18,
-                child: Text(
-                  entry.name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: theme.colors.textSecondary,
-                    fontSize: 13.6,
-                    height: 1.29,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 0,
+                  Positioned(
+                    left: 4,
+                    top: 4,
+                    width: 164,
+                    height: 89,
+                    child: _ThemePreview(entry: widget.entry),
                   ),
-                ),
+                  Positioned(
+                    left: 11,
+                    top: 98,
+                    width: 96,
+                    height: 18,
+                    child: Text(
+                      widget.entry.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: theme.colors.textSecondary,
+                        fontSize: 13.6,
+                        height: 1.29,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0,
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 116,
+                    top: 100,
+                    width: 48,
+                    height: 16,
+                    child: _ThemeActionPill(
+                      selected: widget.selected,
+                      loading: widget.loading,
+                    ),
+                  ),
+                ],
               ),
-              Positioned(
-                left: 116,
-                top: 100,
-                width: 48,
-                height: 16,
-                child: _ThemeActionPill(selected: selected, loading: loading),
-              ),
-            ],
+            ),
           ),
         ),
       ),
@@ -393,8 +506,9 @@ class _ThemeActionPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = context.host4Theme;
-    final background =
-        selected ? theme.colors.brandPrimary : theme.colors.textPrimary;
+    final background = selected
+        ? theme.colors.brandPrimary
+        : theme.colors.textPrimary;
 
     return Container(
       key: ValueKey<String>(
@@ -516,8 +630,10 @@ class _ControllerHintButton extends StatelessWidget {
                   width: 20,
                   height: 20,
                   alignment: Alignment.center,
-                  decoration:
-                      BoxDecoration(color: color, shape: BoxShape.circle),
+                  decoration: BoxDecoration(
+                    color: color,
+                    shape: BoxShape.circle,
+                  ),
                   child: Text(
                     label,
                     style: const TextStyle(
