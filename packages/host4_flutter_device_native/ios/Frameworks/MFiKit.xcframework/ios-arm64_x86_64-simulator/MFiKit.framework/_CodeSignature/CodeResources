@@ -42,7 +42,7 @@
 		</data>
 		<key>Modules/MFiKit.swiftmodule/arm64-apple-ios-simulator.swiftmodule</key>
 		<data>
-		VT3mF9JmzHWF0lIIJCSY3Msc5WQ=
+		2bK5GRLZUmsvt0wlkW9tVCB5zAg=
 		</data>
 		<key>Modules/MFiKit.swiftmodule/x86_64-apple-ios-simulator.abi.json</key>
 		<data>
@@ -62,7 +62,7 @@
 		</data>
 		<key>Modules/MFiKit.swiftmodule/x86_64-apple-ios-simulator.swiftmodule</key>
 		<data>
-		pyTKsxav3PfJ4SYJJnNiet5ZlCM=
+		W4XtRHN/oZzZiyxPWpwlDjGdlew=
 		</data>
 	</dict>
 	<key>files2</key>
@@ -159,11 +159,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			VT3mF9JmzHWF0lIIJCSY3Msc5WQ=
+			2bK5GRLZUmsvt0wlkW9tVCB5zAg=
 			</data>
 			<key>hash2</key>
 			<data>
-			SF6F9k+4gahQTgWRnoe9FDXZM0BOXJV+CjS0h9fPcVw=
+			k3mwxChF6BkOSTvgvf3yylPeKW6VS0gbFT0XVK9YcH0=
 			</data>
 		</dict>
 		<key>Modules/MFiKit.swiftmodule/x86_64-apple-ios-simulator.abi.json</key>
@@ -214,11 +214,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			pyTKsxav3PfJ4SYJJnNiet5ZlCM=
+			W4XtRHN/oZzZiyxPWpwlDjGdlew=
 			</data>
 			<key>hash2</key>
 			<data>
-			ZGAJNEKV5jC0xT/gr9u1qkvBlNahPPF3eu7EpxYUMwg=
+			pPcUYrmui8SWu+AY3Gbc7DPeN4qj/3GWfr50IhHBNho=
 			</data>
 		</dict>
 	</dict>
