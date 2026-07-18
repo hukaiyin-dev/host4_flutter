@@ -13,9 +13,9 @@ internal object EscalationEventEmitter {
                 val modeEvent = message.modeEvent ?: return
                 target.emit(DpKeyEventMapper.map(modeEvent))
             }
-            is TestModeEventRsp ->{
+            is TestModeEventRsp -> {
                 val modeEvent = message.testModeEvent ?: return
-                target.emit(DpKeyEventMapper.map(modeEvent))
+                target.emit(DpKeyEventMapper.map(modeEvent, type = "testModeEvent"))
             }
             is DeviceAlignRsp -> {
                 target.emit(DeviceAlignEventMapper.map(message))
