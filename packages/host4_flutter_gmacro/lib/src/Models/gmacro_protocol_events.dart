@@ -75,6 +75,22 @@ class TestEventMode extends GmacroRealtimeEvent {
       r2: _asInt(map['r2']),
     );
   }
+
+  /// Builds a test-mode event from Android [TestModeEventRsp] escalation data.
+  factory TestEventMode.fromNativeDpKeyEvent(NativeDpKeyEvent event) {
+    return TestEventMode(
+      rawKeys: event.keys,
+      keys: event.keys
+          .map((raw) => GamepadKey.fromValue(raw) ?? GamepadKey.none)
+          .toList(growable: false),
+      j1x: event.leftRockerXValue,
+      j1y: event.leftRockerYValue,
+      j2x: event.rightRockerXValue,
+      j2y: event.rightRockerYValue,
+      l2: event.leftKeyLTwoValue,
+      r2: event.rightKeyRTwoValue,
+    );
+  }
 }
 
 class DeviceKeysStateEvent extends GmacroRealtimeEvent {

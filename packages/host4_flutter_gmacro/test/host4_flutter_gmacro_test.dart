@@ -1,9 +1,16 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:host4_flutter_gmacro/host4_flutter_gmacro.dart';
 import 'package:host4_flutter_device_native/host4_flutter_device_native.dart';
 import 'package:host4_flutter_transport/host4_flutter_transport.dart';
 
 void main() {
+  tearDown(() {
+    debugDefaultTargetPlatformOverride = null;
+  });
+
   test('attach wraps a transport session as gmacro protocol session', () async {
     final gmacro = Host4Gmacro(native: _FakeDeviceNative());
     final transport = _FakeTransportSession();
@@ -103,10 +110,49 @@ void main() {
 
     await session.close();
   });
+
+  test('Android test-mode escalation is exposed as TestEventMode', () async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.android;
+    final native = _FakeDeviceNative();
+    final session = GmacroSession(
+      id: 'protocol-1',
+      transport: _FakeTransportSession(),
+      native: native,
+    );
+    final eventFuture = session.realtimeEvents.first;
+
+    native.escalationEvents.add(<String, Object?>{
+      'type': 'testModeEvent',
+      'keyValue': 1,
+      'keys': <int>[1],
+      'leftRockerXValue': 11,
+      'leftRockerYValue': 22,
+      'rightRockerXValue': 33,
+      'rightRockerYValue': 44,
+      'leftKeyLTwoValue': 55,
+      'rightKeyRTwoValue': 66,
+    });
+
+    final event = await eventFuture;
+    expect(event, isA<TestEventMode>());
+    final testEvent = event as TestEventMode;
+    expect(testEvent.rawKeys, <int>[1]);
+    expect(testEvent.j1x, 11);
+    expect(testEvent.j1y, 22);
+    expect(testEvent.j2x, 33);
+    expect(testEvent.j2y, 44);
+    expect(testEvent.l2, 55);
+    expect(testEvent.r2, 66);
+
+    await session.close();
+    await native.dispose();
+  });
 }
 
 class _FakeDeviceNative extends Host4FlutterDeviceNative {
   final List<Map<String, Object?>> invocations = <Map<String, Object?>>[];
+  final StreamController<Map<String, Object?>> escalationEvents =
+      StreamController<Map<String, Object?>>.broadcast();
 
   @override
   Future<String> attachGmacroProtocol(
@@ -125,7 +171,7 @@ class _FakeDeviceNative extends Host4FlutterDeviceNative {
   Stream<Map<String, Object?>> transportEscalationEvents(
     String transportSessionId,
   ) {
-    return const Stream<Map<String, Object?>>.empty();
+    return escalationEvents.stream;
   }
 
   @override
@@ -143,6 +189,8 @@ class _FakeDeviceNative extends Host4FlutterDeviceNative {
 
   @override
   Future<void> closeProtocol(String protocolSessionId) async {}
+
+  Future<void> dispose() => escalationEvents.close();
 }
 
 class _FakeTransportSession implements TransportSession {

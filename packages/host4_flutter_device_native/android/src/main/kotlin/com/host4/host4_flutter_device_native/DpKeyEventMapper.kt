@@ -3,9 +3,9 @@ package com.host4.host4_flutter_device_native
 import com.host4.platform.kr.model.TestModeEvent
 
 internal object DpKeyEventMapper {
-    fun map(event: TestModeEvent): Map<String, Any?> {
+    fun map(event: TestModeEvent, type: String = "dpKeyEvent"): Map<String, Any?> {
         return mapOf(
-            "type" to "dpKeyEvent",
+            "type" to type,
             "keyValue" to event.keyValue,
             "keys" to event.keys.orEmpty().map { it.toLong() },
             "leftRockerXValue" to event.leftRockerXValue,

@@ -84,6 +84,10 @@ class GmacroSession implements ProtocolSession {
             NativeDpKeyEvent.fromMap(event),
           ),
         );
+      case 'testModeEvent':
+        _realtimeEventController.add(
+          TestEventMode.fromNativeDpKeyEvent(NativeDpKeyEvent.fromMap(event)),
+        );
       case 'deviceAlign':
         _calibrationEventController.add(
           DeviceCalibrationEvent.fromNative(
@@ -115,13 +119,15 @@ class GmacroSession implements ProtocolSession {
     final payload = event.payload;
     if (payload == null) return;
 
-    _calibrationEventController.add(DeviceCalibrationEvent(
-      subId: payload['subId'] as int? ?? 0,
-      kind: DeviceCalibrationSubId.fromValue(payload['subId'] as int? ?? 0),
-      result: payload['result'] as int? ?? 0,
-      param1: _asIntList(payload['param1']),
-      param2: _asIntList(payload['param2']),
-    ));
+    _calibrationEventController.add(
+      DeviceCalibrationEvent(
+        subId: payload['subId'] as int? ?? 0,
+        kind: DeviceCalibrationSubId.fromValue(payload['subId'] as int? ?? 0),
+        result: payload['result'] as int? ?? 0,
+        param1: _asIntList(payload['param1']),
+        param2: _asIntList(payload['param2']),
+      ),
+    );
   }
 
   void _forwardProtocolRealtimeEvents(ProtocolEvent event) {
@@ -219,9 +225,11 @@ List<int> _asIntList(dynamic value) {
   if (value is! List) {
     return const <int>[];
   }
-  return value.map((item) {
-    if (item is int) return item;
-    if (item is num) return item.toInt();
-    return int.tryParse(item.toString()) ?? 0;
-  }).toList(growable: false);
+  return value
+      .map((item) {
+        if (item is int) return item;
+        if (item is num) return item.toInt();
+        return int.tryParse(item.toString()) ?? 0;
+      })
+      .toList(growable: false);
 }
