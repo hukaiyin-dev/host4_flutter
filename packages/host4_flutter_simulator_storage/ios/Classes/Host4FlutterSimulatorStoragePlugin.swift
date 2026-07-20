@@ -387,8 +387,8 @@ public final class Host4FlutterSimulatorStoragePlugin: NSObject, FlutterPlugin, 
     let replacingPath = (arguments?["replacingPath"] as? String)?
       .trimmingCharacters(in: .whitespacesAndNewlines)
     if (replacingPath?.isEmpty ?? true) &&
-      simulatorFolderBookmarkStore.count(for: systemType) >= 3 {
-      result(FlutterError(code: "folder_limit_reached", message: "At most three ROM folders are allowed for each simulator.", details: nil))
+      simulatorFolderBookmarkStore.count(for: systemType) >= 2 {
+      result(FlutterError(code: "folder_limit_reached", message: "At most two additional ROM folders are allowed for each simulator.", details: nil))
       return
     }
     guard let presenter = topViewController() else {
@@ -552,8 +552,29 @@ public final class Host4FlutterSimulatorStoragePlugin: NSObject, FlutterPlugin, 
       [
         "path": entry.path,
         "displayName": URL(fileURLWithPath: entry.path).lastPathComponent,
+        "accessible": isSimulatorFolderAccessible(entry),
       ]
     }
+  }
+
+  private func isSimulatorFolderAccessible(
+    _ entry: Host4SimulatorRomFolderBookmarkStore.Entry
+  ) -> Bool {
+    guard let url = simulatorFolderBookmarkStore.resolvedURL(for: entry) else {
+      return false
+    }
+    if let accessible = Host4TfCardFileAccessRegistry
+      .isActiveDirectoryAccessible(at: url) {
+      return accessible
+    }
+    let didStartAccessing = url.startAccessingSecurityScopedResource()
+    defer {
+      if didStartAccessing {
+        url.stopAccessingSecurityScopedResource()
+      }
+    }
+    guard didStartAccessing else { return false }
+    return Host4TfCardFileAccessRegistry.isDirectoryReadable(at: url)
   }
 
   private func parseSystems(_ rawSystems: [Any]) -> [Host4RomSystemSpec] {
@@ -862,10 +883,13 @@ private final class Host4SimulatorRomFolderBookmarkStore {
   }
 
   private let dataKey = "host4_flutter_simulator_storage.simulator_rom_folders"
-  private let maximumFolderCount = 3
+  private let maximumFolderCount = 2
 
   func entries(for systemType: Int) -> [Entry] {
-    entriesBySystemType()[String(systemType)] ?? []
+    Array(
+      (entriesBySystemType()[String(systemType)] ?? [])
+        .prefix(maximumFolderCount)
+    )
   }
 
   func count(for systemType: Int) -> Int {
@@ -882,6 +906,10 @@ private final class Host4SimulatorRomFolderBookmarkStore {
 
   func resolvedURLs(for systemType: Int) -> [URL] {
     entries(for: systemType).compactMap { resolve($0)?.url }
+  }
+
+  func resolvedURL(for entry: Entry) -> URL? {
+    resolve(entry)?.url
   }
 
   func replaceOrAdd(
@@ -924,7 +952,7 @@ private final class Host4SimulatorRomFolderBookmarkStore {
     } else if systemEntries.count >= maximumFolderCount {
       throw Host4TfCardScanError(
         code: "folder_limit_reached",
-        message: "At most three ROM folders are allowed for each simulator."
+        message: "At most two additional ROM folders are allowed for each simulator."
       )
     } else {
       systemEntries.append(newEntry)
