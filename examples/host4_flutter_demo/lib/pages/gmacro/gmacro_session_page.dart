@@ -25,8 +25,8 @@ class GmacroSessionPage extends StatefulWidget {
 
 class _GmacroSessionPageState extends State<GmacroSessionPage> {
   static const _bundledOtaAssetPath =
-      'assets/ota/OTA_GDF-G910202_F542_V1.0_260708c.bin';
-  static const _bundledOtaFileName = 'OTA_GDF-G910202_F542_V1.0_260708c.bin';
+      'assets/ota/OTA_GDF-G910202_8520_V1.0_260715a.bin';
+  static const _bundledOtaFileName = 'OTA_GDF-G910202_8520_V1.0_260715a.bin';
 
   final _gmacro = Host4Gmacro();
   final GmacroInputHub _inputHub = GmacroInputHub();
