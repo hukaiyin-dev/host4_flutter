@@ -58,7 +58,7 @@ class Host4SimulatorStorage {
     ).map(Host4SimulatorRomFolder.fromMap).toList(growable: false);
   }
 
-  /// Opens the iOS system folder picker for one of a simulator's three slots.
+  /// Opens the iOS system folder picker for one of two additional slots.
   static Future<List<Host4SimulatorRomFolder>> pickSimulatorRomFolder({
     required int systemType,
     String? replacingPath,
@@ -200,17 +200,20 @@ class Host4SimulatorRomFolder {
   const Host4SimulatorRomFolder({
     required this.path,
     required this.displayName,
+    this.accessible = true,
   });
 
   factory Host4SimulatorRomFolder.fromMap(Map<dynamic, dynamic> map) {
     return Host4SimulatorRomFolder(
       path: _readString(map['path']),
       displayName: _readString(map['displayName']),
+      accessible: map['accessible'] is bool ? map['accessible']! as bool : true,
     );
   }
 
   final String path;
   final String displayName;
+  final bool accessible;
 }
 
 class Host4TfCardScanResult {
