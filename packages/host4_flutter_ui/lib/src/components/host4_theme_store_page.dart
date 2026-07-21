@@ -1,4 +1,8 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../foundation/theme/host4_theme_manager.dart';
 import '../foundation/theme/host4_theme_scope.dart';
@@ -31,11 +35,133 @@ class Host4ThemeStorePage extends StatefulWidget {
   final bool showControllerHints;
 
   @override
-  State<Host4ThemeStorePage> createState() => _Host4ThemeStorePageState();
+  State<Host4ThemeStorePage> createState() => Host4ThemeStorePageState();
 }
 
-class _Host4ThemeStorePageState extends State<Host4ThemeStorePage> {
+class Host4ThemeStorePageState extends State<Host4ThemeStorePage> {
+  static const _gridWidth = 532.0;
+  static const _cardWidth = 172.0;
+  static const _cardSpacing = 8.0;
+
   String? _pendingThemeId;
+  int _focusedIndex = 0;
+  String? _trackedThemeId;
+  Host4ThemeManager? _listenedManager;
+  final FocusNode _focusNode = FocusNode(debugLabel: 'host4_theme_store');
+
+  @override
+  void initState() {
+    super.initState();
+    final manager = widget.manager;
+    if (manager != null) {
+      _attachManager(manager);
+      _syncFocusedIndexFromManager(manager);
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (widget.manager == null) {
+      _attachManager(context.host4ThemeManager);
+      _syncFocusedIndexFromManager(context.host4ThemeManager);
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant Host4ThemeStorePage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final manager = widget.manager;
+    if (manager != null && !identical(manager, oldWidget.manager)) {
+      _detachManager();
+      _attachManager(manager);
+      _syncFocusedIndexFromManager(manager);
+    }
+  }
+
+  @override
+  void dispose() {
+    _detachManager();
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  void _attachManager(Host4ThemeManager manager) {
+    if (identical(_listenedManager, manager)) {
+      return;
+    }
+    _detachManager();
+    _listenedManager = manager;
+    manager.addListener(_handleManagerChanged);
+  }
+
+  void _detachManager() {
+    _listenedManager?.removeListener(_handleManagerChanged);
+    _listenedManager = null;
+  }
+
+  void _handleManagerChanged() {
+    if (!mounted) {
+      return;
+    }
+    _syncFocusedIndexFromManager(_manager);
+    setState(() {});
+  }
+
+  void requestInputFocus() {
+    if (!mounted) {
+      return;
+    }
+    _focusNode.requestFocus();
+  }
+
+  bool handleDirectionalFocus(TraversalDirection direction) {
+    final catalog = _manager.catalog;
+    if (catalog.isEmpty) {
+      return false;
+    }
+    final columns = _columnCountFor(catalog.length);
+    final current = _focusedIndex.clamp(0, catalog.length - 1);
+    final row = current ~/ columns;
+    final column = current % columns;
+
+    final int? next = switch (direction) {
+      TraversalDirection.left =>
+        column > 0 ? current - 1 : null,
+      TraversalDirection.right =>
+        column < columns - 1 && current + 1 < catalog.length
+            ? current + 1
+            : null,
+      TraversalDirection.up => row > 0 ? current - columns : null,
+      TraversalDirection.down =>
+        current + columns < catalog.length ? current + columns : null,
+    };
+    if (next == null || next == current) {
+      return false;
+    }
+    setState(() {
+      _focusedIndex = next;
+    });
+    return true;
+  }
+
+  bool handleActivateFocusedTheme() {
+    final catalog = _manager.catalog;
+    if (catalog.isEmpty || _pendingThemeId != null) {
+      return false;
+    }
+    final index = _focusedIndex.clamp(0, catalog.length - 1);
+    unawaited(_applyTheme(_manager, catalog[index]));
+    return true;
+  }
+
+  Host4ThemeManager get _manager {
+    final explicitManager = widget.manager;
+    if (explicitManager != null) {
+      return explicitManager;
+    }
+    return context.host4ThemeManager;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +180,7 @@ class _Host4ThemeStorePageState extends State<Host4ThemeStorePage> {
     return AnimatedBuilder(
       animation: manager,
       builder: (context, _) {
-        return Scaffold(
+        final page = Scaffold(
           backgroundColor: Colors.white,
           resizeToAvoidBottomInset: false,
           body: MediaQuery.removePadding(
@@ -73,6 +199,7 @@ class _Host4ThemeStorePageState extends State<Host4ThemeStorePage> {
                   child: _ThemeStoreScene(
                     manager: manager,
                     pendingThemeId: _pendingThemeId,
+                    focusedIndex: _focusedIndex,
                     title: widget.title,
                     confirmLabel: widget.confirmLabel,
                     backLabel: widget.backLabel,
@@ -83,14 +210,91 @@ class _Host4ThemeStorePageState extends State<Host4ThemeStorePage> {
                     onBack: widget.onBack ?? () => Navigator.maybePop(context),
                     onSearch: widget.onSearch,
                     onApplyTheme: _applyTheme,
+                    onFocusCard: (index) {
+                      setState(() {
+                        _focusedIndex = index;
+                      });
+                      requestInputFocus();
+                    },
                   ),
                 ),
               ),
             ),
           ),
         );
+        return KeyboardListener(
+          focusNode: _focusNode,
+          autofocus: true,
+          onKeyEvent: _handleKeyEvent,
+          child: page,
+        );
       },
     );
+  }
+
+  void _handleKeyEvent(KeyEvent event) {
+    // iOS 方向键/A 会经 LauncherInputRouter 以 synthesized KeyEvent 再注入一次；
+    // 页面内 KeyboardListener 忽略 synthesized，避免一次按键移动两格。
+    if (event.synthesized && defaultTargetPlatform == TargetPlatform.iOS) {
+      return;
+    }
+    if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
+      return;
+    }
+    final key = event.logicalKey;
+    final direction = switch (key) {
+      LogicalKeyboardKey.arrowLeft => TraversalDirection.left,
+      LogicalKeyboardKey.arrowRight => TraversalDirection.right,
+      LogicalKeyboardKey.arrowUp => TraversalDirection.up,
+      LogicalKeyboardKey.arrowDown => TraversalDirection.down,
+      _ => null,
+    };
+    if (direction != null) {
+      handleDirectionalFocus(direction);
+      return;
+    }
+    if (key == LogicalKeyboardKey.keyA ||
+        key == LogicalKeyboardKey.enter ||
+        key == LogicalKeyboardKey.numpadEnter ||
+        key == LogicalKeyboardKey.select ||
+        key == LogicalKeyboardKey.gameButtonA) {
+      handleActivateFocusedTheme();
+      return;
+    }
+    if (key == LogicalKeyboardKey.keyB ||
+        key == LogicalKeyboardKey.escape ||
+        key == LogicalKeyboardKey.goBack ||
+        key == LogicalKeyboardKey.gameButtonB) {
+      (widget.onBack ?? () => Navigator.maybePop(context))();
+    }
+  }
+
+  void _syncFocusedIndexFromManager(Host4ThemeManager manager) {
+    final currentId = manager.currentThemeId;
+    if (currentId == _trackedThemeId) {
+      return;
+    }
+    _trackedThemeId = currentId;
+    final catalog = manager.catalog;
+    if (catalog.isEmpty) {
+      _focusedIndex = 0;
+      return;
+    }
+    final selectedIndex = currentId == null
+        ? -1
+        : catalog.indexWhere((entry) => entry.id == currentId);
+    _focusedIndex = selectedIndex >= 0
+        ? selectedIndex.clamp(0, catalog.length - 1)
+        : _focusedIndex.clamp(0, catalog.length - 1);
+  }
+
+  int _columnCountFor(int itemCount) {
+    if (itemCount <= 0) {
+      return 1;
+    }
+    final columns =
+        ((_gridWidth + _cardSpacing) / (_cardWidth + _cardSpacing)).floor();
+    return columns.clamp(1, itemCount);
   }
 
   Future<void> _applyTheme(
@@ -103,6 +307,10 @@ class _Host4ThemeStorePageState extends State<Host4ThemeStorePage> {
 
     setState(() {
       _pendingThemeId = entry.id;
+      final index = manager.catalog.indexWhere((item) => item.id == entry.id);
+      if (index >= 0) {
+        _focusedIndex = index;
+      }
     });
 
     try {
@@ -124,6 +332,7 @@ class _ThemeStoreScene extends StatelessWidget {
   const _ThemeStoreScene({
     required this.manager,
     required this.pendingThemeId,
+    required this.focusedIndex,
     required this.title,
     required this.confirmLabel,
     required this.backLabel,
@@ -131,6 +340,7 @@ class _ThemeStoreScene extends StatelessWidget {
     required this.onConfirm,
     required this.onBack,
     required this.onApplyTheme,
+    required this.onFocusCard,
     this.statusSource,
     this.onSearch,
   });
@@ -140,6 +350,7 @@ class _ThemeStoreScene extends StatelessWidget {
 
   final Host4ThemeManager manager;
   final String? pendingThemeId;
+  final int focusedIndex;
   final String title;
   final String confirmLabel;
   final String backLabel;
@@ -149,6 +360,7 @@ class _ThemeStoreScene extends StatelessWidget {
   final VoidCallback onBack;
   final VoidCallback? onSearch;
   final void Function(Host4ThemeManager, Host4ThemeCatalogEntry) onApplyTheme;
+  final ValueChanged<int> onFocusCard;
 
   @override
   Widget build(BuildContext context) {
@@ -191,7 +403,9 @@ class _ThemeStoreScene extends StatelessWidget {
           child: _ThemeStoreGrid(
             manager: manager,
             pendingThemeId: pendingThemeId,
+            focusedIndex: focusedIndex,
             onApplyTheme: onApplyTheme,
+            onFocusCard: onFocusCard,
           ),
         ),
         if (showControllerHints)
@@ -247,12 +461,16 @@ class _ThemeStoreGrid extends StatelessWidget {
   const _ThemeStoreGrid({
     required this.manager,
     required this.pendingThemeId,
+    required this.focusedIndex,
     required this.onApplyTheme,
+    required this.onFocusCard,
   });
 
   final Host4ThemeManager manager;
   final String? pendingThemeId;
+  final int focusedIndex;
   final void Function(Host4ThemeManager, Host4ThemeCatalogEntry) onApplyTheme;
+  final ValueChanged<int> onFocusCard;
 
   @override
   Widget build(BuildContext context) {
@@ -260,12 +478,16 @@ class _ThemeStoreGrid extends StatelessWidget {
       spacing: 8,
       runSpacing: 8,
       children: [
-        for (final entry in manager.catalog)
+        for (var index = 0; index < manager.catalog.length; index++)
           _ThemeCard(
-            entry: entry,
-            selected: manager.currentThemeId == entry.id,
-            loading: pendingThemeId == entry.id,
-            onTap: () => onApplyTheme(manager, entry),
+            entry: manager.catalog[index],
+            selected: manager.currentThemeId == manager.catalog[index].id,
+            focused: focusedIndex == index,
+            loading: pendingThemeId == manager.catalog[index].id,
+            onTap: () {
+              onFocusCard(index);
+              onApplyTheme(manager, manager.catalog[index]);
+            },
           ),
       ],
     );
@@ -276,18 +498,26 @@ class _ThemeCard extends StatelessWidget {
   const _ThemeCard({
     required this.entry,
     required this.selected,
+    required this.focused,
     required this.loading,
     required this.onTap,
   });
 
   final Host4ThemeCatalogEntry entry;
   final bool selected;
+  final bool focused;
   final bool loading;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final theme = context.host4Theme;
+    final borderColor = focused
+        ? theme.colors.focus
+        : selected
+        ? theme.colors.brandPrimary
+        : theme.colors.borderDefault;
+    final borderWidth = focused || selected ? 2.0 : 1.0;
 
     return Semantics(
       button: true,
@@ -308,10 +538,8 @@ class _ThemeCard extends StatelessWidget {
                         Colors.white.withValues(alpha: selected ? 0.88 : 0.68),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: selected
-                          ? theme.colors.brandPrimary
-                          : theme.colors.borderDefault,
-                      width: selected ? 2 : 1,
+                      color: borderColor,
+                      width: borderWidth,
                     ),
                   ),
                 ),
