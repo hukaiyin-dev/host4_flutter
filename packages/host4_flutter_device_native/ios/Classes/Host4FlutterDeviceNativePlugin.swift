@@ -727,20 +727,20 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
       bleSession.otaCommandWriter = { data, completion in
         nativeLog("[OTA] commandWriter called, size=\(data.count)")
         do {
-          try bleTransport?.send(data, to: otaCommandChar)
+          try bleTransport?.writeValue(data, to: otaCommandChar, completion: completion)
         } catch {
           nativeLog("[OTA] commandWriter send error: \(error)")
+          completion?()
         }
-        completion?()
       }
       bleSession.otaDataWriter = { data, completion in
         nativeLog("[OTA] dataWriter called, size=\(data.count)")
         do {
-          try bleTransport?.send(data, to: otaDataChar)
+          try bleTransport?.writeValue(data, to: otaDataChar, completion: completion)
         } catch {
           nativeLog("[OTA] dataWriter send error: \(error)")
+          completion?()
         }
-        completion?()
       }
       session = bleSession
     case .mfi(let mfiTransport, let byteTransport):

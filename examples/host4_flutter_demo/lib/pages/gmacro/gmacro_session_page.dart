@@ -14,6 +14,35 @@ import 'gmacro_api_test_page.dart';
 
 enum _OtaFirmwareSource { bundled, picker }
 
+class GmacroBundledOtaFirmware {
+  const GmacroBundledOtaFirmware({
+    required this.assetPath,
+    required this.fileName,
+  });
+
+  final String assetPath;
+  final String fileName;
+}
+
+const _mfiBundledOtaFirmware = GmacroBundledOtaFirmware(
+  assetPath: 'assets/ota/OTA_GDF-G910202_8520_V1.0_260715a.bin',
+  fileName: 'OTA_GDF-G910202_8520_V1.0_260715a.bin',
+);
+
+const _bleBundledOtaFirmware = GmacroBundledOtaFirmware(
+  assetPath: 'assets/ota/OTA_GDF-G560637_46D4_V1.0_260510a.bin',
+  fileName: 'OTA_GDF-G560637_46D4_V1.0_260510a.bin',
+);
+
+GmacroBundledOtaFirmware gmacroBundledOtaFirmwareForTransportKind(
+  TransportKind kind,
+) {
+  return switch (kind) {
+    TransportKind.mfi => _mfiBundledOtaFirmware,
+    TransportKind.ble || TransportKind.usb => _bleBundledOtaFirmware,
+  };
+}
+
 class GmacroSessionPage extends StatefulWidget {
   const GmacroSessionPage({required this.transport, super.key});
 
@@ -24,10 +53,6 @@ class GmacroSessionPage extends StatefulWidget {
 }
 
 class _GmacroSessionPageState extends State<GmacroSessionPage> {
-  static const _bundledOtaAssetPath =
-      'assets/ota/OTA_GDF-G910202_8520_V1.0_260715a.bin';
-  static const _bundledOtaFileName = 'OTA_GDF-G910202_8520_V1.0_260715a.bin';
-
   final _gmacro = Host4Gmacro();
   final GmacroInputHub _inputHub = GmacroInputHub();
 
@@ -49,6 +74,7 @@ class _GmacroSessionPageState extends State<GmacroSessionPage> {
   StreamSubscription<NativeOtaUpgradeEvent>? _otaSub;
   StreamSubscription<dynamic>? _nativeLogSub;
   bool _isOtaRunning = false;
+  bool _isOtaCompleted = false;
   double _otaPercent = 0;
 
   @override
@@ -220,7 +246,7 @@ class _GmacroSessionPageState extends State<GmacroSessionPage> {
         case ProtocolBusy(reason: final r):
           _handleProtocolOtaEvent(event);
           _addLog('🟡 Protocol: Busy — $r');
-          if (mounted) setState(() => _isBusy = true);
+          if (mounted && r != 'success') setState(() => _isBusy = true);
         case ProtocolError(failure: final f):
           _addLog('🔴 Protocol: Error ${f.code} - ${f.message}', isError: true);
           if (mounted) {
@@ -244,13 +270,24 @@ class _GmacroSessionPageState extends State<GmacroSessionPage> {
         final percent = progress is num ? progress.toDouble() : 0.0;
         setState(() {
           _isOtaRunning = true;
+          _isOtaCompleted = false;
           _otaPercent = percent.clamp(0.0, 1.0).toDouble();
         });
       case 'success':
-        setState(() {
-          _isOtaRunning = false;
-          _otaPercent = 1;
-        });
+        _markOtaSuccess();
+    }
+  }
+
+  void _markOtaSuccess() {
+    final shouldLog = !_isOtaCompleted;
+    setState(() {
+      _isBusy = false;
+      _isOtaRunning = false;
+      _isOtaCompleted = true;
+      _otaPercent = 1;
+    });
+    if (shouldLog) {
+      _addLog('🟢 OTA 升级成功');
     }
   }
 
@@ -262,6 +299,7 @@ class _GmacroSessionPageState extends State<GmacroSessionPage> {
         case NativeOtaUpgradeEventType.progress:
           setState(() {
             _isOtaRunning = true;
+            _isOtaCompleted = false;
             _otaPercent = event.percent;
           });
           _addLog(
@@ -269,14 +307,11 @@ class _GmacroSessionPageState extends State<GmacroSessionPage> {
             '(${event.progress}/${event.total})',
           );
         case NativeOtaUpgradeEventType.success:
-          setState(() {
-            _isOtaRunning = false;
-            _otaPercent = 1;
-          });
-          _addLog('🟢 OTA 升级成功');
+          _markOtaSuccess();
         case NativeOtaUpgradeEventType.failed:
           setState(() {
             _isOtaRunning = false;
+            _isOtaCompleted = false;
           });
           _addLog('🔴 OTA 升级失败，code=${event.code ?? -1}', isError: true);
       }
@@ -331,10 +366,13 @@ class _GmacroSessionPageState extends State<GmacroSessionPage> {
     late final String firmwareName;
     switch (source) {
       case _OtaFirmwareSource.bundled:
-        final data = await rootBundle.load(_bundledOtaAssetPath);
+        final firmware = gmacroBundledOtaFirmwareForTransportKind(
+          widget.transport.device.kind,
+        );
+        final data = await rootBundle.load(firmware.assetPath);
         if (!mounted) return;
         bytes = data.buffer.asUint8List();
-        firmwareName = _bundledOtaFileName;
+        firmwareName = firmware.fileName;
       case _OtaFirmwareSource.picker:
         final picked = await FilePicker.platform.pickFiles(
           type: FileType.custom,
@@ -360,6 +398,7 @@ class _GmacroSessionPageState extends State<GmacroSessionPage> {
     _addLog('▶ invoke: startOta（$firmwareName，${bytes.length} bytes）');
     setState(() {
       _isOtaRunning = true;
+      _isOtaCompleted = false;
       _otaPercent = 0;
     });
     try {
@@ -402,6 +441,7 @@ class _GmacroSessionPageState extends State<GmacroSessionPage> {
             isAttaching: _isAttaching,
             isBusy: _isBusy,
             isOtaRunning: _isOtaRunning,
+            isOtaCompleted: _isOtaCompleted,
             otaPercent: _otaPercent,
             session: _session,
           ),
@@ -525,6 +565,7 @@ class _StatusBar extends StatelessWidget {
     required this.isAttaching,
     required this.isBusy,
     required this.isOtaRunning,
+    required this.isOtaCompleted,
     required this.otaPercent,
     required this.session,
   });
@@ -532,6 +573,7 @@ class _StatusBar extends StatelessWidget {
   final bool isAttaching;
   final bool isBusy;
   final bool isOtaRunning;
+  final bool isOtaCompleted;
   final double otaPercent;
   final GmacroSession? session;
 
@@ -547,6 +589,9 @@ class _StatusBar extends StatelessWidget {
     } else if (isOtaRunning) {
       dotColor = theme.colors.warning;
       label = 'OTA 升级中 ${(otaPercent * 100).toStringAsFixed(1)}%';
+    } else if (isOtaCompleted) {
+      dotColor = theme.colors.success;
+      label = 'OTA 升级成功';
     } else if (session == null) {
       dotColor = theme.colors.warning;
       label = '协议挂载失败';
