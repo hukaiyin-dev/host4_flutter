@@ -497,12 +497,12 @@ class _ThemeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = context.host4Theme;
+    // 已应用主题与手柄焦点可能落在不同卡片；描边只给焦点项，
+    // 当前主题通过右下角 pill / 背景亮度区分，避免同时出现两个选中框。
     final borderColor = focused
         ? theme.colors.focus
-        : selected
-        ? theme.colors.brandPrimary
         : theme.colors.borderDefault;
-    final borderWidth = focused || selected ? 2.0 : 1.0;
+    final borderWidth = focused ? 2.0 : 1.0;
 
     return Semantics(
       button: true,
