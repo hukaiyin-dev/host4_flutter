@@ -1160,7 +1160,7 @@ public enum GMacroProtocolEvent : @unchecked Swift.Sendable {
   case progress(CoreFoundation.CGFloat)
   case success
   case failure(Swift.String)
-  case ota(type: GMacroProtocolSDK.GMacroOTAEventType, code: Swift.Int, progress: CoreFoundation.CGFloat)
+  case ota(type: GMacroProtocolSDK.GMacroOTAEventType, code: Swift.Int, progress: Swift.Int, total: Swift.Int, percent: CoreFoundation.CGFloat)
   case testKeys([GMacroProtocolSDK.GamepadKey], j1x: Swift.Int, j1y: Swift.Int, j2x: Swift.Int, j2y: Swift.Int, l2: Swift.Int, r2: Swift.Int)
   case configKeys([GMacroProtocolSDK.GamepadKey])
   case testKeyboardMouse(modifierKeys: [GMacroProtocolSDK.ModifierKey], keyboardKeys: [GMacroProtocolSDK.KeyboardKey], mouseCores: [GMacroProtocolSDK.MouseCoreButton], mouseWheels: [GMacroProtocolSDK.MouseWheelButton], mouseX: Swift.Int8, mouseY: Swift.Int8, mediaKeys: [GMacroProtocolSDK.MediaKey])

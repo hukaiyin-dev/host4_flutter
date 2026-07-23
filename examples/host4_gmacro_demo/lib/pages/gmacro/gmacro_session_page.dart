@@ -266,8 +266,8 @@ class _GmacroSessionPageState extends State<GmacroSessionPage> {
 
     switch (payload['event']) {
       case 'progress':
-        final progress = payload['progress'];
-        final percent = progress is num ? progress.toDouble() : 0.0;
+        final percentValue = payload['percent'];
+        final percent = percentValue is num ? percentValue.toDouble() : 0.0;
         setState(() {
           _isOtaRunning = true;
           _isOtaCompleted = false;

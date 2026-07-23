@@ -53,14 +53,24 @@ MFi 连接
 final otaSub = native.otaUpgradeEvents(protocolSessionId).listen((event) {
   switch (event.type) {
     case NativeOtaUpgradeEventType.progress:
-      final progress = event.percent; // 0.0 - 1.0
+      final progress = event.progress; // 已升级字节数
+      final total = event.total; // 固件总字节数
+      final percent = event.percent; // 0.0 - 1.0
+      final code = event.code; // 100
       break;
 
     case NativeOtaUpgradeEventType.success:
+      final progress = event.progress; // 等于 total
+      final total = event.total; // 固件总字节数
+      final percent = event.percent; // 1.0
+      final code = event.code; // 0
       break;
 
     case NativeOtaUpgradeEventType.failed:
-      final code = event.code;
+      final progress = event.progress; // 失败时当前已升级字节数
+      final total = event.total; // 固件总字节数
+      final percent = event.percent; // 失败时当前进度，0.0 - 1.0
+      final code = event.code; // 1 / 2 / 3
       break;
   }
 });
@@ -68,11 +78,13 @@ final otaSub = native.otaUpgradeEvents(protocolSessionId).listen((event) {
 
 ## 事件参数
 
-OTA 事件包含三个核心参数：
+OTA 事件模型：
 
 ```dart
 class NativeOtaUpgradeEvent {
   final NativeOtaUpgradeEventType type;
+  final int progress;
+  final int total;
   final double percent;
   final int? code;
 }
@@ -84,10 +96,22 @@ class NativeOtaUpgradeEvent {
 - `success`：升级成功
 - `failed`：升级失败
 
+`progress`：
+
+- `progress` 事件：已升级字节数
+- `success` 事件：等于 `total`
+- `failed` 事件：失败时当前已升级字节数
+
+`total`：
+
+- 固件总字节数
+
 `percent`：
 
 - 进度值，范围 `0.0 - 1.0`
 - 页面显示百分比时使用 `percent * 100`
+- `success` 事件固定为 `1.0`
+- `failed` 事件为失败时当前进度
 
 `code`：
 
