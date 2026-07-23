@@ -26668,174 +26668,6 @@
         "moduleName": "GMacroProtocolSDK"
       },
       {
-        "kind": "TypeDecl",
-        "name": "MFIOTAEvent",
-        "printedName": "MFIOTAEvent",
-        "children": [
-          {
-            "kind": "Var",
-            "name": "progress",
-            "printedName": "progress",
-            "children": [
-              {
-                "kind": "TypeFunc",
-                "name": "Function",
-                "printedName": "(GMacroProtocolSDK.MFIOTAEvent.Type) -> (CoreGraphics.CGFloat) -> GMacroProtocolSDK.MFIOTAEvent",
-                "children": [
-                  {
-                    "kind": "TypeFunc",
-                    "name": "Function",
-                    "printedName": "(CoreGraphics.CGFloat) -> GMacroProtocolSDK.MFIOTAEvent",
-                    "children": [
-                      {
-                        "kind": "TypeNominal",
-                        "name": "MFIOTAEvent",
-                        "printedName": "GMacroProtocolSDK.MFIOTAEvent",
-                        "usr": "s:17GMacroProtocolSDK11MFIOTAEventO"
-                      },
-                      {
-                        "kind": "TypeNominal",
-                        "name": "CGFloat",
-                        "printedName": "CoreGraphics.CGFloat",
-                        "usr": "s:14CoreFoundation7CGFloatV"
-                      }
-                    ]
-                  },
-                  {
-                    "kind": "TypeNominal",
-                    "name": "Metatype",
-                    "printedName": "GMacroProtocolSDK.MFIOTAEvent.Type",
-                    "children": [
-                      {
-                        "kind": "TypeNominal",
-                        "name": "MFIOTAEvent",
-                        "printedName": "GMacroProtocolSDK.MFIOTAEvent",
-                        "usr": "s:17GMacroProtocolSDK11MFIOTAEventO"
-                      }
-                    ]
-                  }
-                ]
-              }
-            ],
-            "declKind": "EnumElement",
-            "usr": "s:17GMacroProtocolSDK11MFIOTAEventO8progressyAC14CoreFoundation7CGFloatVcACmF",
-            "mangledName": "$s17GMacroProtocolSDK11MFIOTAEventO8progressyAC12CoreGraphics7CGFloatVcACmF",
-            "moduleName": "GMacroProtocolSDK"
-          },
-          {
-            "kind": "Var",
-            "name": "success",
-            "printedName": "success",
-            "children": [
-              {
-                "kind": "TypeFunc",
-                "name": "Function",
-                "printedName": "(GMacroProtocolSDK.MFIOTAEvent.Type) -> GMacroProtocolSDK.MFIOTAEvent",
-                "children": [
-                  {
-                    "kind": "TypeNominal",
-                    "name": "MFIOTAEvent",
-                    "printedName": "GMacroProtocolSDK.MFIOTAEvent",
-                    "usr": "s:17GMacroProtocolSDK11MFIOTAEventO"
-                  },
-                  {
-                    "kind": "TypeNominal",
-                    "name": "Metatype",
-                    "printedName": "GMacroProtocolSDK.MFIOTAEvent.Type",
-                    "children": [
-                      {
-                        "kind": "TypeNominal",
-                        "name": "MFIOTAEvent",
-                        "printedName": "GMacroProtocolSDK.MFIOTAEvent",
-                        "usr": "s:17GMacroProtocolSDK11MFIOTAEventO"
-                      }
-                    ]
-                  }
-                ]
-              }
-            ],
-            "declKind": "EnumElement",
-            "usr": "s:17GMacroProtocolSDK11MFIOTAEventO7successyA2CmF",
-            "mangledName": "$s17GMacroProtocolSDK11MFIOTAEventO7successyA2CmF",
-            "moduleName": "GMacroProtocolSDK"
-          },
-          {
-            "kind": "Var",
-            "name": "failure",
-            "printedName": "failure",
-            "children": [
-              {
-                "kind": "TypeFunc",
-                "name": "Function",
-                "printedName": "(GMacroProtocolSDK.MFIOTAEvent.Type) -> (Swift.String) -> GMacroProtocolSDK.MFIOTAEvent",
-                "children": [
-                  {
-                    "kind": "TypeFunc",
-                    "name": "Function",
-                    "printedName": "(Swift.String) -> GMacroProtocolSDK.MFIOTAEvent",
-                    "children": [
-                      {
-                        "kind": "TypeNominal",
-                        "name": "MFIOTAEvent",
-                        "printedName": "GMacroProtocolSDK.MFIOTAEvent",
-                        "usr": "s:17GMacroProtocolSDK11MFIOTAEventO"
-                      },
-                      {
-                        "kind": "TypeNominal",
-                        "name": "String",
-                        "printedName": "Swift.String",
-                        "usr": "s:SS"
-                      }
-                    ]
-                  },
-                  {
-                    "kind": "TypeNominal",
-                    "name": "Metatype",
-                    "printedName": "GMacroProtocolSDK.MFIOTAEvent.Type",
-                    "children": [
-                      {
-                        "kind": "TypeNominal",
-                        "name": "MFIOTAEvent",
-                        "printedName": "GMacroProtocolSDK.MFIOTAEvent",
-                        "usr": "s:17GMacroProtocolSDK11MFIOTAEventO"
-                      }
-                    ]
-                  }
-                ]
-              }
-            ],
-            "declKind": "EnumElement",
-            "usr": "s:17GMacroProtocolSDK11MFIOTAEventO7failureyACSScACmF",
-            "mangledName": "$s17GMacroProtocolSDK11MFIOTAEventO7failureyACSScACmF",
-            "moduleName": "GMacroProtocolSDK"
-          }
-        ],
-        "declKind": "Enum",
-        "usr": "s:17GMacroProtocolSDK11MFIOTAEventO",
-        "mangledName": "$s17GMacroProtocolSDK11MFIOTAEventO",
-        "moduleName": "GMacroProtocolSDK",
-        "declAttributes": [
-          "AccessControl",
-          "RawDocComment"
-        ],
-        "conformances": [
-          {
-            "kind": "Conformance",
-            "name": "Copyable",
-            "printedName": "Copyable",
-            "usr": "s:s8CopyableP",
-            "mangledName": "$ss8CopyableP"
-          },
-          {
-            "kind": "Conformance",
-            "name": "Escapable",
-            "printedName": "Escapable",
-            "usr": "s:s9EscapableP",
-            "mangledName": "$ss9EscapableP"
-          }
-        ]
-      },
-      {
         "kind": "Import",
         "name": "Foundation",
         "printedName": "Foundation",
@@ -27036,6 +26868,75 @@
             "declKind": "EnumElement",
             "usr": "s:17GMacroProtocolSDK0aB5EventO7failureyACSScACmF",
             "mangledName": "$s17GMacroProtocolSDK0aB5EventO7failureyACSScACmF",
+            "moduleName": "GMacroProtocolSDK"
+          },
+          {
+            "kind": "Var",
+            "name": "ota",
+            "printedName": "ota",
+            "children": [
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "(GMacroProtocolSDK.GMacroProtocolEvent.Type) -> (GMacroProtocolSDK.GMacroOTAEventType, Swift.Int, CoreGraphics.CGFloat) -> GMacroProtocolSDK.GMacroProtocolEvent",
+                "children": [
+                  {
+                    "kind": "TypeFunc",
+                    "name": "Function",
+                    "printedName": "(GMacroProtocolSDK.GMacroOTAEventType, Swift.Int, CoreGraphics.CGFloat) -> GMacroProtocolSDK.GMacroProtocolEvent",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "GMacroProtocolEvent",
+                        "printedName": "GMacroProtocolSDK.GMacroProtocolEvent",
+                        "usr": "s:17GMacroProtocolSDK0aB5EventO"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Tuple",
+                        "printedName": "(type: GMacroProtocolSDK.GMacroOTAEventType, code: Swift.Int, progress: CoreGraphics.CGFloat)",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "GMacroOTAEventType",
+                            "printedName": "GMacroProtocolSDK.GMacroOTAEventType",
+                            "usr": "s:17GMacroProtocolSDK0A12OTAEventTypeO"
+                          },
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Int",
+                            "printedName": "Swift.Int",
+                            "usr": "s:Si"
+                          },
+                          {
+                            "kind": "TypeNominal",
+                            "name": "CGFloat",
+                            "printedName": "CoreGraphics.CGFloat",
+                            "usr": "s:14CoreFoundation7CGFloatV"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Metatype",
+                    "printedName": "GMacroProtocolSDK.GMacroProtocolEvent.Type",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "GMacroProtocolEvent",
+                        "printedName": "GMacroProtocolSDK.GMacroProtocolEvent",
+                        "usr": "s:17GMacroProtocolSDK0aB5EventO"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "declKind": "EnumElement",
+            "usr": "s:17GMacroProtocolSDK0aB5EventO3otayAcA0A12OTAEventTypeO_Si14CoreFoundation7CGFloatVtcACmF",
+            "mangledName": "$s17GMacroProtocolSDK0aB5EventO3otayAcA0A12OTAEventTypeO_Si12CoreGraphics7CGFloatVtcACmF",
             "moduleName": "GMacroProtocolSDK"
           },
           {
@@ -37482,161 +37383,6 @@
             "funcSelfKind": "NonMutating"
           },
           {
-            "kind": "Var",
-            "name": "mfiOTAEvent",
-            "printedName": "mfiOTAEvent",
-            "children": [
-              {
-                "kind": "TypeNominal",
-                "name": "Optional",
-                "printedName": "((GMacroProtocolSDK.MFIOTAEvent) -> ())?",
-                "children": [
-                  {
-                    "kind": "TypeFunc",
-                    "name": "Function",
-                    "printedName": "(GMacroProtocolSDK.MFIOTAEvent) -> ()",
-                    "children": [
-                      {
-                        "kind": "TypeNominal",
-                        "name": "Void",
-                        "printedName": "()"
-                      },
-                      {
-                        "kind": "TypeNominal",
-                        "name": "MFIOTAEvent",
-                        "printedName": "GMacroProtocolSDK.MFIOTAEvent",
-                        "usr": "s:17GMacroProtocolSDK11MFIOTAEventO"
-                      }
-                    ]
-                  }
-                ],
-                "usr": "s:Sq"
-              }
-            ],
-            "declKind": "Var",
-            "usr": "s:17GMacroProtocolSDK0aB7SessionC11mfiOTAEventyAA11MFIOTAEventOcSgvp",
-            "mangledName": "$s17GMacroProtocolSDK0aB7SessionC11mfiOTAEventyAA11MFIOTAEventOcSgvp",
-            "moduleName": "GMacroProtocolSDK",
-            "declAttributes": [
-              "Final",
-              "AccessControl"
-            ],
-            "isFromExtension": true,
-            "accessors": [
-              {
-                "kind": "Accessor",
-                "name": "Get",
-                "printedName": "Get()",
-                "children": [
-                  {
-                    "kind": "TypeNominal",
-                    "name": "Optional",
-                    "printedName": "((GMacroProtocolSDK.MFIOTAEvent) -> ())?",
-                    "children": [
-                      {
-                        "kind": "TypeFunc",
-                        "name": "Function",
-                        "printedName": "(GMacroProtocolSDK.MFIOTAEvent) -> ()",
-                        "children": [
-                          {
-                            "kind": "TypeNominal",
-                            "name": "Void",
-                            "printedName": "()"
-                          },
-                          {
-                            "kind": "TypeNominal",
-                            "name": "MFIOTAEvent",
-                            "printedName": "GMacroProtocolSDK.MFIOTAEvent",
-                            "usr": "s:17GMacroProtocolSDK11MFIOTAEventO"
-                          }
-                        ]
-                      }
-                    ],
-                    "usr": "s:Sq"
-                  }
-                ],
-                "declKind": "Accessor",
-                "usr": "s:17GMacroProtocolSDK0aB7SessionC11mfiOTAEventyAA11MFIOTAEventOcSgvg",
-                "mangledName": "$s17GMacroProtocolSDK0aB7SessionC11mfiOTAEventyAA11MFIOTAEventOcSgvg",
-                "moduleName": "GMacroProtocolSDK",
-                "declAttributes": [
-                  "Final"
-                ],
-                "isFromExtension": true,
-                "accessorKind": "get"
-              },
-              {
-                "kind": "Accessor",
-                "name": "Set",
-                "printedName": "Set()",
-                "children": [
-                  {
-                    "kind": "TypeNominal",
-                    "name": "Void",
-                    "printedName": "()"
-                  },
-                  {
-                    "kind": "TypeNominal",
-                    "name": "Optional",
-                    "printedName": "((GMacroProtocolSDK.MFIOTAEvent) -> ())?",
-                    "children": [
-                      {
-                        "kind": "TypeFunc",
-                        "name": "Function",
-                        "printedName": "(GMacroProtocolSDK.MFIOTAEvent) -> ()",
-                        "children": [
-                          {
-                            "kind": "TypeNominal",
-                            "name": "Void",
-                            "printedName": "()"
-                          },
-                          {
-                            "kind": "TypeNominal",
-                            "name": "MFIOTAEvent",
-                            "printedName": "GMacroProtocolSDK.MFIOTAEvent",
-                            "usr": "s:17GMacroProtocolSDK11MFIOTAEventO"
-                          }
-                        ]
-                      }
-                    ],
-                    "usr": "s:Sq"
-                  }
-                ],
-                "declKind": "Accessor",
-                "usr": "s:17GMacroProtocolSDK0aB7SessionC11mfiOTAEventyAA11MFIOTAEventOcSgvs",
-                "mangledName": "$s17GMacroProtocolSDK0aB7SessionC11mfiOTAEventyAA11MFIOTAEventOcSgvs",
-                "moduleName": "GMacroProtocolSDK",
-                "declAttributes": [
-                  "Final"
-                ],
-                "isFromExtension": true,
-                "accessorKind": "set"
-              },
-              {
-                "kind": "Accessor",
-                "name": "Modify",
-                "printedName": "Modify()",
-                "children": [
-                  {
-                    "kind": "TypeNominal",
-                    "name": "Void",
-                    "printedName": "()"
-                  }
-                ],
-                "declKind": "Accessor",
-                "usr": "s:17GMacroProtocolSDK0aB7SessionC11mfiOTAEventyAA11MFIOTAEventOcSgvM",
-                "mangledName": "$s17GMacroProtocolSDK0aB7SessionC11mfiOTAEventyAA11MFIOTAEventOcSgvM",
-                "moduleName": "GMacroProtocolSDK",
-                "implicit": true,
-                "declAttributes": [
-                  "Final"
-                ],
-                "isFromExtension": true,
-                "accessorKind": "_modify"
-              }
-            ]
-          },
-          {
             "kind": "Function",
             "name": "startMFIOTA",
             "printedName": "startMFIOTA(data:dev:)",
@@ -38372,6 +38118,270 @@
             "printedName": "GMacroDataDelegate",
             "usr": "s:17GMacroProtocolSDK0A12DataDelegateP",
             "mangledName": "$s17GMacroProtocolSDK0A12DataDelegateP"
+          }
+        ]
+      },
+      {
+        "kind": "TypeDecl",
+        "name": "GMacroOTAEventType",
+        "printedName": "GMacroOTAEventType",
+        "children": [
+          {
+            "kind": "Var",
+            "name": "progress",
+            "printedName": "progress",
+            "children": [
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "(GMacroProtocolSDK.GMacroOTAEventType.Type) -> GMacroProtocolSDK.GMacroOTAEventType",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "GMacroOTAEventType",
+                    "printedName": "GMacroProtocolSDK.GMacroOTAEventType",
+                    "usr": "s:17GMacroProtocolSDK0A12OTAEventTypeO"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Metatype",
+                    "printedName": "GMacroProtocolSDK.GMacroOTAEventType.Type",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "GMacroOTAEventType",
+                        "printedName": "GMacroProtocolSDK.GMacroOTAEventType",
+                        "usr": "s:17GMacroProtocolSDK0A12OTAEventTypeO"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "declKind": "EnumElement",
+            "usr": "s:17GMacroProtocolSDK0A12OTAEventTypeO8progressyA2CmF",
+            "mangledName": "$s17GMacroProtocolSDK0A12OTAEventTypeO8progressyA2CmF",
+            "moduleName": "GMacroProtocolSDK"
+          },
+          {
+            "kind": "Var",
+            "name": "success",
+            "printedName": "success",
+            "children": [
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "(GMacroProtocolSDK.GMacroOTAEventType.Type) -> GMacroProtocolSDK.GMacroOTAEventType",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "GMacroOTAEventType",
+                    "printedName": "GMacroProtocolSDK.GMacroOTAEventType",
+                    "usr": "s:17GMacroProtocolSDK0A12OTAEventTypeO"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Metatype",
+                    "printedName": "GMacroProtocolSDK.GMacroOTAEventType.Type",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "GMacroOTAEventType",
+                        "printedName": "GMacroProtocolSDK.GMacroOTAEventType",
+                        "usr": "s:17GMacroProtocolSDK0A12OTAEventTypeO"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "declKind": "EnumElement",
+            "usr": "s:17GMacroProtocolSDK0A12OTAEventTypeO7successyA2CmF",
+            "mangledName": "$s17GMacroProtocolSDK0A12OTAEventTypeO7successyA2CmF",
+            "moduleName": "GMacroProtocolSDK"
+          },
+          {
+            "kind": "Var",
+            "name": "failed",
+            "printedName": "failed",
+            "children": [
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "(GMacroProtocolSDK.GMacroOTAEventType.Type) -> GMacroProtocolSDK.GMacroOTAEventType",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "GMacroOTAEventType",
+                    "printedName": "GMacroProtocolSDK.GMacroOTAEventType",
+                    "usr": "s:17GMacroProtocolSDK0A12OTAEventTypeO"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Metatype",
+                    "printedName": "GMacroProtocolSDK.GMacroOTAEventType.Type",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "GMacroOTAEventType",
+                        "printedName": "GMacroProtocolSDK.GMacroOTAEventType",
+                        "usr": "s:17GMacroProtocolSDK0A12OTAEventTypeO"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "declKind": "EnumElement",
+            "usr": "s:17GMacroProtocolSDK0A12OTAEventTypeO6failedyA2CmF",
+            "mangledName": "$s17GMacroProtocolSDK0A12OTAEventTypeO6failedyA2CmF",
+            "moduleName": "GMacroProtocolSDK"
+          },
+          {
+            "kind": "Constructor",
+            "name": "init",
+            "printedName": "init(rawValue:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "GMacroProtocolSDK.GMacroOTAEventType?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "GMacroOTAEventType",
+                    "printedName": "GMacroProtocolSDK.GMacroOTAEventType",
+                    "usr": "s:17GMacroProtocolSDK0A12OTAEventTypeO"
+                  }
+                ],
+                "usr": "s:Sq"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "String",
+                "printedName": "Swift.String",
+                "usr": "s:SS"
+              }
+            ],
+            "declKind": "Constructor",
+            "usr": "s:17GMacroProtocolSDK0A12OTAEventTypeO8rawValueACSgSS_tcfc",
+            "mangledName": "$s17GMacroProtocolSDK0A12OTAEventTypeO8rawValueACSgSS_tcfc",
+            "moduleName": "GMacroProtocolSDK",
+            "implicit": true,
+            "init_kind": "Designated"
+          },
+          {
+            "kind": "Var",
+            "name": "rawValue",
+            "printedName": "rawValue",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "String",
+                "printedName": "Swift.String",
+                "usr": "s:SS"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "s:17GMacroProtocolSDK0A12OTAEventTypeO8rawValueSSvp",
+            "mangledName": "$s17GMacroProtocolSDK0A12OTAEventTypeO8rawValueSSvp",
+            "moduleName": "GMacroProtocolSDK",
+            "implicit": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:17GMacroProtocolSDK0A12OTAEventTypeO8rawValueSSvg",
+                "mangledName": "$s17GMacroProtocolSDK0A12OTAEventTypeO8rawValueSSvg",
+                "moduleName": "GMacroProtocolSDK",
+                "implicit": true,
+                "accessorKind": "get"
+              }
+            ]
+          }
+        ],
+        "declKind": "Enum",
+        "usr": "s:17GMacroProtocolSDK0A12OTAEventTypeO",
+        "mangledName": "$s17GMacroProtocolSDK0A12OTAEventTypeO",
+        "moduleName": "GMacroProtocolSDK",
+        "declAttributes": [
+          "AccessControl"
+        ],
+        "enumRawTypeName": "String",
+        "conformances": [
+          {
+            "kind": "Conformance",
+            "name": "Copyable",
+            "printedName": "Copyable",
+            "usr": "s:s8CopyableP",
+            "mangledName": "$ss8CopyableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Escapable",
+            "printedName": "Escapable",
+            "usr": "s:s9EscapableP",
+            "mangledName": "$ss9EscapableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Equatable",
+            "printedName": "Equatable",
+            "usr": "s:SQ",
+            "mangledName": "$sSQ"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Hashable",
+            "printedName": "Hashable",
+            "usr": "s:SH",
+            "mangledName": "$sSH"
+          },
+          {
+            "kind": "Conformance",
+            "name": "RawRepresentable",
+            "printedName": "RawRepresentable",
+            "children": [
+              {
+                "kind": "TypeWitness",
+                "name": "RawValue",
+                "printedName": "RawValue",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  }
+                ]
+              }
+            ],
+            "usr": "s:SY",
+            "mangledName": "$sSY"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Sendable",
+            "printedName": "Sendable",
+            "usr": "s:s8SendableP",
+            "mangledName": "$ss8SendableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "SendableMetatype",
+            "printedName": "SendableMetatype",
+            "usr": "s:s16SendableMetatypeP",
+            "mangledName": "$ss16SendableMetatypeP"
           }
         ]
       },
@@ -42710,84 +42720,77 @@
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Protocol\/GMacroProtocolSession+MFIOTA.swift",
       "kind": "IntegerLiteral",
-      "offset": 412,
+      "offset": 314,
       "length": 4,
       "value": "1024"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Protocol\/GMacroProtocolSession+MFIOTA.swift",
       "kind": "IntegerLiteral",
-      "offset": 450,
+      "offset": 352,
       "length": 2,
       "value": "32"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Protocol\/GMacroProtocolSession+MFIOTA.swift",
       "kind": "IntegerLiteral",
-      "offset": 483,
+      "offset": 385,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Protocol\/GMacroProtocolSession+MFIOTA.swift",
       "kind": "IntegerLiteral",
-      "offset": 511,
+      "offset": 413,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Protocol\/GMacroProtocolSession+MFIOTA.swift",
       "kind": "IntegerLiteral",
-      "offset": 542,
+      "offset": 444,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Protocol\/GMacroProtocolSession+MFIOTA.swift",
       "kind": "IntegerLiteral",
-      "offset": 575,
+      "offset": 477,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Protocol\/GMacroProtocolSession+MFIOTA.swift",
       "kind": "BooleanLiteral",
-      "offset": 603,
+      "offset": 505,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Protocol\/GMacroProtocolSession+MFIOTA.swift",
       "kind": "BooleanLiteral",
-      "offset": 642,
+      "offset": 544,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Protocol\/GMacroProtocolSession+MFIOTA.swift",
       "kind": "IntegerLiteral",
-      "offset": 669,
+      "offset": 571,
       "length": 4,
       "value": "0x01"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Protocol\/GMacroProtocolSession+MFIOTA.swift",
       "kind": "IntegerLiteral",
-      "offset": 990,
+      "offset": 892,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Protocol\/GMacroProtocolSession+MFIOTA.swift",
       "kind": "IntegerLiteral",
-      "offset": 1028,
-      "length": 1,
-      "value": "0"
-    },
-    {
-      "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Protocol\/GMacroProtocolSession+MFIOTA.swift",
-      "kind": "IntegerLiteral",
-      "offset": 1626,
+      "offset": 1224,
       "length": 4,
       "value": "0x01"
     },
@@ -42990,49 +42993,91 @@
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Protocol\/GMacroProtocolSession.swift",
       "kind": "IntegerLiteral",
-      "offset": 1888,
+      "offset": 1957,
       "length": 2,
       "value": "20"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Protocol\/GMacroProtocolSession.swift",
       "kind": "IntegerLiteral",
-      "offset": 6279,
+      "offset": 6348,
       "length": 6,
       "value": "0x5000"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Protocol\/GMacroProtocolSession.swift",
       "kind": "IntegerLiteral",
-      "offset": 6306,
+      "offset": 6375,
       "length": 6,
       "value": "0x5100"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Protocol\/GMacroProtocolSession.swift",
       "kind": "IntegerLiteral",
-      "offset": 6336,
+      "offset": 6405,
       "length": 6,
       "value": "0x5200"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Protocol\/GMacroProtocolSession.swift",
       "kind": "IntegerLiteral",
-      "offset": 6363,
+      "offset": 6432,
       "length": 6,
       "value": "0x5300"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Protocol\/GMacroProtocolSession.swift",
       "kind": "IntegerLiteral",
-      "offset": 6453,
+      "offset": 6599,
+      "length": 3,
+      "value": "100"
+    },
+    {
+      "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Protocol\/GMacroProtocolSession.swift",
+      "kind": "IntegerLiteral",
+      "offset": 6628,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Protocol\/GMacroProtocolSession.swift",
       "kind": "IntegerLiteral",
-      "offset": 6642,
+      "offset": 6659,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Protocol\/GMacroProtocolSession.swift",
+      "kind": "IntegerLiteral",
+      "offset": 6693,
+      "length": 1,
+      "value": "2"
+    },
+    {
+      "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Protocol\/GMacroProtocolSession.swift",
+      "kind": "IntegerLiteral",
+      "offset": 6726,
+      "length": 1,
+      "value": "3"
+    },
+    {
+      "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Protocol\/GMacroProtocolSession.swift",
+      "kind": "IntegerLiteral",
+      "offset": 6811,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Protocol\/GMacroProtocolSession.swift",
+      "kind": "IntegerLiteral",
+      "offset": 6841,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Protocol\/GMacroProtocolSession.swift",
+      "kind": "IntegerLiteral",
+      "offset": 7030,
       "length": 1,
       "value": "0"
     },

@@ -246,7 +246,9 @@ class _GmacroSessionPageState extends State<GmacroSessionPage> {
         case ProtocolBusy(reason: final r):
           _handleProtocolOtaEvent(event);
           _addLog('🟡 Protocol: Busy — $r');
-          if (mounted && r != 'success') setState(() => _isBusy = true);
+          if (mounted && r != 'success' && r != 'failed') {
+            setState(() => _isBusy = true);
+          }
         case ProtocolError(failure: final f):
           _addLog('🔴 Protocol: Error ${f.code} - ${f.message}', isError: true);
           if (mounted) {
@@ -275,6 +277,12 @@ class _GmacroSessionPageState extends State<GmacroSessionPage> {
         });
       case 'success':
         _markOtaSuccess();
+      case 'failed':
+        setState(() {
+          _isBusy = false;
+          _isOtaRunning = false;
+          _isOtaCompleted = false;
+        });
     }
   }
 
@@ -310,6 +318,7 @@ class _GmacroSessionPageState extends State<GmacroSessionPage> {
           _markOtaSuccess();
         case NativeOtaUpgradeEventType.failed:
           setState(() {
+            _isBusy = false;
             _isOtaRunning = false;
             _isOtaCompleted = false;
           });

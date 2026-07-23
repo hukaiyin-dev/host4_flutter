@@ -312,11 +312,14 @@ class NativeOtaUpgradeEvent {
   });
 
   factory NativeOtaUpgradeEvent.fromMap(Map<String, Object?> map) {
+    final percent = map.containsKey('percent')
+        ? _readDouble(map['percent'])
+        : _readDouble(map['progress']);
     return NativeOtaUpgradeEvent(
       type: _nativeOtaUpgradeEventTypeFromName(map['type'] as String?),
       progress: _readInt(map['progress']),
       total: _readInt(map['total']),
-      percent: _readDouble(map['percent']),
+      percent: percent,
       code: map['code'] == null ? null : _readInt(map['code']),
     );
   }
