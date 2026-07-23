@@ -106,7 +106,7 @@ packages:
     source: hosted
     version: "2.2.0"
   file_picker:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: file_picker
       sha256: ab13ae8ef5580a411c458d6207b6774a6c237d77ac37011b13994879f68a8810
@@ -153,7 +153,7 @@ packages:
     source: hosted
     version: "2.0.2"
   host4_flutter_ble:
-    dependency: "direct main"
+    dependency: transitive
     description:
       path: "../../packages/host4_flutter_ble"
       relative: true
@@ -167,49 +167,56 @@ packages:
     source: path
     version: "0.0.1"
   host4_flutter_device_native:
-    dependency: "direct main"
+    dependency: transitive
     description:
       path: "../../packages/host4_flutter_device_native"
       relative: true
     source: path
     version: "0.0.1"
   host4_flutter_gmacro:
-    dependency: "direct main"
+    dependency: transitive
     description:
       path: "../../packages/host4_flutter_gmacro"
       relative: true
     source: path
     version: "0.0.1"
-  host4_flutter_log:
+  host4_flutter_gmacro_demo_ui:
     dependency: "direct main"
+    description:
+      path: "../../packages/host4_flutter_gmacro_demo_ui"
+      relative: true
+    source: path
+    version: "0.0.1"
+  host4_flutter_log:
+    dependency: transitive
     description:
       path: "../../packages/host4_flutter_log"
       relative: true
     source: path
     version: "0.0.1"
   host4_flutter_mfi:
-    dependency: "direct main"
+    dependency: transitive
     description:
       path: "../../packages/host4_flutter_mfi"
       relative: true
     source: path
     version: "0.0.1"
   host4_flutter_protocol:
-    dependency: "direct main"
+    dependency: transitive
     description:
       path: "../../packages/host4_flutter_protocol"
       relative: true
     source: path
     version: "0.0.1"
   host4_flutter_transport:
-    dependency: "direct main"
+    dependency: "direct dev"
     description:
       path: "../../packages/host4_flutter_transport"
       relative: true
     source: path
     version: "0.0.1"
   host4_flutter_usb:
-    dependency: "direct main"
+    dependency: transitive
     description:
       path: "../../packages/host4_flutter_usb"
       relative: true

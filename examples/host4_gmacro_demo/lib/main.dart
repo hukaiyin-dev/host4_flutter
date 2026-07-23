@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import 'pages/gmacro/gmacro_entry_page.dart';
+import 'package:host4_flutter_gmacro_demo_ui/host4_flutter_gmacro_demo_ui.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();

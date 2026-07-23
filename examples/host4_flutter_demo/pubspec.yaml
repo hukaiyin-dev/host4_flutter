@@ -68,6 +68,8 @@ dependencies:
     path: ../../packages/host4_flutter_device_native
   host4_flutter_gmacro:
     path: ../../packages/host4_flutter_gmacro
+  host4_flutter_gmacro_demo_ui:
+    path: ../../packages/host4_flutter_gmacro_demo_ui
   host4_flutter_aivoice:
     path: ../../packages/host4_flutter_aivoice
   file_picker: ^8.1.7
@@ -109,7 +111,6 @@ flutter:
     - assets/themes/grassland/tokens.json
     - assets/themes/grassland/asset.json
     - assets/themes/grassland/images/
-    - assets/ota/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

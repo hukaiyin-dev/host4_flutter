@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:host4_flutter_demo/pages/gmacro/gmacro_session_page.dart';
+import 'package:host4_flutter_gmacro_demo_ui/host4_flutter_gmacro_demo_ui.dart';
 import 'package:host4_flutter_transport/host4_flutter_transport.dart';
 
 void main() {
@@ -10,7 +10,7 @@ void main() {
 
     expect(
       firmware.assetPath,
-      'assets/ota/OTA_GDF-G560637_46D4_V1.0_260510a.bin',
+      'packages/host4_flutter_gmacro_demo_ui/assets/ota/OTA_GDF-G560637_46D4_V1.0_260510a.bin',
     );
     expect(firmware.fileName, 'OTA_GDF-G560637_46D4_V1.0_260510a.bin');
   });
@@ -22,7 +22,7 @@ void main() {
 
     expect(
       firmware.assetPath,
-      'assets/ota/OTA_GDF-G910202_8520_V1.0_260715a.bin',
+      'packages/host4_flutter_gmacro_demo_ui/assets/ota/OTA_GDF-G910202_8520_V1.0_260715a.bin',
     );
     expect(firmware.fileName, 'OTA_GDF-G910202_8520_V1.0_260715a.bin');
   });

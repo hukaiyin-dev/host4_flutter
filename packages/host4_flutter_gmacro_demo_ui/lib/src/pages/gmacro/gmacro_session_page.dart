@@ -25,12 +25,14 @@ class GmacroBundledOtaFirmware {
 }
 
 const _mfiBundledOtaFirmware = GmacroBundledOtaFirmware(
-  assetPath: 'assets/ota/OTA_GDF-G910202_8520_V1.0_260715a.bin',
+  assetPath:
+      'packages/host4_flutter_gmacro_demo_ui/assets/ota/OTA_GDF-G910202_8520_V1.0_260715a.bin',
   fileName: 'OTA_GDF-G910202_8520_V1.0_260715a.bin',
 );
 
 const _bleBundledOtaFirmware = GmacroBundledOtaFirmware(
-  assetPath: 'assets/ota/OTA_GDF-G560637_46D4_V1.0_260510a.bin',
+  assetPath:
+      'packages/host4_flutter_gmacro_demo_ui/assets/ota/OTA_GDF-G560637_46D4_V1.0_260510a.bin',
   fileName: 'OTA_GDF-G560637_46D4_V1.0_260510a.bin',
 );
 
@@ -618,12 +620,31 @@ class _StatusBar extends StatelessWidget {
             decoration: BoxDecoration(color: dotColor, shape: BoxShape.circle),
           ),
           SizedBox(width: theme.spacing.sm),
-          Host4Text(label),
+          Expanded(
+            flex: 3,
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: theme.colors.textPrimary,
+                fontWeight: isBusy ? FontWeight.w600 : null,
+              ),
+            ),
+          ),
           if (session != null) ...[
-            const Spacer(),
-            Host4Text(
-              'session: ${session!.id.substring(0, 8)}…',
-              colorRole: Host4TextColorRole.secondary,
+            SizedBox(width: theme.spacing.sm),
+            Flexible(
+              flex: 2,
+              child: Text(
+                'session: ${session!.id.substring(0, 8)}…',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.end,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: theme.colors.textSecondary,
+                ),
+              ),
             ),
           ],
         ],

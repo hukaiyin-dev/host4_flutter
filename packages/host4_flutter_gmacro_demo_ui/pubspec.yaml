@@ -1,0 +1,38 @@
+name: host4_flutter_gmacro_demo_ui
+description: "Shared GMacro transport and API demo UI for host4 examples."
+version: 0.0.1
+publish_to: none
+
+environment:
+  sdk: ">=3.10.0 <4.0.0"
+  flutter: ">=1.17.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  host4_flutter_ble:
+    path: ../host4_flutter_ble
+  host4_flutter_device_native:
+    path: ../host4_flutter_device_native
+  host4_flutter_gmacro:
+    path: ../host4_flutter_gmacro
+  host4_flutter_log:
+    path: ../host4_flutter_log
+  host4_flutter_mfi:
+    path: ../host4_flutter_mfi
+  host4_flutter_protocol:
+    path: ../host4_flutter_protocol
+  host4_flutter_transport:
+    path: ../host4_flutter_transport
+  host4_flutter_usb:
+    path: ../host4_flutter_usb
+  file_picker: ^8.1.7
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  assets:
+    - assets/ota/

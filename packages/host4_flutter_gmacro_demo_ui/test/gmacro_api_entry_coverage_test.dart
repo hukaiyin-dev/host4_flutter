@@ -5,10 +5,10 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('Gmacro API test page exposes every GmacroMethods entry', () {
     final methodsSource = File(
-      '../../packages/host4_flutter_gmacro/lib/src/Models/gmacro_methods.dart',
+      '../host4_flutter_gmacro/lib/src/Models/gmacro_methods.dart',
     ).readAsStringSync();
     final pageSource = File(
-      '../../packages/host4_flutter_gmacro_demo_ui/lib/src/pages/gmacro/gmacro_api_test_page.dart',
+      'lib/src/pages/gmacro/gmacro_api_test_page.dart',
     ).readAsStringSync();
 
     final methods = RegExp(

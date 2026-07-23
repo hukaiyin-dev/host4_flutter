@@ -30,27 +30,14 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  host4_flutter_transport:
-    path: ../../packages/host4_flutter_transport
-  host4_flutter_protocol:
-    path: ../../packages/host4_flutter_protocol
-  host4_flutter_ble:
-    path: ../../packages/host4_flutter_ble
-  host4_flutter_mfi:
-    path: ../../packages/host4_flutter_mfi
-  host4_flutter_usb:
-    path: ../../packages/host4_flutter_usb
-  host4_flutter_device_native:
-    path: ../../packages/host4_flutter_device_native
-  host4_flutter_gmacro:
-    path: ../../packages/host4_flutter_gmacro
-  host4_flutter_log:
-    path: ../../packages/host4_flutter_log
-  file_picker: ^8.1.7
+  host4_flutter_gmacro_demo_ui:
+    path: ../../packages/host4_flutter_gmacro_demo_ui
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  host4_flutter_transport:
+    path: ../../packages/host4_flutter_transport
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -69,9 +56,6 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
-
-  assets:
-    - assets/ota/
 
   # To add assets to your application, add an assets section, like this:
   # assets:

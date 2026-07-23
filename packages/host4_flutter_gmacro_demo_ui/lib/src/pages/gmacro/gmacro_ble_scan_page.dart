@@ -9,6 +9,7 @@ import 'package:host4_flutter_transport/host4_flutter_transport.dart';
 import '../../widgets/demo_ui.dart';
 
 import '../../widgets/sub_page_scaffold.dart';
+import 'ble_system_connect_warm_up.dart';
 import 'gmacro_session_page.dart';
 
 class GmacroBleScanPage extends StatefulWidget {
@@ -117,6 +118,11 @@ class _GmacroBleScanPageState extends State<GmacroBleScanPage> {
     setState(() => _isConnecting = true);
 
     try {
+      await warmUpBleForSystemConnect(
+        isIOS: !kIsWeb && Platform.isIOS,
+        discovery: _discovery,
+      );
+
       Object? lastError;
       TransportSession? transport;
 
