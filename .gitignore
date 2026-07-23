@@ -26,6 +26,9 @@ pubspec_overrides.yaml
 *.iml
 
 scripts/
+!examples/scripts/
+!examples/scripts/**
+examples/host4_gmacro_demo_*.zip
 Server/
 
 ## Various settings
