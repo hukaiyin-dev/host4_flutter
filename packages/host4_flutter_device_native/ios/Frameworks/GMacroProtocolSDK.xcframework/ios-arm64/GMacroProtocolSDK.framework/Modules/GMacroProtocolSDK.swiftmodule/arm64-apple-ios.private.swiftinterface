@@ -1153,24 +1153,14 @@ public struct KeyTurbo {
   public var speed: Swift.Int
   public init(key: GMacroProtocolSDK.GamepadKey, turbo: GMacroProtocolSDK.TurboMode, speed: Swift.Int = 10)
 }
-public enum MFIOTAEvent {
-  case progress(CoreFoundation.CGFloat)
-  case success
-  case failure(Swift.String)
-}
 extension GMacroProtocolSDK.GMacroProtocolSession {
-  #if compiler(>=5.3) && $NonescapableTypes
-  final public var mfiOTAEvent: ((GMacroProtocolSDK.MFIOTAEvent) -> Swift.Void)? {
-    get
-    set
-  }
-  #endif
   final public func startMFIOTA(data: Foundation.Data, dev: Swift.UInt8 = 0x01)
 }
 public enum GMacroProtocolEvent : @unchecked Swift.Sendable {
   case progress(CoreFoundation.CGFloat)
   case success
   case failure(Swift.String)
+  case ota(type: GMacroProtocolSDK.GMacroOTAEventType, code: Swift.Int, progress: CoreFoundation.CGFloat)
   case testKeys([GMacroProtocolSDK.GamepadKey], j1x: Swift.Int, j1y: Swift.Int, j2x: Swift.Int, j2y: Swift.Int, l2: Swift.Int, r2: Swift.Int)
   case configKeys([GMacroProtocolSDK.GamepadKey])
   case testKeyboardMouse(modifierKeys: [GMacroProtocolSDK.ModifierKey], keyboardKeys: [GMacroProtocolSDK.KeyboardKey], mouseCores: [GMacroProtocolSDK.MouseCoreButton], mouseWheels: [GMacroProtocolSDK.MouseWheelButton], mouseX: Swift.Int8, mouseY: Swift.Int8, mediaKeys: [GMacroProtocolSDK.MediaKey])
@@ -1204,6 +1194,18 @@ extension GMacroProtocolSDK.GMacroProtocolSession : GMacroProtocolSDK.GMacroData
   final public func finishCalibration(_ type: Swift.Int, subId: Swift.Int, result: Swift.Int, param1: [Swift.Int], param2: [Swift.Int])
   final public func devConnectState(_ state: Swift.Int)
   final public func receiveDevKeysState(_ keys: [GMacroProtocolSDK.GamepadKey], j1x: Swift.Int, j1x_o: Swift.Int, j1y: Swift.Int, j1y_o: Swift.Int, j2x: Swift.Int, j2x_o: Swift.Int, j2y: Swift.Int, j2y_o: Swift.Int, l2: Swift.Int, l2_o: Swift.Int, r2: Swift.Int, r2_o: Swift.Int)
+}
+public enum GMacroOTAEventType : Swift.String, Swift.Sendable {
+  case progress
+  case success
+  case failed
+  #if compiler(>=5.3) && $NonescapableTypes
+  public init?(rawValue: Swift.String)
+  #endif
+  public typealias RawValue = Swift.String
+  public var rawValue: Swift.String {
+    get
+  }
 }
 extension GMacroProtocolSDK.GMacroProtocolSession {
   final public func startOTA(data: Foundation.Data)
@@ -1277,3 +1279,6 @@ extension GMacroProtocolSDK.CycleMode : Swift.RawRepresentable {}
 extension GMacroProtocolSDK.TurboMode : Swift.Equatable {}
 extension GMacroProtocolSDK.TurboMode : Swift.Hashable {}
 extension GMacroProtocolSDK.TurboMode : Swift.RawRepresentable {}
+extension GMacroProtocolSDK.GMacroOTAEventType : Swift.Equatable {}
+extension GMacroProtocolSDK.GMacroOTAEventType : Swift.Hashable {}
+extension GMacroProtocolSDK.GMacroOTAEventType : Swift.RawRepresentable {}

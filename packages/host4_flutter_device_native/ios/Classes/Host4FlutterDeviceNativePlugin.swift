@@ -317,19 +317,25 @@ private final class GMacroProtocolRecord {
   let session: GMacroProtocolSession
   let eventChannel: FlutterEventChannel
   let eventHandler: QueuedEventStreamHandler
+  let otaEventChannel: FlutterEventChannel
+  let otaEventHandler: QueuedEventStreamHandler
 
   init(
     sessionId: String,
     transportSessionId: String,
     session: GMacroProtocolSession,
     eventChannel: FlutterEventChannel,
-    eventHandler: QueuedEventStreamHandler
+    eventHandler: QueuedEventStreamHandler,
+    otaEventChannel: FlutterEventChannel,
+    otaEventHandler: QueuedEventStreamHandler
   ) {
     self.sessionId = sessionId
     self.transportSessionId = transportSessionId
     self.session = session
     self.eventChannel = eventChannel
     self.eventHandler = eventHandler
+    self.otaEventChannel = otaEventChannel
+    self.otaEventHandler = otaEventHandler
   }
 }
 
@@ -696,6 +702,7 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
     GPDConstant.responseTimeout = 2
 
     let eventHandler = QueuedEventStreamHandler()
+    let otaEventHandler = QueuedEventStreamHandler()
     let session: GMacroProtocolSession
 
     switch transportRecord.source {
@@ -705,7 +712,11 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
           transportSessionId: transportSessionId,
           onEvent: { [weak self, weak eventHandler] event in
             guard let self, let eventHandler else { return }
-            eventHandler.emit(self.protocolEventMap(from: event))
+            self.emitGMacroEvent(
+              event,
+              protocolEventHandler: eventHandler,
+              otaEventHandler: otaEventHandler
+            )
           }
         )
       else {
@@ -748,11 +759,11 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
       let mfiSession = GMacroProtocolSession(sessionId: sessionId, transport: byteTransport)
       mfiSession.onEvent = { [weak self, weak eventHandler] event in
         guard let self, let eventHandler else { return }
-        eventHandler.emit(self.protocolEventMap(from: event))
-      }
-      mfiSession.mfiOTAEvent = { [weak self, weak eventHandler] event in
-        guard let self, let eventHandler else { return }
-        eventHandler.emit(self.mfiOtaEventMap(from: event))
+        self.emitGMacroEvent(
+          event,
+          protocolEventHandler: eventHandler,
+          otaEventHandler: otaEventHandler
+        )
       }
       mfiSession.otaCommandWriter = { data, completion in
         nativeLog("[MFi OTA] commandWriter called, size=\(data.count)")
@@ -781,13 +792,20 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
       binaryMessenger: messenger
     )
     eventChannel.setStreamHandler(eventHandler)
+    let otaEventChannel = FlutterEventChannel(
+      name: "host4_flutter_device_native/ota_events/\(protocolSessionId)",
+      binaryMessenger: messenger
+    )
+    otaEventChannel.setStreamHandler(otaEventHandler)
 
     gmacroProtocolSessions[protocolSessionId] = GMacroProtocolRecord(
       sessionId: protocolSessionId,
       transportSessionId: transportSessionId,
       session: session,
       eventChannel: eventChannel,
-      eventHandler: eventHandler
+      eventHandler: eventHandler,
+      otaEventChannel: otaEventChannel,
+      otaEventHandler: otaEventHandler
     )
 
     result(protocolSessionId)
@@ -1617,8 +1635,31 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
     }
   }
 
+  private func emitGMacroEvent(
+    _ event: GMacroProtocolEvent,
+    protocolEventHandler: QueuedEventStreamHandler,
+    otaEventHandler: QueuedEventStreamHandler
+  ) {
+    protocolEventHandler.emit(protocolEventMap(from: event))
+    if let otaEvent = otaEventMap(from: event) {
+      otaEventHandler.emit(otaEvent)
+    }
+  }
+
   private func protocolEventMap(from event: GMacroProtocolEvent) -> [String: Any] {
     switch event {
+    case .ota(let type, let code, let progress):
+      let typeName = "\(type)"
+      return [
+        "type": "busy",
+        "reason": typeName,
+        "payload": [
+          "event": typeName,
+          "type": typeName,
+          "code": code,
+          "progress": Double(progress),
+        ],
+      ]
     case .progress(let progress):
       return [
         "type": "busy",
@@ -1770,36 +1811,16 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
     }
   }
 
-  private func mfiOtaEventMap(from event: MFIOTAEvent) -> [String: Any] {
+  private func otaEventMap(from event: GMacroProtocolEvent) -> [String: Any]? {
     switch event {
-    case .progress(let progress):
+    case .ota(let type, let code, let progress):
       return [
-        "type": "busy",
-        "reason": "progress",
-        "payload": [
-          "event": "progress",
-          "progress": Double(progress),
-        ],
+        "type": "\(type)",
+        "code": code,
+        "progress": Double(progress),
       ]
-    case .success:
-      return [
-        "type": "busy",
-        "reason": "success",
-        "payload": ["event": "success"],
-      ]
-    case .failure(let message):
-      return [
-        "type": "error",
-        "failure": failureMap(code: "gmacro-failure", message: message),
-      ]
-    @unknown default:
-      return [
-        "type": "error",
-        "failure": failureMap(
-          code: "unknown-mfi-ota-event",
-          message: "MFi OTA emitted an unknown event."
-        ),
-      ]
+    default:
+      return nil
     }
   }
 
