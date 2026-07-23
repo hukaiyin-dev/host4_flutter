@@ -1648,7 +1648,7 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
 
   private func protocolEventMap(from event: GMacroProtocolEvent) -> [String: Any] {
     switch event {
-    case .ota(let type, let code, let progress):
+    case .ota(let type, let code, let progress, let total, let percent):
       let typeName = "\(type)"
       return [
         "type": "busy",
@@ -1657,7 +1657,9 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
           "event": typeName,
           "type": typeName,
           "code": code,
-          "progress": Double(progress),
+          "progress": progress,
+          "total": total,
+          "percent": Double(percent),
         ],
       ]
     case .progress(let progress):
@@ -1813,11 +1815,13 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
 
   private func otaEventMap(from event: GMacroProtocolEvent) -> [String: Any]? {
     switch event {
-    case .ota(let type, let code, let progress):
+    case .ota(let type, let code, let progress, let total, let percent):
       return [
         "type": "\(type)",
         "code": code,
-        "progress": Double(progress),
+        "progress": progress,
+        "total": total,
+        "percent": Double(percent),
       ]
     default:
       return nil
