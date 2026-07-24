@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -40,15 +39,10 @@ class Host4ThemeStorePage extends StatefulWidget {
 }
 
 class Host4ThemeStorePageState extends State<Host4ThemeStorePage> {
-  static const _gridWidth = 532.0;
-  static const _cardWidth = 172.0;
-  static const _cardSpacing = 8.0;
-
   String? _pendingThemeId;
-  int _focusedIndex = 0;
-  String? _trackedThemeId;
   Host4ThemeManager? _listenedManager;
-  final FocusNode _focusNode = FocusNode(debugLabel: 'host4_theme_store');
+  final Map<String, FocusNode> _cardFocusNodes = <String, FocusNode>{};
+  bool _focusRequestScheduled = false;
 
   @override
   void initState() {
@@ -56,7 +50,8 @@ class Host4ThemeStorePageState extends State<Host4ThemeStorePage> {
     final manager = widget.manager;
     if (manager != null) {
       _attachManager(manager);
-      _syncFocusedIndexFromManager(manager);
+      _syncCardFocusNodes(manager);
+      _scheduleSelectedThemeFocus(manager);
     }
   }
 
@@ -65,7 +60,8 @@ class Host4ThemeStorePageState extends State<Host4ThemeStorePage> {
     super.didChangeDependencies();
     if (widget.manager == null) {
       _attachManager(context.host4ThemeManager);
-      _syncFocusedIndexFromManager(context.host4ThemeManager);
+      _syncCardFocusNodes(context.host4ThemeManager);
+      _scheduleSelectedThemeFocus(context.host4ThemeManager);
     }
   }
 
@@ -73,7 +69,10 @@ class Host4ThemeStorePageState extends State<Host4ThemeStorePage> {
   void dispose() {
     _listenedManager?.removeListener(_onManagerChanged);
     _listenedManager = null;
-    _focusNode.dispose();
+    for (final node in _cardFocusNodes.values) {
+      node.dispose();
+    }
+    _cardFocusNodes.clear();
     super.dispose();
   }
 
@@ -81,46 +80,7 @@ class Host4ThemeStorePageState extends State<Host4ThemeStorePage> {
     if (!mounted) {
       return;
     }
-    _focusNode.requestFocus();
-  }
-
-  bool handleDirectionalFocus(TraversalDirection direction) {
-    final catalog = _manager.catalog;
-    if (catalog.isEmpty) {
-      return false;
-    }
-    final columns = _columnCountFor(catalog.length);
-    final current = _focusedIndex.clamp(0, catalog.length - 1);
-    final row = current ~/ columns;
-    final column = current % columns;
-
-    final int? next = switch (direction) {
-      TraversalDirection.left => column > 0 ? current - 1 : null,
-      TraversalDirection.right =>
-        column < columns - 1 && current + 1 < catalog.length
-            ? current + 1
-            : null,
-      TraversalDirection.up => row > 0 ? current - columns : null,
-      TraversalDirection.down =>
-        current + columns < catalog.length ? current + columns : null,
-    };
-    if (next == null || next == current) {
-      return false;
-    }
-    setState(() {
-      _focusedIndex = next;
-    });
-    return true;
-  }
-
-  bool handleActivateFocusedTheme() {
-    final catalog = _manager.catalog;
-    if (catalog.isEmpty || _pendingThemeId != null) {
-      return false;
-    }
-    final index = _focusedIndex.clamp(0, catalog.length - 1);
-    unawaited(_applyTheme(_manager, catalog[index]));
-    return true;
+    _requestSelectedThemeFocus(_manager);
   }
 
   Host4ThemeManager get _manager {
@@ -148,50 +108,84 @@ class Host4ThemeStorePageState extends State<Host4ThemeStorePage> {
     return AnimatedBuilder(
       animation: manager,
       builder: (context, _) {
-        return KeyboardListener(
-          focusNode: _focusNode,
-          autofocus: true,
-          onKeyEvent: _handleKeyEvent,
-          child: Scaffold(
-            backgroundColor: Colors.white,
-            resizeToAvoidBottomInset: false,
-            body: MediaQuery.removePadding(
-              context: context,
-              removeLeft: true,
-              removeTop: true,
-              removeRight: true,
-              removeBottom: true,
-              child: SizedBox.expand(
-                child: FittedBox(
-                  fit: BoxFit.fill,
-                  child: SizedBox(
-                    key: const ValueKey<String>('host4_theme_store_page'),
-                    width: _ThemeStoreScene.designWidth,
-                    height: _ThemeStoreScene.designHeight,
-                    child: _ThemeStoreScene(
-                      manager: manager,
-                      pendingThemeId: _pendingThemeId,
-                      focusedIndex: _focusedIndex,
-                      title: widget.title,
-                      confirmLabel: widget.confirmLabel,
-                      backLabel: widget.backLabel,
-                      statusSource: widget.statusSource,
-                      showControllerHints: widget.showControllerHints,
-                      onConfirm:
-                          widget.onConfirm ?? () => Navigator.maybePop(context),
-                      onBack: widget.onBack ?? () => Navigator.maybePop(context),
-                      onSearch: widget.onSearch,
-                      onApplyTheme: _applyTheme,
-                      onFocusCard: (index) {
-                        setState(() {
-                          _focusedIndex = index;
-                        });
-                        requestInputFocus();
-                      },
+        _syncCardFocusNodes(manager);
+        _scheduleFocusIfNeeded(manager);
+        return Semantics(
+          identifier: 'theme_store.surface',
+          explicitChildNodes: true,
+          child: FocusTraversalGroup(
+            policy: ReadingOrderTraversalPolicy(),
+            child: Builder(
+              builder: (groupContext) {
+                return Shortcuts(
+                  shortcuts: const <ShortcutActivator, Intent>{
+                    SingleActivator(LogicalKeyboardKey.arrowLeft):
+                        DirectionalFocusIntent(TraversalDirection.left),
+                    SingleActivator(LogicalKeyboardKey.arrowRight):
+                        DirectionalFocusIntent(TraversalDirection.right),
+                    SingleActivator(LogicalKeyboardKey.arrowUp):
+                        DirectionalFocusIntent(TraversalDirection.up),
+                    SingleActivator(LogicalKeyboardKey.arrowDown):
+                        DirectionalFocusIntent(TraversalDirection.down),
+                  },
+                  child: Actions(
+                    actions: <Type, Action<Intent>>{
+                      DirectionalFocusIntent:
+                          CallbackAction<DirectionalFocusIntent>(
+                            onInvoke: (intent) {
+                              _moveFocus(intent.direction);
+                              return null;
+                            },
+                          ),
+                    },
+                    child: Focus(
+                      onKeyEvent: _handleRepeatAndBackKeyEvent,
+                      child: Scaffold(
+                        backgroundColor: Colors.white,
+                        resizeToAvoidBottomInset: false,
+                        body: MediaQuery.removePadding(
+                          context: context,
+                          removeLeft: true,
+                          removeTop: true,
+                          removeRight: true,
+                          removeBottom: true,
+                          child: SizedBox.expand(
+                            child: FittedBox(
+                              fit: BoxFit.fill,
+                              child: SizedBox(
+                                key: const ValueKey<String>(
+                                  'host4_theme_store_page',
+                                ),
+                                width: _ThemeStoreScene.designWidth,
+                                height: _ThemeStoreScene.designHeight,
+                                child: _ThemeStoreScene(
+                                  manager: manager,
+                                  pendingThemeId: _pendingThemeId,
+                                  cardFocusNodes: _cardFocusNodes,
+                                  title: widget.title,
+                                  confirmLabel: widget.confirmLabel,
+                                  backLabel: widget.backLabel,
+                                  statusSource: widget.statusSource,
+                                  showControllerHints:
+                                      widget.showControllerHints,
+                                  onConfirm:
+                                      widget.onConfirm ??
+                                      () => Navigator.maybePop(context),
+                                  onBack:
+                                      widget.onBack ??
+                                      () => Navigator.maybePop(context),
+                                  onSearch: widget.onSearch,
+                                  onApplyTheme: _applyTheme,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ),
+                );
+              },
             ),
           ),
         );
@@ -199,41 +193,50 @@ class Host4ThemeStorePageState extends State<Host4ThemeStorePage> {
     );
   }
 
-  void _handleKeyEvent(KeyEvent event) {
-    // iOS 方向键/A 会经 LauncherInputRouter 以 synthesized KeyEvent 再注入一次；
-    // 页面内 KeyboardListener 忽略 synthesized，避免一次按键移动两格。
-    if (event.synthesized && defaultTargetPlatform == TargetPlatform.iOS) {
-      return;
-    }
-    if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
-      return;
-    }
+  KeyEventResult _handleRepeatAndBackKeyEvent(FocusNode node, KeyEvent event) {
     final key = event.logicalKey;
-    final direction = switch (key) {
-      LogicalKeyboardKey.arrowLeft => TraversalDirection.left,
-      LogicalKeyboardKey.arrowRight => TraversalDirection.right,
-      LogicalKeyboardKey.arrowUp => TraversalDirection.up,
-      LogicalKeyboardKey.arrowDown => TraversalDirection.down,
-      _ => null,
-    };
-    if (direction != null) {
-      handleDirectionalFocus(direction);
-      return;
+    final direction = _directionForKey(key);
+    if ((event is KeyDownEvent || event is KeyRepeatEvent) &&
+        direction != null) {
+      _moveFocus(direction);
+      return KeyEventResult.handled;
     }
-    if (key == LogicalKeyboardKey.keyA ||
-        key == LogicalKeyboardKey.enter ||
-        key == LogicalKeyboardKey.numpadEnter ||
-        key == LogicalKeyboardKey.select ||
-        key == LogicalKeyboardKey.gameButtonA) {
-      handleActivateFocusedTheme();
-      return;
+    if (event is KeyRepeatEvent && _isActivateKey(key)) {
+      return KeyEventResult.handled;
     }
-    if (key == LogicalKeyboardKey.keyB ||
-        key == LogicalKeyboardKey.escape ||
-        key == LogicalKeyboardKey.goBack ||
-        key == LogicalKeyboardKey.gameButtonB) {
+    if (event is KeyDownEvent &&
+        (key == LogicalKeyboardKey.keyB ||
+            key == LogicalKeyboardKey.escape ||
+            key == LogicalKeyboardKey.goBack ||
+            key == LogicalKeyboardKey.gameButtonB)) {
       (widget.onBack ?? () => Navigator.maybePop(context))();
+      return KeyEventResult.handled;
     }
+    return KeyEventResult.ignored;
+  }
+
+  void _moveFocus(TraversalDirection direction) {
+    final focusedNode = FocusManager.instance.primaryFocus;
+    if (focusedNode == null || !_cardFocusNodes.containsValue(focusedNode)) {
+      _requestSelectedThemeFocus(_manager);
+      return;
+    }
+    final catalog = _manager.catalog;
+    final currentIndex = catalog.indexWhere(
+      (entry) => identical(_cardFocusNodes[entry.id], focusedNode),
+    );
+    if (currentIndex < 0) {
+      _requestSelectedThemeFocus(_manager);
+      return;
+    }
+    final nextIndex = switch (direction) {
+      TraversalDirection.left || TraversalDirection.up => currentIndex - 1,
+      TraversalDirection.right || TraversalDirection.down => currentIndex + 1,
+    };
+    if (nextIndex < 0 || nextIndex >= catalog.length) {
+      return;
+    }
+    _cardFocusNodes[catalog[nextIndex].id]?.requestFocus();
   }
 
   void _attachManager(Host4ThemeManager manager) {
@@ -249,37 +252,58 @@ class Host4ThemeStorePageState extends State<Host4ThemeStorePage> {
     if (!mounted || _listenedManager == null) {
       return;
     }
-    _syncFocusedIndexFromManager(_listenedManager!);
+    _syncCardFocusNodes(_listenedManager!);
+    _scheduleFocusIfNeeded(_listenedManager!);
     setState(() {});
   }
 
-  void _syncFocusedIndexFromManager(Host4ThemeManager manager) {
-    final catalog = manager.catalog;
-    if (catalog.isEmpty) {
-      _focusedIndex = 0;
-      _trackedThemeId = null;
-      return;
+  void _syncCardFocusNodes(Host4ThemeManager manager) {
+    final ids = manager.catalog.map((entry) => entry.id).toSet();
+    final removed = _cardFocusNodes.keys
+        .where((id) => !ids.contains(id))
+        .toList(growable: false);
+    for (final id in removed) {
+      _cardFocusNodes.remove(id)?.dispose();
     }
-    final currentId = manager.currentThemeId;
-    if (currentId != _trackedThemeId) {
-      _trackedThemeId = currentId;
-      if (currentId != null) {
-        final selectedIndex = catalog.indexWhere((entry) => entry.id == currentId);
-        if (selectedIndex >= 0) {
-          _focusedIndex = selectedIndex;
-        }
-      }
+    for (final id in ids) {
+      _cardFocusNodes.putIfAbsent(
+        id,
+        () => FocusNode(debugLabel: 'host4_theme_card_$id'),
+      );
     }
-    _focusedIndex = _focusedIndex.clamp(0, catalog.length - 1);
   }
 
-  int _columnCountFor(int itemCount) {
-    if (itemCount <= 0) {
-      return 1;
+  void _scheduleFocusIfNeeded(Host4ThemeManager manager) {
+    final focusedNode = FocusManager.instance.primaryFocus;
+    if (_cardFocusNodes.containsValue(focusedNode)) {
+      return;
     }
-    final columns =
-        ((_gridWidth + _cardSpacing) / (_cardWidth + _cardSpacing)).floor();
-    return columns.clamp(1, itemCount);
+    _scheduleSelectedThemeFocus(manager);
+  }
+
+  void _scheduleSelectedThemeFocus(Host4ThemeManager manager) {
+    if (_focusRequestScheduled) {
+      return;
+    }
+    _focusRequestScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _focusRequestScheduled = false;
+      if (!mounted) {
+        return;
+      }
+      _requestSelectedThemeFocus(manager);
+    });
+  }
+
+  void _requestSelectedThemeFocus(Host4ThemeManager manager) {
+    final catalog = manager.catalog;
+    if (catalog.isEmpty) {
+      return;
+    }
+    final selectedId = manager.currentThemeId;
+    final fallbackId = catalog.first.id;
+    final node = _cardFocusNodes[selectedId] ?? _cardFocusNodes[fallbackId];
+    node?.requestFocus();
   }
 
   Future<void> _applyTheme(
@@ -292,10 +316,6 @@ class Host4ThemeStorePageState extends State<Host4ThemeStorePage> {
 
     setState(() {
       _pendingThemeId = entry.id;
-      _focusedIndex = manager.catalog.indexWhere((item) => item.id == entry.id);
-      if (_focusedIndex < 0) {
-        _focusedIndex = 0;
-      }
     });
 
     try {
@@ -313,11 +333,29 @@ class Host4ThemeStorePageState extends State<Host4ThemeStorePage> {
   }
 }
 
+bool _isActivateKey(LogicalKeyboardKey key) {
+  return key == LogicalKeyboardKey.keyA ||
+      key == LogicalKeyboardKey.enter ||
+      key == LogicalKeyboardKey.numpadEnter ||
+      key == LogicalKeyboardKey.select ||
+      key == LogicalKeyboardKey.gameButtonA;
+}
+
+TraversalDirection? _directionForKey(LogicalKeyboardKey key) {
+  return switch (key) {
+    LogicalKeyboardKey.arrowLeft => TraversalDirection.left,
+    LogicalKeyboardKey.arrowRight => TraversalDirection.right,
+    LogicalKeyboardKey.arrowUp => TraversalDirection.up,
+    LogicalKeyboardKey.arrowDown => TraversalDirection.down,
+    _ => null,
+  };
+}
+
 class _ThemeStoreScene extends StatelessWidget {
   const _ThemeStoreScene({
     required this.manager,
     required this.pendingThemeId,
-    required this.focusedIndex,
+    required this.cardFocusNodes,
     required this.title,
     required this.confirmLabel,
     required this.backLabel,
@@ -325,7 +363,6 @@ class _ThemeStoreScene extends StatelessWidget {
     required this.onConfirm,
     required this.onBack,
     required this.onApplyTheme,
-    required this.onFocusCard,
     this.statusSource,
     this.onSearch,
   });
@@ -335,7 +372,7 @@ class _ThemeStoreScene extends StatelessWidget {
 
   final Host4ThemeManager manager;
   final String? pendingThemeId;
-  final int focusedIndex;
+  final Map<String, FocusNode> cardFocusNodes;
   final String title;
   final String confirmLabel;
   final String backLabel;
@@ -345,7 +382,6 @@ class _ThemeStoreScene extends StatelessWidget {
   final VoidCallback onBack;
   final VoidCallback? onSearch;
   final void Function(Host4ThemeManager, Host4ThemeCatalogEntry) onApplyTheme;
-  final ValueChanged<int> onFocusCard;
 
   @override
   Widget build(BuildContext context) {
@@ -388,9 +424,8 @@ class _ThemeStoreScene extends StatelessWidget {
           child: _ThemeStoreGrid(
             manager: manager,
             pendingThemeId: pendingThemeId,
-            focusedIndex: focusedIndex,
+            cardFocusNodes: cardFocusNodes,
             onApplyTheme: onApplyTheme,
-            onFocusCard: onFocusCard,
           ),
         ),
         if (showControllerHints)
@@ -446,16 +481,14 @@ class _ThemeStoreGrid extends StatelessWidget {
   const _ThemeStoreGrid({
     required this.manager,
     required this.pendingThemeId,
-    required this.focusedIndex,
+    required this.cardFocusNodes,
     required this.onApplyTheme,
-    required this.onFocusCard,
   });
 
   final Host4ThemeManager manager;
   final String? pendingThemeId;
-  final int focusedIndex;
+  final Map<String, FocusNode> cardFocusNodes;
   final void Function(Host4ThemeManager, Host4ThemeCatalogEntry) onApplyTheme;
-  final ValueChanged<int> onFocusCard;
 
   @override
   Widget build(BuildContext context) {
@@ -466,111 +499,173 @@ class _ThemeStoreGrid extends StatelessWidget {
         for (var index = 0; index < manager.catalog.length; index++)
           _ThemeCard(
             entry: manager.catalog[index],
+            focusNode: cardFocusNodes[manager.catalog[index].id]!,
             selected: manager.currentThemeId == manager.catalog[index].id,
-            focused: focusedIndex == index,
             loading: pendingThemeId == manager.catalog[index].id,
-            onTap: () {
-              onFocusCard(index);
-              onApplyTheme(manager, manager.catalog[index]);
-            },
+            onActivate: () => onApplyTheme(manager, manager.catalog[index]),
           ),
       ],
     );
   }
 }
 
-class _ThemeCard extends StatelessWidget {
+class _ThemeCard extends StatefulWidget {
   const _ThemeCard({
     required this.entry,
+    required this.focusNode,
     required this.selected,
-    required this.focused,
     required this.loading,
-    required this.onTap,
+    required this.onActivate,
   });
 
   final Host4ThemeCatalogEntry entry;
+  final FocusNode focusNode;
   final bool selected;
-  final bool focused;
   final bool loading;
-  final VoidCallback onTap;
+  final VoidCallback onActivate;
+
+  @override
+  State<_ThemeCard> createState() => _ThemeCardState();
+}
+
+class _ThemeCardState extends State<_ThemeCard> {
+  @override
+  void initState() {
+    super.initState();
+    widget.focusNode.addListener(_handleFocusChanged);
+  }
+
+  @override
+  void didUpdateWidget(covariant _ThemeCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!identical(oldWidget.focusNode, widget.focusNode)) {
+      oldWidget.focusNode.removeListener(_handleFocusChanged);
+      widget.focusNode.addListener(_handleFocusChanged);
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.focusNode.removeListener(_handleFocusChanged);
+    super.dispose();
+  }
+
+  void _handleFocusChanged() {
+    if (mounted) {
+      setState(() {});
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = context.host4Theme;
     // 已应用主题与手柄焦点可能落在不同卡片；描边只给焦点项，
     // 当前主题通过右下角 pill / 背景亮度区分，避免同时出现两个选中框。
+    final focused = widget.focusNode.hasPrimaryFocus;
     final borderColor = focused
         ? theme.colors.focus
         : theme.colors.borderDefault;
     final borderWidth = focused ? 2.0 : 1.0;
 
     return Semantics(
+      identifier: 'theme_store.card_${widget.entry.id}',
       button: true,
-      selected: selected,
-      child: InkWell(
-        key: ValueKey<String>('host4_theme_card_${entry.id}'),
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(8),
-        child: SizedBox(
-          width: 172,
-          height: 124,
-          child: Stack(
-            children: [
-              Positioned.fill(
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    color:
-                        Colors.white.withValues(alpha: selected ? 0.88 : 0.68),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: borderColor,
-                      width: borderWidth,
+      selected: widget.selected,
+      child: Shortcuts(
+        shortcuts: const <ShortcutActivator, Intent>{
+          SingleActivator(LogicalKeyboardKey.keyA): ActivateIntent(),
+          SingleActivator(LogicalKeyboardKey.enter): ActivateIntent(),
+          SingleActivator(LogicalKeyboardKey.numpadEnter): ActivateIntent(),
+          SingleActivator(LogicalKeyboardKey.select): ActivateIntent(),
+          SingleActivator(LogicalKeyboardKey.gameButtonA): ActivateIntent(),
+        },
+        child: Actions(
+          actions: <Type, Action<Intent>>{
+            ActivateIntent: CallbackAction<ActivateIntent>(
+              onInvoke: (intent) {
+                widget.onActivate();
+                return null;
+              },
+            ),
+          },
+          child: Focus(
+            focusNode: widget.focusNode,
+            child: InkWell(
+              key: ValueKey<String>('host4_theme_card_${widget.entry.id}'),
+              onTap: () {
+                widget.focusNode.requestFocus();
+                widget.onActivate();
+              },
+              borderRadius: BorderRadius.circular(8),
+              child: SizedBox(
+                width: 172,
+                height: 124,
+                child: Stack(
+                  children: [
+                    Positioned.fill(
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(
+                            alpha: widget.selected ? 0.88 : 0.68,
+                          ),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: borderColor,
+                            width: borderWidth,
+                          ),
+                          boxShadow: focused
+                              ? [
+                                  BoxShadow(
+                                    color: theme.colors.focus.withValues(
+                                      alpha: 0.2,
+                                    ),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ]
+                              : null,
+                        ),
+                      ),
                     ),
-                    boxShadow: focused
-                        ? [
-                            BoxShadow(
-                              color: theme.colors.focus.withValues(alpha: 0.2),
-                              blurRadius: 10,
-                              offset: const Offset(0, 2),
-                            ),
-                          ]
-                        : null,
-                  ),
+                    Positioned(
+                      left: 4,
+                      top: 4,
+                      width: 164,
+                      height: 89,
+                      child: _ThemePreview(entry: widget.entry),
+                    ),
+                    Positioned(
+                      left: 11,
+                      top: 98,
+                      width: 96,
+                      height: 18,
+                      child: Text(
+                        widget.entry.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: theme.colors.textSecondary,
+                          fontSize: 13.6,
+                          height: 1.29,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0,
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      left: 116,
+                      top: 100,
+                      width: 48,
+                      height: 16,
+                      child: _ThemeActionPill(
+                        selected: widget.selected,
+                        loading: widget.loading,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              Positioned(
-                left: 4,
-                top: 4,
-                width: 164,
-                height: 89,
-                child: _ThemePreview(entry: entry),
-              ),
-              Positioned(
-                left: 11,
-                top: 98,
-                width: 96,
-                height: 18,
-                child: Text(
-                  entry.name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: theme.colors.textSecondary,
-                    fontSize: 13.6,
-                    height: 1.29,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 0,
-                  ),
-                ),
-              ),
-              Positioned(
-                left: 116,
-                top: 100,
-                width: 48,
-                height: 16,
-                child: _ThemeActionPill(selected: selected, loading: loading),
-              ),
-            ],
+            ),
           ),
         ),
       ),
@@ -615,35 +710,39 @@ class _ThemeActionPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = context.host4Theme;
-    final background =
-        selected ? theme.colors.brandPrimary : theme.colors.textPrimary;
+    final background = selected
+        ? theme.colors.brandPrimary
+        : theme.colors.textPrimary;
 
-    return Container(
-      key: ValueKey<String>(
-        selected ? 'host4_theme_selected_pill' : 'host4_theme_switch_pill',
-      ),
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: background,
-        borderRadius: BorderRadius.circular(999),
-        border: selected
-            ? null
-            : Border.all(color: theme.colors.surface, width: 0.8),
-      ),
-      child: loading
-          ? SizedBox(
-              width: 8,
-              height: 8,
-              child: CircularProgressIndicator(
-                strokeWidth: 1.4,
+    return Semantics(
+      identifier: selected ? 'theme_store.selected_pill' : null,
+      child: Container(
+        key: ValueKey<String>(
+          selected ? 'host4_theme_selected_pill' : 'host4_theme_switch_pill',
+        ),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: background,
+          borderRadius: BorderRadius.circular(999),
+          border: selected
+              ? null
+              : Border.all(color: theme.colors.surface, width: 0.8),
+        ),
+        child: loading
+            ? SizedBox(
+                width: 8,
+                height: 8,
+                child: CircularProgressIndicator(
+                  strokeWidth: 1.4,
+                  color: theme.colors.textInverse,
+                ),
+              )
+            : Icon(
+                selected ? Icons.check_rounded : Icons.swap_horiz_rounded,
                 color: theme.colors.textInverse,
+                size: selected ? 15 : 14,
               ),
-            )
-          : Icon(
-              selected ? Icons.check_rounded : Icons.swap_horiz_rounded,
-              color: theme.colors.textInverse,
-              size: selected ? 15 : 14,
-            ),
+      ),
     );
   }
 }
@@ -738,8 +837,10 @@ class _ControllerHintButton extends StatelessWidget {
                   width: 20,
                   height: 20,
                   alignment: Alignment.center,
-                  decoration:
-                      BoxDecoration(color: color, shape: BoxShape.circle),
+                  decoration: BoxDecoration(
+                    color: color,
+                    shape: BoxShape.circle,
+                  ),
                   child: Text(
                     label,
                     style: const TextStyle(
