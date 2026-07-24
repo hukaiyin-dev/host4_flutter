@@ -452,6 +452,12 @@ public final class Host4FlutterSimulatorStoragePlugin: NSObject, FlutterPlugin, 
       return
     }
     let folderURLs = simulatorFolderBookmarkStore.resolvedURLs(for: system.type)
+    if system.type == 5 {
+      print("[IOS_GB_SCAN_DEBUG] native start folder scan type=\(system.type) name=\(system.name) dir=\(system.dir) extensions=\(system.extensions.sorted()) resolvedFolderCount=\(folderURLs.count)")
+      for folderURL in folderURLs {
+        print("[IOS_GB_SCAN_DEBUG] native resolved folder url=\"\(folderURL.path)\"")
+      }
+    }
     guard !folderURLs.isEmpty else {
       result(FlutterError(code: "no_folders", message: "No ROM folder is configured for this simulator.", details: nil))
       return
@@ -486,6 +492,9 @@ public final class Host4FlutterSimulatorStoragePlugin: NSObject, FlutterPlugin, 
             directoryURL: folderURL,
             ownsExistingSecurityScope: true
           )
+        if system.type == 5 {
+          print("[IOS_GB_SCAN_DEBUG] native access folder=\"\(folderURL.path)\" didStartAccessing=\(didStartAccessing) didTransferSecurityScope=\(didTransferSecurityScope)")
+        }
         defer {
           if didStartAccessing && !didTransferSecurityScope {
             folderURL.stopAccessingSecurityScopedResource()
@@ -548,13 +557,21 @@ public final class Host4FlutterSimulatorStoragePlugin: NSObject, FlutterPlugin, 
   }
 
   private func simulatorFolderPayloads(for systemType: Int) -> [[String: Any]] {
-    simulatorFolderBookmarkStore.entries(for: systemType).map { entry in
-      [
+    let payloads = simulatorFolderBookmarkStore.entries(for: systemType).map { entry in
+      let payload: [String: Any] = [
         "path": entry.path,
         "displayName": URL(fileURLWithPath: entry.path).lastPathComponent,
         "accessible": isSimulatorFolderAccessible(entry),
       ]
+      if systemType == 5 {
+        print("[IOS_GB_SCAN_DEBUG] native load folder path=\"\(entry.path)\" accessible=\(payload["accessible"] ?? false)")
+      }
+      return payload
     }
+    if systemType == 5 {
+      print("[IOS_GB_SCAN_DEBUG] native load folder count=\(payloads.count)")
+    }
+    return payloads
   }
 
   private func isSimulatorFolderAccessible(
@@ -1168,6 +1185,10 @@ private final class Host4TfCardRomScanner {
     onEvent: ([String: Any]) -> Void
   ) throws -> Int {
     let platformURL = try directoryURL(from: selectedURL.standardizedFileURL)
+    if system.type == 5 {
+      print("[IOS_GB_SCAN_DEBUG] native platform directory=\"\(platformURL.path)\" allowedExtensions=\(system.extensions.sorted())")
+      debugListDirectory(in: platformURL, allowedExtensions: system.extensions)
+    }
     onEvent([
       "phase": "platformStarted",
       "scanId": scanId,
@@ -1180,6 +1201,9 @@ private final class Host4TfCardRomScanner {
     )
     var gameCount = 0
     try enumerateRomFiles(in: platformURL, allowedExtensions: system.extensions) { fileURL in
+      if system.type == 5 {
+        print("[IOS_GB_SCAN_DEBUG] native game file=\"\(fileURL.path)\"")
+      }
       let game = self.gamePayload(
         system: system,
         platformURL: platformURL,
@@ -1203,6 +1227,33 @@ private final class Host4TfCardRomScanner {
       "gameCount": gameCount,
     ])
     return gameCount
+  }
+
+  private func debugListDirectory(
+    in directoryURL: URL,
+    allowedExtensions: Set<String>
+  ) {
+    guard let enumerator = fileManager.enumerator(
+      at: directoryURL,
+      includingPropertiesForKeys: [.isRegularFileKey, .isHiddenKey],
+      options: [.skipsHiddenFiles]
+    ) else {
+      print("[IOS_GB_SCAN_DEBUG] native debug enumerator nil directory=\"\(directoryURL.path)\"")
+      return
+    }
+
+    var count = 0
+    for case let fileURL as URL in enumerator {
+      count += 1
+      do {
+        let values = try fileURL.resourceValues(forKeys: [.isRegularFileKey, .isHiddenKey])
+        let fileExtension = ".\(fileURL.pathExtension.lowercased())"
+        print("[IOS_GB_SCAN_DEBUG] native debug entry path=\"\(fileURL.path)\" ext=\"\(fileExtension)\" regular=\(values.isRegularFile == true) hidden=\(values.isHidden == true) allowed=\(allowedExtensions.contains(fileExtension))")
+      } catch {
+        print("[IOS_GB_SCAN_DEBUG] native debug entry path=\"\(fileURL.path)\" resourceError=\"\(error.localizedDescription)\"")
+      }
+    }
+    print("[IOS_GB_SCAN_DEBUG] native debug entryCount=\(count) directory=\"\(directoryURL.path)\"")
   }
 
   private func directoryURL(from url: URL) throws -> URL {
