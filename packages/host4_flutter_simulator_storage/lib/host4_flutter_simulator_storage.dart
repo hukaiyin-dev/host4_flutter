@@ -131,6 +131,7 @@ enum Host4TfCardScanPhase {
   platformCompleted,
   completed,
   skipped,
+  platformError,
   failed,
   unknown,
 }

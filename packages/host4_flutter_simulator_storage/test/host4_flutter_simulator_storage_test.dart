@@ -354,4 +354,17 @@ void main() {
     expect(event.phase, Host4TfCardScanPhase.skipped);
     expect(event.message, contains('No roms folder'));
   });
+
+  test('TF scan event preserves a platform-scoped error', () {
+    final event = Host4TfCardScanEvent.fromMap(<String, Object?>{
+      'phase': 'platformError',
+      'scanId': 'ios_tf_scan_1',
+      'platformName': 'GB',
+      'message': 'Unable to access the selected ROM folder.',
+    });
+
+    expect(event.phase, Host4TfCardScanPhase.platformError);
+    expect(event.platformName, 'GB');
+    expect(event.message, 'Unable to access the selected ROM folder.');
+  });
 }
