@@ -1,0 +1,22 @@
+name: host4_flutter_download
+description: Foreground firmware file download facade for Host4 Flutter applications.
+version: 0.0.1
+publish_to: none
+
+environment:
+  sdk: ">=3.10.0 <4.0.0"
+  flutter: ">=1.17.0"
+
+dependencies:
+  crypto: 3.0.7
+  dio: 5.10.0
+  flutter:
+    sdk: flutter
+  flutter_download_manager: 0.5.5
+  path: 1.9.1
+  path_provider: 2.1.6
+
+dev_dependencies:
+  flutter_lints: 6.0.0
+  flutter_test:
+    sdk: flutter
