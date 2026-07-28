@@ -300,6 +300,9 @@ class Host4ThemeStorePageState extends State<Host4ThemeStorePage> {
     if (catalog.isEmpty) {
       return;
     }
+    if (_cardFocusNodes.containsValue(FocusManager.instance.primaryFocus)) {
+      return;
+    }
     final selectedId = manager.currentThemeId;
     final fallbackId = catalog.first.id;
     final node = _cardFocusNodes[selectedId] ?? _cardFocusNodes[fallbackId];
