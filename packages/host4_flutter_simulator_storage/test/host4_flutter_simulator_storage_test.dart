@@ -322,6 +322,40 @@ void main() {
     },
   );
 
+  test(
+    'iOS scans a simulator folder through an already retained TF scope',
+    () async {
+      final pluginSource = await File(
+        'ios/Classes/Host4FlutterSimulatorStoragePlugin.swift',
+      ).readAsString();
+
+      expect(
+        pluginSource,
+        contains(
+          'let hasRetainedAccess = Host4TfCardFileAccessRegistry\n'
+          '          .isActiveDirectoryAccessible(at: folderURL) == true',
+        ),
+      );
+      expect(
+        pluginSource,
+        contains('guard hasRetainedAccess || didStartAccessing else'),
+      );
+    },
+  );
+
+  test('iOS TF scans explicitly exclude AppleDouble ROM sidecars', () async {
+    final pluginSource = await File(
+      'ios/Classes/Host4FlutterSimulatorStoragePlugin.swift',
+    ).readAsString();
+
+    expect(
+      RegExp(
+        r'guard !isAppleDoubleSidecar\(fileURL\) else \{ continue \}',
+      ).allMatches(pluginSource),
+      hasLength(2),
+    );
+  });
+
   test('TF scan event parses a discovered ROM immediately', () {
     final event = Host4TfCardScanEvent.fromMap(<String, Object?>{
       'phase': 'gameFound',

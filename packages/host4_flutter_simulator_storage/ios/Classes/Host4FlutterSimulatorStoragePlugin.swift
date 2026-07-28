@@ -486,7 +486,10 @@ public final class Host4FlutterSimulatorStoragePlugin: NSObject, FlutterPlugin, 
       ])
       var gameCount = 0
       for folderURL in folderURLs {
-        let didStartAccessing = folderURL.startAccessingSecurityScopedResource()
+        let hasRetainedAccess = Host4TfCardFileAccessRegistry
+          .isActiveDirectoryAccessible(at: folderURL) == true
+        let didStartAccessing = !hasRetainedAccess &&
+          folderURL.startAccessingSecurityScopedResource()
         let didTransferSecurityScope = didStartAccessing &&
           Host4TfCardFileAccessRegistry.activate(
             directoryURL: folderURL,
@@ -500,7 +503,7 @@ public final class Host4FlutterSimulatorStoragePlugin: NSObject, FlutterPlugin, 
             folderURL.stopAccessingSecurityScopedResource()
           }
         }
-        guard didStartAccessing else {
+        guard hasRetainedAccess || didStartAccessing else {
           self.emitStreamingEvent([
             "phase": "platformError",
             "scanId": scanId,
@@ -1333,6 +1336,7 @@ private final class Host4TfCardRomScanner {
     for case let fileURL as URL in enumerator {
       let values = try fileURL.resourceValues(forKeys: [.isRegularFileKey, .isHiddenKey])
       guard values.isRegularFile == true, values.isHidden != true else { continue }
+      guard !isAppleDoubleSidecar(fileURL) else { continue }
       let fileExtension = ".\(fileURL.pathExtension.lowercased())"
       if allowedExtensions.contains(fileExtension) {
         files.append(fileURL)
@@ -1355,10 +1359,15 @@ private final class Host4TfCardRomScanner {
     for case let fileURL as URL in enumerator {
       let values = try fileURL.resourceValues(forKeys: [.isRegularFileKey, .isHiddenKey])
       guard values.isRegularFile == true, values.isHidden != true else { continue }
+      guard !isAppleDoubleSidecar(fileURL) else { continue }
       if allowedExtensions.contains(".\(fileURL.pathExtension.lowercased())") {
         onFile(fileURL)
       }
     }
+  }
+
+  private func isAppleDoubleSidecar(_ fileURL: URL) -> Bool {
+    fileURL.lastPathComponent.hasPrefix("._")
   }
 
   private func isDirectory(_ url: URL) -> Bool {
