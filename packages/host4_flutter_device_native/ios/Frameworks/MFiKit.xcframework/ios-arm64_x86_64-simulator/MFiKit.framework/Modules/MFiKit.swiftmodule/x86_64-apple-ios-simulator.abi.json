@@ -2873,28 +2873,70 @@
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/MFiKit\/MFiKit\/IAP2Manager.swift",
       "kind": "BooleanLiteral",
-      "offset": 7152,
+      "offset": 6713,
+      "length": 5,
+      "value": "false"
+    },
+    {
+      "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/MFiKit\/MFiKit\/IAP2Manager.swift",
+      "kind": "Array",
+      "offset": 6755,
+      "length": 2,
+      "value": "[]"
+    },
+    {
+      "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/MFiKit\/MFiKit\/IAP2Manager.swift",
+      "kind": "IntegerLiteral",
+      "offset": 6839,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/MFiKit\/MFiKit\/IAP2Manager.swift",
+      "kind": "IntegerLiteral",
+      "offset": 6879,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/MFiKit\/MFiKit\/IAP2Manager.swift",
+      "kind": "BooleanLiteral",
+      "offset": 6918,
+      "length": 5,
+      "value": "false"
+    },
+    {
+      "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/MFiKit\/MFiKit\/IAP2Manager.swift",
+      "kind": "IntegerLiteral",
+      "offset": 6965,
+      "length": 1,
+      "value": "3"
+    },
+    {
+      "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/MFiKit\/MFiKit\/IAP2Manager.swift",
+      "kind": "BooleanLiteral",
+      "offset": 7439,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/MFiKit\/MFiKit\/IAP2Manager.swift",
       "kind": "BooleanLiteral",
-      "offset": 7493,
+      "offset": 7780,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/MFiKit\/MFiKit\/IAP2Manager.swift",
       "kind": "BooleanLiteral",
-      "offset": 7662,
+      "offset": 7949,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/MFiKit\/MFiKit\/IAP2Manager.swift",
       "kind": "BooleanLiteral",
-      "offset": 18154,
+      "offset": 20749,
       "length": 5,
       "value": "false"
     },

@@ -172,6 +172,13 @@ final class IAP2Manager: NSObject {
     private var inStream: InputStream?
     private var outStream: OutputStream?
     private var outputReadyNotified = false
+    private var outputCanWrite = false
+    private var sendQueue: [Data] = []
+    private var currentSendingData: Data?
+    private var currentSendingOffset = 0
+    private var zeroWriteRetryCount = 0
+    private var isPumpingSendQueue = false
+    private let maxZeroWriteRetryCount = 3
     
     // 回调
     public var onTx: ((Data) -> Void)?
@@ -354,6 +361,7 @@ final class IAP2Manager: NSObject {
         outStream.schedule(in: .main, forMode: .common)
         
         outputReadyNotified = false
+        resetSendQueue()
         
         print("[IAP2] setupStreams: 打开输入输出流")
         inStream.open()
@@ -386,15 +394,15 @@ final class IAP2Manager: NSObject {
         if !Thread.isMainThread {
             var result: Result<String, Error>!
             DispatchQueue.main.sync {
-                result = Result { try self.performWrite(data) }
+                result = Result { try self.enqueueWrite(data) }
             }
             return try result.get()
         }
-        return try performWrite(data)
+        return try enqueueWrite(data)
     }
 
-    private func performWrite(_ data: Data) throws -> String {
-        guard let outStream = outStream else {
+    private func enqueueWrite(_ data: Data) throws -> String {
+        guard outStream != nil else {
             print("[IAP2] performWrite: 流已释放")
             throw NSError(
                 domain: "IAP2Manager",
@@ -403,44 +411,115 @@ final class IAP2Manager: NSObject {
             )
         }
 
-        let bytesWritten = try data.withUnsafeBytes { rawBuffer -> Int in
-            guard let baseAddress = rawBuffer.bindMemory(to: UInt8.self).baseAddress else {
-                return 0
+        sendQueue.append(data)
+        print("[IAP2] sendData: 加入发送队列 \(data.count) 字节: \(data.map { String(format: "%02X", $0) }.joined())")
+        pumpSendQueue()
+        return "已加入发送队列 \(data.count) 字节"
+    }
+
+    private func pumpSendQueue() {
+        guard Thread.isMainThread else {
+            DispatchQueue.main.async { [weak self] in
+                self?.pumpSendQueue()
+            }
+            return
+        }
+
+        guard let outStream = outStream else {
+            print("[IAP2] performWrite: 流已释放")
+            let error = NSError(
+                domain: "IAP2Manager",
+                code: -12,
+                userInfo: [NSLocalizedDescriptionKey: "流已释放"]
+            )
+            failCurrentSend(error)
+            return
+        }
+        guard isCompleted else { return }
+        guard outputCanWrite else { return }
+        guard !isPumpingSendQueue else { return }
+
+        isPumpingSendQueue = true
+        defer { isPumpingSendQueue = false }
+
+        while true {
+            if currentSendingData == nil {
+                guard !sendQueue.isEmpty else { return }
+                currentSendingData = sendQueue.removeFirst()
+                currentSendingOffset = 0
+                zeroWriteRetryCount = 0
             }
 
-            var totalWritten = 0
-            while totalWritten < data.count {
-                let count = outStream.write(baseAddress.advanced(by: totalWritten),
-                                            maxLength: data.count - totalWritten)
-                if count < 0 {
-                    let error = outStream.streamError ?? NSError(
-                        domain: "IAP2Manager",
-                        code: -1,
-                        userInfo: [NSLocalizedDescriptionKey: "发送失败"]
-                    )
-                    print("[IAP2] sendData: 发送失败，error = \(String(describing: outStream.streamError))")
-                    onErrorOccurred?(error)
-                    throw error
+            guard let data = currentSendingData else { return }
+
+            let writeResult = data.withUnsafeBytes { rawBuffer -> Int in
+                guard let baseAddress = rawBuffer.bindMemory(to: UInt8.self).baseAddress else {
+                    return 0
                 }
-                if count == 0 {
+
+                return outStream.write(baseAddress.advanced(by: currentSendingOffset),
+                                       maxLength: data.count - currentSendingOffset)
+            }
+
+            let count = writeResult
+            if count < 0 {
+                let error = outStream.streamError ?? NSError(
+                    domain: "IAP2Manager",
+                    code: -1,
+                    userInfo: [NSLocalizedDescriptionKey: "发送失败"]
+                )
+                print("[IAP2] sendData: 发送失败，error = \(String(describing: outStream.streamError))")
+                failCurrentSend(error)
+                return
+            }
+            if count == 0 {
+                outputCanWrite = false
+                zeroWriteRetryCount += 1
+                print("[IAP2] sendData: write 返回 0，等待下一次 hasSpaceAvailable 后重试 (\(zeroWriteRetryCount)/\(maxZeroWriteRetryCount))")
+
+                if zeroWriteRetryCount > maxZeroWriteRetryCount {
                     let error = NSError(
                         domain: "IAP2Manager",
                         code: -13,
-                        userInfo: [NSLocalizedDescriptionKey: "发送失败：输出流未写入数据"]
+                        userInfo: [NSLocalizedDescriptionKey: "发送失败：输出流连续未写入数据"]
                     )
-                    print("[IAP2] sendData: 发送失败，write 返回 0")
-                    onErrorOccurred?(error)
-                    throw error
+                    print("[IAP2] sendData: 发送失败，write 返回 0 超过重试次数")
+                    failCurrentSend(error)
                 }
-                totalWritten += count
+                return
             }
-            return totalWritten
-        }
 
-        print("[IAP2] sendData: 发送 \(data.count) 字节: \(data.map { String(format: "%02X", $0) }.joined())")
-        print("[IAP2] sendData: 已发送 \(bytesWritten)/\(data.count) 字节")
-        onTx?(data)
-        return "已发送 \(bytesWritten)/\(data.count) 字节"
+            zeroWriteRetryCount = 0
+            currentSendingOffset += count
+
+            if currentSendingOffset >= data.count {
+                print("[IAP2] sendData: 发送 \(data.count) 字节: \(data.map { String(format: "%02X", $0) }.joined())")
+                print("[IAP2] sendData: 已发送 \(data.count)/\(data.count) 字节")
+                onTx?(data)
+                currentSendingData = nil
+                currentSendingOffset = 0
+                zeroWriteRetryCount = 0
+                continue
+            }
+        }
+    }
+
+    private func failCurrentSend(_ error: Error) {
+        sendQueue.removeAll()
+        currentSendingData = nil
+        currentSendingOffset = 0
+        zeroWriteRetryCount = 0
+        outputCanWrite = false
+        onErrorOccurred?(error)
+    }
+
+    private func resetSendQueue() {
+        outputCanWrite = false
+        sendQueue.removeAll()
+        currentSendingData = nil
+        currentSendingOffset = 0
+        zeroWriteRetryCount = 0
+        isPumpingSendQueue = false
     }
     
     //发送连接测试数据
@@ -496,6 +575,7 @@ final class IAP2Manager: NSObject {
         outputReadyNotified = false
         inputOpened = false
         outputWritable = false
+        resetSendQueue()
         
         
         print("[IAP2] disconnect: 已关闭流并清理 session")
@@ -566,6 +646,7 @@ extension IAP2Manager: StreamDelegate {
             
             if aStream == outStream {
                 outputWritable = true
+                outputCanWrite = true
                 if !outputReadyNotified {
                     outputReadyNotified = true
                 
@@ -580,6 +661,7 @@ extension IAP2Manager: StreamDelegate {
         if eventCode.contains(.hasSpaceAvailable), aStream == outStream {
             print("[IAP2] stream: OutputStream hasSpaceAvailable")
             outputWritable = true
+            outputCanWrite = true
             
             if !outputReadyNotified {
                 outputReadyNotified = true
@@ -587,6 +669,7 @@ extension IAP2Manager: StreamDelegate {
                 print("[IAP2] stream: OutputStream ready (hasSpaceAvailable), firing onOutputReady")
                 onOutputReady?()
             }
+            pumpSendQueue()
         }
 
         // 输入流有数据可读

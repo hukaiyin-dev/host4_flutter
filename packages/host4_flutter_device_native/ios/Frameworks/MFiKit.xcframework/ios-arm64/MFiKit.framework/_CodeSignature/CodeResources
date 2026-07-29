@@ -10,7 +10,7 @@
 		</data>
 		<key>Headers/IAP2Manager.swift</key>
 		<data>
-		Ax4pJxFcRBfYo9n7+p1hN4KqzVg=
+		FfN041oVo/UW+zWPL4hwOB9jKlQ=
 		</data>
 		<key>Headers/MFiKitHelper.swift</key>
 		<data>
@@ -26,7 +26,7 @@
 		</data>
 		<key>Modules/MFiKit.swiftmodule/arm64-apple-ios.abi.json</key>
 		<data>
-		5078od+aa02u4J5Pu0pCzrLce2A=
+		WAGyeMql4bsXUfN4rNbl5V7GugQ=
 		</data>
 		<key>Modules/MFiKit.swiftmodule/arm64-apple-ios.private.swiftinterface</key>
 		<data>
@@ -42,7 +42,7 @@
 		</data>
 		<key>Modules/MFiKit.swiftmodule/arm64-apple-ios.swiftmodule</key>
 		<data>
-		PrqvK9Osx0udjwTICFkCI+BcW7g=
+		v7aC8000Owx4lPDpo+2xEElXVHE=
 		</data>
 	</dict>
 	<key>files2</key>
@@ -62,11 +62,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			Ax4pJxFcRBfYo9n7+p1hN4KqzVg=
+			FfN041oVo/UW+zWPL4hwOB9jKlQ=
 			</data>
 			<key>hash2</key>
 			<data>
-			prsvUtdz9QKBvBvoBz/kHKyNJB38iY67U2I7aqYlqVU=
+			WqtLXhy/p52y5lFxG8YYBWZv9zEqaeJuV2z3h0cbMCY=
 			</data>
 		</dict>
 		<key>Headers/MFiKitHelper.swift</key>
@@ -95,11 +95,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			5078od+aa02u4J5Pu0pCzrLce2A=
+			WAGyeMql4bsXUfN4rNbl5V7GugQ=
 			</data>
 			<key>hash2</key>
 			<data>
-			F48fBDtL77rXjjTDWZGPGxzBoVTwdEuhWzXzBe6FGuU=
+			KNREZtA0ocg9DBPsrXiu4WO8C4Cp+YWEQ0oMF/C3guE=
 			</data>
 		</dict>
 		<key>Modules/MFiKit.swiftmodule/arm64-apple-ios.private.swiftinterface</key>
@@ -139,11 +139,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			PrqvK9Osx0udjwTICFkCI+BcW7g=
+			v7aC8000Owx4lPDpo+2xEElXVHE=
 			</data>
 			<key>hash2</key>
 			<data>
-			t0KlO1qkXoNP1XxK/+hsnPfcU+yhR9XgvRWe+vJqYc8=
+			zUx1Q7giBgrgcFUYrEVCcXYXPLUwekZc6oomeMRFxy4=
 			</data>
 		</dict>
 	</dict>

@@ -128,6 +128,7 @@ enum Host4TfCardScanPhase {
   started,
   platformStarted,
   gameFound,
+  platformError,
   platformCompleted,
   completed,
   skipped,
