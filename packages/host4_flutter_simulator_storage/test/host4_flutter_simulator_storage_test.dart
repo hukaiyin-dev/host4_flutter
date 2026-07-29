@@ -158,31 +158,28 @@ void main() {
     },
   );
 
+  test('iOS stores up to two additional folders for each simulator', () async {
+    final pluginSource = await File(
+      'ios/Classes/Host4FlutterSimulatorStoragePlugin.swift',
+    ).readAsString();
+
+    expect(pluginSource, contains('Host4SimulatorRomFolderBookmarkStore'));
+    expect(pluginSource, contains('case "pickSimulatorRomFolder"'));
+    expect(pluginSource, contains('case "startSimulatorRomFolderScan"'));
+    expect(pluginSource, contains('private let maximumFolderCount = 2'));
+  });
+
   test(
-    'iOS stores up to two additional folders for each simulator',
+    'iOS reports accessibility for every configured simulator folder',
     () async {
       final pluginSource = await File(
         'ios/Classes/Host4FlutterSimulatorStoragePlugin.swift',
       ).readAsString();
 
-      expect(pluginSource, contains('Host4SimulatorRomFolderBookmarkStore'));
-      expect(pluginSource, contains('case "pickSimulatorRomFolder"'));
-      expect(pluginSource, contains('case "startSimulatorRomFolderScan"'));
-      expect(pluginSource, contains('private let maximumFolderCount = 2'));
+      expect(pluginSource, contains('"accessible":'));
+      expect(pluginSource, contains('isSimulatorFolderAccessible(entry)'));
     },
   );
-
-  test('iOS reports accessibility for every configured simulator folder', () async {
-    final pluginSource = await File(
-      'ios/Classes/Host4FlutterSimulatorStoragePlugin.swift',
-    ).readAsString();
-
-    expect(pluginSource, contains('"accessible":'));
-    expect(
-      pluginSource,
-      contains('isSimulatorFolderAccessible(entry)'),
-    );
-  });
 
   test('iOS keeps a replaced ROM folder in its original UI slot', () async {
     final pluginSource = await File(
@@ -393,11 +390,13 @@ void main() {
     final event = Host4TfCardScanEvent.fromMap(<String, Object?>{
       'phase': 'platformError',
       'scanId': 'ios_tf_scan_1',
+      'type': 9,
       'platformName': 'GB',
       'message': 'Unable to access the selected ROM folder.',
     });
 
     expect(event.phase, Host4TfCardScanPhase.platformError);
+    expect(event.type, 9);
     expect(event.platformName, 'GB');
     expect(event.message, 'Unable to access the selected ROM folder.');
   });
