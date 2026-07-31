@@ -126,6 +126,32 @@ void main() {
     expect(manager.theme.meta.id, 'mint');
   });
 
+  testWidgets('theme store displays names from the custom name builder', (
+    tester,
+  ) async {
+    final manager = Host4ThemeManager(
+      catalog: _testCatalog,
+      bundle: _testBundle,
+    );
+    addTearDown(manager.dispose);
+    await tester.runAsync(
+      () => manager.initialize(Host4ThemeAssets.defaultThemeId),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Host4ThemeStorePage(
+          manager: manager,
+          themeNameBuilder: (entry) => '本地化-${entry.id}',
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('本地化-default'), findsOneWidget);
+    expect(find.text('Default Aurora'), findsNothing);
+  });
+
   testWidgets('theme store uses per-card focus and sinks repeat activate', (
     tester,
   ) async {

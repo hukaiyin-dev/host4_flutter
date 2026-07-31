@@ -18,6 +18,7 @@ class Host4ThemeStorePage extends StatefulWidget {
     this.title = '主题商店',
     this.confirmLabel = '确定',
     this.backLabel = '返回',
+    this.themeNameBuilder,
     this.statusSource,
     this.showControllerHints = true,
   });
@@ -29,6 +30,7 @@ class Host4ThemeStorePage extends StatefulWidget {
   final String title;
   final String confirmLabel;
   final String backLabel;
+  final String Function(Host4ThemeCatalogEntry entry)? themeNameBuilder;
 
   /// 系统状态数据源；传入则在右上角显示时间 / Wi-Fi / 电量。
   final Host4SystemStatusSource? statusSource;
@@ -165,6 +167,7 @@ class Host4ThemeStorePageState extends State<Host4ThemeStorePage> {
                                   title: widget.title,
                                   confirmLabel: widget.confirmLabel,
                                   backLabel: widget.backLabel,
+                                  themeNameBuilder: widget.themeNameBuilder,
                                   statusSource: widget.statusSource,
                                   showControllerHints:
                                       widget.showControllerHints,
@@ -366,6 +369,7 @@ class _ThemeStoreScene extends StatelessWidget {
     required this.onConfirm,
     required this.onBack,
     required this.onApplyTheme,
+    this.themeNameBuilder,
     this.statusSource,
     this.onSearch,
   });
@@ -379,6 +383,7 @@ class _ThemeStoreScene extends StatelessWidget {
   final String title;
   final String confirmLabel;
   final String backLabel;
+  final String Function(Host4ThemeCatalogEntry entry)? themeNameBuilder;
   final Host4SystemStatusSource? statusSource;
   final bool showControllerHints;
   final VoidCallback onConfirm;
@@ -428,6 +433,7 @@ class _ThemeStoreScene extends StatelessWidget {
             manager: manager,
             pendingThemeId: pendingThemeId,
             cardFocusNodes: cardFocusNodes,
+            themeNameBuilder: themeNameBuilder,
             onApplyTheme: onApplyTheme,
           ),
         ),
@@ -486,11 +492,13 @@ class _ThemeStoreGrid extends StatelessWidget {
     required this.pendingThemeId,
     required this.cardFocusNodes,
     required this.onApplyTheme,
+    this.themeNameBuilder,
   });
 
   final Host4ThemeManager manager;
   final String? pendingThemeId;
   final Map<String, FocusNode> cardFocusNodes;
+  final String Function(Host4ThemeCatalogEntry entry)? themeNameBuilder;
   final void Function(Host4ThemeManager, Host4ThemeCatalogEntry) onApplyTheme;
 
   @override
@@ -502,6 +510,9 @@ class _ThemeStoreGrid extends StatelessWidget {
         for (var index = 0; index < manager.catalog.length; index++)
           _ThemeCard(
             entry: manager.catalog[index],
+            name:
+                themeNameBuilder?.call(manager.catalog[index]) ??
+                manager.catalog[index].name,
             focusNode: cardFocusNodes[manager.catalog[index].id]!,
             selected: manager.currentThemeId == manager.catalog[index].id,
             loading: pendingThemeId == manager.catalog[index].id,
@@ -515,6 +526,7 @@ class _ThemeStoreGrid extends StatelessWidget {
 class _ThemeCard extends StatefulWidget {
   const _ThemeCard({
     required this.entry,
+    required this.name,
     required this.focusNode,
     required this.selected,
     required this.loading,
@@ -522,6 +534,7 @@ class _ThemeCard extends StatefulWidget {
   });
 
   final Host4ThemeCatalogEntry entry;
+  final String name;
   final FocusNode focusNode;
   final bool selected;
   final bool loading;
@@ -643,7 +656,7 @@ class _ThemeCardState extends State<_ThemeCard> {
                       width: 96,
                       height: 18,
                       child: Text(
-                        widget.entry.name,
+                        widget.name,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
