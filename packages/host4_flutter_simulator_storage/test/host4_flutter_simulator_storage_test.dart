@@ -8,10 +8,15 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   const channel = MethodChannel('host4_flutter_simulator_storage');
+  const eventsChannel = EventChannel(
+    'host4_flutter_simulator_storage/tf_card_scan_events',
+  );
 
   tearDown(() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, null);
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockStreamHandler(eventsChannel, null);
   });
 
   test('scanTfCardRoms sends system specs and parses scanned ROMs', () async {
@@ -373,6 +378,51 @@ void main() {
     expect(event.scanId, 'ios_tf_scan_1');
     expect(event.game?.name, 'Zelda');
     expect(event.game?.resourcePath, 'Zelda.gba');
+  });
+
+  test('TF scan events share one native EventChannel subscription', () async {
+    final messenger =
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+    MockStreamHandlerEventSink? eventSink;
+    var listenCount = 0;
+    var cancelCount = 0;
+    messenger.setMockStreamHandler(
+      eventsChannel,
+      MockStreamHandler.inline(
+        onListen: (arguments, events) {
+          listenCount += 1;
+          eventSink = events;
+        },
+        onCancel: (arguments) {
+          cancelCount += 1;
+        },
+      ),
+    );
+
+    final firstEvents = <Host4TfCardScanEvent>[];
+    final secondEvents = <Host4TfCardScanEvent>[];
+    final firstSubscription =
+        Host4SimulatorStorage.tfCardRomScanEvents.listen(firstEvents.add);
+    final secondSubscription =
+        Host4SimulatorStorage.tfCardRomScanEvents.listen(secondEvents.add);
+    await pumpEventQueue();
+
+    expect(listenCount, 1);
+    eventSink?.success(<String, Object?>{
+      'phase': 'completed',
+      'scanId': 'shared_scan',
+    });
+    await pumpEventQueue();
+    expect(firstEvents.single.scanId, 'shared_scan');
+    expect(secondEvents.single.scanId, 'shared_scan');
+
+    await firstSubscription.cancel();
+    await pumpEventQueue();
+    expect(cancelCount, 0);
+
+    await secondSubscription.cancel();
+    await pumpEventQueue();
+    expect(cancelCount, 1);
   });
 
   test('TF scan event preserves a skipped directory selection', () {
