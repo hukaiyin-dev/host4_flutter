@@ -3,6 +3,7 @@ struct Host4FlutterChannelConstants {
   static let fetchDeviceVersion = "fetchDeviceVersion"
   static let fetchGameMacroDefaultInfo = "fetchGameMacroDefaultInfo"
   static let fetchMobapadDeviceInfo = "fetchMobapadDeviceInfo"
+  static let fetchPrintingType = "fetchPrintingType"
   static let resetDevice = "resetDevice"
   static let fetchChargingDock = "fetchChargingDock"
   static let updateChargingDock = "updateChargingDock"

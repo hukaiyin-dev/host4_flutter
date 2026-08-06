@@ -507,6 +507,7 @@ class _GmacroApiTestPageState extends State<GmacroApiTestPage> {
             '查询 GameMacro 默认值 (profile=0)',
             () => s!.fetchGameMacroDefaultInfo(profile: 0),
           ),
+          _Item('fetchPrintingType', '查询实物外观类型', () => s!.fetchPrintingType()),
           _Item('resetDevice', '恢复默认设置', () => s!.resetDevice()),
           _Item('switchToNormalMode', '切换普通模式', () => s!.switchToNormalMode()),
           _Item('switchToTestMode', '切换测试模式', () => s!.switchToTestMode()),
