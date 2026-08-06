@@ -342,6 +342,9 @@ extension GMacroProtocolSDK.GMacroProtocolSession {
   #if compiler(>=5.3) && $NonescapableTypes
   final public func resetDevice(_ response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
   #endif
+  #if compiler(>=5.3) && $NonescapableTypes
+  final public func fetchPrintingType(_ response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  #endif
 }
 extension GMacroProtocolSDK.GMacroProtocolSession {
   #if compiler(>=5.3) && $NonescapableTypes

@@ -3,6 +3,7 @@ abstract final class GmacroMethods {
   static const fetchDeviceVersion = 'fetchDeviceVersion';
   static const fetchGameMacroDefaultInfo = 'fetchGameMacroDefaultInfo';
   static const fetchMobapadDeviceInfo = 'fetchMobapadDeviceInfo';
+  static const fetchPrintingType = 'fetchPrintingType';
   static const resetDevice = 'resetDevice';
   static const fetchChargingDock = 'fetchChargingDock';
   static const updateChargingDock = 'updateChargingDock';

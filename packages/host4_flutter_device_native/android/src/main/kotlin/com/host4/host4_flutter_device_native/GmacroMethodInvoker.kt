@@ -49,6 +49,10 @@ internal object GmacroMethodInvoker {
                     commands.QueryMacroHandleInfo(profile, GmacroCallbackBridge.message(result))
                 }
 
+                //0x44 查询实物外观
+                Host4FlutterGmacroConstants.fetchPrintingType ->
+                    commands.queryPhysicalAppearance(GmacroCallbackBridge.fetchPrintingType(result))
+
                 //恢复出厂
                 Host4FlutterGmacroConstants.resetDevice -> commands.resetKeyBoard(GmacroCallbackBridge.message(result))
 

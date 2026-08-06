@@ -270,6 +270,8 @@ extension DataHelper {
             }
         case .deviceVersion:
             responseDic = analyzeDeviceVersion(payload)
+        case .printingType:
+            return analyzePrintingType(payload)
         case .mode:
             return analyzeResult(payload: payload)
         case .rocker:
@@ -511,6 +513,15 @@ extension DataHelper {
         
         responseDic = ["result": result]
         return (.success(responseDic), true)
+    }
+
+    /// 解析实物外观类型 0x44，原始 type 值直接上报
+    func analyzePrintingType(_ payload: Data) -> (response: Result<[String: Any], Error>, isComplete: Bool) {
+        guard let type = payload.first else {
+            return (.failure(BluetoothError.invalidInput), true)
+        }
+
+        return (.success(["type": Int(type)]), true)
     }
     
     /// 处理成功/失败 数据， 不为 0 时判定为失败(有subId的时候)
