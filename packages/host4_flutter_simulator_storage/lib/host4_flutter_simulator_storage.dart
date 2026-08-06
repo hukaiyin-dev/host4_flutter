@@ -58,16 +58,30 @@ class Host4SimulatorStorage {
     ).map(Host4SimulatorRomFolder.fromMap).toList(growable: false);
   }
 
-  /// Opens the iOS system folder picker for one of two additional slots.
+  /// Opens the iOS system folder picker for an additional ROM folder.
+  ///
+  /// [maximumFolderCount] defaults to the native limit of two additional
+  /// folders. Callers without a separate default folder can raise it to three.
   static Future<List<Host4SimulatorRomFolder>> pickSimulatorRomFolder({
     required int systemType,
     String? replacingPath,
+    int? maximumFolderCount,
   }) async {
+    if (maximumFolderCount != null &&
+        (maximumFolderCount < 1 || maximumFolderCount > 3)) {
+      throw ArgumentError.value(
+        maximumFolderCount,
+        'maximumFolderCount',
+        'must be between 1 and 3',
+      );
+    }
     final payload = await _channel
         .invokeMethod<Object?>('pickSimulatorRomFolder', <String, Object?>{
           'systemType': systemType,
           if (replacingPath != null && replacingPath.trim().isNotEmpty)
             'replacingPath': replacingPath,
+          if (maximumFolderCount != null)
+            'maximumFolderCount': maximumFolderCount,
         });
     return _readMapList(
       payload,

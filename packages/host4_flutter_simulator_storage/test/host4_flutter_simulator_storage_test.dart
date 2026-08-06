@@ -117,6 +117,7 @@ void main() {
       final folders = await Host4SimulatorStorage.pickSimulatorRomFolder(
         systemType: 9,
         replacingPath: '/private/var/mobile/Media/TF/old-gb',
+        maximumFolderCount: 3,
       );
 
       expect(folders.single.path, '/private/var/mobile/Media/TF/gb');
@@ -125,6 +126,7 @@ void main() {
       expect(calls.single.arguments, <String, Object?>{
         'systemType': 9,
         'replacingPath': '/private/var/mobile/Media/TF/old-gb',
+        'maximumFolderCount': 3,
       });
     },
   );
@@ -163,16 +165,29 @@ void main() {
     },
   );
 
-  test('iOS stores up to two additional folders for each simulator', () async {
-    final pluginSource = await File(
-      'ios/Classes/Host4FlutterSimulatorStoragePlugin.swift',
-    ).readAsString();
+  test(
+    'iOS stores a third folder only when the caller raises the default limit',
+    () async {
+      final pluginSource = await File(
+        'ios/Classes/Host4FlutterSimulatorStoragePlugin.swift',
+      ).readAsString();
 
-    expect(pluginSource, contains('Host4SimulatorRomFolderBookmarkStore'));
-    expect(pluginSource, contains('case "pickSimulatorRomFolder"'));
-    expect(pluginSource, contains('case "startSimulatorRomFolderScan"'));
-    expect(pluginSource, contains('private let maximumFolderCount = 2'));
-  });
+      expect(pluginSource, contains('Host4SimulatorRomFolderBookmarkStore'));
+      expect(pluginSource, contains('case "pickSimulatorRomFolder"'));
+      expect(pluginSource, contains('case "startSimulatorRomFolderScan"'));
+      expect(
+        pluginSource,
+        contains('arguments?["maximumFolderCount"] as? Int ?? 2'),
+      );
+      expect(pluginSource, contains('let maximumFolderCount = 3'));
+      expect(
+        pluginSource,
+        contains(
+          'simulatorFolderBookmarkStore.count(for: systemType) >= maximumFolderCount',
+        ),
+      );
+    },
+  );
 
   test(
     'iOS reports accessibility for every configured simulator folder',
