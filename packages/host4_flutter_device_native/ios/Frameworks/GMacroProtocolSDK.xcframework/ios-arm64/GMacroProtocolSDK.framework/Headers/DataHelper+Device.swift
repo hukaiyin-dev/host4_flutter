@@ -128,6 +128,17 @@ extension DataHelper {
                    finish: finish,
                    response: response)
     }
+
+    // 查询实物外观类型 0x44
+    func fetchPrintingType(finish: (() -> Void)? = nil,
+                           response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
+        let protocolID = GMacroProtocolID.printingType
+        let all = dataFrom(protocolID: protocolID, payload: nil)
+        self.write(protocolID: protocolID,
+                   data: all,
+                   finish: finish,
+                   response: response)
+    }
     
     
     func updateSwitchLayout(isOpen : Bool, locking : Bool, exchange : Bool,

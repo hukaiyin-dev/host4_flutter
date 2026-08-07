@@ -18,9 +18,9 @@ class Host4ThemeStorePage extends StatefulWidget {
     this.title = '主题商店',
     this.confirmLabel = '确定',
     this.backLabel = '返回',
-    this.themeNameBuilder,
     this.statusSource,
     this.showControllerHints = true,
+    this.themeNameBuilder,
   });
 
   final Host4ThemeManager? manager;
@@ -30,11 +30,11 @@ class Host4ThemeStorePage extends StatefulWidget {
   final String title;
   final String confirmLabel;
   final String backLabel;
-  final String Function(Host4ThemeCatalogEntry entry)? themeNameBuilder;
 
   /// 系统状态数据源；传入则在右上角显示时间 / Wi-Fi / 电量。
   final Host4SystemStatusSource? statusSource;
   final bool showControllerHints;
+  final String Function(Host4ThemeCatalogEntry entry)? themeNameBuilder;
 
   @override
   State<Host4ThemeStorePage> createState() => Host4ThemeStorePageState();
@@ -167,10 +167,10 @@ class Host4ThemeStorePageState extends State<Host4ThemeStorePage> {
                                   title: widget.title,
                                   confirmLabel: widget.confirmLabel,
                                   backLabel: widget.backLabel,
-                                  themeNameBuilder: widget.themeNameBuilder,
                                   statusSource: widget.statusSource,
                                   showControllerHints:
                                       widget.showControllerHints,
+                                  themeNameBuilder: widget.themeNameBuilder,
                                   onConfirm:
                                       widget.onConfirm ??
                                       () => Navigator.maybePop(context),
@@ -383,13 +383,13 @@ class _ThemeStoreScene extends StatelessWidget {
   final String title;
   final String confirmLabel;
   final String backLabel;
-  final String Function(Host4ThemeCatalogEntry entry)? themeNameBuilder;
   final Host4SystemStatusSource? statusSource;
   final bool showControllerHints;
   final VoidCallback onConfirm;
   final VoidCallback onBack;
   final VoidCallback? onSearch;
   final void Function(Host4ThemeManager, Host4ThemeCatalogEntry) onApplyTheme;
+  final String Function(Host4ThemeCatalogEntry entry)? themeNameBuilder;
 
   @override
   Widget build(BuildContext context) {
@@ -498,8 +498,8 @@ class _ThemeStoreGrid extends StatelessWidget {
   final Host4ThemeManager manager;
   final String? pendingThemeId;
   final Map<String, FocusNode> cardFocusNodes;
-  final String Function(Host4ThemeCatalogEntry entry)? themeNameBuilder;
   final void Function(Host4ThemeManager, Host4ThemeCatalogEntry) onApplyTheme;
+  final String Function(Host4ThemeCatalogEntry entry)? themeNameBuilder;
 
   @override
   Widget build(BuildContext context) {
@@ -510,12 +510,12 @@ class _ThemeStoreGrid extends StatelessWidget {
         for (var index = 0; index < manager.catalog.length; index++)
           _ThemeCard(
             entry: manager.catalog[index],
-            name:
-                themeNameBuilder?.call(manager.catalog[index]) ??
-                manager.catalog[index].name,
             focusNode: cardFocusNodes[manager.catalog[index].id]!,
             selected: manager.currentThemeId == manager.catalog[index].id,
             loading: pendingThemeId == manager.catalog[index].id,
+            themeName:
+                themeNameBuilder?.call(manager.catalog[index]) ??
+                manager.catalog[index].name,
             onActivate: () => onApplyTheme(manager, manager.catalog[index]),
           ),
       ],
@@ -526,18 +526,18 @@ class _ThemeStoreGrid extends StatelessWidget {
 class _ThemeCard extends StatefulWidget {
   const _ThemeCard({
     required this.entry,
-    required this.name,
     required this.focusNode,
     required this.selected,
     required this.loading,
+    required this.themeName,
     required this.onActivate,
   });
 
   final Host4ThemeCatalogEntry entry;
-  final String name;
   final FocusNode focusNode;
   final bool selected;
   final bool loading;
+  final String themeName;
   final VoidCallback onActivate;
 
   @override
@@ -656,7 +656,7 @@ class _ThemeCardState extends State<_ThemeCard> {
                       width: 96,
                       height: 18,
                       child: Text(
-                        widget.name,
+                        widget.themeName,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(

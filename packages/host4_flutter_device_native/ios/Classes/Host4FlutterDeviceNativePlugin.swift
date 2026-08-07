@@ -958,6 +958,8 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
             }
           }
         }
+      case Host4FlutterChannelConstants.fetchPrintingType:
+        invoke(result) { callback in session.fetchPrintingType(callback) }
       case Host4FlutterChannelConstants.resetDevice:
         invoke(result) { callback in session.resetDevice(callback) }
       case Host4FlutterChannelConstants.switchToNormalMode:

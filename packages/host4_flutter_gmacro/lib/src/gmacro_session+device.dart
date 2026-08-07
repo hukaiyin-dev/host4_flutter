@@ -25,6 +25,10 @@ extension GmacroSessionDevice on GmacroSession {
         arguments: {'profile': profile},
       );
 
+  /// 查询实物外观类型 0x44。type: 0 = Xbox 风格，1 = Switch 风格。
+  Future<Map<String, Object?>> fetchPrintingType() =>
+      invoke(GmacroMethods.fetchPrintingType);
+
   /// 恢复默认设置
   Future<Map<String, Object?>> resetDevice() =>
       invoke(GmacroMethods.resetDevice);
@@ -46,7 +50,7 @@ extension GmacroSessionDevice on GmacroSession {
       invoke(GmacroMethods.switchToSettingMode);
 
   ///切换到触点映射模式
-  Future<Map<String,Object?>> switchToTouchMappingMode() =>
+  Future<Map<String, Object?>> switchToTouchMappingMode() =>
       invoke(GmacroMethods.switchToTouchMappingMode);
 
   /// 查询上报率
@@ -91,5 +95,8 @@ extension GmacroSessionDevice on GmacroSession {
 
   /// 开关手柄功能以及回调 0:关闭手柄 1关闭私有协议 2关闭手柄共有协议
   Future<Map<String, Object?>> switchHandleCallbacks({required int method}) =>
-      invoke(GmacroMethods.switchHandleCallbacks, arguments: {'method': method});
+      invoke(
+        GmacroMethods.switchHandleCallbacks,
+        arguments: {'method': method},
+      );
 }

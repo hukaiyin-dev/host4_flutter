@@ -8,6 +8,7 @@ import com.host4.platform.kr.response.LinerTriggerRsp
 import com.host4.platform.kr.response.MacroHandleConfigRsp
 import com.host4.platform.kr.response.MacroMappingKeyRsp
 import com.host4.platform.kr.response.MacroProfileRsp
+import com.host4.platform.kr.response.PhysicalAppearanceRsp
 import com.host4.platform.kr.response.QueryCurrentLightEffectRsp
 import com.host4.platform.kr.response.QueryHandleInfoRsp
 import com.host4.platform.kr.response.VibrateOpenRsp
@@ -68,6 +69,26 @@ internal object GmacroCallbackBridge {
                             "hardware" to (rsp.hardwareVersion ?: ""),
                         ),
                     )
+                } else {
+                    result.error(
+                        "gmacro-method-failed",
+                        "GMacro method failed with code=$code",
+                        GmacroResponseSerializer.toMap(rsp),
+                    )
+                }
+            }
+        }
+    }
+
+
+    /**
+     * 查询实物外观类型（0x44），与 iOS 统一返回 type 原始值。
+     */
+    fun fetchPrintingType(result: MethodChannel.Result): OnMessageCallback<PhysicalAppearanceRsp> {
+        return OnMessageCallback { code, rsp ->
+            mainHandler.post {
+                if (code == Constants.SUCCESS || code == 80) {
+                    result.success(mapOf("type" to rsp.physicalAppearance))
                 } else {
                     result.error(
                         "gmacro-method-failed",

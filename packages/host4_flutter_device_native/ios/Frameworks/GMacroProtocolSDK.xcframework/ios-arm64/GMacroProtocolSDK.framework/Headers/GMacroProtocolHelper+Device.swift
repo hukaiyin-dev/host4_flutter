@@ -30,6 +30,12 @@ extension GMacroProtocolSession {
     public func resetDevice(_ response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
         dataHelper.resetDevice(response: response)
     }
+
+    /// 查询实物外观类型 0x44
+    /// type: 0 = Xbox 风格，1 = Switch 风格
+    public func fetchPrintingType(_ response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
+        dataHelper.fetchPrintingType(response: response)
+    }
 }
 
 
