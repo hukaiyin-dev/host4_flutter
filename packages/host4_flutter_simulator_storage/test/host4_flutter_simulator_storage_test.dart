@@ -8,10 +8,15 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   const channel = MethodChannel('host4_flutter_simulator_storage');
+  const eventsChannel = EventChannel(
+    'host4_flutter_simulator_storage/tf_card_scan_events',
+  );
 
   tearDown(() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, null);
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockStreamHandler(eventsChannel, null);
   });
 
   test('scanTfCardRoms sends system specs and parses scanned ROMs', () async {
@@ -112,6 +117,7 @@ void main() {
       final folders = await Host4SimulatorStorage.pickSimulatorRomFolder(
         systemType: 9,
         replacingPath: '/private/var/mobile/Media/TF/old-gb',
+        maximumFolderCount: 3,
       );
 
       expect(folders.single.path, '/private/var/mobile/Media/TF/gb');
@@ -120,6 +126,7 @@ void main() {
       expect(calls.single.arguments, <String, Object?>{
         'systemType': 9,
         'replacingPath': '/private/var/mobile/Media/TF/old-gb',
+        'maximumFolderCount': 3,
       });
     },
   );
@@ -158,16 +165,29 @@ void main() {
     },
   );
 
-  test('iOS stores up to two additional folders for each simulator', () async {
-    final pluginSource = await File(
-      'ios/Classes/Host4FlutterSimulatorStoragePlugin.swift',
-    ).readAsString();
+  test(
+    'iOS stores a third folder only when the caller raises the default limit',
+    () async {
+      final pluginSource = await File(
+        'ios/Classes/Host4FlutterSimulatorStoragePlugin.swift',
+      ).readAsString();
 
-    expect(pluginSource, contains('Host4SimulatorRomFolderBookmarkStore'));
-    expect(pluginSource, contains('case "pickSimulatorRomFolder"'));
-    expect(pluginSource, contains('case "startSimulatorRomFolderScan"'));
-    expect(pluginSource, contains('private let maximumFolderCount = 2'));
-  });
+      expect(pluginSource, contains('Host4SimulatorRomFolderBookmarkStore'));
+      expect(pluginSource, contains('case "pickSimulatorRomFolder"'));
+      expect(pluginSource, contains('case "startSimulatorRomFolderScan"'));
+      expect(
+        pluginSource,
+        contains('arguments?["maximumFolderCount"] as? Int ?? 2'),
+      );
+      expect(pluginSource, contains('let maximumFolderCount = 3'));
+      expect(
+        pluginSource,
+        contains(
+          'simulatorFolderBookmarkStore.count(for: systemType) >= maximumFolderCount',
+        ),
+      );
+    },
+  );
 
   test(
     'iOS reports accessibility for every configured simulator folder',
@@ -373,6 +393,51 @@ void main() {
     expect(event.scanId, 'ios_tf_scan_1');
     expect(event.game?.name, 'Zelda');
     expect(event.game?.resourcePath, 'Zelda.gba');
+  });
+
+  test('TF scan events share one native EventChannel subscription', () async {
+    final messenger =
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+    MockStreamHandlerEventSink? eventSink;
+    var listenCount = 0;
+    var cancelCount = 0;
+    messenger.setMockStreamHandler(
+      eventsChannel,
+      MockStreamHandler.inline(
+        onListen: (arguments, events) {
+          listenCount += 1;
+          eventSink = events;
+        },
+        onCancel: (arguments) {
+          cancelCount += 1;
+        },
+      ),
+    );
+
+    final firstEvents = <Host4TfCardScanEvent>[];
+    final secondEvents = <Host4TfCardScanEvent>[];
+    final firstSubscription =
+        Host4SimulatorStorage.tfCardRomScanEvents.listen(firstEvents.add);
+    final secondSubscription =
+        Host4SimulatorStorage.tfCardRomScanEvents.listen(secondEvents.add);
+    await pumpEventQueue();
+
+    expect(listenCount, 1);
+    eventSink?.success(<String, Object?>{
+      'phase': 'completed',
+      'scanId': 'shared_scan',
+    });
+    await pumpEventQueue();
+    expect(firstEvents.single.scanId, 'shared_scan');
+    expect(secondEvents.single.scanId, 'shared_scan');
+
+    await firstSubscription.cancel();
+    await pumpEventQueue();
+    expect(cancelCount, 0);
+
+    await secondSubscription.cancel();
+    await pumpEventQueue();
+    expect(cancelCount, 1);
   });
 
   test('TF scan event preserves a skipped directory selection', () {

@@ -4,19 +4,19 @@ const MethodChannel _channel = MethodChannel('host4_flutter_simulator_storage');
 const EventChannel _events = EventChannel(
   'host4_flutter_simulator_storage/tf_card_scan_events',
 );
+final Stream<Host4TfCardScanEvent> _tfCardRomScanEvents = _events
+    .receiveBroadcastStream()
+    .where((event) => event is Map)
+    .cast<Map>()
+    .map(Host4TfCardScanEvent.fromMap);
 
 class Host4SimulatorStorage {
   const Host4SimulatorStorage._();
 
   /// Emits TF-card scan progress. Subscribe before starting a scan so no
   /// discovered ROM is missed.
-  static Stream<Host4TfCardScanEvent> get tfCardRomScanEvents {
-    return _events
-        .receiveBroadcastStream()
-        .where((event) => event is Map)
-        .cast<Map>()
-        .map(Host4TfCardScanEvent.fromMap);
-  }
+  static Stream<Host4TfCardScanEvent> get tfCardRomScanEvents =>
+      _tfCardRomScanEvents;
 
   /// Starts an iOS TF-card scan. Results arrive through [tfCardRomScanEvents].
   static Future<String> startTfCardRomScan({
@@ -58,16 +58,30 @@ class Host4SimulatorStorage {
     ).map(Host4SimulatorRomFolder.fromMap).toList(growable: false);
   }
 
-  /// Opens the iOS system folder picker for one of two additional slots.
+  /// Opens the iOS system folder picker for an additional ROM folder.
+  ///
+  /// [maximumFolderCount] defaults to the native limit of two additional
+  /// folders. Callers without a separate default folder can raise it to three.
   static Future<List<Host4SimulatorRomFolder>> pickSimulatorRomFolder({
     required int systemType,
     String? replacingPath,
+    int? maximumFolderCount,
   }) async {
+    if (maximumFolderCount != null &&
+        (maximumFolderCount < 1 || maximumFolderCount > 3)) {
+      throw ArgumentError.value(
+        maximumFolderCount,
+        'maximumFolderCount',
+        'must be between 1 and 3',
+      );
+    }
     final payload = await _channel
         .invokeMethod<Object?>('pickSimulatorRomFolder', <String, Object?>{
           'systemType': systemType,
           if (replacingPath != null && replacingPath.trim().isNotEmpty)
             'replacingPath': replacingPath,
+          if (maximumFolderCount != null)
+            'maximumFolderCount': maximumFolderCount,
         });
     return _readMapList(
       payload,

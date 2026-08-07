@@ -386,9 +386,17 @@ public final class Host4FlutterSimulatorStoragePlugin: NSObject, FlutterPlugin, 
     let arguments = call.arguments as? [String: Any]
     let replacingPath = (arguments?["replacingPath"] as? String)?
       .trimmingCharacters(in: .whitespacesAndNewlines)
+    let maximumFolderCount = min(
+      max(arguments?["maximumFolderCount"] as? Int ?? 2, 1),
+      simulatorFolderBookmarkStore.maximumFolderCount
+    )
     if (replacingPath?.isEmpty ?? true) &&
-      simulatorFolderBookmarkStore.count(for: systemType) >= 2 {
-      result(FlutterError(code: "folder_limit_reached", message: "At most two additional ROM folders are allowed for each simulator.", details: nil))
+      simulatorFolderBookmarkStore.count(for: systemType) >= maximumFolderCount {
+      result(FlutterError(
+        code: "folder_limit_reached",
+        message: "At most \(maximumFolderCount) additional ROM folders are allowed for each simulator.",
+        details: nil
+      ))
       return
     }
     guard let presenter = topViewController() else {
@@ -903,7 +911,7 @@ private final class Host4SimulatorRomFolderBookmarkStore {
   }
 
   private let dataKey = "host4_flutter_simulator_storage.simulator_rom_folders"
-  private let maximumFolderCount = 2
+  let maximumFolderCount = 3
 
   func entries(for systemType: Int) -> [Entry] {
     Array(
@@ -972,7 +980,7 @@ private final class Host4SimulatorRomFolderBookmarkStore {
     } else if systemEntries.count >= maximumFolderCount {
       throw Host4TfCardScanError(
         code: "folder_limit_reached",
-        message: "At most two additional ROM folders are allowed for each simulator."
+        message: "At most three additional ROM folders are allowed for each simulator."
       )
     } else {
       systemEntries.append(newEntry)
