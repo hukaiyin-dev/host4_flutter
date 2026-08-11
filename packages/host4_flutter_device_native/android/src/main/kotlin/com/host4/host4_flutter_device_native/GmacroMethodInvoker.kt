@@ -638,6 +638,14 @@ internal object GmacroMethodInvoker {
                     commands.switchHandleConfig(profile, GmacroCallbackBridge.message(result))
                 }
 
+                //0x83 02 开关手柄功能以及 EP3 回调，按 bit 参数兼容 Android 旧 SDK
+                Host4FlutterGmacroConstants.updateHandleFunction -> {
+                    val handleOn = GmacroArgParser.boolArg(arguments, "handleOn")
+                    val ep3CallbackOn = GmacroArgParser.boolArg(arguments, "ep3CallbackOn")
+                    val method = (if (handleOn) 1 else 0) or (if (ep3CallbackOn) 2 else 0)
+                    commands.switchHandleCallbacks(method, GmacroCallbackBridge.message(result))
+                }
+
                 //0x83 02
                 Host4FlutterGmacroConstants.switchHandleCallbacks -> {
                     val method = GmacroArgParser.intArg(arguments, "method")

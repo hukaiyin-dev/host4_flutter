@@ -133,6 +133,7 @@ struct Host4FlutterChannelConstants {
   static let switchOutputMode = "switchOutputMode"
   static let sendHandleBeta = "sendHandleBeta"
   static let switchHandleConfig = "switchHandleConfig"
+  static let updateHandleFunction = "updateHandleFunction"
   static let switchHandleCallbacks = "switchHandleCallbacks"
   static let queryLinerTrigger = "queryLinerTrigger"
   static let switchLinerTrigger = "switchLinerTrigger"

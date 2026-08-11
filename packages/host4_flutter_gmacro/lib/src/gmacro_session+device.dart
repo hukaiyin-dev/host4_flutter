@@ -93,7 +93,18 @@ extension GmacroSessionDevice on GmacroSession {
   Future<Map<String, Object?>> switchHandleConfig({required int profile}) =>
       invoke(GmacroMethods.switchHandleConfig, arguments: {'profile': profile});
 
-  /// 开关手柄功能以及回调 0:关闭手柄 1关闭私有协议 2关闭手柄共有协议
+  /// 开关手柄功能以及 EP3 回调。
+  ///
+  /// [handleOn] 对应 Bit0；[ep3CallbackOn] 对应 Bit1。
+  Future<Map<String, Object?>> updateHandleFunction({
+    required bool handleOn,
+    required bool ep3CallbackOn,
+  }) => invoke(
+    GmacroMethods.updateHandleFunction,
+    arguments: {'handleOn': handleOn, 'ep3CallbackOn': ep3CallbackOn},
+  );
+
+  /// 兼容旧接口：开关手柄功能以及回调。
   Future<Map<String, Object?>> switchHandleCallbacks({required int method}) =>
       invoke(
         GmacroMethods.switchHandleCallbacks,

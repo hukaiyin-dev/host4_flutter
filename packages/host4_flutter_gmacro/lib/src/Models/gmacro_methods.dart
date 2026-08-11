@@ -136,6 +136,7 @@ abstract final class GmacroMethods {
   static const queryOutputMode = 'queryOutputMode';
   static const sendHandleBeta = 'sendHandleBeta';
   static const switchHandleConfig = 'switchHandleConfig';
+  static const updateHandleFunction = 'updateHandleFunction';
   static const switchHandleCallbacks = 'switchHandleCallbacks';
   static const queryLinerTrigger = 'queryLinerTrigger';
   static const switchLinerTrigger = 'switchLinerTrigger';
