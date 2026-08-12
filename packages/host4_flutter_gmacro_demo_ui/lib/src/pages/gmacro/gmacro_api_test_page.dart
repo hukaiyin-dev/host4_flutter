@@ -498,6 +498,11 @@ class _GmacroApiTestPageState extends State<GmacroApiTestPage> {
         items: [
           _Item('fetchDeviceVersion', '查询设备版本', () => s!.fetchDeviceVersion()),
           _Item(
+            'fetchAppWakeKeyType',
+            '查询唤醒 APP 按键类型',
+            () => s!.fetchAppWakeKeyType(),
+          ),
+          _Item(
             'fetchMobapadDeviceInfo',
             '查询设备信息 (profile=0)',
             () => s!.fetchMobapadDeviceInfo(profile: 0),

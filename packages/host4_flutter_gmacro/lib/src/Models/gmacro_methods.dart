@@ -1,6 +1,7 @@
 abstract final class GmacroMethods {
   // Device
   static const fetchDeviceVersion = 'fetchDeviceVersion';
+  static const fetchAppWakeKeyType = 'fetchAppWakeKeyType';
   static const fetchGameMacroDefaultInfo = 'fetchGameMacroDefaultInfo';
   static const fetchMobapadDeviceInfo = 'fetchMobapadDeviceInfo';
   static const fetchPrintingType = 'fetchPrintingType';

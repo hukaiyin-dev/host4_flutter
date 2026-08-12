@@ -934,6 +934,8 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
             }
           }
         }
+      case Host4FlutterChannelConstants.fetchAppWakeKeyType:
+        invoke(result) { callback in session.fetchAppWakeKeyType(callback) }
       case Host4FlutterChannelConstants.fetchGameMacroDefaultInfo:
         let profile = try intArg("profile", from: arguments)
         invoke(result) { callback in
