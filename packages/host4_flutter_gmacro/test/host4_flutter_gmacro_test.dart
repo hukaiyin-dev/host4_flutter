@@ -111,6 +111,29 @@ void main() {
     await session.close();
   });
 
+  test(
+    'updateHandleFunction forwards independent handle and EP3 flags',
+    () async {
+      final native = _FakeDeviceNative();
+      final session = GmacroSession(
+        id: 'protocol-1',
+        transport: _FakeTransportSession(),
+        native: native,
+      );
+
+      await session.updateHandleFunction(handleOn: false, ep3CallbackOn: true);
+
+      expect(native.invocations, <Map<String, Object?>>[
+        {
+          'method': GmacroMethods.updateHandleFunction,
+          'arguments': {'handleOn': false, 'ep3CallbackOn': true},
+        },
+      ]);
+
+      await session.close();
+    },
+  );
+
   test('Android test-mode escalation is exposed as TestEventMode', () async {
     debugDefaultTargetPlatformOverride = TargetPlatform.android;
     final native = _FakeDeviceNative();

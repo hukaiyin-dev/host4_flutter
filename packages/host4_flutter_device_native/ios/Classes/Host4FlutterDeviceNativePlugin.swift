@@ -1494,6 +1494,10 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
       case Host4FlutterChannelConstants.switchHandleConfig:
         let profile = try intArg("profile", from: arguments)
         invoke(result) { callback in session.switchToProfile(profile: profile, response: callback) }
+      case Host4FlutterChannelConstants.updateHandleFunction:
+        let handleOn = try boolArg("handleOn", from: arguments)
+        let ep3CallbackOn = try boolArg("ep3CallbackOn", from: arguments)
+        invoke(result) { callback in session.updateHandleFunction(handleOn: handleOn, ep3CallbackOn: ep3CallbackOn, response: callback) }
       case Host4FlutterChannelConstants.switchHandleCallbacks:
         let method = try intArg("method", from: arguments)
         let handleOn = method != 0

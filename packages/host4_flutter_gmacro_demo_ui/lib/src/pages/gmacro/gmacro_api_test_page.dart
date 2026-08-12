@@ -828,6 +828,11 @@ class _GmacroApiTestPageState extends State<GmacroApiTestPage> {
             () => s!.switchHandleConfig(profile: 0),
           ),
           _Item(
+            'updateHandleFunction',
+            '手柄功能关 / EP3 回调开',
+            () => s!.updateHandleFunction(handleOn: false, ep3CallbackOn: true),
+          ),
+          _Item(
             'switchHandleCallbacks',
             '开关手柄功能以及回调(method=1)',
             () => s!.switchHandleCallbacks(method: 1),
