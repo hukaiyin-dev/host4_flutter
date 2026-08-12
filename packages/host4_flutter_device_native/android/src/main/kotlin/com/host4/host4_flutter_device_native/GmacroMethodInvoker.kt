@@ -35,12 +35,9 @@ internal object GmacroMethodInvoker {
                     commands.queryDeviceInfo(GmacroCallbackBridge.fetchDeviceVersion(result))
                 }
 
-                Host4FlutterGmacroConstants.fetchAppWakeKeyType -> {
-                    result.error(
-                        "not-implemented",
-                        "fetchAppWakeKeyType is not implemented by the Android native SDK.",
-                        null,
-                    )
+                //查询长按按键类型
+                Host4FlutterGmacroConstants.fetchAppWakeKeyType-> {
+                    commands.fetchAppWakeKeyType(GmacroCallbackBridge.fetchAppWakeKeyType(result))
                 }
 
                 // 0x77 04 查询 Game Macro 默认值
@@ -272,7 +269,7 @@ internal object GmacroMethodInvoker {
 
                 Host4FlutterGmacroConstants.queryMacroKeys -> {
                     val profile = GmacroArgParser.intArg(arguments, "profile")
-                    commands.queryMacroKeyReq(profile, GmacroCallbackBridge.message(result))
+                    commands.queryMacroSupportReq(profile, GmacroCallbackBridge.message(result))
                 }
 
                 Host4FlutterGmacroConstants.queryMacroRecordableKeys -> {

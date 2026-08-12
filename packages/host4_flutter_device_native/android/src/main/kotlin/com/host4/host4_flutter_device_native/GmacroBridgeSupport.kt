@@ -11,6 +11,7 @@ import com.host4.platform.kr.response.MacroProfileRsp
 import com.host4.platform.kr.response.PhysicalAppearanceRsp
 import com.host4.platform.kr.response.QueryCurrentLightEffectRsp
 import com.host4.platform.kr.response.QueryHandleInfoRsp
+import com.host4.platform.kr.response.QueryUsbResetRsp
 import com.host4.platform.kr.response.VibrateOpenRsp
 import com.host4.platform.kr.response.WorkStyleRsp
 import com.host4.platform.listener.OnMessageCallback
@@ -285,6 +286,30 @@ internal object GmacroCallbackBridge {
                             "rightMode" to (rsp.triggerRight),
                             "leftThreshold" to 0,
                             "rightThreshold" to 0,
+                        ),
+                    )
+                } else {
+                    result.error(
+                        "gmacro-method-failed",
+                        "GMacro method failed with code=$code",
+                        GmacroResponseSerializer.toMap(rsp),
+                    )
+                }
+            }
+        }
+    }
+
+
+    /**
+     * 按键类型
+     */
+    fun fetchAppWakeKeyType(result: MethodChannel.Result) : OnMessageCallback<QueryUsbResetRsp> {
+        return OnMessageCallback { code, rsp ->
+            mainHandler.post {
+                if (code == Constants.SUCCESS || code == 80) {
+                    result.success(
+                        mapOf(
+                            "keyType" to (rsp.keyType),
                         ),
                     )
                 } else {
