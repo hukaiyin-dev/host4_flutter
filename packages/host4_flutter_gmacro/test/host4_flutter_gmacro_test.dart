@@ -134,6 +134,26 @@ void main() {
     },
   );
 
+  test('fetchAppWakeKeyType forwards sdk method without arguments', () async {
+    final native = _FakeDeviceNative();
+    final session = GmacroSession(
+      id: 'protocol-1',
+      transport: _FakeTransportSession(),
+      native: native,
+    );
+
+    await session.fetchAppWakeKeyType();
+
+    expect(native.invocations, <Map<String, Object?>>[
+      {
+        'method': GmacroMethods.fetchAppWakeKeyType,
+        'arguments': <String, Object?>{},
+      },
+    ]);
+
+    await session.close();
+  });
+
   test('Android test-mode escalation is exposed as TestEventMode', () async {
     debugDefaultTargetPlatformOverride = TargetPlatform.android;
     final native = _FakeDeviceNative();

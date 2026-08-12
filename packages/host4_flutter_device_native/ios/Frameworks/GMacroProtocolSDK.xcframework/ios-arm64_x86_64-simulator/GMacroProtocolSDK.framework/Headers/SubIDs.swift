@@ -14,6 +14,7 @@ enum DeviceVersionSubID: UInt8 {
     case fetchReportRate        = 0x09 // 查询回报率
     case setChargingDock        = 0x0A // 设置充电底座启停开关
     case fetchChargingDock      = 0x0B // 查询充电底座启停开关
+    case fetchAppWakeKeyType    = 0x10 // 获取唤醒 APP 的按键类型
 
    var description: String {
         switch self {
@@ -27,6 +28,8 @@ enum DeviceVersionSubID: UInt8 {
             return "设置充电底座启停开关"
         case .fetchChargingDock:
             return "查询充电底座启停开关"
+        case .fetchAppWakeKeyType:
+            return "获取唤醒 APP 的按键类型"
         }
     }
 

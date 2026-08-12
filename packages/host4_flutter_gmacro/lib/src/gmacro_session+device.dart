@@ -7,6 +7,10 @@ extension GmacroSessionDevice on GmacroSession {
   Future<Map<String, Object?>> fetchDeviceVersion() =>
       invoke(GmacroMethods.fetchDeviceVersion);
 
+  /// 获取唤醒 APP 的按键类型。keyType: 1 = Home 键，2 = AI 键。
+  Future<Map<String, Object?>> fetchAppWakeKeyType() =>
+      invoke(GmacroMethods.fetchAppWakeKeyType);
+
   /// 查询 Game Macro 默认值（完整设备配置）0x77 04
   Future<GmacroDefaultInfo> fetchGameMacroDefaultInfo({
     required int profile,

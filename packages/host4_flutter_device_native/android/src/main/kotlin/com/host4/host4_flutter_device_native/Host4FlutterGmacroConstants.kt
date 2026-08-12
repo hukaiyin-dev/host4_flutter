@@ -1,6 +1,7 @@
 internal object Host4FlutterGmacroConstants {
     // Device
     const val fetchDeviceVersion = "fetchDeviceVersion"
+    const val fetchAppWakeKeyType = "fetchAppWakeKeyType"
     const val fetchGameMacroDefaultInfo = "fetchGameMacroDefaultInfo"
     const val fetchMobapadDeviceInfo = "fetchMobapadDeviceInfo"
     const val fetchPrintingType = "fetchPrintingType"

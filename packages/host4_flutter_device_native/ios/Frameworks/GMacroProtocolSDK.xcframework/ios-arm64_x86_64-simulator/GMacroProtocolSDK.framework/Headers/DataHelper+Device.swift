@@ -60,6 +60,24 @@ extension DataHelper {
                    finish: finish,
                    response: response)
     }
+
+    // MARK: - 8410 获取唤醒 APP 的按键类型
+    func fetchAppWakeKeyType(finish:(()->())? = nil, response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
+        var payload = Data()
+
+        let subID = DeviceVersionSubID.fetchAppWakeKeyType
+        payload.append(Data.from(subID.rawValue))
+
+        let device = GMacroDeviceType.gamepad.rawValue
+        payload.append(Data.from(device))
+
+        let protocolID = subID.proID
+        let all = dataFrom(protocolID: protocolID, payload: payload)
+        self.write(protocolID: protocolID,
+                   data: all,
+                   finish: finish,
+                   response: response)
+    }
     
     // 获取设备信息(魔派)
     func deviceInfo(profile: Int,
@@ -525,6 +543,9 @@ extension DataHelper {
                 isOn = false
             }
             dic["isOn"] = isOn
+        case .fetchAppWakeKeyType:
+            let keyType = parser.next(1).toInt()
+            dic["keyType"] = keyType
         default:
             let rawHex = payload.map { String(format: "%02X", $0) }.joined(separator: " ")
             print("未处理的完整数据: [\(rawHex)]")
