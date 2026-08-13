@@ -601,7 +601,11 @@ public final class Host4FlutterSimulatorStoragePlugin: NSObject, FlutterPlugin, 
         url.stopAccessingSecurityScopedResource()
       }
     }
-    guard didStartAccessing else { return false }
+    // A folder inside the app's own sandbox (for example the launcher's
+    // Documents/roms/<system> onboarding directory re-selected through the
+    // document picker) is readable without a security scope, so
+    // startAccessingSecurityScopedResource legitimately returns false there.
+    // The readability probe alone is authoritative for accessibility.
     return Host4TfCardFileAccessRegistry.isDirectoryReadable(at: url)
   }
 
