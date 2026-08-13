@@ -7,6 +7,10 @@ extension GmacroSessionDevice on GmacroSession {
   Future<Map<String, Object?>> fetchDeviceVersion() =>
       invoke(GmacroMethods.fetchDeviceVersion);
 
+  /// 获取唤醒 APP 的按键类型。keyType: 1 = Home 键，2 = AI 键。
+  Future<Map<String, Object?>> fetchAppWakeKeyType() =>
+      invoke(GmacroMethods.fetchAppWakeKeyType);
+
   /// 查询 Game Macro 默认值（完整设备配置）0x77 04
   Future<GmacroDefaultInfo> fetchGameMacroDefaultInfo({
     required int profile,
@@ -93,7 +97,18 @@ extension GmacroSessionDevice on GmacroSession {
   Future<Map<String, Object?>> switchHandleConfig({required int profile}) =>
       invoke(GmacroMethods.switchHandleConfig, arguments: {'profile': profile});
 
-  /// 开关手柄功能以及回调 0:关闭手柄 1关闭私有协议 2关闭手柄共有协议
+  /// 开关手柄功能以及 EP3 回调。
+  ///
+  /// [handleOn] 对应 Bit0；[ep3CallbackOn] 对应 Bit1。
+  Future<Map<String, Object?>> updateHandleFunction({
+    required bool handleOn,
+    required bool ep3CallbackOn,
+  }) => invoke(
+    GmacroMethods.updateHandleFunction,
+    arguments: {'handleOn': handleOn, 'ep3CallbackOn': ep3CallbackOn},
+  );
+
+  /// 兼容旧接口：开关手柄功能以及回调。
   Future<Map<String, Object?>> switchHandleCallbacks({required int method}) =>
       invoke(
         GmacroMethods.switchHandleCallbacks,

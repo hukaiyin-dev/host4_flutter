@@ -35,6 +35,11 @@ internal object GmacroMethodInvoker {
                     commands.queryDeviceInfo(GmacroCallbackBridge.fetchDeviceVersion(result))
                 }
 
+                //查询长按按键类型
+                Host4FlutterGmacroConstants.fetchAppWakeKeyType-> {
+                    commands.fetchAppWakeKeyType(GmacroCallbackBridge.fetchAppWakeKeyType(result))
+                }
+
                 // 0x77 04 查询 Game Macro 默认值
                 Host4FlutterGmacroConstants.fetchGameMacroDefaultInfo -> {
                     val profile = GmacroArgParser.intArg(arguments, "profile")
@@ -264,7 +269,7 @@ internal object GmacroMethodInvoker {
 
                 Host4FlutterGmacroConstants.queryMacroKeys -> {
                     val profile = GmacroArgParser.intArg(arguments, "profile")
-                    commands.queryMacroKeyReq(profile, GmacroCallbackBridge.message(result))
+                    commands.queryMacroSupportReq(profile, GmacroCallbackBridge.message(result))
                 }
 
                 Host4FlutterGmacroConstants.queryMacroRecordableKeys -> {
@@ -636,6 +641,14 @@ internal object GmacroMethodInvoker {
                 Host4FlutterGmacroConstants.switchHandleConfig -> {
                     val profile = GmacroArgParser.intArg(arguments, "profile")
                     commands.switchHandleConfig(profile, GmacroCallbackBridge.message(result))
+                }
+
+                //0x83 02 开关手柄功能以及 EP3 回调，按 bit 参数兼容 Android 旧 SDK
+                Host4FlutterGmacroConstants.updateHandleFunction -> {
+                    val handleOn = GmacroArgParser.boolArg(arguments, "handleOn")
+                    val ep3CallbackOn = GmacroArgParser.boolArg(arguments, "ep3CallbackOn")
+                    val method = (if (handleOn) 1 else 0) or (if (ep3CallbackOn) 2 else 0)
+                    commands.switchHandleCallbacks(method, GmacroCallbackBridge.message(result))
                 }
 
                 //0x83 02

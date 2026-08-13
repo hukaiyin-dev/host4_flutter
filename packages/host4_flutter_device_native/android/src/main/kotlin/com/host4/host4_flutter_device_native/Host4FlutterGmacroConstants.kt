@@ -1,6 +1,7 @@
 internal object Host4FlutterGmacroConstants {
     // Device
     const val fetchDeviceVersion = "fetchDeviceVersion"
+    const val fetchAppWakeKeyType = "fetchAppWakeKeyType"
     const val fetchGameMacroDefaultInfo = "fetchGameMacroDefaultInfo"
     const val fetchMobapadDeviceInfo = "fetchMobapadDeviceInfo"
     const val fetchPrintingType = "fetchPrintingType"
@@ -134,6 +135,7 @@ internal object Host4FlutterGmacroConstants {
     const val queryOutputMode = "queryOutputMode"
     const val sendHandleBeta = "sendHandleBeta"
     const val switchHandleConfig = "switchHandleConfig"
+    const val updateHandleFunction = "updateHandleFunction"
     const val switchHandleCallbacks = "switchHandleCallbacks"
     const val queryLinerTrigger = "queryLinerTrigger"
     const val switchLinerTrigger = "switchLinerTrigger"

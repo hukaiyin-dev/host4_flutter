@@ -15,6 +15,12 @@ extension GMacroProtocolSession {
     public func fetchDeviceVersion(_ response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
         dataHelper.deviceVersion(response: response)
     }
+
+    /// 获取唤醒 APP 的按键类型 0x84 0x10
+    /// keyType: 1 = Home 键，2 = AI 键
+    public func fetchAppWakeKeyType(_ response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
+        dataHelper.fetchAppWakeKeyType(response: response)
+    }
     
     /// 设备信息（魔派）
     public func fetchMobapadDeviceInfo(profile: Int, response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {

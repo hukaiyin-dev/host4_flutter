@@ -1,6 +1,7 @@
 struct Host4FlutterChannelConstants {
   // Device
   static let fetchDeviceVersion = "fetchDeviceVersion"
+  static let fetchAppWakeKeyType = "fetchAppWakeKeyType"
   static let fetchGameMacroDefaultInfo = "fetchGameMacroDefaultInfo"
   static let fetchMobapadDeviceInfo = "fetchMobapadDeviceInfo"
   static let fetchPrintingType = "fetchPrintingType"
@@ -133,6 +134,7 @@ struct Host4FlutterChannelConstants {
   static let switchOutputMode = "switchOutputMode"
   static let sendHandleBeta = "sendHandleBeta"
   static let switchHandleConfig = "switchHandleConfig"
+  static let updateHandleFunction = "updateHandleFunction"
   static let switchHandleCallbacks = "switchHandleCallbacks"
   static let queryLinerTrigger = "queryLinerTrigger"
   static let switchLinerTrigger = "switchLinerTrigger"

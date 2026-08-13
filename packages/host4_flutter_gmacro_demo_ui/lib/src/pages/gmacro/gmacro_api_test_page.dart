@@ -498,6 +498,11 @@ class _GmacroApiTestPageState extends State<GmacroApiTestPage> {
         items: [
           _Item('fetchDeviceVersion', '查询设备版本', () => s!.fetchDeviceVersion()),
           _Item(
+            'fetchAppWakeKeyType',
+            '查询唤醒 APP 按键类型',
+            () => s!.fetchAppWakeKeyType(),
+          ),
+          _Item(
             'fetchMobapadDeviceInfo',
             '查询设备信息 (profile=0)',
             () => s!.fetchMobapadDeviceInfo(profile: 0),
@@ -826,6 +831,11 @@ class _GmacroApiTestPageState extends State<GmacroApiTestPage> {
             'switchHandleConfig',
             '切换手柄配置页(profile=0)',
             () => s!.switchHandleConfig(profile: 0),
+          ),
+          _Item(
+            'updateHandleFunction',
+            '手柄功能关 / EP3 回调开',
+            () => s!.updateHandleFunction(handleOn: false, ep3CallbackOn: true),
           ),
           _Item(
             'switchHandleCallbacks',
