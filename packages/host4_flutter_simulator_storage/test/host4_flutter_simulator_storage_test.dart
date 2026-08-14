@@ -423,6 +423,37 @@ void main() {
     );
   });
 
+  test(
+    'iOS simulator folder scan normalizes gamelist paths after bookmark resolution',
+    () async {
+      final pluginSource = await File(
+        'ios/Classes/Host4FlutterSimulatorStoragePlugin.swift',
+      ).readAsString();
+
+      expect(
+        pluginSource,
+        contains('static func metadata(\n    forResourcePath resourcePath'),
+      );
+      expect(pluginSource, contains('addCandidate(fileURL.path)'));
+      expect(
+        pluginSource,
+        contains('candidate.hasSuffix("/\\(metadataPath)")'),
+      );
+      expect(
+        pluginSource,
+        contains('metadataPath.hasSuffix("/\\(candidate)")'),
+      );
+      expect(
+        pluginSource,
+        contains('replacingOccurrences(of: "\\\\", with: "/")'),
+      );
+      expect(
+        pluginSource,
+        contains('parser.shouldResolveExternalEntities = false'),
+      );
+    },
+  );
+
   test('TF scan event parses a discovered ROM immediately', () {
     final event = Host4TfCardScanEvent.fromMap(<String, Object?>{
       'phase': 'gameFound',

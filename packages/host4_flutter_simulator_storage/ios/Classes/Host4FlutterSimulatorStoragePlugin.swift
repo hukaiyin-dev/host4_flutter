@@ -1338,9 +1338,11 @@ private final class Host4TfCardRomScanner {
     metadata: [String: Host4GameMetadata]
   ) -> [String: Any] {
     let resourcePath = relativePath(from: platformURL, to: fileURL)
-    let gameMetadata = metadata[resourcePath] ??
-      metadata["./\(resourcePath)"] ??
-      metadata.first(where: { resourcePath.hasSuffix($0.key.trimmingPrefix("./")) })?.value
+    let gameMetadata = Host4GameListParser.metadata(
+      forResourcePath: resourcePath,
+      fileURL: fileURL,
+      in: metadata
+    )
     var game: [String: Any] = [
       "type": system.type,
       "platformName": system.name,
@@ -1437,8 +1439,61 @@ private final class Host4GameListParser: NSObject, XMLParserDelegate {
       let parser = XMLParser(contentsOf: fileURL) else { return [:] }
     let delegate = Host4GameListParser()
     parser.delegate = delegate
-    parser.parse()
+    parser.shouldResolveExternalEntities = false
+    guard parser.parse() else { return [:] }
     return delegate.games
+  }
+
+  static func metadata(
+    forResourcePath resourcePath: String,
+    fileURL: URL,
+    in entries: [String: Host4GameMetadata]
+  ) -> Host4GameMetadata? {
+    var candidates: [String] = []
+    func addCandidate(_ value: String) {
+      guard let normalized = normalizedPath(value), !candidates.contains(normalized) else {
+        return
+      }
+      candidates.append(normalized)
+    }
+
+    addCandidate(resourcePath)
+    // A bookmark can resolve to a different `/var` spelling after a process
+    // restart. The complete ROM path still lets a gamelist entry such as
+    // `./roms/nes/game.nes` match its selected platform folder.
+    addCandidate(fileURL.path)
+    for candidate in candidates {
+      if let exact = entries[candidate] {
+        return exact
+      }
+    }
+
+    var bestMetadata: Host4GameMetadata?
+    var bestPath: String?
+    var bestScore = -1
+    var ambiguous = false
+    for (metadataPath, metadata) in entries {
+      for candidate in candidates {
+        let score: Int?
+        if candidate.hasSuffix("/\(metadataPath)") {
+          score = 3000000 + metadataPath.count
+        } else if metadataPath.hasSuffix("/\(candidate)") {
+          score = 2000000 + candidate.count
+        } else {
+          score = nil
+        }
+        guard let score else { continue }
+        if score > bestScore {
+          bestMetadata = metadata
+          bestPath = metadataPath
+          bestScore = score
+          ambiguous = false
+        } else if score == bestScore && bestPath != metadataPath {
+          ambiguous = true
+        }
+      }
+    }
+    return ambiguous ? nil : bestMetadata
   }
 
   func parser(
@@ -1448,9 +1503,10 @@ private final class Host4GameListParser: NSObject, XMLParserDelegate {
     qualifiedName qName: String?,
     attributes attributeDict: [String: String] = [:]
   ) {
+    let normalizedElementName = elementName.lowercased()
     currentElement = elementName
     currentText = ""
-    if elementName == "game" {
+    if normalizedElementName == "game" {
       inGame = true
       path = ""
       name = ""
@@ -1472,7 +1528,7 @@ private final class Host4GameListParser: NSObject, XMLParserDelegate {
   ) {
     guard inGame else { return }
     let text = currentText.trimmingCharacters(in: .whitespacesAndNewlines)
-    switch elementName {
+    switch elementName.lowercased() {
     case "path":
       path = text
     case "name":
@@ -1484,14 +1540,13 @@ private final class Host4GameListParser: NSObject, XMLParserDelegate {
     case "desc":
       gameDescription = text
     case "game":
-      if !path.isEmpty {
-        games[path.trimmingPrefix("./")] = Host4GameMetadata(
+      if let normalizedPath = Self.normalizedPath(path) {
+        games[normalizedPath] = Host4GameMetadata(
           name: name.isEmpty ? nil : name,
           imagePath: imagePath.isEmpty ? nil : imagePath,
           videoPath: videoPath.isEmpty ? nil : videoPath,
           description: gameDescription.isEmpty ? nil : gameDescription
         )
-        games[path] = games[path.trimmingPrefix("./")]
       }
       inGame = false
     default:
@@ -1499,11 +1554,21 @@ private final class Host4GameListParser: NSObject, XMLParserDelegate {
     }
     currentText = ""
   }
-}
 
-private extension String {
-  func trimmingPrefix(_ prefix: String) -> String {
-    guard hasPrefix(prefix) else { return self }
-    return String(dropFirst(prefix.count))
+  private static func normalizedPath(_ rawPath: String) -> String? {
+    var path = rawPath
+      .trimmingCharacters(in: .whitespacesAndNewlines)
+      .replacingOccurrences(of: "\\", with: "/")
+    while path.hasPrefix("./") {
+      path.removeFirst(2)
+    }
+    let components = path.split(separator: "/", omittingEmptySubsequences: true)
+      .filter { $0 != "." }
+    guard !components.isEmpty, !components.contains("..") else {
+      return nil
+    }
+    return components.joined(separator: "/")
+      .precomposedStringWithCanonicalMapping
+      .lowercased()
   }
 }
