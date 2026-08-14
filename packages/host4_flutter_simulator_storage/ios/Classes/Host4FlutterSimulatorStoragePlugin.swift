@@ -503,15 +503,20 @@ public final class Host4FlutterSimulatorStoragePlugin: NSObject, FlutterPlugin, 
             directoryURL: folderURL,
             ownsExistingSecurityScope: true
           )
-        if system.type == 5 {
-          print("[IOS_GB_SCAN_DEBUG] native access folder=\"\(folderURL.path)\" didStartAccessing=\(didStartAccessing) didTransferSecurityScope=\(didTransferSecurityScope)")
-        }
+        // A folder inside the app's own sandbox is directly readable even
+        // though starting a security scope legitimately returns false. Keep
+        // this as a third access mode so a re-added Documents/roms/<system>
+        // bookmark is not reported as a platform error during the actual
+        // native scan.
+        let isDirectlyReadable = !hasRetainedAccess &&
+          !didStartAccessing &&
+          Host4TfCardFileAccessRegistry.isDirectoryReadable(at: folderURL)
         defer {
           if didStartAccessing && !didTransferSecurityScope {
             folderURL.stopAccessingSecurityScopedResource()
           }
         }
-        guard hasRetainedAccess || didStartAccessing else {
+        guard hasRetainedAccess || didStartAccessing || isDirectlyReadable else {
           self.emitStreamingEvent([
             "phase": "platformError",
             "scanId": scanId,
@@ -929,8 +934,10 @@ private final class Host4SimulatorRomFolderBookmarkStore {
   }
 
   func lastURL(for systemType: Int, matchingPath path: String) -> URL? {
-    let normalizedPath = URL(fileURLWithPath: path).standardizedFileURL.path
-    guard let entry = entries(for: systemType).first(where: { $0.path == normalizedPath }) else {
+    let normalizedPath = canonicalPath(path)
+    guard let entry = entries(for: systemType).first(where: {
+      canonicalPath($0.path) == normalizedPath
+    }) else {
       return nil
     }
     return resolve(entry)?.url
@@ -962,16 +969,21 @@ private final class Host4SimulatorRomFolderBookmarkStore {
     var allEntries = entriesBySystemType()
     var systemEntries = allEntries[key] ?? []
     let newEntry = Entry(path: normalizedURL.path, bookmarkData: bookmarkData)
+    let newPathKey = canonicalPath(normalizedURL.path)
     if let replacingPath = replacingPath?.trimmingCharacters(in: .whitespacesAndNewlines),
       !replacingPath.isEmpty {
-      let normalizedReplacingPath = URL(fileURLWithPath: replacingPath).standardizedFileURL.path
-      guard let index = systemEntries.firstIndex(where: { $0.path == normalizedReplacingPath }) else {
+      let normalizedReplacingPath = canonicalPath(replacingPath)
+      guard let index = systemEntries.firstIndex(where: {
+        canonicalPath($0.path) == normalizedReplacingPath
+      }) else {
         throw Host4TfCardScanError(
           code: "folder_not_found",
           message: "The ROM folder to replace is no longer configured."
         )
       }
-      if let duplicateIndex = systemEntries.firstIndex(where: { $0.path == normalizedURL.path }),
+      if let duplicateIndex = systemEntries.firstIndex(where: {
+        canonicalPath($0.path) == newPathKey
+      }),
         duplicateIndex != index {
         throw Host4TfCardScanError(
           code: "folder_already_added",
@@ -979,7 +991,9 @@ private final class Host4SimulatorRomFolderBookmarkStore {
         )
       }
       systemEntries[index] = Entry(path: normalizedURL.path, bookmarkData: bookmarkData)
-    } else if let index = systemEntries.firstIndex(where: { $0.path == normalizedURL.path }) {
+    } else if let index = systemEntries.firstIndex(where: {
+      canonicalPath($0.path) == newPathKey
+    }) {
       systemEntries[index] = newEntry
     } else if systemEntries.count >= maximumFolderCount {
       throw Host4TfCardScanError(
@@ -994,17 +1008,25 @@ private final class Host4SimulatorRomFolderBookmarkStore {
   }
 
   func remove(for systemType: Int, matchingPath path: String) {
-    let normalizedPath = URL(fileURLWithPath: path).standardizedFileURL.path
+    let normalizedPath = canonicalPath(path)
     let key = String(systemType)
     var allEntries = entriesBySystemType()
     var systemEntries = allEntries[key] ?? []
-    systemEntries.removeAll { $0.path == normalizedPath }
+    systemEntries.removeAll { canonicalPath($0.path) == normalizedPath }
     if systemEntries.isEmpty {
       allEntries[key] = nil
     } else {
       allEntries[key] = systemEntries
     }
     save(allEntries)
+  }
+
+  private func canonicalPath(_ path: String) -> String {
+    let normalizedPath = URL(fileURLWithPath: path).standardizedFileURL.path
+    if normalizedPath == "/private/var" || normalizedPath.hasPrefix("/private/var/") {
+      return String(normalizedPath.dropFirst("/private".count))
+    }
+    return normalizedPath
   }
 
   private func resolve(_ entry: Entry) -> (url: URL, isStale: Bool)? {

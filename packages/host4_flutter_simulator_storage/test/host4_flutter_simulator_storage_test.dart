@@ -209,6 +209,28 @@ void main() {
     expect(pluginSource, contains('systemEntries[index] = Entry('));
   });
 
+  test('iOS bookmark identity treats /var aliases as one folder', () async {
+    final pluginSource = await File(
+      'ios/Classes/Host4FlutterSimulatorStoragePlugin.swift',
+    ).readAsString();
+
+    expect(
+      pluginSource,
+      contains('private func canonicalPath(_ path: String)'),
+    );
+    expect(pluginSource, contains('normalizedPath.hasPrefix("/private/var/")'));
+    expect(
+      pluginSource,
+      contains(r'canonicalPath($0.path) == normalizedReplacingPath'),
+    );
+    expect(
+      pluginSource,
+      contains(
+        r'systemEntries.removeAll { canonicalPath($0.path) == normalizedPath }',
+      ),
+    );
+  });
+
   test(
     'iOS keeps a selected folder visible even before access is retained',
     () async {
@@ -223,6 +245,32 @@ void main() {
             'guard didStartAccessing else {\n'
             '        simulatorFolderResult(FlutterError(',
           ),
+        ),
+      );
+    },
+  );
+
+  test(
+    'iOS native simulator scan accepts a directly readable sandbox folder',
+    () async {
+      final pluginSource = await File(
+        'ios/Classes/Host4FlutterSimulatorStoragePlugin.swift',
+      ).readAsString();
+
+      expect(
+        pluginSource,
+        contains('let isDirectlyReadable = !hasRetainedAccess'),
+      );
+      expect(
+        pluginSource,
+        contains(
+          'Host4TfCardFileAccessRegistry.isDirectoryReadable(at: folderURL)',
+        ),
+      );
+      expect(
+        pluginSource,
+        contains(
+          'guard hasRetainedAccess || didStartAccessing || isDirectlyReadable else',
         ),
       );
     },
@@ -355,7 +403,9 @@ void main() {
       );
       expect(
         pluginSource,
-        contains('guard hasRetainedAccess || didStartAccessing else'),
+        contains(
+          'guard hasRetainedAccess || didStartAccessing || isDirectlyReadable else',
+        ),
       );
     },
   );
