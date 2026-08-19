@@ -62,12 +62,15 @@ class Host4SimulatorStorage {
   static Future<List<Host4SimulatorRomFolder>> pickSimulatorRomFolder({
     required int systemType,
     String? replacingPath,
+    int? maximumFolderCount,
   }) async {
     final payload = await _channel
         .invokeMethod<Object?>('pickSimulatorRomFolder', <String, Object?>{
           'systemType': systemType,
           if (replacingPath != null && replacingPath.trim().isNotEmpty)
             'replacingPath': replacingPath,
+          if (maximumFolderCount != null)
+            'maximumFolderCount': maximumFolderCount,
         });
     return _readMapList(
       payload,
