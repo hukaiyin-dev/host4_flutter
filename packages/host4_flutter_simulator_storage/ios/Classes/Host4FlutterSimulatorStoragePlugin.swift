@@ -129,6 +129,7 @@ public final class Host4FlutterSimulatorStoragePlugin: NSObject, FlutterPlugin, 
   private var pendingSimulatorFolderResult: FlutterResult?
   private var pendingSimulatorFolderSystemType: Int?
   private var pendingSimulatorFolderReplacingPath: String?
+  private var pendingSimulatorFolderMaximumCount: Int?
   private var eventSink: FlutterEventSink?
   private var bufferedStreamingEvents: [[String: Any]] = []
   private var streamingScanActive = false
@@ -386,12 +387,9 @@ public final class Host4FlutterSimulatorStoragePlugin: NSObject, FlutterPlugin, 
     let arguments = call.arguments as? [String: Any]
     let replacingPath = (arguments?["replacingPath"] as? String)?
       .trimmingCharacters(in: .whitespacesAndNewlines)
-    let maximumFolderCount = min(
-      max(arguments?["maximumFolderCount"] as? Int ?? 2, 1),
-      simulatorFolderBookmarkStore.maximumFolderCount
-    )
+    let maximumFolderCount = simulatorMaximumFolderCount(from: call.arguments)
     if (replacingPath?.isEmpty ?? true) &&
-      simulatorFolderBookmarkStore.count(for: systemType) >= maximumFolderCount {
+      simulatorFolderBookmarkStore.count(for: systemType, maximumFolderCount: maximumFolderCount) >= maximumFolderCount {
       result(FlutterError(
         code: "folder_limit_reached",
         message: "At most \(maximumFolderCount) additional ROM folders are allowed for each simulator.",
@@ -407,6 +405,7 @@ public final class Host4FlutterSimulatorStoragePlugin: NSObject, FlutterPlugin, 
     pendingSimulatorFolderResult = result
     pendingSimulatorFolderSystemType = systemType
     pendingSimulatorFolderReplacingPath = replacingPath?.isEmpty == false ? replacingPath : nil
+    pendingSimulatorFolderMaximumCount = maximumFolderCount
     let picker = UIDocumentPickerViewController(forOpeningContentTypes: [UTType.folder], asCopy: false)
     picker.delegate = self
     picker.allowsMultipleSelection = false
@@ -572,6 +571,24 @@ public final class Host4FlutterSimulatorStoragePlugin: NSObject, FlutterPlugin, 
     return nil
   }
 
+  private func simulatorMaximumFolderCount(from arguments: Any?) -> Int {
+    guard let arguments = arguments as? [String: Any] else {
+      return Host4SimulatorRomFolderBookmarkStore.defaultMaximumFolderCount
+    }
+    let rawValue: Int?
+    if let value = arguments["maximumFolderCount"] as? Int {
+      rawValue = value
+    } else if let value = arguments["maximumFolderCount"] as? NSNumber {
+      rawValue = value.intValue
+    } else {
+      rawValue = nil
+    }
+    guard let rawValue, rawValue > 0 else {
+      return Host4SimulatorRomFolderBookmarkStore.defaultMaximumFolderCount
+    }
+    return min(rawValue, simulatorFolderBookmarkStore.maximumFolderCount)
+  }
+
   private func simulatorFolderPayloads(for systemType: Int) -> [[String: Any]] {
     let payloads = simulatorFolderBookmarkStore.entries(for: systemType).map { entry in
       let payload: [String: Any] = [
@@ -708,9 +725,11 @@ public final class Host4FlutterSimulatorStoragePlugin: NSObject, FlutterPlugin, 
     if let simulatorFolderResult = pendingSimulatorFolderResult {
       let systemType = pendingSimulatorFolderSystemType
       let replacingPath = pendingSimulatorFolderReplacingPath
+      let maximumFolderCount = pendingSimulatorFolderMaximumCount
       pendingSimulatorFolderResult = nil
       pendingSimulatorFolderSystemType = nil
       pendingSimulatorFolderReplacingPath = nil
+      pendingSimulatorFolderMaximumCount = nil
       guard let systemType, let url = urls.first else {
         simulatorFolderResult(FlutterError(code: "cancelled", message: "Folder selection was cancelled.", details: nil))
         return
@@ -726,7 +745,8 @@ public final class Host4FlutterSimulatorStoragePlugin: NSObject, FlutterPlugin, 
         try simulatorFolderBookmarkStore.replaceOrAdd(
           url: url,
           for: systemType,
-          replacingPath: replacingPath
+          replacingPath: replacingPath,
+          maximumFolderCount: maximumFolderCount ?? Host4SimulatorRomFolderBookmarkStore.defaultMaximumFolderCount
         )
         didTransferSecurityScope = Host4TfCardFileAccessRegistry.activate(
           directoryURL: url,
@@ -793,6 +813,7 @@ public final class Host4FlutterSimulatorStoragePlugin: NSObject, FlutterPlugin, 
       pendingSimulatorFolderResult = nil
       pendingSimulatorFolderSystemType = nil
       pendingSimulatorFolderReplacingPath = nil
+      pendingSimulatorFolderMaximumCount = nil
       simulatorFolderResult(FlutterError(code: "cancelled", message: "Folder selection was cancelled.", details: nil))
       return
     }
@@ -914,6 +935,8 @@ private final class Host4TfCardBookmarkStore {
 }
 
 private final class Host4SimulatorRomFolderBookmarkStore {
+  static let defaultMaximumFolderCount = 2
+
   fileprivate struct Entry: Codable {
     let path: String
     let bookmarkData: Data
@@ -922,15 +945,21 @@ private final class Host4SimulatorRomFolderBookmarkStore {
   private let dataKey = "host4_flutter_simulator_storage.simulator_rom_folders"
   let maximumFolderCount = 3
 
-  func entries(for systemType: Int) -> [Entry] {
+  func entries(
+    for systemType: Int,
+    maximumFolderCount: Int = 3
+  ) -> [Entry] {
     Array(
       (entriesBySystemType()[String(systemType)] ?? [])
         .prefix(maximumFolderCount)
     )
   }
 
-  func count(for systemType: Int) -> Int {
-    entries(for: systemType).count
+  func count(
+    for systemType: Int,
+    maximumFolderCount: Int = defaultMaximumFolderCount
+  ) -> Int {
+    entries(for: systemType, maximumFolderCount: maximumFolderCount).count
   }
 
   func lastURL(for systemType: Int, matchingPath path: String) -> URL? {
@@ -954,7 +983,8 @@ private final class Host4SimulatorRomFolderBookmarkStore {
   func replaceOrAdd(
     url: URL,
     for systemType: Int,
-    replacingPath: String?
+    replacingPath: String?,
+    maximumFolderCount: Int = defaultMaximumFolderCount
   ) throws {
     let normalizedURL = url.standardizedFileURL
     // UIDocumentPicker already grants temporary access while this delegate is
@@ -998,7 +1028,7 @@ private final class Host4SimulatorRomFolderBookmarkStore {
     } else if systemEntries.count >= maximumFolderCount {
       throw Host4TfCardScanError(
         code: "folder_limit_reached",
-        message: "At most three additional ROM folders are allowed for each simulator."
+        message: "At most \(maximumFolderCount) additional ROM folders are allowed for each simulator."
       )
     } else {
       systemEntries.append(newEntry)

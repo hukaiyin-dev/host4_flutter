@@ -177,14 +177,15 @@ void main() {
       expect(pluginSource, contains('case "startSimulatorRomFolderScan"'));
       expect(
         pluginSource,
-        contains('arguments?["maximumFolderCount"] as? Int ?? 2'),
+        contains(
+          'let maximumFolderCount = simulatorMaximumFolderCount(from: call.arguments)',
+        ),
       );
+      expect(pluginSource, contains('defaultMaximumFolderCount = 2'));
       expect(pluginSource, contains('let maximumFolderCount = 3'));
       expect(
         pluginSource,
-        contains(
-          'simulatorFolderBookmarkStore.count(for: systemType) >= maximumFolderCount',
-        ),
+        contains('pendingSimulatorFolderMaximumCount = maximumFolderCount'),
       );
     },
   );
@@ -497,10 +498,12 @@ void main() {
 
     final firstEvents = <Host4TfCardScanEvent>[];
     final secondEvents = <Host4TfCardScanEvent>[];
-    final firstSubscription =
-        Host4SimulatorStorage.tfCardRomScanEvents.listen(firstEvents.add);
-    final secondSubscription =
-        Host4SimulatorStorage.tfCardRomScanEvents.listen(secondEvents.add);
+    final firstSubscription = Host4SimulatorStorage.tfCardRomScanEvents.listen(
+      firstEvents.add,
+    );
+    final secondSubscription = Host4SimulatorStorage.tfCardRomScanEvents.listen(
+      secondEvents.add,
+    );
     await pumpEventQueue();
 
     expect(listenCount, 1);
