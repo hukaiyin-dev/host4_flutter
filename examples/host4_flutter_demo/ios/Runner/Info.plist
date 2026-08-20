@@ -43,6 +43,7 @@
 	<string>AI 语音对话功能需要使用麦克风进行语音输入</string>
 	<key>UISupportedExternalAccessoryProtocols</key>
 	<array>
+		<string>com.HOST4</string>
 		<string>com.OSYN</string>
 	</array>
 	<key>UIApplicationSceneManifest</key>

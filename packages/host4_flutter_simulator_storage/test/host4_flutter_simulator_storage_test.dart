@@ -112,6 +112,7 @@ void main() {
       final folders = await Host4SimulatorStorage.pickSimulatorRomFolder(
         systemType: 9,
         replacingPath: '/private/var/mobile/Media/TF/old-gb',
+        maximumFolderCount: 3,
       );
 
       expect(folders.single.path, '/private/var/mobile/Media/TF/gb');
@@ -120,6 +121,7 @@ void main() {
       expect(calls.single.arguments, <String, Object?>{
         'systemType': 9,
         'replacingPath': '/private/var/mobile/Media/TF/old-gb',
+        'maximumFolderCount': 3,
       });
     },
   );
