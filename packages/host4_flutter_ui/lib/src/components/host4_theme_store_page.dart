@@ -19,6 +19,7 @@ class Host4ThemeStorePage extends StatefulWidget {
     this.confirmLabel = '确定',
     this.backLabel = '返回',
     this.statusSource,
+    this.showSearchButton = true,
     this.showControllerHints = true,
     this.themeNameBuilder,
   });
@@ -33,6 +34,9 @@ class Host4ThemeStorePage extends StatefulWidget {
 
   /// 系统状态数据源；传入则在右上角显示时间 / Wi-Fi / 电量。
   final Host4SystemStatusSource? statusSource;
+
+  /// 是否显示右上角搜索按钮。
+  final bool showSearchButton;
   final bool showControllerHints;
   final String Function(Host4ThemeCatalogEntry entry)? themeNameBuilder;
 
@@ -168,6 +172,7 @@ class Host4ThemeStorePageState extends State<Host4ThemeStorePage> {
                                   confirmLabel: widget.confirmLabel,
                                   backLabel: widget.backLabel,
                                   statusSource: widget.statusSource,
+                                  showSearchButton: widget.showSearchButton,
                                   showControllerHints:
                                       widget.showControllerHints,
                                   themeNameBuilder: widget.themeNameBuilder,
@@ -365,6 +370,7 @@ class _ThemeStoreScene extends StatelessWidget {
     required this.title,
     required this.confirmLabel,
     required this.backLabel,
+    required this.showSearchButton,
     required this.showControllerHints,
     required this.onConfirm,
     required this.onBack,
@@ -384,6 +390,7 @@ class _ThemeStoreScene extends StatelessWidget {
   final String confirmLabel;
   final String backLabel;
   final Host4SystemStatusSource? statusSource;
+  final bool showSearchButton;
   final bool showControllerHints;
   final VoidCallback onConfirm;
   final VoidCallback onBack;
@@ -410,11 +417,13 @@ class _ThemeStoreScene extends StatelessWidget {
             safeAreaTop: 0,
             title: title,
             titleKey: const ValueKey<String>('host4_theme_store_title'),
-            trailing: _HeaderIconButton(
-              keyValue: 'host4_theme_store_search',
-              icon: Icons.search_rounded,
-              onTap: onSearch,
-            ),
+            trailing: showSearchButton
+                ? _HeaderIconButton(
+                    keyValue: 'host4_theme_store_search',
+                    icon: Icons.search_rounded,
+                    onTap: onSearch,
+                  )
+                : null,
             status: statusSource == null
                 ? null
                 : Host4SystemStatus(

@@ -390,7 +390,11 @@ public final class Host4FlutterSimulatorStoragePlugin: NSObject, FlutterPlugin, 
     let maximumFolderCount = simulatorMaximumFolderCount(from: call.arguments)
     if (replacingPath?.isEmpty ?? true) &&
       simulatorFolderBookmarkStore.count(for: systemType, maximumFolderCount: maximumFolderCount) >= maximumFolderCount {
-      result(FlutterError(code: "folder_limit_reached", message: "The maximum additional ROM folder count has been reached for this simulator.", details: nil))
+      result(FlutterError(
+        code: "folder_limit_reached",
+        message: "At most \(maximumFolderCount) additional ROM folders are allowed for each simulator.",
+        details: nil
+      ))
       return
     }
     guard let presenter = topViewController() else {
@@ -498,15 +502,20 @@ public final class Host4FlutterSimulatorStoragePlugin: NSObject, FlutterPlugin, 
             directoryURL: folderURL,
             ownsExistingSecurityScope: true
           )
-        if system.type == 5 {
-          print("[IOS_GB_SCAN_DEBUG] native access folder=\"\(folderURL.path)\" didStartAccessing=\(didStartAccessing) didTransferSecurityScope=\(didTransferSecurityScope)")
-        }
+        // A folder inside the app's own sandbox is directly readable even
+        // though starting a security scope legitimately returns false. Keep
+        // this as a third access mode so a re-added Documents/roms/<system>
+        // bookmark is not reported as a platform error during the actual
+        // native scan.
+        let isDirectlyReadable = !hasRetainedAccess &&
+          !didStartAccessing &&
+          Host4TfCardFileAccessRegistry.isDirectoryReadable(at: folderURL)
         defer {
           if didStartAccessing && !didTransferSecurityScope {
             folderURL.stopAccessingSecurityScopedResource()
           }
         }
-        guard hasRetainedAccess || didStartAccessing else {
+        guard hasRetainedAccess || didStartAccessing || isDirectlyReadable else {
           self.emitStreamingEvent([
             "phase": "platformError",
             "scanId": scanId,
@@ -577,7 +586,7 @@ public final class Host4FlutterSimulatorStoragePlugin: NSObject, FlutterPlugin, 
     guard let rawValue, rawValue > 0 else {
       return Host4SimulatorRomFolderBookmarkStore.defaultMaximumFolderCount
     }
-    return rawValue
+    return min(rawValue, simulatorFolderBookmarkStore.maximumFolderCount)
   }
 
   private func simulatorFolderPayloads(for systemType: Int) -> [[String: Any]] {
@@ -614,7 +623,11 @@ public final class Host4FlutterSimulatorStoragePlugin: NSObject, FlutterPlugin, 
         url.stopAccessingSecurityScopedResource()
       }
     }
-    guard didStartAccessing else { return false }
+    // A folder inside the app's own sandbox (for example the launcher's
+    // Documents/roms/<system> onboarding directory re-selected through the
+    // document picker) is readable without a security scope, so
+    // startAccessingSecurityScopedResource legitimately returns false there.
+    // The readability probe alone is authoritative for accessibility.
     return Host4TfCardFileAccessRegistry.isDirectoryReadable(at: url)
   }
 
@@ -930,10 +943,11 @@ private final class Host4SimulatorRomFolderBookmarkStore {
   }
 
   private let dataKey = "host4_flutter_simulator_storage.simulator_rom_folders"
+  let maximumFolderCount = 3
 
   func entries(
     for systemType: Int,
-    maximumFolderCount: Int = defaultMaximumFolderCount
+    maximumFolderCount: Int = 3
   ) -> [Entry] {
     Array(
       (entriesBySystemType()[String(systemType)] ?? [])
@@ -949,8 +963,10 @@ private final class Host4SimulatorRomFolderBookmarkStore {
   }
 
   func lastURL(for systemType: Int, matchingPath path: String) -> URL? {
-    let normalizedPath = URL(fileURLWithPath: path).standardizedFileURL.path
-    guard let entry = entries(for: systemType).first(where: { $0.path == normalizedPath }) else {
+    let normalizedPath = canonicalPath(path)
+    guard let entry = entries(for: systemType).first(where: {
+      canonicalPath($0.path) == normalizedPath
+    }) else {
       return nil
     }
     return resolve(entry)?.url
@@ -983,16 +999,21 @@ private final class Host4SimulatorRomFolderBookmarkStore {
     var allEntries = entriesBySystemType()
     var systemEntries = allEntries[key] ?? []
     let newEntry = Entry(path: normalizedURL.path, bookmarkData: bookmarkData)
+    let newPathKey = canonicalPath(normalizedURL.path)
     if let replacingPath = replacingPath?.trimmingCharacters(in: .whitespacesAndNewlines),
       !replacingPath.isEmpty {
-      let normalizedReplacingPath = URL(fileURLWithPath: replacingPath).standardizedFileURL.path
-      guard let index = systemEntries.firstIndex(where: { $0.path == normalizedReplacingPath }) else {
+      let normalizedReplacingPath = canonicalPath(replacingPath)
+      guard let index = systemEntries.firstIndex(where: {
+        canonicalPath($0.path) == normalizedReplacingPath
+      }) else {
         throw Host4TfCardScanError(
           code: "folder_not_found",
           message: "The ROM folder to replace is no longer configured."
         )
       }
-      if let duplicateIndex = systemEntries.firstIndex(where: { $0.path == normalizedURL.path }),
+      if let duplicateIndex = systemEntries.firstIndex(where: {
+        canonicalPath($0.path) == newPathKey
+      }),
         duplicateIndex != index {
         throw Host4TfCardScanError(
           code: "folder_already_added",
@@ -1000,12 +1021,14 @@ private final class Host4SimulatorRomFolderBookmarkStore {
         )
       }
       systemEntries[index] = Entry(path: normalizedURL.path, bookmarkData: bookmarkData)
-    } else if let index = systemEntries.firstIndex(where: { $0.path == normalizedURL.path }) {
+    } else if let index = systemEntries.firstIndex(where: {
+      canonicalPath($0.path) == newPathKey
+    }) {
       systemEntries[index] = newEntry
     } else if systemEntries.count >= maximumFolderCount {
       throw Host4TfCardScanError(
         code: "folder_limit_reached",
-        message: "At most two additional ROM folders are allowed for each simulator."
+        message: "At most \(maximumFolderCount) additional ROM folders are allowed for each simulator."
       )
     } else {
       systemEntries.append(newEntry)
@@ -1015,17 +1038,25 @@ private final class Host4SimulatorRomFolderBookmarkStore {
   }
 
   func remove(for systemType: Int, matchingPath path: String) {
-    let normalizedPath = URL(fileURLWithPath: path).standardizedFileURL.path
+    let normalizedPath = canonicalPath(path)
     let key = String(systemType)
     var allEntries = entriesBySystemType()
     var systemEntries = allEntries[key] ?? []
-    systemEntries.removeAll { $0.path == normalizedPath }
+    systemEntries.removeAll { canonicalPath($0.path) == normalizedPath }
     if systemEntries.isEmpty {
       allEntries[key] = nil
     } else {
       allEntries[key] = systemEntries
     }
     save(allEntries)
+  }
+
+  private func canonicalPath(_ path: String) -> String {
+    let normalizedPath = URL(fileURLWithPath: path).standardizedFileURL.path
+    if normalizedPath == "/private/var" || normalizedPath.hasPrefix("/private/var/") {
+      return String(normalizedPath.dropFirst("/private".count))
+    }
+    return normalizedPath
   }
 
   private func resolve(_ entry: Entry) -> (url: URL, isStale: Bool)? {
@@ -1337,9 +1368,11 @@ private final class Host4TfCardRomScanner {
     metadata: [String: Host4GameMetadata]
   ) -> [String: Any] {
     let resourcePath = relativePath(from: platformURL, to: fileURL)
-    let gameMetadata = metadata[resourcePath] ??
-      metadata["./\(resourcePath)"] ??
-      metadata.first(where: { resourcePath.hasSuffix($0.key.trimmingPrefix("./")) })?.value
+    let gameMetadata = Host4GameListParser.metadata(
+      forResourcePath: resourcePath,
+      fileURL: fileURL,
+      in: metadata
+    )
     var game: [String: Any] = [
       "type": system.type,
       "platformName": system.name,
@@ -1436,8 +1469,61 @@ private final class Host4GameListParser: NSObject, XMLParserDelegate {
       let parser = XMLParser(contentsOf: fileURL) else { return [:] }
     let delegate = Host4GameListParser()
     parser.delegate = delegate
-    parser.parse()
+    parser.shouldResolveExternalEntities = false
+    guard parser.parse() else { return [:] }
     return delegate.games
+  }
+
+  static func metadata(
+    forResourcePath resourcePath: String,
+    fileURL: URL,
+    in entries: [String: Host4GameMetadata]
+  ) -> Host4GameMetadata? {
+    var candidates: [String] = []
+    func addCandidate(_ value: String) {
+      guard let normalized = normalizedPath(value), !candidates.contains(normalized) else {
+        return
+      }
+      candidates.append(normalized)
+    }
+
+    addCandidate(resourcePath)
+    // A bookmark can resolve to a different `/var` spelling after a process
+    // restart. The complete ROM path still lets a gamelist entry such as
+    // `./roms/nes/game.nes` match its selected platform folder.
+    addCandidate(fileURL.path)
+    for candidate in candidates {
+      if let exact = entries[candidate] {
+        return exact
+      }
+    }
+
+    var bestMetadata: Host4GameMetadata?
+    var bestPath: String?
+    var bestScore = -1
+    var ambiguous = false
+    for (metadataPath, metadata) in entries {
+      for candidate in candidates {
+        let score: Int?
+        if candidate.hasSuffix("/\(metadataPath)") {
+          score = 3000000 + metadataPath.count
+        } else if metadataPath.hasSuffix("/\(candidate)") {
+          score = 2000000 + candidate.count
+        } else {
+          score = nil
+        }
+        guard let score else { continue }
+        if score > bestScore {
+          bestMetadata = metadata
+          bestPath = metadataPath
+          bestScore = score
+          ambiguous = false
+        } else if score == bestScore && bestPath != metadataPath {
+          ambiguous = true
+        }
+      }
+    }
+    return ambiguous ? nil : bestMetadata
   }
 
   func parser(
@@ -1447,9 +1533,10 @@ private final class Host4GameListParser: NSObject, XMLParserDelegate {
     qualifiedName qName: String?,
     attributes attributeDict: [String: String] = [:]
   ) {
+    let normalizedElementName = elementName.lowercased()
     currentElement = elementName
     currentText = ""
-    if elementName == "game" {
+    if normalizedElementName == "game" {
       inGame = true
       path = ""
       name = ""
@@ -1471,7 +1558,7 @@ private final class Host4GameListParser: NSObject, XMLParserDelegate {
   ) {
     guard inGame else { return }
     let text = currentText.trimmingCharacters(in: .whitespacesAndNewlines)
-    switch elementName {
+    switch elementName.lowercased() {
     case "path":
       path = text
     case "name":
@@ -1483,14 +1570,13 @@ private final class Host4GameListParser: NSObject, XMLParserDelegate {
     case "desc":
       gameDescription = text
     case "game":
-      if !path.isEmpty {
-        games[path.trimmingPrefix("./")] = Host4GameMetadata(
+      if let normalizedPath = Self.normalizedPath(path) {
+        games[normalizedPath] = Host4GameMetadata(
           name: name.isEmpty ? nil : name,
           imagePath: imagePath.isEmpty ? nil : imagePath,
           videoPath: videoPath.isEmpty ? nil : videoPath,
           description: gameDescription.isEmpty ? nil : gameDescription
         )
-        games[path] = games[path.trimmingPrefix("./")]
       }
       inGame = false
     default:
@@ -1498,11 +1584,21 @@ private final class Host4GameListParser: NSObject, XMLParserDelegate {
     }
     currentText = ""
   }
-}
 
-private extension String {
-  func trimmingPrefix(_ prefix: String) -> String {
-    guard hasPrefix(prefix) else { return self }
-    return String(dropFirst(prefix.count))
+  private static func normalizedPath(_ rawPath: String) -> String? {
+    var path = rawPath
+      .trimmingCharacters(in: .whitespacesAndNewlines)
+      .replacingOccurrences(of: "\\", with: "/")
+    while path.hasPrefix("./") {
+      path.removeFirst(2)
+    }
+    let components = path.split(separator: "/", omittingEmptySubsequences: true)
+      .filter { $0 != "." }
+    guard !components.isEmpty, !components.contains("..") else {
+      return nil
+    }
+    return components.joined(separator: "/")
+      .precomposedStringWithCanonicalMapping
+      .lowercased()
   }
 }

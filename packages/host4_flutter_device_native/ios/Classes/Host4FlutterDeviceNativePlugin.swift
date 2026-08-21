@@ -3,8 +3,23 @@ import Flutter
 import Foundation
 import UIKit
 
+private final class DisabledEventStreamHandler: NSObject, FlutterStreamHandler {
+  func onListen(
+    withArguments arguments: Any?,
+    eventSink events: @escaping FlutterEventSink
+  ) -> FlutterError? {
+    nil
+  }
+
+  func onCancel(withArguments arguments: Any?) -> FlutterError? {
+    nil
+  }
+}
+
 public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
   private let methodChannel: FlutterMethodChannel
+  private let disabledEventStreamHandler = DisabledEventStreamHandler()
+  private var disabledEventChannels: [FlutterEventChannel] = []
 
   private init(messenger: FlutterBinaryMessenger) {
     methodChannel = FlutterMethodChannel(
@@ -13,6 +28,17 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
     )
 
     super.init()
+
+    disabledEventChannels = [
+      "host4_flutter_device_native/ble_scan",
+      "host4_flutter_device_native/native_log",
+      "host4_flutter_device_native/mfi_accessory_events",
+    ].map {
+      FlutterEventChannel(name: $0, binaryMessenger: messenger)
+    }
+    disabledEventChannels.forEach {
+      $0.setStreamHandler(disabledEventStreamHandler)
+    }
   }
 
   public static func register(with registrar: FlutterPluginRegistrar) {
