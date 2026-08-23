@@ -1,0 +1,25 @@
+name: host4_flutter_web_emulator
+description: WebView-based GB/GBC/GBA emulator runtime for Host4 Flutter apps.
+version: 0.0.1
+publish_to: none
+
+environment:
+  sdk: ">=3.10.0 <4.0.0"
+  flutter: ">=3.3.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  host4_flutter_webview:
+    path: ../host4_flutter_webview
+
+dev_dependencies:
+  flutter_lints: ^6.0.0
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  assets:
+    - assets/emulator/index.html
+    - assets/emulator/zip.min.js
+    - assets/emulator/nostalgist.0.19.0.umd.js

@@ -9,6 +9,7 @@ import 'ios_tf_card_page.dart';
 import 'silicone_overlay_page.dart';
 import 'tester_page.dart';
 import 'usb_drive_page.dart';
+import 'web_emulator_poc_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({required this.onResetToDefaults, super.key});
@@ -63,6 +64,18 @@ class _HomePageState extends State<HomePage> {
           title: 'iOS TF 卡',
           subtitle: '按规则读取 TF 卡内的游戏',
           child: IosTfCardPage(),
+        ),
+      ),
+      _LabEntry(
+        title: 'Web 模拟器 POC',
+        subtitle: 'Nostalgist + mGBA 下载 core 验证',
+        icon: Icons.sports_esports_outlined,
+        color: Colors.indigo,
+        minHeight: 220,
+        builder: (_) => const SubPageScaffold(
+          title: 'Web 模拟器 POC',
+          subtitle: '选择本地 GB / GBC / GBA ROM 并在 WebView 启动',
+          child: WebEmulatorPocPage(),
         ),
       ),
       _LabEntry(

@@ -30,7 +30,9 @@ class Host4WebController {
     try {
       await _inner.runJavaScript(js);
     } on PlatformException catch (e) {
-      debugPrint('[Host4WebView] runJavaScript failed (${e.code}): ${e.message}');
+      debugPrint(
+        '[Host4WebView] runJavaScript failed (${e.code}): ${e.message}',
+      );
     }
   }
 

@@ -25,6 +25,7 @@ class Host4WebView extends StatefulWidget {
   const Host4WebView({
     super.key,
     required this.initialUrl,
+    this.initialAssetPath,
     this.bridge,
     this.backgroundColor,
     this.loadingOverlayBuilder,
@@ -41,8 +42,33 @@ class Host4WebView extends StatefulWidget {
     this.onWebResourceError,
   });
 
+  const Host4WebView.asset({
+    super.key,
+    required String this.initialAssetPath,
+    this.bridge,
+    this.backgroundColor,
+    this.loadingOverlayBuilder,
+    this.showProgressBar = true,
+    this.needTitleBar = false,
+    this.title,
+    this.enableZoom = false,
+    this.userAgent,
+    this.allowRoutePopGesture = false,
+    this.onControllerReady,
+    this.onPageStarted,
+    this.onPageFinished,
+    this.onNavigationRequest,
+    this.onWebResourceError,
+  }) : initialUrl = 'about:blank';
+
   /// The URL to load on launch.
   final String initialUrl;
+
+  /// Optional Flutter asset path to load on launch.
+  ///
+  /// Use package asset paths such as
+  /// `packages/my_package/assets/page/index.html`.
+  final String? initialAssetPath;
 
   /// Optional JS bridge adapter. When provided, `JsBridge` / `NativeBridge`
   /// JavaScript channels are registered and a generic `JsBridge.method(arg)`
@@ -117,12 +143,20 @@ class _Host4WebViewState extends State<Host4WebView> {
     _controller = _buildController();
     _webController = Host4WebController(_controller);
     widget.onControllerReady?.call(_webController);
-    final uri = Uri.parse(widget.initialUrl);
-    debugPrint('[Host4WebView] loadRequest uri=$uri scheme=${uri.scheme} hasScheme=${uri.hasScheme}');
+    final assetPath = widget.initialAssetPath;
     try {
-      _controller.loadRequest(uri);
+      if (assetPath != null) {
+        debugPrint('[Host4WebView] loadFlutterAsset path=$assetPath');
+        _controller.loadFlutterAsset(assetPath);
+      } else {
+        final uri = Uri.parse(widget.initialUrl);
+        debugPrint(
+          '[Host4WebView] loadRequest uri=$uri scheme=${uri.scheme} hasScheme=${uri.hasScheme}',
+        );
+        _controller.loadRequest(uri);
+      }
     } catch (e, st) {
-      debugPrint('[Host4WebView] loadRequest failed: $e\n$st');
+      debugPrint('[Host4WebView] initial load failed: $e\n$st');
     }
   }
 

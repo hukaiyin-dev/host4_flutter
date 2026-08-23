@@ -1,0 +1,285 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Host4 Web Emulator</title>
+    <style>
+      html,
+      body,
+      #emulator {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+        background: #000;
+      }
+
+      canvas {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: contain;
+      }
+    </style>
+  </head>
+  <body>
+    <main id="emulator"></main>
+    <script src="./zip.min.js"></script>
+    <script src="./nostalgist.0.19.0.umd.js"></script>
+    <script>
+      (function () {
+        var current = null;
+        var bridgeReady = false;
+        var pendingMessages = [];
+
+        function post(method, payload) {
+          var channel = window.JsBridge || window.NativeBridge;
+          if (!channel || typeof channel.postMessage !== 'function') {
+            pendingMessages.push({ method: method, payload: payload });
+            return;
+          }
+          channel.postMessage(JSON.stringify({
+            method: method,
+            payload: payload
+          }));
+        }
+
+        function flushPendingMessages() {
+          if (bridgeReady) return;
+          bridgeReady = true;
+          var channel = window.JsBridge || window.NativeBridge;
+          if (!channel || typeof channel.postMessage !== 'function') return;
+          var queued = pendingMessages.splice(0);
+          for (var i = 0; i < queued.length; i++) {
+            channel.postMessage(JSON.stringify(queued[i]));
+          }
+        }
+
+        function report(type, requestId, ok, data, error) {
+          post(type, {
+            type: type,
+            requestId: requestId || '',
+            ok: ok,
+            data: data || null,
+            error: error ? String(error.message || error) : null
+          });
+        }
+
+        function base64ToBlob(base64, mimeType) {
+          var binary = atob(base64);
+          var bytes = new Uint8Array(binary.length);
+          for (var i = 0; i < binary.length; i += 1) {
+            bytes[i] = binary.charCodeAt(i);
+          }
+          return new Blob([bytes], mimeType ? { type: mimeType } : undefined);
+        }
+
+        function resolveRom(config) {
+          if (config.romBase64) {
+            return {
+              fileName: config.romName || 'game.rom',
+              fileContent: base64ToBlob(config.romBase64)
+            };
+          }
+          return config.romFileUrl;
+        }
+
+        // 使用本地打包的 zip.js 解压 core ZIP，绕过 Nostalgist 内部的
+        // import("https://...zip.js...+esm")，该动态导入在 file:// 源下会失败。
+        var coreCache = null;
+        async function extractCoreLocal(coreName, zipUrl) {
+          if (coreCache) return coreCache;
+          var url = zipUrl || (
+            'https://cdn.jsdelivr.net/gh/arianrhodsandlot/retroarch-emscripten-build@v1.22.2/retroarch/'
+            + coreName + '_libretro.zip'
+          );
+          var response = await fetch(url);
+          if (!response.ok) throw new Error('Failed to fetch core ZIP: ' + response.status);
+          var blob = await response.blob();
+          var reader = new zip.ZipReader(new zip.BlobReader(blob));
+          var entries = await reader.getEntries();
+          var result = {};
+          for (var i = 0; i < entries.length; i++) {
+            var entry = entries[i];
+            if (entry.directory) continue;
+            if (entry.filename.endsWith('.js')) {
+              result.js = await entry.getData(new zip.BlobWriter('application/javascript'));
+            } else if (entry.filename.endsWith('.wasm')) {
+              result.wasm = await entry.getData(new zip.BlobWriter('application/wasm'));
+            }
+          }
+          await reader.close();
+          if (!result.js || !result.wasm) throw new Error('Core ZIP missing .js or .wasm for ' + coreName);
+          coreCache = result;
+          return result;
+        }
+
+        window.Host4WebEmulator = {
+          launch: async function (config) {
+            flushPendingMessages();
+            var requestId = config.requestId || 'launch';
+            try {
+              if (!window.Nostalgist) throw new Error('Nostalgist is not loaded.');
+              if (current && typeof current.exit === 'function') current.exit();
+
+              var coreName = config.core || 'mgba';
+              var coreZipUrl = config.coreZipUrl || null;
+
+              current = await window.Nostalgist.launch({
+                element: document.getElementById('emulator'),
+                core: coreName,
+                rom: resolveRom(config),
+                respondToGlobalEvents: true,
+                style: {
+                  width: '100%',
+                  height: '100%'
+                },
+                resolveCoreJs: async function () {
+                  var r = await extractCoreLocal(coreName, coreZipUrl);
+                  return r.js;
+                },
+                resolveCoreWasm: async function () {
+                  var r = await extractCoreLocal(coreName, coreZipUrl);
+                  return r.wasm;
+                }
+              });
+              report('launched', requestId, true, {
+                system: config.system,
+                core: coreName
+              }, null);
+            } catch (error) {
+              console.error('[Host4WebEmulator] launch failed:', error);
+              report('launchError', requestId, false, null, error);
+            }
+          },
+
+          pause: function () {
+            if (current && typeof current.pause === 'function') current.pause();
+            report('paused', 'pause', true, null, null);
+          },
+
+          resume: function () {
+            if (current && typeof current.resume === 'function') current.resume();
+            report('resumed', 'resume', true, null, null);
+          },
+
+          restart: async function () {
+            var requestId = 'restart';
+            try {
+              if (!current) throw new Error('Emulator not running.');
+              await current.restart();
+              report('restarted', requestId, true, null, null);
+            } catch (error) {
+              report('restartError', requestId, false, null, error);
+            }
+          },
+
+          exit: function () {
+            if (current && typeof current.exit === 'function') current.exit();
+            current = null;
+            report('exited', 'exit', true, null, null);
+          },
+
+          saveState: async function (requestId) {
+            requestId = requestId || 'saveState';
+            try {
+              if (!current) throw new Error('Emulator not running.');
+              var result = await current.saveState();
+              // state 和 thumbnail 转 base64 回传
+              var stateBlob = new Blob([result.state]);
+              var thumbBlob = result.thumbnail ? new Blob([result.thumbnail]) : null;
+
+              var stateBase64 = await blobToBase64(stateBlob);
+              var thumbBase64 = thumbBlob ? await blobToBase64(thumbBlob) : null;
+
+              report('stateSaved', requestId, true, {
+                state: stateBase64,
+                thumbnail: thumbBase64
+              }, null);
+            } catch (error) {
+              report('saveStateError', requestId, false, null, error);
+            }
+          },
+
+          loadState: async function (requestId, stateBase64) {
+            requestId = requestId || 'loadState';
+            try {
+              if (!current) throw new Error('Emulator not running.');
+              var binary = atob(stateBase64);
+              var bytes = new Uint8Array(binary.length);
+              for (var i = 0; i < binary.length; i++) {
+                bytes[i] = binary.charCodeAt(i);
+              }
+              await current.loadState(bytes.buffer);
+              report('stateLoaded', requestId, true, null, null);
+            } catch (error) {
+              report('loadStateError', requestId, false, null, error);
+            }
+          },
+
+          screenshot: async function (requestId) {
+            requestId = requestId || 'screenshot';
+            try {
+              if (!current) throw new Error('Emulator not running.');
+              var blob = await current.screenshot();
+              var base64 = await blobToBase64(blob);
+              report('screenshotTaken', requestId, true, { image: base64 }, null);
+            } catch (error) {
+              report('screenshotError', requestId, false, null, error);
+            }
+          },
+
+          setRate: function (rate) {
+            try {
+              if (current && typeof current.setFastForwardRatio === 'function') {
+                current.setFastForwardRatio(rate);
+              }
+            } catch (error) {
+              report('setRateError', 'setRate', false, null, error);
+            }
+          },
+
+          keyEvent: function (event) {
+            if (!current) return;
+            var button = event.button;
+            var player = event.player || 1;
+            var action = event.action;
+
+            switch (action) {
+              case 'press':
+                current.press(button, player, event.duration);
+                break;
+              case 'down':
+                current.pressDown(button, player);
+                break;
+              case 'up':
+                current.pressUp(button, player);
+                break;
+            }
+          },
+
+          keyEvents: function (events) {
+            if (!current || !Array.isArray(events)) return;
+            for (var i = 0; i < events.length; i++) {
+              window.Host4WebEmulator.keyEvent(events[i]);
+            }
+          }
+        };
+
+        function blobToBase64(blob) {
+          return new Promise(function (resolve, reject) {
+            var reader = new FileReader();
+            reader.onloadend = function () {
+              var result = reader.result;
+              resolve(result ? result.split(',')[1] : null);
+            };
+            reader.onerror = function () { reject(reader.error); };
+            reader.readAsDataURL(blob);
+          });
+        }
+
+        post('ready', { type: 'ready', requestId: '', ok: true, data: null, error: null });
+      })();
+    </script>
+  </body>
+</html>
