@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:host4_flutter_web_emulator/host4_flutter_web_emulator.dart';
 
@@ -96,6 +98,31 @@ void main() {
     });
   });
 
+  test('parses bridge response payloads', () {
+    final message = Host4WebEmulatorBridgeMessage.fromPayload(<String, Object?>{
+      'type': 'stateSaved',
+      'requestId': 'request-2',
+      'ok': true,
+      'data': <String, Object?>{'state': 'STATE'},
+      'error': null,
+    });
+
+    expect(message.type, 'stateSaved');
+    expect(message.requestId, 'request-2');
+    expect(message.ok, isTrue);
+  });
+
+  test('launch payload can restore SRAM', () {
+    final config = Host4WebEmulatorLaunchConfig(
+      system: Host4WebEmulatorSystem.gbc,
+      romBase64: 'ROM',
+      romName: 'demo.gbc',
+      sramBase64: 'SRAM',
+    );
+
+    expect(config.toJson()['sramBase64'], 'SRAM');
+  });
+
   test('uses packaged local emulator assets as the first entry point', () {
     expect(
       Host4WebEmulatorAssets.indexHtml,
@@ -133,6 +160,122 @@ void main() {
     expect(
       Host4WebEmulatorJavaScript.launch(config),
       contains('"core":"mgba"'),
+    );
+  });
+
+  test('generates SRAM export JavaScript', () {
+    expect(
+      Host4WebEmulatorJavaScript.saveSram('sram-1'),
+      'window.Host4WebEmulator.saveSRAM("sram-1");',
+    );
+  });
+
+  test('packaged web runtime wires SRAM restore and export', () async {
+    final html = await File('assets/emulator/index.html').readAsString();
+    expect(html, contains('sram: config.sramBase64'));
+    expect(html, contains('saveSRAM: async function (requestId)'));
+    expect(html, contains("report('sramSaved', requestId"));
+    expect(html, contains("report('rateSet', requestId"));
+  });
+
+  test(
+    'controller completes a state request from its matching bridge reply',
+    () async {
+      final scripts = <String>[];
+      final controller = Host4WebEmulatorController.forJavaScriptExecutor(
+        (script) async => scripts.add(script),
+        requestIdFactory: () => 'state-1',
+      );
+
+      final resultFuture = controller.saveState();
+      expect(scripts.single, contains('"state-1"'));
+
+      expect(
+        controller.handleBridgeMessage('stateSaved', <String, Object?>{
+          'type': 'stateSaved',
+          'requestId': 'state-1',
+          'ok': true,
+          'data': <String, Object?>{'state': 'STATE', 'thumbnail': 'THUMBNAIL'},
+          'error': null,
+        }),
+        isTrue,
+      );
+
+      final result = await resultFuture;
+      expect(result.stateBase64, 'STATE');
+      expect(result.thumbnailBase64, 'THUMBNAIL');
+    },
+  );
+
+  test('controller surfaces a failed bridge reply', () async {
+    final controller = Host4WebEmulatorController.forJavaScriptExecutor(
+      (_) async {},
+      requestIdFactory: () => 'load-1',
+    );
+
+    final resultFuture = controller.loadState('STATE');
+    controller.handleBridgeMessage('loadStateError', <String, Object?>{
+      'type': 'loadStateError',
+      'requestId': 'load-1',
+      'ok': false,
+      'data': null,
+      'error': 'invalid state',
+    });
+
+    await expectLater(
+      resultFuture,
+      throwsA(
+        isA<Host4WebEmulatorException>().having(
+          (error) => error.message,
+          'message',
+          contains('invalid state'),
+        ),
+      ),
+    );
+  });
+
+  test('controller keeps concurrent requests isolated by request id', () async {
+    var sequence = 0;
+    final controller = Host4WebEmulatorController.forJavaScriptExecutor(
+      (_) async {},
+      requestIdFactory: () => 'state-${++sequence}',
+    );
+
+    final first = controller.saveState();
+    final second = controller.saveState();
+    controller.handleBridgeMessage('stateSaved', <String, Object?>{
+      'type': 'stateSaved',
+      'requestId': 'state-2',
+      'ok': true,
+      'data': <String, Object?>{'state': 'SECOND'},
+    });
+    controller.handleBridgeMessage('stateSaved', <String, Object?>{
+      'type': 'stateSaved',
+      'requestId': 'state-1',
+      'ok': true,
+      'data': <String, Object?>{'state': 'FIRST'},
+    });
+
+    expect((await first).stateBase64, 'FIRST');
+    expect((await second).stateBase64, 'SECOND');
+  });
+
+  test('controller times out a request without a bridge reply', () async {
+    final controller = Host4WebEmulatorController.forJavaScriptExecutor(
+      (_) async {},
+      requestTimeout: const Duration(milliseconds: 1),
+      requestIdFactory: () => 'state-timeout',
+    );
+
+    await expectLater(
+      controller.saveState(),
+      throwsA(
+        isA<Host4WebEmulatorException>().having(
+          (error) => error.message,
+          'message',
+          contains('timed out'),
+        ),
+      ),
     );
   });
 }

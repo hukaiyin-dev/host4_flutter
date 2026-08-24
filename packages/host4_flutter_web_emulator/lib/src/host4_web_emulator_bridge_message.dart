@@ -7,6 +7,25 @@ class Host4WebEmulatorBridgeMessage {
     this.error,
   });
 
+  factory Host4WebEmulatorBridgeMessage.fromPayload(Object? payload) {
+    if (payload is! Map) {
+      throw const FormatException('Web emulator bridge payload must be a map.');
+    }
+    final type = payload['type'];
+    final requestId = payload['requestId'];
+    final ok = payload['ok'];
+    if (type is! String || requestId is! String || ok is! bool) {
+      throw const FormatException('Invalid web emulator bridge envelope.');
+    }
+    return Host4WebEmulatorBridgeMessage(
+      type: type,
+      requestId: requestId,
+      ok: ok,
+      data: payload['data'],
+      error: payload['error'],
+    );
+  }
+
   factory Host4WebEmulatorBridgeMessage.success({
     required String type,
     required String requestId,

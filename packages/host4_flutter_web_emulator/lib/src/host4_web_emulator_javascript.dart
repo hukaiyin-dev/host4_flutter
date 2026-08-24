@@ -5,24 +5,35 @@ import 'host4_web_emulator_launch_config.dart';
 class Host4WebEmulatorJavaScript {
   const Host4WebEmulatorJavaScript._();
 
-  static String launch(Host4WebEmulatorLaunchConfig config) {
-    return 'window.Host4WebEmulator.launch(${jsonEncode(config.toJson())});';
+  static String launch(
+    Host4WebEmulatorLaunchConfig config, {
+    String? requestId,
+  }) {
+    final payload = config.toJson();
+    if (requestId != null) payload['requestId'] = requestId;
+    return 'window.Host4WebEmulator.launch(${jsonEncode(payload)});';
   }
 
-  static String pause() => 'window.Host4WebEmulator.pause();';
+  static String pause([String requestId = 'pause']) =>
+      'window.Host4WebEmulator.pause(${jsonEncode(requestId)});';
 
-  static String resume() => 'window.Host4WebEmulator.resume();';
+  static String resume([String requestId = 'resume']) =>
+      'window.Host4WebEmulator.resume(${jsonEncode(requestId)});';
 
-  static String restart() => 'window.Host4WebEmulator.restart();';
+  static String restart([String requestId = 'restart']) =>
+      'window.Host4WebEmulator.restart(${jsonEncode(requestId)});';
 
-  static String exit() => 'window.Host4WebEmulator.exit();';
+  static String exit([String requestId = 'exit']) =>
+      'window.Host4WebEmulator.exit(${jsonEncode(requestId)});';
 
   static String saveState([String requestId = 'saveState']) {
     return 'window.Host4WebEmulator.saveState(${jsonEncode(requestId)});';
   }
 
-  static String loadState(String stateBase64,
-      [String requestId = 'loadState']) {
+  static String loadState(
+    String stateBase64, [
+    String requestId = 'loadState',
+  ]) {
     return 'window.Host4WebEmulator.loadState(${jsonEncode(requestId)}, ${jsonEncode(stateBase64)});';
   }
 
@@ -30,8 +41,12 @@ class Host4WebEmulatorJavaScript {
     return 'window.Host4WebEmulator.screenshot(${jsonEncode(requestId)});';
   }
 
-  static String setRate(double rate) {
-    return 'window.Host4WebEmulator.setRate($rate);';
+  static String saveSram([String requestId = 'saveSRAM']) {
+    return 'window.Host4WebEmulator.saveSRAM(${jsonEncode(requestId)});';
+  }
+
+  static String setRate(double rate, [String requestId = 'setRate']) {
+    return 'window.Host4WebEmulator.setRate($rate, ${jsonEncode(requestId)});';
   }
 
   /// 单个按键事件。

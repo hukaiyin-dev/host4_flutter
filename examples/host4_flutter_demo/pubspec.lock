@@ -146,7 +146,7 @@ packages:
     source: hosted
     version: "2.1.2"
   display_metrics:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: display_metrics
       sha256: "5957d2cf657906fe9bda4917946b8a56c6e9517e8a86cd5bc57bc31a644ff876"
@@ -395,6 +395,13 @@ packages:
     dependency: "direct main"
     description:
       path: "../../packages/host4_flutter_device_native"
+      relative: true
+    source: path
+    version: "0.0.1"
+  host4_flutter_emulator_ui:
+    dependency: "direct main"
+    description:
+      path: "../../packages/host4_flutter_emulator_ui"
       relative: true
     source: path
     version: "0.0.1"

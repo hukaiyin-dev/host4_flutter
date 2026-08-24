@@ -1,10 +1,20 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:display_metrics/display_metrics.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:host4_flutter_crypto/host4_flutter_crypto.dart';
+import 'package:host4_flutter_emulator_ui/host4_flutter_emulator_ui.dart';
 import 'package:host4_flutter_ui/host4_flutter_ui.dart';
 import 'package:host4_flutter_web_emulator/host4_flutter_web_emulator.dart';
+import 'package:path_provider/path_provider.dart';
+
+import 'web_emulator/web_emulator_save_repository.dart';
+import 'web_emulator/web_emulator_session_actions.dart';
+
+enum _WebEmulatorOverlay { none, menu, saves }
 
 class WebEmulatorPocPage extends StatefulWidget {
   const WebEmulatorPocPage({super.key});
@@ -13,15 +23,38 @@ class WebEmulatorPocPage extends StatefulWidget {
   State<WebEmulatorPocPage> createState() => _WebEmulatorPocPageState();
 }
 
-class _WebEmulatorPocPageState extends State<WebEmulatorPocPage> {
+class _WebEmulatorPocPageState extends State<WebEmulatorPocPage>
+    with WidgetsBindingObserver {
   Host4WebEmulatorLaunchConfig? _launchConfig;
   Host4WebEmulatorController? _controller;
+  WebEmulatorSaveRepository? _repository;
+  WebEmulatorSessionActions? _actions;
+  String? _gameKey;
   String _status = '请选择一个 .gb / .gbc / .gba / .zip ROM。';
   bool _loadingRom = false;
+  bool _launched = false;
+  bool _sramSaveInFlight = false;
+  _WebEmulatorOverlay _overlay = _WebEmulatorOverlay.none;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.paused ||
+        state == AppLifecycleState.detached) {
+      unawaited(_persistSram(reportErrors: false));
+    }
+  }
 
   @override
   void dispose() {
-    _controller?.exit();
+    WidgetsBinding.instance.removeObserver(this);
+    unawaited(_persistSram(reportErrors: false));
     super.dispose();
   }
 
@@ -34,7 +67,7 @@ class _WebEmulatorPocPageState extends State<WebEmulatorPocPage> {
     try {
       final result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
-        allowedExtensions: const ['gb', 'gbc', 'gba', 'zip'],
+        allowedExtensions: const <String>['gb', 'gbc', 'gba', 'zip'],
         withData: true,
       );
       final file = result?.files.single;
@@ -48,41 +81,55 @@ class _WebEmulatorPocPageState extends State<WebEmulatorPocPage> {
         return;
       }
 
-      final bytes = file.bytes ?? await File(file.path!).readAsBytes();
+      final path = file.path;
+      final bytes =
+          file.bytes ??
+          (path == null
+              ? throw StateError('无法读取所选 ROM。')
+              : await File(path).readAsBytes());
       var system = Host4WebEmulatorSystem.tryFromRomFileName(file.name);
-
-      // ZIP 文件无法从文件名推断 system，需要用户选择
       if (system == null) {
-        if (Host4WebEmulatorSystem.isZipFile(file.name)) {
-          if (!mounted) return;
-          system = await _pickSystemForZip();
-          if (system == null) {
-            if (mounted) {
-              setState(() {
-                _loadingRom = false;
-                _status = '已取消选择平台。';
-              });
-            }
-            return;
-          }
-        } else {
+        if (!Host4WebEmulatorSystem.isZipFile(file.name)) {
           throw ArgumentError('不支持的文件类型：${file.name}');
+        }
+        if (!mounted) return;
+        system = await _pickSystemForZip();
+        if (system == null) {
+          if (mounted) {
+            setState(() {
+              _loadingRom = false;
+              _status = '已取消选择平台。';
+            });
+          }
+          return;
         }
       }
 
-      // 退出上一个 emulator
-      _controller?.exit();
-
+      await _shutdownCurrentSession();
+      final gameKey = sha256OfBytes(bytes);
+      final documents = await getApplicationDocumentsDirectory();
+      final repository = WebEmulatorSaveRepository(
+        rootDirectory: Directory('${documents.path}/host4_web_emulator'),
+        gameKey: gameKey,
+      );
+      final sram = await repository.readSram();
       final config = Host4WebEmulatorLaunchConfig(
         system: system,
         romName: file.name,
         romBase64: base64Encode(bytes),
+        sramBase64: sram == null ? null : base64Encode(sram),
       );
 
       if (!mounted) return;
       setState(() {
         _launchConfig = config;
+        _repository = repository;
+        _gameKey = gameKey;
+        _controller = null;
+        _actions = null;
         _loadingRom = false;
+        _launched = false;
+        _overlay = _WebEmulatorOverlay.none;
         _status =
             '已加载 ${file.name}，系统 ${system!.name.toUpperCase()}，等待 WebView 启动。';
       });
@@ -95,12 +142,12 @@ class _WebEmulatorPocPageState extends State<WebEmulatorPocPage> {
     }
   }
 
-  Future<Host4WebEmulatorSystem?> _pickSystemForZip() async {
+  Future<Host4WebEmulatorSystem?> _pickSystemForZip() {
     return showDialog<Host4WebEmulatorSystem>(
       context: context,
       builder: (context) => SimpleDialog(
         title: const Text('ZIP 内的 ROM 是什么平台？'),
-        children: [
+        children: <Widget>[
           for (final system in Host4WebEmulatorSystem.values)
             SimpleDialogOption(
               onPressed: () => Navigator.pop(context, system),
@@ -111,61 +158,196 @@ class _WebEmulatorPocPageState extends State<WebEmulatorPocPage> {
     );
   }
 
+  Future<void> _shutdownCurrentSession() async {
+    try {
+      await _persistSram(reportErrors: false);
+      await _controller?.exit();
+    } catch (error) {
+      debugPrint('[WebEmulatorDemo] shutdown failed: $error');
+    }
+  }
+
+  Future<void> _persistSram({required bool reportErrors}) async {
+    final actions = _actions;
+    if (!_launched || actions == null || _sramSaveInFlight) return;
+    _sramSaveInFlight = true;
+    try {
+      await actions.persistSram();
+    } catch (error) {
+      debugPrint('[WebEmulatorDemo] SRAM save failed: $error');
+      if (reportErrors && mounted) {
+        setState(() => _status = 'SRAM 保存失败：$error');
+      }
+    } finally {
+      _sramSaveInFlight = false;
+    }
+  }
+
+  void _onControllerReady(Host4WebEmulatorController controller) {
+    final repository = _repository;
+    if (repository == null) return;
+    final actions = WebEmulatorSessionActions(
+      runtime: Host4WebEmulatorRuntime(controller),
+      repository: repository,
+      onChanged: _refresh,
+      onReturnToGame: _returnToGame,
+      onExit: _finishSession,
+    );
+    if (!mounted) return;
+    setState(() {
+      _controller = controller;
+      _actions = actions;
+    });
+  }
+
+  void _refresh() {
+    if (mounted) setState(() {});
+  }
+
+  Future<void> _returnToGame() async {
+    if (!mounted) return;
+    setState(() => _overlay = _WebEmulatorOverlay.none);
+  }
+
+  Future<void> _finishSession() async {
+    if (!mounted) return;
+    setState(() {
+      _launchConfig = null;
+      _controller = null;
+      _repository = null;
+      _actions = null;
+      _gameKey = null;
+      _launched = false;
+      _overlay = _WebEmulatorOverlay.none;
+      _status = '游戏已退出，请选择 ROM。';
+    });
+  }
+
+  Future<void> _openMenu() async {
+    final controller = _controller;
+    if (controller == null || _overlay != _WebEmulatorOverlay.none) return;
+    try {
+      await controller.pause();
+      if (mounted) setState(() => _overlay = _WebEmulatorOverlay.menu);
+    } catch (error) {
+      if (mounted) setState(() => _status = '暂停失败：$error');
+    }
+  }
+
+  void _onInput(Host4EmulatorInputEvent event) {
+    final controller = _controller;
+    if (controller == null) return;
+    unawaited(
+      controller.keyEvent(event.input, action: event.phase).catchError((error) {
+        debugPrint('[WebEmulatorDemo] input failed: $error');
+      }),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = context.host4Theme;
     final config = _launchConfig;
 
     return Column(
-      children: [
-        Padding(
-          padding: EdgeInsets.fromLTRB(
-            theme.spacing.page,
-            0,
-            theme.spacing.page,
-            theme.spacing.md,
-          ),
-          child: Host4Card(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Host4Text('Web 模拟器 POC', role: Host4TextRole.heading),
-                SizedBox(height: theme.spacing.sm),
-                Host4Text(_status, colorRole: Host4TextColorRole.secondary),
-                SizedBox(height: theme.spacing.md),
-                Host4Button(
-                  label: _loadingRom ? '读取中...' : '选择 ROM',
-                  expanded: true,
-                  onPressed: _loadingRom ? null : _pickRom,
-                ),
-              ],
+      children: <Widget>[
+        if (!_launched)
+          Padding(
+            padding: EdgeInsets.fromLTRB(
+              theme.spacing.page,
+              0,
+              theme.spacing.page,
+              theme.spacing.md,
+            ),
+            child: Host4Card(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  const Host4Text('Web 模拟器 Demo', role: Host4TextRole.heading),
+                  SizedBox(height: theme.spacing.sm),
+                  Host4Text(_status, colorRole: Host4TextColorRole.secondary),
+                  SizedBox(height: theme.spacing.md),
+                  Host4Button(
+                    label: _loadingRom ? '读取中...' : '选择 ROM',
+                    expanded: true,
+                    onPressed: _loadingRom ? null : _pickRom,
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
         Expanded(
           child: config == null
-              ? Center(
+              ? const Center(
                   child: Host4Text(
-                    '选择 ROM 后会在这里启动 Nostalgist + mGBA。',
+                    '支持 GB / GBC / GBA，选择 ROM 后开始游戏。',
                     colorRole: Host4TextColorRole.secondary,
                   ),
                 )
-              : Host4WebEmulatorView(
-                  launchConfig: config,
-                  onControllerReady: (controller) {
-                    _controller = controller;
-                  },
-                  onBridgeMessage: (method, payload) {
-                    if (!mounted) return;
-                    setState(() => _status = '$method: $payload');
-                  },
-                  onWebError: (error) {
-                    if (!mounted) return;
-                    setState(() => _status = 'WebView 错误：$error');
-                  },
-                ),
+              : _buildEmulator(config),
         ),
       ],
     );
+  }
+
+  Widget _buildEmulator(Host4WebEmulatorLaunchConfig config) {
+    final actions = _actions;
+    final repository = _repository;
+    return DisplayMetricsWidget(child: Stack(
+      fit: StackFit.expand,
+      children: <Widget>[
+        Host4WebEmulatorView(
+          key: ValueKey<String>(_gameKey!),
+          launchConfig: config,
+          onControllerReady: _onControllerReady,
+          onBridgeMessage: (method, payload) {
+            debugPrint('[WebEmulatorDemo] bridge: $method $payload');
+            if (!mounted || method != 'launched') return;
+            setState(() {
+              _launched = true;
+              _status = '模拟器已启动';
+            });
+          },
+          onWebError: (error) {
+            debugPrint('[WebEmulatorDemo] web error: $error');
+            if (mounted) setState(() => _status = '模拟器错误：$error');
+          },
+        ),
+        if (_launched && _overlay == _WebEmulatorOverlay.none)
+          Host4EmulatorControlsLayer(
+            profile: _profileFor(config.system),
+            layoutStyle: Host4EmulatorControlLayoutStyle.silicone,
+            onInput: _onInput,
+            onMenuTap: _openMenu,
+          ),
+        if (_overlay == _WebEmulatorOverlay.menu && actions != null)
+          Host4EmulatorMenuOverlay(
+            actions: actions,
+            onOpenSaveManager: () {
+              setState(() => _overlay = _WebEmulatorOverlay.saves);
+            },
+          ),
+        if (_overlay == _WebEmulatorOverlay.saves &&
+            actions != null &&
+            repository != null)
+          Host4EmulatorSaveManager(
+            actions: actions,
+            dataSource: repository,
+            onBack: () {
+              setState(() => _overlay = _WebEmulatorOverlay.menu);
+            },
+          ),
+      ],
+    ));
+  }
+
+  static Host4EmulatorControlProfile _profileFor(
+    Host4WebEmulatorSystem system,
+  ) {
+    return switch (system) {
+      Host4WebEmulatorSystem.gb => Host4EmulatorControlProfile.gb,
+      Host4WebEmulatorSystem.gbc => Host4EmulatorControlProfile.gbc,
+      Host4WebEmulatorSystem.gba => Host4EmulatorControlProfile.gba,
+    };
   }
 }

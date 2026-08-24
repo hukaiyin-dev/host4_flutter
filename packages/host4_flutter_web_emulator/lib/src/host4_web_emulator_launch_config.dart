@@ -6,6 +6,7 @@ class Host4WebEmulatorLaunchConfig {
     required this.romName,
     this.romFileUrl,
     this.romBase64,
+    this.sramBase64,
   }) {
     if (romFileUrl == null && romBase64 == null) {
       throw ArgumentError('Either romFileUrl or romBase64 is required.');
@@ -15,6 +16,7 @@ class Host4WebEmulatorLaunchConfig {
   final Host4WebEmulatorSystem system;
   final Uri? romFileUrl;
   final String? romBase64;
+  final String? sramBase64;
   final String romName;
 
   Map<String, Object?> toJson() {
@@ -25,6 +27,7 @@ class Host4WebEmulatorLaunchConfig {
       'core': core.name,
       if (romFileUrl != null) 'romFileUrl': romFileUrl.toString(),
       if (romBase64 != null) 'romBase64': romBase64,
+      if (sramBase64 != null) 'sramBase64': sramBase64,
       'romName': romName,
       'coreZipUrl': core.zipUrl,
     };

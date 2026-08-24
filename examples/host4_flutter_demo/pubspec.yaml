@@ -28,6 +28,7 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
+  display_metrics: ^2.3.0
   flutter:
     sdk: flutter
   flutter_localizations:
@@ -48,6 +49,8 @@ dependencies:
     path: ../../packages/host4_flutter_physical_overlay
   host4_flutter_ui:
     path: ../../packages/host4_flutter_ui
+  host4_flutter_emulator_ui:
+    path: ../../packages/host4_flutter_emulator_ui
   host4_flutter_system_status:
     path: ../../packages/host4_flutter_system_status
   host4_flutter_log:

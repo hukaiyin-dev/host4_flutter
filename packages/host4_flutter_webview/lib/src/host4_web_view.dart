@@ -201,6 +201,7 @@ class _Host4WebViewState extends State<Host4WebView> {
     controller.setNavigationDelegate(
       NavigationDelegate(
         onPageStarted: (url) {
+          debugPrint('[Host4WebView] onPageStarted url=$url');
           if (!mounted) return;
           setState(() {
             _isLoading = true;
@@ -213,6 +214,7 @@ class _Host4WebViewState extends State<Host4WebView> {
           widget.onPageStarted?.call(url);
         },
         onPageFinished: (url) {
+          debugPrint('[Host4WebView] onPageFinished url=$url');
           if (!mounted) return;
           setState(() {
             _isLoading = false;
@@ -228,6 +230,13 @@ class _Host4WebViewState extends State<Host4WebView> {
           setState(() => _progress = p / 100.0);
         },
         onWebResourceError: (error) {
+          debugPrint(
+            '[Host4WebView] onWebResourceError '
+            'isMain=${error.isForMainFrame} '
+            'code=${error.errorCode} '
+            'desc=${error.description} '
+            'url=${error.url}',
+          );
           if (!mounted) return;
           final isMain = error.isForMainFrame ?? true;
           if (!isMain) return;
@@ -242,6 +251,7 @@ class _Host4WebViewState extends State<Host4WebView> {
         },
         onNavigationRequest: (req) {
           final uri = Uri.tryParse(req.url);
+          debugPrint('[Host4WebView] onNavigationRequest url=${req.url} scheme=${uri?.scheme}');
           if (uri == null) return NavigationDecision.prevent;
           final custom = widget.onNavigationRequest?.call(uri);
           if (custom != null) {
@@ -249,7 +259,9 @@ class _Host4WebViewState extends State<Host4WebView> {
                 ? NavigationDecision.navigate
                 : NavigationDecision.prevent;
           }
-          return (uri.scheme == 'http' || uri.scheme == 'https')
+          return (uri.scheme == 'http' ||
+                  uri.scheme == 'https' ||
+                  uri.scheme == 'file')
               ? NavigationDecision.navigate
               : NavigationDecision.prevent;
         },

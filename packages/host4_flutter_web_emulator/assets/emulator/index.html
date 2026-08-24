@@ -23,7 +23,7 @@
     </style>
   </head>
   <body>
-    <main id="emulator"></main>
+    <canvas id="emulator"></canvas>
     <script src="./zip.min.js"></script>
     <script src="./nostalgist.0.19.0.umd.js"></script>
     <script>
@@ -129,6 +129,9 @@
                 element: document.getElementById('emulator'),
                 core: coreName,
                 rom: resolveRom(config),
+                sram: config.sramBase64
+                  ? base64ToBlob(config.sramBase64, 'application/octet-stream')
+                  : undefined,
                 respondToGlobalEvents: true,
                 style: {
                   width: '100%',
@@ -153,18 +156,30 @@
             }
           },
 
-          pause: function () {
-            if (current && typeof current.pause === 'function') current.pause();
-            report('paused', 'pause', true, null, null);
+          pause: function (requestId) {
+            requestId = requestId || 'pause';
+            try {
+              if (!current) throw new Error('Emulator not running.');
+              if (typeof current.pause === 'function') current.pause();
+              report('paused', requestId, true, null, null);
+            } catch (error) {
+              report('pauseError', requestId, false, null, error);
+            }
           },
 
-          resume: function () {
-            if (current && typeof current.resume === 'function') current.resume();
-            report('resumed', 'resume', true, null, null);
+          resume: function (requestId) {
+            requestId = requestId || 'resume';
+            try {
+              if (!current) throw new Error('Emulator not running.');
+              if (typeof current.resume === 'function') current.resume();
+              report('resumed', requestId, true, null, null);
+            } catch (error) {
+              report('resumeError', requestId, false, null, error);
+            }
           },
 
-          restart: async function () {
-            var requestId = 'restart';
+          restart: async function (requestId) {
+            requestId = requestId || 'restart';
             try {
               if (!current) throw new Error('Emulator not running.');
               await current.restart();
@@ -174,10 +189,15 @@
             }
           },
 
-          exit: function () {
-            if (current && typeof current.exit === 'function') current.exit();
-            current = null;
-            report('exited', 'exit', true, null, null);
+          exit: function (requestId) {
+            requestId = requestId || 'exit';
+            try {
+              if (current && typeof current.exit === 'function') current.exit();
+              current = null;
+              report('exited', requestId, true, null, null);
+            } catch (error) {
+              report('exitError', requestId, false, null, error);
+            }
           },
 
           saveState: async function (requestId) {
@@ -229,13 +249,33 @@
             }
           },
 
-          setRate: function (rate) {
+          saveSRAM: async function (requestId) {
+            requestId = requestId || 'saveSRAM';
             try {
-              if (current && typeof current.setFastForwardRatio === 'function') {
-                current.setFastForwardRatio(rate);
+              if (!current) throw new Error('Emulator not running.');
+              if (typeof current.saveSRAM !== 'function') {
+                throw new Error('Core does not support SRAM export.');
               }
+              var result = await current.saveSRAM();
+              var blob = result instanceof Blob ? result : new Blob([result]);
+              var base64 = await blobToBase64(blob);
+              report('sramSaved', requestId, true, { sram: base64 }, null);
             } catch (error) {
-              report('setRateError', 'setRate', false, null, error);
+              report('saveSRAMError', requestId, false, null, error);
+            }
+          },
+
+          setRate: function (rate, requestId) {
+            requestId = requestId || 'setRate';
+            try {
+              if (!current) throw new Error('Emulator not running.');
+              if (typeof current.setFastForwardRatio !== 'function') {
+                throw new Error('Core does not support rate changes.');
+              }
+              current.setFastForwardRatio(rate);
+              report('rateSet', requestId, true, { rate: rate }, null);
+            } catch (error) {
+              report('setRateError', requestId, false, null, error);
             }
           },
 
