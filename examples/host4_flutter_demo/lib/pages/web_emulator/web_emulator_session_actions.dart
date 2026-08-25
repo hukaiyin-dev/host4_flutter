@@ -89,6 +89,7 @@ class WebEmulatorSessionActions extends Host4EmulatorSessionActions {
   Future<void> quickLoad() async {
     final state = await repository.readQuickState();
     await runtime.loadState(base64Encode(state));
+    await runtime.resume();
     await onReturnToGame?.call();
   }
 
@@ -113,6 +114,7 @@ class WebEmulatorSessionActions extends Host4EmulatorSessionActions {
   Future<void> loadSlot(int slot) async {
     final state = await repository.readSlotState(slot);
     await runtime.loadState(base64Encode(state));
+    await runtime.resume();
     await onReturnToGame?.call();
   }
 

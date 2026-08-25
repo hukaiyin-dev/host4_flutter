@@ -29,6 +29,7 @@
     <script>
       (function () {
         var current = null;
+        var currentRate = 1;
         var bridgeReady = false;
         var pendingMessages = [];
 
@@ -146,6 +147,7 @@
                   return r.wasm;
                 }
               });
+              currentRate = 1;
               report('launched', requestId, true, {
                 system: config.system,
                 core: coreName
@@ -194,6 +196,7 @@
             try {
               if (current && typeof current.exit === 'function') current.exit();
               current = null;
+              currentRate = 1;
               report('exited', requestId, true, null, null);
             } catch (error) {
               report('exitError', requestId, false, null, error);
@@ -269,10 +272,16 @@
             requestId = requestId || 'setRate';
             try {
               if (!current) throw new Error('Emulator not running.');
-              if (typeof current.setFastForwardRatio !== 'function') {
+              if (rate !== 1 && rate !== 2) {
+                throw new Error('Only 1x and 2x rates are supported.');
+              }
+              if (typeof current.sendCommand !== 'function') {
                 throw new Error('Core does not support rate changes.');
               }
-              current.setFastForwardRatio(rate);
+              if (rate !== currentRate) {
+                current.sendCommand('FAST_FORWARD');
+                currentRate = rate;
+              }
               report('rateSet', requestId, true, { rate: rate }, null);
             } catch (error) {
               report('setRateError', requestId, false, null, error);

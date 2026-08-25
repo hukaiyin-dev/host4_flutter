@@ -716,6 +716,53 @@ class _SmallButtonVisual extends StatelessWidget {
   }
 }
 
+/// Shoulder button with pill shape and text label, matching Delta's
+/// `DeltaSmallButton(style: pillShoulder)`.
+class Host4EmulatorSiliconeSmallButton extends StatelessWidget {
+  const Host4EmulatorSiliconeSmallButton({
+    required this.hitSize,
+    required this.visualSize,
+    required this.label,
+    required this.inputName,
+    this.onEvent,
+    this.onTap,
+    super.key,
+  }) : assert(onEvent != null || onTap != null);
+
+  final Size hitSize;
+  final Size visualSize;
+  final String label;
+  final String inputName;
+  final ValueChanged<Host4EmulatorInputEvent>? onEvent;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final visual = CustomPaint(painter: _SmallButtonVisualPainter(label));
+    final Widget inner;
+    if (onEvent != null) {
+      inner = _PressableInput(
+        source: 'silicone.shoulder.$inputName',
+        inputName: inputName,
+        onEvent: onEvent!,
+        child: visual,
+      );
+    } else {
+      inner = GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: visual,
+      );
+    }
+    return SizedBox.fromSize(
+      size: hitSize,
+      child: Center(
+        child: SizedBox.fromSize(size: visualSize, child: inner),
+      ),
+    );
+  }
+}
+
 class _SmallButtonVisualPainter extends CustomPainter {
   const _SmallButtonVisualPainter(this.label);
 

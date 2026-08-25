@@ -72,11 +72,7 @@ class _HomePageState extends State<HomePage> {
         icon: Icons.sports_esports_outlined,
         color: Colors.indigo,
         minHeight: 220,
-        builder: (_) => const SubPageScaffold(
-          title: 'Web 模拟器 POC',
-          subtitle: '选择本地 GB / GBC / GBA ROM 并在 WebView 启动',
-          child: WebEmulatorPocPage(),
-        ),
+        builder: (_) => const WebEmulatorPocPage(),
       ),
       _LabEntry(
         title: 'AI Voice',

@@ -150,8 +150,11 @@ class Host4EmulatorSiliconeLayoutResolver {
     final Offset origin = Offset(left, top);
     final Map<String, Host4EmulatorSiliconeResolvedControl> controls =
         <String, Host4EmulatorSiliconeResolvedControl>{};
-    final Map<Host4EmulatorSiliconePadSlot, Host4EmulatorSiliconeResolvedControl>
-        slots = _buildPadSlots(metrics: metrics, origin: origin);
+    final Map<
+      Host4EmulatorSiliconePadSlot,
+      Host4EmulatorSiliconeResolvedControl
+    >
+    slots = _buildPadSlots(metrics: metrics, origin: origin);
 
     _addControlFromSlot(
       controls,
@@ -233,18 +236,24 @@ class Host4EmulatorSiliconeLayoutResolver {
 
     final Map<String, Host4EmulatorSiliconeResolvedControl> controls =
         <String, Host4EmulatorSiliconeResolvedControl>{};
-    final Map<Host4EmulatorSiliconePadSlot, Host4EmulatorSiliconeResolvedControl>
-        leftSlots = _buildPadSlots(
-          metrics: metrics,
-          origin: screenLeftPad.topLeft,
-          clockwise: true,
-        );
-    final Map<Host4EmulatorSiliconePadSlot, Host4EmulatorSiliconeResolvedControl>
-        rightSlots = _buildPadSlots(
-          metrics: metrics,
-          origin: screenRightPad.topLeft,
-          clockwise: false,
-        );
+    final Map<
+      Host4EmulatorSiliconePadSlot,
+      Host4EmulatorSiliconeResolvedControl
+    >
+    leftSlots = _buildPadSlots(
+      metrics: metrics,
+      origin: screenLeftPad.topLeft,
+      clockwise: true,
+    );
+    final Map<
+      Host4EmulatorSiliconePadSlot,
+      Host4EmulatorSiliconeResolvedControl
+    >
+    rightSlots = _buildPadSlots(
+      metrics: metrics,
+      origin: screenRightPad.topLeft,
+      clockwise: false,
+    );
     _addLandscapePadControls(
       controls,
       slots: leftSlots,
@@ -297,8 +306,11 @@ class Host4EmulatorSiliconeLayoutResolver {
 
   static void _addLandscapePadControls(
     Map<String, Host4EmulatorSiliconeResolvedControl> controls, {
-    required Map<Host4EmulatorSiliconePadSlot, Host4EmulatorSiliconeResolvedControl>
-        slots,
+    required Map<
+      Host4EmulatorSiliconePadSlot,
+      Host4EmulatorSiliconeResolvedControl
+    >
+    slots,
     required Host4EmulatorSiliconeMetrics metrics,
     required String dpadIdentifier,
     required String actionIdentifier,
@@ -374,11 +386,12 @@ class Host4EmulatorSiliconeLayoutResolver {
       rect('actionLeft'),
       borderRadius: rect('actionLeft').shortestSide / 2,
     );
-    final Host4EmulatorSiliconeResolvedControl physicalActionRight = rectControl(
-      Host4EmulatorSiliconePadSlot.actionRight,
-      rect('actionRight'),
-      borderRadius: rect('actionRight').shortestSide / 2,
-    );
+    final Host4EmulatorSiliconeResolvedControl physicalActionRight =
+        rectControl(
+          Host4EmulatorSiliconePadSlot.actionRight,
+          rect('actionRight'),
+          borderRadius: rect('actionRight').shortestSide / 2,
+        );
     final Host4EmulatorSiliconeResolvedControl physicalActionBottom =
         rectControl(
           Host4EmulatorSiliconePadSlot.actionBottom,
@@ -386,30 +399,33 @@ class Host4EmulatorSiliconeLayoutResolver {
           borderRadius: rect('actionBottom').shortestSide / 2,
         );
 
-    final Map<Host4EmulatorSiliconePadSlot, Host4EmulatorSiliconeResolvedControl>
-        actionSlots = switch (clockwise) {
-          null =>
-            <Host4EmulatorSiliconePadSlot, Host4EmulatorSiliconeResolvedControl>{
-              Host4EmulatorSiliconePadSlot.actionTop: physicalActionTop,
-              Host4EmulatorSiliconePadSlot.actionLeft: physicalActionLeft,
-              Host4EmulatorSiliconePadSlot.actionRight: physicalActionRight,
-              Host4EmulatorSiliconePadSlot.actionBottom: physicalActionBottom,
-            },
-          true =>
-            <Host4EmulatorSiliconePadSlot, Host4EmulatorSiliconeResolvedControl>{
-              Host4EmulatorSiliconePadSlot.actionTop: physicalActionLeft,
-              Host4EmulatorSiliconePadSlot.actionLeft: physicalActionBottom,
-              Host4EmulatorSiliconePadSlot.actionRight: physicalActionTop,
-              Host4EmulatorSiliconePadSlot.actionBottom: physicalActionRight,
-            },
-          false =>
-            <Host4EmulatorSiliconePadSlot, Host4EmulatorSiliconeResolvedControl>{
-              Host4EmulatorSiliconePadSlot.actionTop: physicalActionRight,
-              Host4EmulatorSiliconePadSlot.actionLeft: physicalActionTop,
-              Host4EmulatorSiliconePadSlot.actionRight: physicalActionBottom,
-              Host4EmulatorSiliconePadSlot.actionBottom: physicalActionLeft,
-            },
-        };
+    final Map<
+      Host4EmulatorSiliconePadSlot,
+      Host4EmulatorSiliconeResolvedControl
+    >
+    actionSlots = switch (clockwise) {
+      null =>
+        <Host4EmulatorSiliconePadSlot, Host4EmulatorSiliconeResolvedControl>{
+          Host4EmulatorSiliconePadSlot.actionTop: physicalActionTop,
+          Host4EmulatorSiliconePadSlot.actionLeft: physicalActionLeft,
+          Host4EmulatorSiliconePadSlot.actionRight: physicalActionRight,
+          Host4EmulatorSiliconePadSlot.actionBottom: physicalActionBottom,
+        },
+      true =>
+        <Host4EmulatorSiliconePadSlot, Host4EmulatorSiliconeResolvedControl>{
+          Host4EmulatorSiliconePadSlot.actionTop: physicalActionLeft,
+          Host4EmulatorSiliconePadSlot.actionLeft: physicalActionBottom,
+          Host4EmulatorSiliconePadSlot.actionRight: physicalActionTop,
+          Host4EmulatorSiliconePadSlot.actionBottom: physicalActionRight,
+        },
+      false =>
+        <Host4EmulatorSiliconePadSlot, Host4EmulatorSiliconeResolvedControl>{
+          Host4EmulatorSiliconePadSlot.actionTop: physicalActionRight,
+          Host4EmulatorSiliconePadSlot.actionLeft: physicalActionTop,
+          Host4EmulatorSiliconePadSlot.actionRight: physicalActionBottom,
+          Host4EmulatorSiliconePadSlot.actionBottom: physicalActionLeft,
+        },
+    };
 
     return <Host4EmulatorSiliconePadSlot, Host4EmulatorSiliconeResolvedControl>{
       Host4EmulatorSiliconePadSlot.dpad: rectControl(
@@ -465,12 +481,7 @@ class Host4EmulatorSiliconeLayoutResolver {
         rect.width,
       );
     }
-    return Rect.fromLTWH(
-      rect.top,
-      width - rect.right,
-      rect.height,
-      rect.width,
-    );
+    return Rect.fromLTWH(rect.top, width - rect.right, rect.height, rect.width);
   }
 
   static void _addRectControl(
@@ -564,6 +575,26 @@ class Host4EmulatorSiliconeLayoutResolver {
       controls,
       semanticsIdentifier: 'game.controls.btn_set',
       center: Offset(screenSize.width / 2, bottomButtonCenterY),
+      size: Size.square(bottomButtonSize),
+    );
+    _addSystemControl(
+      controls,
+      semanticsIdentifier: 'game.controls.btn_locate_placeholder',
+      center: Offset(
+        _portraitBottomButtonSideMargin * scale + bottomButtonSize / 2,
+        bottomButtonCenterY,
+      ),
+      size: Size.square(bottomButtonSize),
+    );
+    _addSystemControl(
+      controls,
+      semanticsIdentifier: 'game.controls.btn_hide_toggle',
+      center: Offset(
+        screenSize.width -
+            _portraitBottomButtonSideMargin * scale -
+            bottomButtonSize / 2,
+        bottomButtonCenterY,
+      ),
       size: Size.square(bottomButtonSize),
     );
   }
@@ -660,9 +691,11 @@ const double _portraitRightShoulderCenterXRatio =
     (301.0 - 27.2) / _portraitPadUiWidth;
 const double _portraitShoulderWidthRatio = 72.0 / _portraitPadUiWidth;
 const double _portraitShoulderHeightRatio = 31.5 / _portraitPadUiHeight;
-const double _portraitLowerSlotBottomMargin = _portraitBaseHeight - 676.0 - 31.5;
+const double _portraitLowerSlotBottomMargin =
+    _portraitBaseHeight - 676.0 - 31.5;
 const double _portraitBottomButtonSize = 42;
 const double _portraitBottomButtonBottomMargin =
     _portraitBaseHeight - 778.0 - _portraitBottomButtonSize;
+const double _portraitBottomButtonSideMargin = 32;
 const double _landscapeSystemButtonCenterOffset = 98;
 const double _landscapeSystemButtonBottomMargin = 33;

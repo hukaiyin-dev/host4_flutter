@@ -3,15 +3,61 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:host4_flutter_emulator_ui/host4_flutter_emulator_ui.dart';
 
 void main() {
+  testWidgets('portrait menu matches the Pantas 2x3 card geometry', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Host4EmulatorMenuOverlay(
+          actions: _FakeActions(),
+          onOpenSaveManager: () {},
+          layoutStyle: Host4EmulatorControlLayoutStyle.silicone,
+          onLayoutChanged: (_) async {},
+        ),
+      ),
+    );
+
+    final quickSave = find.byKey(const ValueKey<String>('menu.quick_save'));
+    final exit = find.byKey(const ValueKey<String>('menu.exit'));
+    final saveManager = find.byKey(const ValueKey<String>('menu.save_manager'));
+    final speed = find.byKey(const ValueKey<String>('menu.speed'));
+    final quickLoad = find.byKey(const ValueKey<String>('menu.quick_load'));
+    final continueGame = find.byKey(const ValueKey<String>('menu.continue'));
+
+    expect(tester.getSize(quickSave), const Size(167, 102));
+    expect(tester.getTopLeft(quickSave), const Offset(24, 75));
+    expect(tester.getTopLeft(exit), const Offset(199, 75));
+    expect(tester.getTopLeft(saveManager), const Offset(24, 185));
+    expect(tester.getTopLeft(speed), const Offset(199, 185));
+    expect(tester.getTopLeft(quickLoad), const Offset(24, 295));
+    expect(tester.getTopLeft(continueGame), const Offset(199, 295));
+    expect(find.text('游戏菜单'), findsNothing);
+    expect(
+      find.ancestor(
+        of: find.text('快速存档'),
+        matching: find.byType(Material),
+      ),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('menu exposes the host4 session actions', (tester) async {
     final actions = _FakeActions();
     var openedSaveManager = false;
+    Host4EmulatorControlLayoutStyle? selectedLayout;
 
     await tester.pumpWidget(
       MaterialApp(
         home: Host4EmulatorMenuOverlay(
           actions: actions,
           onOpenSaveManager: () => openedSaveManager = true,
+          layoutStyle: Host4EmulatorControlLayoutStyle.silicone,
+          onLayoutChanged: (value) async => selectedLayout = value,
         ),
       ),
     );
@@ -28,9 +74,9 @@ void main() {
       find.byKey(const ValueKey<String>('menu.save_manager')),
       findsOneWidget,
     );
-    expect(find.byKey(const ValueKey<String>('menu.restart')), findsOneWidget);
     expect(find.byKey(const ValueKey<String>('menu.exit')), findsOneWidget);
     expect(find.byKey(const ValueKey<String>('menu.continue')), findsOneWidget);
+    expect(find.byKey(const ValueKey<String>('menu.layout')), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey<String>('menu.quick_save')));
     await tester.pump();
@@ -42,6 +88,10 @@ void main() {
 
     await tester.tap(find.byKey(const ValueKey<String>('menu.save_manager')));
     expect(openedSaveManager, isTrue);
+
+    await tester.tap(find.byKey(const ValueKey<String>('menu.layout')));
+    await tester.pump();
+    expect(selectedLayout, Host4EmulatorControlLayoutStyle.modern);
 
     await tester.tap(find.byKey(const ValueKey<String>('menu.continue')));
     await tester.pump();

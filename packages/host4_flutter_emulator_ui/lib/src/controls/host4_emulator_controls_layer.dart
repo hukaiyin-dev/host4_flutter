@@ -1,6 +1,9 @@
 import 'dart:math' as math;
 
+import 'package:display_metrics/display_metrics.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../input/host4_emulator_input_event.dart';
 import '../model/host4_emulator_control_layout_style.dart';
@@ -16,6 +19,7 @@ class Host4EmulatorControlsLayer extends StatelessWidget {
     required this.profile,
     required this.onInput,
     required this.onMenuTap,
+    this.onLocateTap,
     this.layoutStyle = Host4EmulatorControlLayoutStyle.modern,
     super.key,
   });
@@ -23,6 +27,7 @@ class Host4EmulatorControlsLayer extends StatelessWidget {
   final Host4EmulatorControlProfile profile;
   final ValueChanged<Host4EmulatorInputEvent> onInput;
   final VoidCallback onMenuTap;
+  final VoidCallback? onLocateTap;
   final Host4EmulatorControlLayoutStyle layoutStyle;
 
   @override
@@ -33,12 +38,109 @@ class Host4EmulatorControlsLayer extends StatelessWidget {
         onInput: onInput,
         onMenuTap: onMenuTap,
       ),
-      Host4EmulatorControlLayoutStyle.silicone => _SiliconeControls(
-        profile: profile,
-        onInput: onInput,
-        onMenuTap: onMenuTap,
+      Host4EmulatorControlLayoutStyle.silicone => DisplayMetricsWidget(
+        child: _SiliconeControls(
+          profile: profile,
+          onInput: onInput,
+          onMenuTap: onMenuTap,
+          onLocateTap: onLocateTap,
+        ),
       ),
     };
+  }
+}
+
+class Host4EmulatorActiveMenuButton extends StatelessWidget {
+  const Host4EmulatorActiveMenuButton({
+    required this.layoutStyle,
+    required this.onTap,
+    super.key,
+  });
+
+  final Host4EmulatorControlLayoutStyle layoutStyle;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    if (layoutStyle == Host4EmulatorControlLayoutStyle.silicone) {
+      return DisplayMetricsWidget(child: _ActiveSiliconeMenuButton(onTap));
+    }
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final size = constraints.biggest;
+        final landscape = size.width >= size.height;
+        final scale = landscape
+            ? math.min(size.width / 844, size.height / 390).clamp(0.65, 1.4)
+            : math.min(size.width / 390, size.height / 844).clamp(0.78, 1.25);
+        return SafeArea(
+          child: Stack(
+            children: <Widget>[
+              Positioned(
+                key: const ValueKey<String>('controls.active_menu'),
+                left: size.width / 2 - 21 * scale,
+                top: 24 * scale,
+                child: Host4EmulatorAuxiliaryButton(
+                  asset: 'logo_group.svg',
+                  size: Size.square(42 * scale),
+                  onTap: onTap,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _ActiveSiliconeMenuButton extends StatelessWidget {
+  const _ActiveSiliconeMenuButton(this.onTap);
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final size = constraints.biggest;
+        final landscape = size.width >= size.height;
+        final metrics = Host4EmulatorSiliconeMetrics.of(context);
+        final padding = MediaQuery.paddingOf(context);
+        final layout = landscape
+            ? Host4EmulatorSiliconeLayoutResolver.landscape(
+                screenSize: size,
+                metrics: metrics,
+              )
+            : Host4EmulatorSiliconeLayoutResolver.portrait(
+                screenSize: size,
+                metrics: metrics,
+                topInset: padding.top,
+                bottomInset: padding.bottom,
+              );
+        final identifier = landscape
+            ? 'landscape.controls.btn_set'
+            : 'game.controls.btn_set';
+        final control = layout.controls[identifier];
+        if (control == null) return const SizedBox.shrink();
+        return Stack(
+          children: <Widget>[
+            Positioned(
+              left: control.hitRect.left,
+              top: control.hitRect.top,
+              child: _SiliconeSystemButton(
+                semanticsIdentifier: 'controls.active_menu',
+                hitSize: control.hitRect.size,
+                visualSize: control.visualSize,
+                asset: 'logo_group.svg',
+                centerStyle: true,
+                selected: true,
+                onTap: onTap,
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 }
 
@@ -162,16 +264,25 @@ class _ModernControls extends StatelessWidget {
   }
 }
 
-class _SiliconeControls extends StatelessWidget {
+class _SiliconeControls extends StatefulWidget {
   const _SiliconeControls({
     required this.profile,
     required this.onInput,
     required this.onMenuTap,
+    required this.onLocateTap,
   });
 
   final Host4EmulatorControlProfile profile;
   final ValueChanged<Host4EmulatorInputEvent> onInput;
   final VoidCallback onMenuTap;
+  final VoidCallback? onLocateTap;
+
+  @override
+  State<_SiliconeControls> createState() => _SiliconeControlsState();
+}
+
+class _SiliconeControlsState extends State<_SiliconeControls> {
+  bool _collapsed = false;
 
   @override
   Widget build(BuildContext context) {
@@ -180,6 +291,7 @@ class _SiliconeControls extends StatelessWidget {
         final size = constraints.biggest;
         final landscape = size.width >= size.height;
         final metrics = Host4EmulatorSiliconeMetrics.of(context);
+        final padding = MediaQuery.paddingOf(context);
 
         final Host4EmulatorSiliconeResolvedLayout layout;
         final List<Host4EmulatorSiliconePadBinding> bindings;
@@ -189,9 +301,10 @@ class _SiliconeControls extends StatelessWidget {
             screenSize: size,
             metrics: metrics,
           );
-          bindings = _landscapeBindings;
+          bindings = widget.profile.hasShoulderButtons
+              ? _landscapeBindings
+              : _landscapeBindingsWithoutShoulders;
         } else {
-          final padding = MediaQuery.paddingOf(context);
           layout = Host4EmulatorSiliconeLayoutResolver.portrait(
             screenSize: size,
             metrics: metrics,
@@ -201,73 +314,72 @@ class _SiliconeControls extends StatelessWidget {
           bindings = _portraitBindings;
         }
 
-        final edge = 24.0 *
-            (landscape
-                ? math.min(size.width / 844, size.height / 390)
-                    .clamp(0.65, 1.4)
-                : math.min(size.width / 390, size.height / 844)
-                    .clamp(0.78, 1.25));
+        if (_collapsed) {
+          return SizedBox.fromSize(
+            size: size,
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: <Widget>[_hideToggle(layout, landscape)],
+            ),
+          );
+        }
 
-        return Stack(
-          clipBehavior: Clip.none,
-          children: <Widget>[
-            for (final binding in bindings)
-              Host4EmulatorSiliconePad(
-                layout: layout,
-                binding: binding,
-                onEvent: onInput,
-              ),
-            if (profile.hasShoulderButtons && !landscape) ..._portraitShoulders(
-              layout,
-            ),
-            if (profile.hasShoulderButtons && landscape) ..._landscapeShoulders(
-              layout,
-            ),
-            _menuButton(layout, size, landscape, edge),
-          ],
+        return SizedBox.fromSize(
+          size: size,
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: <Widget>[
+              for (final binding in bindings)
+                Host4EmulatorSiliconePad(
+                  layout: layout,
+                  binding: binding,
+                  onEvent: widget.onInput,
+                ),
+              if (!landscape) ..._portraitShoulders(layout),
+              if (widget.profile.hasShoulderButtons && landscape)
+                ..._landscapeShoulders(layout),
+              if (!landscape && widget.onLocateTap != null)
+                _locateButton(layout),
+              _menuButton(layout, size, landscape),
+              _hideToggle(layout, landscape),
+            ],
+          ),
         );
       },
     );
   }
 
-  List<Widget> _portraitShoulders(
-    Host4EmulatorSiliconeResolvedLayout layout,
-  ) {
+  List<Widget> _portraitShoulders(Host4EmulatorSiliconeResolvedLayout layout) {
     return <Widget>[
-      _auxiliaryFromControl(layout, 'game.controls.btn_l', 'l',
-          'landscape_shoulder_l1.svg'),
-      _auxiliaryFromControl(layout, 'game.controls.btn_r', 'r',
-          'landscape_shoulder_r1.svg'),
+      _shoulderButton(layout, 'game.controls.btn_l', 'l', 'L'),
+      _shoulderButton(layout, 'game.controls.btn_r', 'r', 'R'),
     ];
   }
 
-  List<Widget> _landscapeShoulders(
-    Host4EmulatorSiliconeResolvedLayout layout,
-  ) {
+  List<Widget> _landscapeShoulders(Host4EmulatorSiliconeResolvedLayout layout) {
     return <Widget>[
-      _auxiliaryFromControl(layout, 'landscape.controls.btn_l2', 'l',
-          'landscape_shoulder_l1.svg'),
-      _auxiliaryFromControl(layout, 'landscape.controls.btn_r2', 'r',
-          'landscape_shoulder_r1.svg'),
+      _shoulderButton(layout, 'landscape.controls.btn_l2', 'l', 'L'),
+      _shoulderButton(layout, 'landscape.controls.btn_r2', 'r', 'R'),
     ];
   }
 
-  Widget _auxiliaryFromControl(
+  Widget _shoulderButton(
     Host4EmulatorSiliconeResolvedLayout layout,
     String identifier,
     String input,
-    String asset,
+    String label,
   ) {
     final control = layout.controls[identifier];
     if (control == null) return const SizedBox.shrink();
     return Positioned(
       left: control.hitRect.left,
       top: control.hitRect.top,
-      child: Host4EmulatorAuxiliaryButton(
-        input: input,
-        asset: asset,
-        size: control.hitRect.size,
-        onEvent: onInput,
+      child: Host4EmulatorSiliconeSmallButton(
+        hitSize: control.hitRect.size,
+        visualSize: control.visualSize,
+        label: label,
+        inputName: input,
+        onEvent: widget.onInput,
       ),
     );
   }
@@ -276,7 +388,6 @@ class _SiliconeControls extends StatelessWidget {
     Host4EmulatorSiliconeResolvedLayout layout,
     Size size,
     bool landscape,
-    double edge,
   ) {
     final String identifier = landscape
         ? 'landscape.controls.btn_set'
@@ -285,21 +396,64 @@ class _SiliconeControls extends StatelessWidget {
     if (control == null) {
       return Positioned(
         left: size.width / 2 - 21,
-        top: edge,
+        top: 24,
         child: Host4EmulatorAuxiliaryButton(
           asset: 'logo_group.svg',
           size: const Size.square(42),
-          onTap: onMenuTap,
+          onTap: widget.onMenuTap,
         ),
       );
     }
     return Positioned(
       left: control.hitRect.left,
       top: control.hitRect.top,
-      child: Host4EmulatorAuxiliaryButton(
+      child: _SiliconeSystemButton(
+        semanticsIdentifier: identifier,
+        hitSize: control.hitRect.size,
+        visualSize: control.visualSize,
         asset: 'logo_group.svg',
-        size: control.hitRect.size,
-        onTap: onMenuTap,
+        centerStyle: true,
+        onTap: widget.onMenuTap,
+      ),
+    );
+  }
+
+  Widget _locateButton(Host4EmulatorSiliconeResolvedLayout layout) {
+    const identifier = 'game.controls.btn_locate_placeholder';
+    final control = layout.controls[identifier];
+    if (control == null) return const SizedBox.shrink();
+    return Positioned(
+      left: control.hitRect.left,
+      top: control.hitRect.top,
+      child: _SiliconeSystemButton(
+        semanticsIdentifier: identifier,
+        hitSize: control.hitRect.size,
+        visualSize: control.visualSize,
+        asset: 'ic_dingwei.svg',
+        onTap: widget.onLocateTap!,
+      ),
+    );
+  }
+
+  Widget _hideToggle(
+    Host4EmulatorSiliconeResolvedLayout layout,
+    bool landscape,
+  ) {
+    final String identifier = landscape
+        ? 'landscape.controls.hide_toggle'
+        : 'game.controls.btn_hide_toggle';
+    final control = layout.controls[identifier];
+    if (control == null) return const SizedBox.shrink();
+    return Positioned(
+      left: control.hitRect.left,
+      top: control.hitRect.top,
+      child: _SiliconeSystemButton(
+        semanticsIdentifier: identifier,
+        hitSize: control.hitRect.size,
+        visualSize: control.visualSize,
+        asset: 'ic_expand.svg',
+        iconQuarterTurns: _collapsed ? 2 : 0,
+        onTap: () => setState(() => _collapsed = !_collapsed),
       ),
     );
   }
@@ -310,6 +464,18 @@ class _SiliconeControls extends StatelessWidget {
           side: Host4EmulatorSiliconePadSide.single,
           dpadIdentifier: 'game.controls.dpad',
           actions: <Host4EmulatorSiliconePadActionBinding>[
+            Host4EmulatorSiliconePadActionBinding(
+              slot: Host4EmulatorSiliconePadSlot.actionTop,
+              inputName: 'x',
+              label: 'X',
+              semanticsIdentifier: 'game.controls.btn_x',
+            ),
+            Host4EmulatorSiliconePadActionBinding(
+              slot: Host4EmulatorSiliconePadSlot.actionLeft,
+              inputName: 'y',
+              label: 'Y',
+              semanticsIdentifier: 'game.controls.btn_y',
+            ),
             Host4EmulatorSiliconePadActionBinding(
               slot: Host4EmulatorSiliconePadSlot.actionRight,
               inputName: 'a',
@@ -326,13 +492,13 @@ class _SiliconeControls extends StatelessWidget {
           innerTop: Host4EmulatorSiliconePadSmallBinding(
             slot: Host4EmulatorSiliconePadSlot.innerTop,
             inputName: 'start',
-            label: 'START',
+            label: 'Start',
             semanticsIdentifier: 'game.controls.btn_start',
           ),
           innerBottom: Host4EmulatorSiliconePadSmallBinding(
             slot: Host4EmulatorSiliconePadSlot.innerBottom,
             inputName: 'select',
-            label: 'SELECT',
+            label: 'Select',
             semanticsIdentifier: 'game.controls.btn_select',
           ),
         ),
@@ -386,7 +552,7 @@ class _SiliconeControls extends StatelessWidget {
           innerBottom: Host4EmulatorSiliconePadSmallBinding(
             slot: Host4EmulatorSiliconePadSlot.innerBottom,
             inputName: 'select',
-            label: 'SELECT',
+            label: 'Select',
             semanticsIdentifier: 'landscape.controls.btn_select',
           ),
         ),
@@ -420,9 +586,117 @@ class _SiliconeControls extends StatelessWidget {
           innerBottom: Host4EmulatorSiliconePadSmallBinding(
             slot: Host4EmulatorSiliconePadSlot.innerBottom,
             inputName: 'start',
-            label: 'START',
+            label: 'Start',
             semanticsIdentifier: 'landscape.controls.btn_start',
           ),
         ),
       ];
+
+  static final List<Host4EmulatorSiliconePadBinding>
+  _landscapeBindingsWithoutShoulders = _landscapeBindings
+      .map(_withoutShoulderBinding)
+      .toList(growable: false);
+
+  static Host4EmulatorSiliconePadBinding _withoutShoulderBinding(
+    Host4EmulatorSiliconePadBinding binding,
+  ) {
+    return Host4EmulatorSiliconePadBinding(
+      side: binding.side,
+      dpadIdentifier: binding.dpadIdentifier,
+      actions: binding.actions,
+      dpadAliasIdentifier: binding.dpadAliasIdentifier,
+      actionClusterIdentifier: binding.actionClusterIdentifier,
+      actionDirectionDisplayQuarterTurns:
+          binding.actionDirectionDisplayQuarterTurns,
+      dpadDisplayQuarterTurns: binding.dpadDisplayQuarterTurns,
+      dpadInputQuarterTurns: binding.dpadInputQuarterTurns,
+      innerBottom: binding.innerBottom,
+    );
+  }
+}
+
+class _SiliconeSystemButton extends StatefulWidget {
+  const _SiliconeSystemButton({
+    required this.semanticsIdentifier,
+    required this.hitSize,
+    required this.visualSize,
+    required this.asset,
+    required this.onTap,
+    this.centerStyle = false,
+    this.selected = false,
+    this.iconQuarterTurns = 0,
+  });
+
+  final String semanticsIdentifier;
+  final Size hitSize;
+  final Size visualSize;
+  final String asset;
+  final VoidCallback onTap;
+  final bool centerStyle;
+  final bool selected;
+  final int iconQuarterTurns;
+
+  @override
+  State<_SiliconeSystemButton> createState() => _SiliconeSystemButtonState();
+}
+
+class _SiliconeSystemButtonState extends State<_SiliconeSystemButton> {
+  bool _pressed = false;
+
+  void _setPressed(bool value) {
+    if (_pressed == value) return;
+    setState(() => _pressed = value);
+    if (value) HapticFeedback.mediumImpact();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      key: ValueKey<String>(widget.semanticsIdentifier),
+      container: true,
+      enabled: true,
+      identifier: widget.semanticsIdentifier,
+      button: true,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTapDown: (_) => _setPressed(true),
+        onTapUp: (_) => _setPressed(false),
+        onTapCancel: () => _setPressed(false),
+        onTap: widget.onTap,
+        child: SizedBox.fromSize(
+          size: widget.hitSize,
+          child: Center(
+            child: AnimatedOpacity(
+              duration: const Duration(milliseconds: 60),
+              opacity: _pressed ? 0.85 : 1,
+              child: Container(
+                width: widget.visualSize.width,
+                height: widget.visualSize.height,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: widget.centerStyle
+                      ? widget.selected
+                            ? const Color(0xFFE7EDF8)
+                            : const Color(0x66E7EDF8)
+                      : const Color(0xA6FFFFFF),
+                ),
+                alignment: Alignment.center,
+                child: SizedBox.square(
+                  dimension: widget.visualSize.shortestSide * 0.55,
+                  child: RotatedBox(
+                    quarterTurns: widget.iconQuarterTurns,
+                    child: SvgPicture.asset(
+                      'assets/controls/${widget.asset}',
+                      package: 'host4_flutter_emulator_ui',
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }

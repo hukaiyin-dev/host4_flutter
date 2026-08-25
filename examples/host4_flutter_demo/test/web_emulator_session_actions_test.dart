@@ -36,6 +36,7 @@ void main() {
       await actions.quickLoad();
 
       expect(runtime.loadedState, 'STATE');
+      expect(runtime.resumeCount, 1);
       expect((await repository.load()).quick?.thumbnailBytes, isNotEmpty);
     },
   );
@@ -44,6 +45,7 @@ void main() {
     await actions.saveSlot(3);
     await actions.loadSlot(3);
     expect(runtime.loadedState, 'STATE');
+    expect(runtime.resumeCount, 1);
 
     await actions.deleteSlot(3);
     expect((await repository.load()).manualAt(3), isNull);
@@ -79,6 +81,7 @@ class _FakeRuntime implements WebEmulatorRuntime {
   double rate = 1;
   bool failSram = false;
   bool exited = false;
+  int resumeCount = 0;
 
   @override
   Future<void> exit() async => exited = true;
@@ -95,7 +98,9 @@ class _FakeRuntime implements WebEmulatorRuntime {
   Future<void> restart() async {}
 
   @override
-  Future<void> resume() async {}
+  Future<void> resume() async {
+    resumeCount += 1;
+  }
 
   @override
   Future<Host4WebEmulatorState> saveState() async {
