@@ -27,7 +27,26 @@ void main() {
     expect(await store.load(), Host4EmulatorControlLayoutStyle.modern);
   });
 
-  testWidgets('layout selector reports the upper-layer selection', (
+  test('silicone variant persists independently from the ROM layout', () async {
+    SharedPreferences.setMockInitialValues(<String, Object>{
+      WebEmulatorLayoutPreferenceStore.preferenceKey: 'modern',
+    });
+    final preferences = await SharedPreferences.getInstance();
+    final layoutStore = WebEmulatorLayoutPreferenceStore(preferences);
+    final variantStore = WebEmulatorSiliconeLayoutPreferenceStore(preferences);
+
+    await variantStore.save(
+      Host4EmulatorSiliconeLayoutVariant.modernAsymmetric,
+    );
+
+    expect(await layoutStore.load(), Host4EmulatorControlLayoutStyle.modern);
+    expect(
+      await variantStore.load(),
+      Host4EmulatorSiliconeLayoutVariant.modernAsymmetric,
+    );
+  });
+
+  testWidgets('ROM selector only exposes traditional and silicone choices', (
     tester,
   ) async {
     Host4EmulatorControlLayoutStyle? selected;
@@ -41,6 +60,10 @@ void main() {
         ),
       ),
     );
+
+    expect(find.text('通用布局'), findsOneWidget);
+    expect(find.text('硅胶布局'), findsOneWidget);
+    expect(find.text('现代非对称'), findsNothing);
 
     await tester.tap(find.text('通用布局'));
     await tester.pump();

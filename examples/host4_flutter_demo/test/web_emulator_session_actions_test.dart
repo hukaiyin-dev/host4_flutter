@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -60,6 +61,56 @@ void main() {
     expect(await repository.readSram(), 'SRAM'.codeUnits);
   });
 
+  test('concurrent SRAM persistence shares one runtime export', () async {
+    final export = Completer<String>();
+    runtime.sramCompleter = export;
+
+    final first = actions.persistSram();
+    final second = actions.persistSram();
+
+    expect(runtime.sramSaveCount, 1);
+    expect(runtime.exited, isFalse);
+
+    export.complete('U1JBTQ==');
+    await Future.wait(<Future<void>>[first, second]);
+
+    expect(await repository.readSram(), 'SRAM'.codeUnits);
+  });
+
+  test('rate selected in a paused menu is applied during resume', () async {
+    await actions.pause();
+    await actions.setRate(2);
+
+    expect(actions.rate, 2);
+    expect(runtime.calls, <String>['pause']);
+
+    await actions.resume();
+
+    expect(runtime.calls, <String>['pause', 'resume:2.0']);
+  });
+
+  test('quick load resumes with the rate selected in the menu', () async {
+    await actions.quickSave();
+    runtime.calls.clear();
+    await actions.pause();
+    await actions.setRate(2);
+
+    await actions.quickLoad();
+
+    expect(runtime.calls, <String>['pause', 'loadState', 'resume:2.0']);
+  });
+
+  test('slot load resumes with the rate selected in the menu', () async {
+    await actions.saveSlot(3);
+    runtime.calls.clear();
+    await actions.pause();
+    await actions.setRate(2);
+
+    await actions.loadSlot(3);
+
+    expect(runtime.calls, <String>['pause', 'loadState', 'resume:2.0']);
+  });
+
   test('exit still closes the runtime when SRAM persistence fails', () async {
     var finished = false;
     runtime.failSram = true;
@@ -74,36 +125,84 @@ void main() {
     expect(runtime.exited, isTrue);
     expect(finished, isTrue);
   });
+
+  test(
+    'shutdown waits for an in-flight SRAM export before runtime exit',
+    () async {
+      final export = Completer<String>();
+      runtime.sramCompleter = export;
+
+      final saving = actions.persistSram();
+      final shutdown = actions.shutdown(reason: 'switch_rom');
+      await Future<void>.delayed(Duration.zero);
+
+      expect(runtime.exitCount, 0);
+
+      export.complete('U1JBTQ==');
+      await Future.wait(<Future<void>>[saving, shutdown]);
+
+      expect(runtime.sramSaveCount, 1);
+      expect(runtime.exitCount, 1);
+      expect(await repository.readSram(), 'SRAM'.codeUnits);
+    },
+  );
+
+  test('concurrent shutdown requests close one session once', () async {
+    var finishCount = 0;
+    actions = WebEmulatorSessionActions(
+      runtime: runtime,
+      repository: repository,
+      onExit: () async => finishCount += 1,
+    );
+
+    final first = actions.shutdown(reason: 'menu_exit');
+    final second = actions.shutdown(reason: 'switch_rom');
+    await Future.wait(<Future<void>>[first, second]);
+
+    expect(runtime.sramSaveCount, 1);
+    expect(runtime.exitCount, 1);
+    expect(finishCount, 1);
+  });
 }
 
 class _FakeRuntime implements WebEmulatorRuntime {
+  final List<String> calls = <String>[];
   String? loadedState;
   double rate = 1;
   bool failSram = false;
   bool exited = false;
+  int exitCount = 0;
   int resumeCount = 0;
+  int sramSaveCount = 0;
+  Completer<String>? sramCompleter;
 
   @override
-  Future<void> exit() async => exited = true;
+  Future<void> exit() async {
+    exitCount += 1;
+    exited = true;
+  }
 
   @override
   Future<void> loadState(String stateBase64) async {
+    calls.add('loadState');
     loadedState = utf8.decode(base64Decode(stateBase64));
   }
 
   @override
-  Future<void> pause() async {}
+  Future<void> pause() async => calls.add('pause');
 
   @override
   Future<void> restart() async {}
 
   @override
-  Future<void> resume() async {
+  Future<void> resume({double? rate}) async {
     resumeCount += 1;
+    calls.add('resume:$rate');
   }
 
   @override
   Future<Host4WebEmulatorState> saveState() async {
+    calls.add('saveState');
     return const Host4WebEmulatorState(
       stateBase64: 'U1RBVEU=',
       thumbnailBase64: 'UE5H',
@@ -112,12 +211,16 @@ class _FakeRuntime implements WebEmulatorRuntime {
 
   @override
   Future<String> saveSram() async {
+    sramSaveCount += 1;
+    final completer = sramCompleter;
+    if (completer != null) return completer.future;
     if (failSram) throw StateError('SRAM failed');
     return 'U1JBTQ==';
   }
 
   @override
   Future<void> setRate(double value) async {
+    calls.add('rate:$value');
     rate = value;
   }
 }

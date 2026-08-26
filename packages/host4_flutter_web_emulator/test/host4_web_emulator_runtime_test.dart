@@ -170,6 +170,13 @@ void main() {
     );
   });
 
+  test('generates resume JavaScript with a deferred target rate', () {
+    expect(
+      Host4WebEmulatorJavaScript.resume('resume-1', 2),
+      'window.Host4WebEmulator.resume("resume-1", 2.0);',
+    );
+  });
+
   test('packaged web runtime wires SRAM restore and export', () async {
     final html = await File('assets/emulator/index.html').readAsString();
     expect(html, contains('sram: config.sramBase64'));
@@ -204,6 +211,32 @@ void main() {
       final result = await resultFuture;
       expect(result.stateBase64, 'STATE');
       expect(result.thumbnailBase64, 'THUMBNAIL');
+    },
+  );
+
+  test(
+    'controller resumes with the deferred rate in one bridge request',
+    () async {
+      final scripts = <String>[];
+      final controller = Host4WebEmulatorController.forJavaScriptExecutor(
+        (script) async => scripts.add(script),
+        requestIdFactory: () => 'resume-1',
+      );
+
+      final resultFuture = controller.resume(rate: 2);
+      expect(
+        scripts.single,
+        'window.Host4WebEmulator.resume("resume-1", 2.0);',
+      );
+      controller.handleBridgeMessage('resumed', <String, Object?>{
+        'type': 'resumed',
+        'requestId': 'resume-1',
+        'ok': true,
+        'data': <String, Object?>{'rate': 2},
+        'error': null,
+      });
+
+      await resultFuture;
     },
   );
 

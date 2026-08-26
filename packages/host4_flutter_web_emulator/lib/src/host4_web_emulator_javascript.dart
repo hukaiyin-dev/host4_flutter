@@ -17,8 +17,10 @@ class Host4WebEmulatorJavaScript {
   static String pause([String requestId = 'pause']) =>
       'window.Host4WebEmulator.pause(${jsonEncode(requestId)});';
 
-  static String resume([String requestId = 'resume']) =>
-      'window.Host4WebEmulator.resume(${jsonEncode(requestId)});';
+  static String resume([String requestId = 'resume', double? rate]) {
+    final rateArgument = rate == null ? '' : ', $rate';
+    return 'window.Host4WebEmulator.resume(${jsonEncode(requestId)}$rateArgument);';
+  }
 
   static String restart([String requestId = 'restart']) =>
       'window.Host4WebEmulator.restart(${jsonEncode(requestId)});';

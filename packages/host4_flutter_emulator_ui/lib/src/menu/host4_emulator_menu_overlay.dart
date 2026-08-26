@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-import '../model/host4_emulator_control_layout_style.dart';
 import '../session/host4_emulator_session_actions.dart';
 
 enum _MenuAction {
@@ -79,19 +78,13 @@ class Host4EmulatorMenuOverlay extends StatefulWidget {
   const Host4EmulatorMenuOverlay({
     required this.actions,
     required this.onOpenSaveManager,
-    this.layoutStyle,
-    this.onLayoutChanged,
+    this.onOpenLayoutPicker,
     super.key,
-  }) : assert(
-         (layoutStyle == null) == (onLayoutChanged == null),
-         'layoutStyle and onLayoutChanged must be provided together.',
-       );
+  });
 
   final Host4EmulatorSessionActions actions;
   final VoidCallback onOpenSaveManager;
-  final Host4EmulatorControlLayoutStyle? layoutStyle;
-  final Future<void> Function(Host4EmulatorControlLayoutStyle value)?
-  onLayoutChanged;
+  final VoidCallback? onOpenLayoutPicker;
 
   @override
   State<Host4EmulatorMenuOverlay> createState() =>
@@ -202,16 +195,6 @@ class _Host4EmulatorMenuOverlayState extends State<Host4EmulatorMenuOverlay> {
     await widget.actions.setRate(next);
   }
 
-  Future<void> _toggleLayout() async {
-    final current = widget.layoutStyle;
-    final onChanged = widget.onLayoutChanged;
-    if (current == null || onChanged == null) return;
-    final next = current == Host4EmulatorControlLayoutStyle.modern
-        ? Host4EmulatorControlLayoutStyle.silicone
-        : Host4EmulatorControlLayoutStyle.modern;
-    await onChanged(next);
-  }
-
   VoidCallback? _onTapFor(_MenuAction action) {
     return switch (action) {
       _MenuAction.quickLoad => () => unawaited(_run(widget.actions.quickLoad)),
@@ -220,10 +203,7 @@ class _Host4EmulatorMenuOverlayState extends State<Host4EmulatorMenuOverlay> {
       _MenuAction.speed => () => unawaited(_run(_toggleRate)),
       _MenuAction.exit => () => unawaited(_run(widget.actions.exit)),
       _MenuAction.continueGame => () => unawaited(_run(widget.actions.resume)),
-      _MenuAction.layout when widget.onLayoutChanged != null => () => unawaited(
-        _run(_toggleLayout),
-      ),
-      _MenuAction.layout => null,
+      _MenuAction.layout => widget.onOpenLayoutPicker,
     };
   }
 

@@ -101,6 +101,99 @@ void main() {
     expect(find.byType(DisplayMetricsWidget), findsOneWidget);
   });
 
+  testWidgets('portrait always keeps the single Pantas silicone pad', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Host4EmulatorControlsLayer(
+          profile: Host4EmulatorControlProfile.gb,
+          layoutStyle: Host4EmulatorControlLayoutStyle.silicone,
+          siliconeLayoutVariant:
+              Host4EmulatorSiliconeLayoutVariant.modernAsymmetric,
+          onInput: (_) {},
+          onMenuTap: () {},
+        ),
+      ),
+    );
+
+    expect(
+      find.byKey(const ValueKey<String>('game.controls.dpad')),
+      findsOneWidget,
+    );
+    expect(find.byKey(const ValueKey<String>('controls.dpad')), findsNothing);
+  });
+
+  testWidgets('landscape styles use the Pantas control positions', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(844, 390);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    Future<void> pumpVariant(Host4EmulatorSiliconeLayoutVariant variant) {
+      return tester.pumpWidget(
+        MaterialApp(
+          home: Host4EmulatorControlsLayer(
+            profile: Host4EmulatorControlProfile.gba,
+            layoutStyle: Host4EmulatorControlLayoutStyle.silicone,
+            siliconeLayoutVariant: variant,
+            onInput: (_) {},
+            onMenuTap: () {},
+          ),
+        ),
+      );
+    }
+
+    await pumpVariant(Host4EmulatorSiliconeLayoutVariant.modernSymmetric);
+    expect(
+      tester.getTopLeft(
+        find.byKey(const ValueKey<String>('landscape.controls.dpad_left')),
+      ),
+      const Offset(66, 132),
+    );
+    expect(
+      tester.getTopLeft(
+        find.byKey(const ValueKey<String>('landscape.controls.stick_left')),
+      ),
+      const Offset(231, 215),
+    );
+
+    await pumpVariant(Host4EmulatorSiliconeLayoutVariant.modernAsymmetric);
+    expect(
+      tester.getTopLeft(
+        find.byKey(const ValueKey<String>('landscape.controls.stick_left')),
+      ),
+      const Offset(66, 132),
+    );
+    expect(
+      tester.getTopLeft(
+        find.byKey(const ValueKey<String>('landscape.controls.dpad_left')),
+      ),
+      const Offset(231, 215),
+    );
+
+    await pumpVariant(Host4EmulatorSiliconeLayoutVariant.retroTraditional);
+    expect(
+      tester.getTopLeft(
+        find.byKey(const ValueKey<String>('landscape.controls.stick_left')),
+      ),
+      const Offset(112, 157),
+    );
+    expect(
+      find.byKey(
+        const ValueKey<String>('landscape.controls.retro_mode_toggle'),
+      ),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('portrait silicone keeps the full Pantas pad for GB', (
     tester,
   ) async {
@@ -267,6 +360,33 @@ void main() {
     await tester.tap(activeSet);
     await tester.pump();
     expect(tapCount, 1);
+  });
+
+  testWidgets('active silicone variant SET keeps its Pantas position', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(844, 390);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Host4EmulatorActiveMenuButton(
+          layoutStyle: Host4EmulatorControlLayoutStyle.silicone,
+          siliconeLayoutVariant:
+              Host4EmulatorSiliconeLayoutVariant.modernAsymmetric,
+          onTap: () {},
+        ),
+      ),
+    );
+
+    expect(
+      tester.getTopLeft(
+        find.byKey(const ValueKey<String>('controls.active_menu')),
+      ),
+      const Offset(401, 336),
+    );
   });
 
   testWidgets('action buttons send down up and cancel-safe events', (

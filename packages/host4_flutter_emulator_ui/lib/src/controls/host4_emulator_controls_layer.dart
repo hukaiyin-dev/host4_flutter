@@ -8,9 +8,11 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../input/host4_emulator_input_event.dart';
 import '../model/host4_emulator_control_layout_style.dart';
 import '../model/host4_emulator_control_profile.dart';
+import '../model/host4_emulator_silicone_layout_variant.dart';
 import 'host4_emulator_action_button.dart';
 import 'host4_emulator_auxiliary_button.dart';
 import 'host4_emulator_dpad.dart';
+import 'host4_emulator_landscape_controls.dart';
 import 'host4_emulator_silicone_layout.dart';
 import 'host4_emulator_silicone_pad.dart';
 
@@ -21,6 +23,7 @@ class Host4EmulatorControlsLayer extends StatelessWidget {
     required this.onMenuTap,
     this.onLocateTap,
     this.layoutStyle = Host4EmulatorControlLayoutStyle.modern,
+    this.siliconeLayoutVariant = Host4EmulatorSiliconeLayoutVariant.silicone,
     super.key,
   });
 
@@ -29,24 +32,40 @@ class Host4EmulatorControlsLayer extends StatelessWidget {
   final VoidCallback onMenuTap;
   final VoidCallback? onLocateTap;
   final Host4EmulatorControlLayoutStyle layoutStyle;
+  final Host4EmulatorSiliconeLayoutVariant siliconeLayoutVariant;
 
   @override
   Widget build(BuildContext context) {
-    return switch (layoutStyle) {
-      Host4EmulatorControlLayoutStyle.modern => _ModernControls(
-        profile: profile,
-        onInput: onInput,
-        onMenuTap: onMenuTap,
-      ),
-      Host4EmulatorControlLayoutStyle.silicone => DisplayMetricsWidget(
-        child: _SiliconeControls(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final landscape = constraints.maxWidth >= constraints.maxHeight;
+        if (layoutStyle == Host4EmulatorControlLayoutStyle.modern) {
+          return _ModernControls(
+            profile: profile,
+            onInput: onInput,
+            onMenuTap: onMenuTap,
+          );
+        }
+        if (!landscape ||
+            siliconeLayoutVariant ==
+                Host4EmulatorSiliconeLayoutVariant.silicone) {
+          return DisplayMetricsWidget(
+            child: _SiliconeControls(
+              profile: profile,
+              onInput: onInput,
+              onMenuTap: onMenuTap,
+              onLocateTap: onLocateTap,
+            ),
+          );
+        }
+        return Host4EmulatorLandscapeControls(
           profile: profile,
+          variant: siliconeLayoutVariant,
           onInput: onInput,
           onMenuTap: onMenuTap,
-          onLocateTap: onLocateTap,
-        ),
-      ),
-    };
+        );
+      },
+    );
   }
 }
 
@@ -54,39 +73,64 @@ class Host4EmulatorActiveMenuButton extends StatelessWidget {
   const Host4EmulatorActiveMenuButton({
     required this.layoutStyle,
     required this.onTap,
+    this.siliconeLayoutVariant = Host4EmulatorSiliconeLayoutVariant.silicone,
     super.key,
   });
 
   final Host4EmulatorControlLayoutStyle layoutStyle;
+  final Host4EmulatorSiliconeLayoutVariant siliconeLayoutVariant;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    if (layoutStyle == Host4EmulatorControlLayoutStyle.silicone) {
-      return DisplayMetricsWidget(child: _ActiveSiliconeMenuButton(onTap));
-    }
     return LayoutBuilder(
       builder: (context, constraints) {
         final size = constraints.biggest;
         final landscape = size.width >= size.height;
-        final scale = landscape
-            ? math.min(size.width / 844, size.height / 390).clamp(0.65, 1.4)
-            : math.min(size.width / 390, size.height / 844).clamp(0.78, 1.25);
-        return SafeArea(
-          child: Stack(
-            children: <Widget>[
-              Positioned(
-                key: const ValueKey<String>('controls.active_menu'),
-                left: size.width / 2 - 21 * scale,
-                top: 24 * scale,
-                child: Host4EmulatorAuxiliaryButton(
-                  asset: 'logo_group.svg',
-                  size: Size.square(42 * scale),
-                  onTap: onTap,
+        if (layoutStyle == Host4EmulatorControlLayoutStyle.modern) {
+          final scale = landscape
+              ? math.min(size.width / 844, size.height / 390).clamp(0.65, 1.4)
+              : math.min(size.width / 390, size.height / 844).clamp(0.78, 1.25);
+          return SafeArea(
+            child: Stack(
+              children: <Widget>[
+                Positioned(
+                  key: const ValueKey<String>('controls.active_menu'),
+                  left: size.width / 2 - 21 * scale,
+                  top: 24 * scale,
+                  child: Host4EmulatorAuxiliaryButton(
+                    asset: 'logo_group.svg',
+                    size: Size.square(42 * scale),
+                    onTap: onTap,
+                  ),
                 ),
+              ],
+            ),
+          );
+        }
+        if (!landscape ||
+            siliconeLayoutVariant ==
+                Host4EmulatorSiliconeLayoutVariant.silicone) {
+          return DisplayMetricsWidget(child: _ActiveSiliconeMenuButton(onTap));
+        }
+        final scale = math.min(size.width / 844, size.height / 390);
+        final offset = Offset(
+          (size.width - 844 * scale) / 2,
+          (size.height - 390 * scale) / 2,
+        );
+        return Stack(
+          children: <Widget>[
+            Positioned(
+              key: const ValueKey<String>('controls.active_menu'),
+              left: offset.dx + 401 * scale,
+              top: offset.dy + 336 * scale,
+              child: Host4EmulatorAuxiliaryButton(
+                asset: 'logo_group.svg',
+                size: Size.square(42 * scale),
+                onTap: onTap,
               ),
-            ],
-          ),
+            ),
+          ],
         );
       },
     );

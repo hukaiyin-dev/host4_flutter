@@ -77,11 +77,11 @@ class Host4WebEmulatorController {
     );
   }
 
-  Future<void> resume() async {
+  Future<void> resume({double? rate}) async {
     await _request(
       action: 'resume',
       successType: 'resumed',
-      script: Host4WebEmulatorJavaScript.resume,
+      script: (requestId) => Host4WebEmulatorJavaScript.resume(requestId, rate),
     );
   }
 

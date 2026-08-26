@@ -1,4 +1,1 @@
-enum Host4EmulatorControlLayoutStyle {
-  modern,
-  silicone,
-}
+enum Host4EmulatorControlLayoutStyle { modern, silicone }

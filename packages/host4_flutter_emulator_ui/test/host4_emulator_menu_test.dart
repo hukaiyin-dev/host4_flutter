@@ -16,8 +16,7 @@ void main() {
         home: Host4EmulatorMenuOverlay(
           actions: _FakeActions(),
           onOpenSaveManager: () {},
-          layoutStyle: Host4EmulatorControlLayoutStyle.silicone,
-          onLayoutChanged: (_) async {},
+          onOpenLayoutPicker: () {},
         ),
       ),
     );
@@ -38,10 +37,7 @@ void main() {
     expect(tester.getTopLeft(continueGame), const Offset(199, 295));
     expect(find.text('游戏菜单'), findsNothing);
     expect(
-      find.ancestor(
-        of: find.text('快速存档'),
-        matching: find.byType(Material),
-      ),
+      find.ancestor(of: find.text('快速存档'), matching: find.byType(Material)),
       findsOneWidget,
     );
   });
@@ -49,15 +45,14 @@ void main() {
   testWidgets('menu exposes the host4 session actions', (tester) async {
     final actions = _FakeActions();
     var openedSaveManager = false;
-    Host4EmulatorControlLayoutStyle? selectedLayout;
+    var openedLayoutPicker = false;
 
     await tester.pumpWidget(
       MaterialApp(
         home: Host4EmulatorMenuOverlay(
           actions: actions,
           onOpenSaveManager: () => openedSaveManager = true,
-          layoutStyle: Host4EmulatorControlLayoutStyle.silicone,
-          onLayoutChanged: (value) async => selectedLayout = value,
+          onOpenLayoutPicker: () => openedLayoutPicker = true,
         ),
       ),
     );
@@ -91,7 +86,7 @@ void main() {
 
     await tester.tap(find.byKey(const ValueKey<String>('menu.layout')));
     await tester.pump();
-    expect(selectedLayout, Host4EmulatorControlLayoutStyle.modern);
+    expect(openedLayoutPicker, isTrue);
 
     await tester.tap(find.byKey(const ValueKey<String>('menu.continue')));
     await tester.pump();

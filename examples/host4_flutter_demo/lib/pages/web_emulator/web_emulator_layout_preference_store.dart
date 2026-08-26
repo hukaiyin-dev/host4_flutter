@@ -30,6 +30,29 @@ class WebEmulatorLayoutPreferenceStore
   }
 }
 
+class WebEmulatorSiliconeLayoutPreferenceStore {
+  const WebEmulatorSiliconeLayoutPreferenceStore(this.preferences);
+
+  static const String preferenceKey = 'host4.web_emulator.silicone_layout.v1';
+
+  final SharedPreferences preferences;
+
+  Future<Host4EmulatorSiliconeLayoutVariant> load() async {
+    return switch (preferences.getString(preferenceKey)) {
+      'retro_traditional' =>
+        Host4EmulatorSiliconeLayoutVariant.retroTraditional,
+      'modern_symmetric' => Host4EmulatorSiliconeLayoutVariant.modernSymmetric,
+      'modern_asymmetric' =>
+        Host4EmulatorSiliconeLayoutVariant.modernAsymmetric,
+      _ => Host4EmulatorSiliconeLayoutVariant.silicone,
+    };
+  }
+
+  Future<void> save(Host4EmulatorSiliconeLayoutVariant variant) async {
+    await preferences.setString(preferenceKey, variant.wireName);
+  }
+}
+
 class WebEmulatorLayoutPreferenceCoordinator {
   WebEmulatorLayoutPreferenceCoordinator(
     this._persistence, {
