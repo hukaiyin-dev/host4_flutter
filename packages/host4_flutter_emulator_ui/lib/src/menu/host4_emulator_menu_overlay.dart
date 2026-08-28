@@ -79,12 +79,14 @@ class Host4EmulatorMenuOverlay extends StatefulWidget {
     required this.actions,
     required this.onOpenSaveManager,
     this.onOpenLayoutPicker,
+    this.showLayoutAction = true,
     super.key,
   });
 
   final Host4EmulatorSessionActions actions;
   final VoidCallback onOpenSaveManager;
   final VoidCallback? onOpenLayoutPicker;
+  final bool showLayoutAction;
 
   @override
   State<Host4EmulatorMenuOverlay> createState() =>
@@ -111,6 +113,19 @@ class _Host4EmulatorMenuOverlayState extends State<Host4EmulatorMenuOverlay> {
       ],
       <_MenuAction?>[_MenuAction.speed, null, _MenuAction.exit],
       <_MenuAction?>[_MenuAction.continueGame, _MenuAction.layout, null],
+    ],
+  );
+
+  static const _landscapeWithoutLayoutSpec = _MenuSpec(
+    layout: _MenuLayoutSpec.landscape,
+    rows: <List<_MenuAction?>>[
+      <_MenuAction?>[
+        _MenuAction.quickLoad,
+        _MenuAction.saveManager,
+        _MenuAction.quickSave,
+      ],
+      <_MenuAction?>[_MenuAction.speed, null, _MenuAction.exit],
+      <_MenuAction?>[_MenuAction.continueGame, null, null],
     ],
   );
 
@@ -214,7 +229,11 @@ class _Host4EmulatorMenuOverlayState extends State<Host4EmulatorMenuOverlay> {
       child: LayoutBuilder(
         builder: (context, constraints) {
           final landscape = constraints.maxWidth > constraints.maxHeight;
-          final spec = landscape ? _landscapeSpec : _portraitSpec;
+          final spec = landscape
+              ? widget.showLayoutAction
+                    ? _landscapeSpec
+                    : _landscapeWithoutLayoutSpec
+              : _portraitSpec;
           final scale = (constraints.maxWidth / spec.layout.baseWidth).clamp(
             0.0,
             2.0,

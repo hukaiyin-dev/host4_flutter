@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -59,6 +60,62 @@ void main() {
     await repository.writeSram(Uint8List.fromList(<int>[10, 11, 12]));
 
     expect(await repository.readSram(), <int>[10, 11, 12]);
+  });
+
+  test('SRAM replacement does not mutate the previous file handle', () async {
+    final gameDirectory = Directory('${root.path}/${'a' * 64}');
+    await repository.writeSram(Uint8List.fromList(<int>[1, 2, 3]));
+    final previous = await File('${gameDirectory.path}/sram.bin').open();
+
+    try {
+      await repository.writeSram(Uint8List.fromList(<int>[4, 5, 6]));
+
+      expect(await previous.read(3), <int>[1, 2, 3]);
+      expect(await repository.readSram(), <int>[4, 5, 6]);
+    } finally {
+      await previous.close();
+    }
+  });
+
+  test('state thumbnail and index are replaced as complete files', () async {
+    final gameDirectory = Directory('${root.path}/${'a' * 64}');
+    await repository.writeQuick(
+      state: Uint8List.fromList(<int>[1, 2, 3]),
+      thumbnail: Uint8List.fromList(<int>[7, 8]),
+    );
+    final previousState = await File(
+      '${gameDirectory.path}/quick/state.bin',
+    ).open();
+    final previousThumbnail = await File(
+      '${gameDirectory.path}/quick/thumbnail.png',
+    ).open();
+    final previousIndex = await File('${gameDirectory.path}/index.json').open();
+
+    try {
+      await repository.writeQuick(
+        state: Uint8List.fromList(<int>[4, 5, 6]),
+        thumbnail: Uint8List.fromList(<int>[9, 10]),
+      );
+      await repository.writeSlot(1, state: Uint8List.fromList(<int>[11]));
+
+      expect(await previousState.read(3), <int>[1, 2, 3]);
+      expect(await previousThumbnail.read(2), <int>[7, 8]);
+      final previousIndexJson =
+          jsonDecode(
+                utf8.decode(
+                  await previousIndex.read(await previousIndex.length()),
+                ),
+              )
+              as Map<String, dynamic>;
+      expect((previousIndexJson['slots'] as Map).containsKey('1'), isFalse);
+      expect(await repository.readQuickState(), <int>[4, 5, 6]);
+      expect((await repository.load()).quick?.thumbnailBytes, <int>[9, 10]);
+      expect((await repository.load()).manualAt(1), isNotNull);
+    } finally {
+      await previousState.close();
+      await previousThumbnail.close();
+      await previousIndex.close();
+    }
   });
 
   test('rejects unsafe game keys and invalid slots', () {

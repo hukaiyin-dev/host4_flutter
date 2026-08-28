@@ -92,6 +92,21 @@ void main() {
     await tester.pump();
     expect(actions.calls, contains('resume'));
   });
+
+  testWidgets('consumer can hide the manual layout action', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Host4EmulatorMenuOverlay(
+          actions: _FakeActions(),
+          onOpenSaveManager: () {},
+          showLayoutAction: false,
+        ),
+      ),
+    );
+
+    expect(find.byKey(const ValueKey<String>('menu.layout')), findsNothing);
+    expect(find.text('切换布局'), findsNothing);
+  });
 }
 
 class _FakeActions extends Host4EmulatorSessionActions {

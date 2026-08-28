@@ -4,6 +4,23 @@ import 'dart:typed_data';
 
 import 'package:host4_flutter_emulator_ui/host4_flutter_emulator_ui.dart';
 
+int _atomicWriteSequence = 0;
+
+Future<void> _writeBytesAtomically(File destination, List<int> bytes) async {
+  await destination.parent.create(recursive: true);
+  final sequence = _atomicWriteSequence++;
+  final temporary = File(
+    '${destination.path}.tmp.'
+    '${DateTime.now().microsecondsSinceEpoch}.$sequence',
+  );
+  try {
+    await temporary.writeAsBytes(bytes, flush: true);
+    await temporary.rename(destination.path);
+  } finally {
+    if (await temporary.exists()) await temporary.delete();
+  }
+}
+
 class WebEmulatorSaveRepository implements Host4EmulatorSaveDataSource {
   WebEmulatorSaveRepository({
     required Directory rootDirectory,
@@ -110,8 +127,7 @@ class WebEmulatorSaveRepository implements Host4EmulatorSaveDataSource {
   }
 
   Future<void> writeSram(Uint8List bytes) async {
-    await _gameDirectory.create(recursive: true);
-    await _sramFile.writeAsBytes(bytes, flush: true);
+    await _writeBytesAtomically(_sramFile, bytes);
   }
 
   Future<Host4EmulatorSaveEntry?> _readEntry({
@@ -137,13 +153,12 @@ class WebEmulatorSaveRepository implements Host4EmulatorSaveDataSource {
     Uint8List state,
     Uint8List? thumbnail,
   ) async {
-    await directory.create(recursive: true);
-    await File('${directory.path}/state.bin').writeAsBytes(state, flush: true);
+    await _writeBytesAtomically(File('${directory.path}/state.bin'), state);
     final thumbnailFile = File('${directory.path}/thumbnail.png');
     if (thumbnail == null) {
       if (await thumbnailFile.exists()) await thumbnailFile.delete();
     } else {
-      await thumbnailFile.writeAsBytes(thumbnail, flush: true);
+      await _writeBytesAtomically(thumbnailFile, thumbnail);
     }
   }
 
@@ -167,10 +182,9 @@ class WebEmulatorSaveRepository implements Host4EmulatorSaveDataSource {
   }
 
   Future<void> _writeIndex(Map<String, dynamic> index) async {
-    await _gameDirectory.create(recursive: true);
     index['version'] = 1;
     index.putIfAbsent('slots', () => <String, dynamic>{});
-    await _indexFile.writeAsString(jsonEncode(index), flush: true);
+    await _writeBytesAtomically(_indexFile, utf8.encode(jsonEncode(index)));
   }
 
   static Map<String, dynamic> _mutableSlots(Map<String, dynamic> index) {
