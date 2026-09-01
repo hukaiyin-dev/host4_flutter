@@ -75,13 +75,22 @@ import MFiKit
 import UIKit
 
 private final class QueuedEventStreamHandler: NSObject, FlutterStreamHandler {
+  var debugLabel: String
   private var eventSink: FlutterEventSink?
   private var bufferedEvents: [[String: Any]] = []
+
+  init(debugLabel: String = "") {
+    self.debugLabel = debugLabel
+    super.init()
+  }
 
   func onListen(
     withArguments arguments: Any?,
     eventSink events: @escaping FlutterEventSink
   ) -> FlutterError? {
+    if !debugLabel.isEmpty {
+      print("[NativeChannel] onListen \(debugLabel), buffered=\(bufferedEvents.count)")
+    }
     eventSink = events
     bufferedEvents.forEach(events)
     bufferedEvents.removeAll()
@@ -89,6 +98,9 @@ private final class QueuedEventStreamHandler: NSObject, FlutterStreamHandler {
   }
 
   func onCancel(withArguments arguments: Any?) -> FlutterError? {
+    if !debugLabel.isEmpty {
+      print("[NativeChannel] onCancel \(debugLabel)")
+    }
     eventSink = nil
     return nil
   }
@@ -98,8 +110,14 @@ private final class QueuedEventStreamHandler: NSObject, FlutterStreamHandler {
       guard let self else { return }
 
       if let eventSink = self.eventSink {
+        if event["reason"] as? String == "calibrationFinished" {
+          print("[NativeChannel] emit \(self.debugLabel) to sink event=\(event)")
+        }
         eventSink(event)
       } else {
+        if event["reason"] as? String == "calibrationFinished" {
+          print("[NativeChannel] emit \(self.debugLabel) buffered event=\(event)")
+        }
         self.bufferedEvents.append(event)
       }
     }
@@ -727,8 +745,8 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
     }
     GPDConstant.responseTimeout = 2
 
-    let eventHandler = QueuedEventStreamHandler()
-    let otaEventHandler = QueuedEventStreamHandler()
+    let eventHandler = QueuedEventStreamHandler(debugLabel: "protocol pending")
+    let otaEventHandler = QueuedEventStreamHandler(debugLabel: "ota pending")
     let session: GMacroProtocolSession
 
     switch transportRecord.source {
@@ -813,6 +831,8 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
     }
 
     let protocolSessionId = session.sessionId
+    eventHandler.debugLabel = "protocol_events/\(protocolSessionId)"
+    otaEventHandler.debugLabel = "ota_events/\(protocolSessionId)"
     let eventChannel = FlutterEventChannel(
       name: "host4_flutter_device_native/protocol_events/\(protocolSessionId)",
       binaryMessenger: messenger
@@ -1789,6 +1809,7 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
         ],
       ]
     case .calibrationFinished(let type, let subId, let result, let param1, let param2):
+      print("[Native] [GMacro] calibrationFinished event type=\(type) subId=\(subId) result=\(result) param1=\(param1) param2=\(param2)")
       return [
         "type": "busy",
         "reason": "calibrationFinished",

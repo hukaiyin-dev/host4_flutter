@@ -709,6 +709,22 @@ extension DataHelper {
         
         return indices
     }
+
+    // 摇杆/扳机校准错误码使用 1-based code，与 Android 侧返回保持一致。
+    func getCalibrationErrorCodes(from data: Data) -> [Int] {
+        guard let byte = data.first else { return [] }
+
+        var codes = [Int]()
+        for index in 0..<8 {
+            if ((byte >> index) & 1) == 1 {
+                codes.append(index + 1)
+            }
+        }
+
+        print("calibration error codes \(codes)")
+
+        return codes
+    }
 }
 
 private extension DataHelper {

@@ -18,7 +18,7 @@
 		</data>
 		<key>Headers/DataHelper+Gyro.swift</key>
 		<data>
-		hdhuZS740U8QVpFUYWoXzrNZsz4=
+		EwtR3go/D7RLGCH3BifRGAYQIBM=
 		</data>
 		<key>Headers/DataHelper+Light.swift</key>
 		<data>
@@ -34,7 +34,7 @@
 		</data>
 		<key>Headers/DataHelper+Parse.swift</key>
 		<data>
-		pfM+qlceGiUi3+c8OKDkQ1MA8BU=
+		FrD+OzI74sjg8JZqGNXOFietG7g=
 		</data>
 		<key>Headers/DataHelper+Rocker.swift</key>
 		<data>
@@ -218,7 +218,7 @@
 		</data>
 		<key>Modules/GMacroProtocolSDK.swiftmodule/arm64-apple-ios-simulator.swiftmodule</key>
 		<data>
-		1CjWU0dYbuETmq33GtfioZHljxw=
+		JjbfFMnhl5liRyNHUMfpFD+j76Q=
 		</data>
 		<key>Modules/GMacroProtocolSDK.swiftmodule/x86_64-apple-ios-simulator.abi.json</key>
 		<data>
@@ -238,7 +238,7 @@
 		</data>
 		<key>Modules/GMacroProtocolSDK.swiftmodule/x86_64-apple-ios-simulator.swiftmodule</key>
 		<data>
-		6EHNkGnC7AIYvdNUPeaR1CJQz9M=
+		he8w6aoSwBvtjYO9Eu9F4panYAg=
 		</data>
 	</dict>
 	<key>files2</key>
@@ -280,11 +280,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			hdhuZS740U8QVpFUYWoXzrNZsz4=
+			EwtR3go/D7RLGCH3BifRGAYQIBM=
 			</data>
 			<key>hash2</key>
 			<data>
-			ZjIjKNXQweuKQQ2NxPm1bg6A6KOvXo8arLeuTumugOI=
+			vbocw1t9Bqk91SOIMcwavqxD3/CyKHdO1CSXuGEzh2I=
 			</data>
 		</dict>
 		<key>Headers/DataHelper+Light.swift</key>
@@ -324,11 +324,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			pfM+qlceGiUi3+c8OKDkQ1MA8BU=
+			FrD+OzI74sjg8JZqGNXOFietG7g=
 			</data>
 			<key>hash2</key>
 			<data>
-			4Xt2F0YDwnVtAqxjNBkhLn9TVbWAI8XFtIpx9TXKYv0=
+			hjt+6KN0TFFPzvDHfD3ZIcL6nKeEC3XrPPkRwjC7vkQ=
 			</data>
 		</dict>
 		<key>Headers/DataHelper+Rocker.swift</key>
@@ -819,11 +819,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			1CjWU0dYbuETmq33GtfioZHljxw=
+			JjbfFMnhl5liRyNHUMfpFD+j76Q=
 			</data>
 			<key>hash2</key>
 			<data>
-			9Pq2JUqUQ2VJVweuN7tm3Ri3ju26mXL+RHjitbvEEuI=
+			ZLpBRRU7nxV0Ap4xcFpdHUtJ5LpBtaEpskXzPv/qwuU=
 			</data>
 		</dict>
 		<key>Modules/GMacroProtocolSDK.swiftmodule/x86_64-apple-ios-simulator.abi.json</key>
@@ -874,11 +874,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			6EHNkGnC7AIYvdNUPeaR1CJQz9M=
+			he8w6aoSwBvtjYO9Eu9F4panYAg=
 			</data>
 			<key>hash2</key>
 			<data>
-			osZnN3PKgwRpDPqppnqiPqp26zIk6yP/+nilZXRNVz8=
+			+5c3XA6PERQqsFGb7A4BNig8CLfHnEZLtsMi8QGjZa4=
 			</data>
 		</dict>
 	</dict>

@@ -56,7 +56,19 @@ class GmacroSession implements ProtocolSession {
     _nativeSub = _native
         .protocolEvents(id)
         .listen(
-          (nativeEvent) => _eventController.add(_mapProtocolEvent(nativeEvent)),
+          (nativeEvent) {
+            if (nativeEvent.reason == 'calibrationFinished') {
+              print(
+                '[GmacroSession] native calibrationFinished event '
+                'payload=${nativeEvent.payload}',
+              );
+            }
+            _eventController.add(_mapProtocolEvent(nativeEvent));
+          },
+          onError: (Object error, StackTrace stackTrace) {
+            print('[GmacroSession] protocolEvents error: $error');
+            print('$stackTrace');
+          },
         );
 
     _realtimeProtocolSub = _eventController.stream.listen(
@@ -117,13 +129,15 @@ class GmacroSession implements ProtocolSession {
       return;
     }
     final payload = event.payload;
-    if (payload == null) return;
+    final subId = _asInt(payload['subId']);
+    final result = _asInt(payload['result']);
 
+    print('[GmacroSession] calibrationFinished payload=$payload');
     _calibrationEventController.add(
       DeviceCalibrationEvent(
-        subId: payload['subId'] as int? ?? 0,
-        kind: DeviceCalibrationSubId.fromValue(payload['subId'] as int? ?? 0),
-        result: payload['result'] as int? ?? 0,
+        subId: subId,
+        kind: DeviceCalibrationSubId.fromValue(subId),
+        result: result,
         param1: _asIntList(payload['param1']),
         param2: _asIntList(payload['param2']),
       ),
@@ -219,6 +233,19 @@ class GmacroSession implements ProtocolSession {
         );
     }
   }
+}
+
+int _asInt(dynamic value, {int defaultValue = 0}) {
+  if (value == null) {
+    return defaultValue;
+  }
+  if (value is int) {
+    return value;
+  }
+  if (value is num) {
+    return value.toInt();
+  }
+  return int.tryParse(value.toString()) ?? defaultValue;
 }
 
 List<int> _asIntList(dynamic value) {
