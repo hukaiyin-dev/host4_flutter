@@ -751,9 +751,13 @@ extension DataHelper {
             var p1Data = parser.next(1)
             var p2Data = parser.next(1)
             
-            param1 = self.getReversedBitIndices(from: p1Data)
-
-            param2 = self.getReversedBitIndices(from: p2Data)
+            if subId == 02 || subId == 03 {
+                param1 = self.getCalibrationErrorCodes(from: p1Data)
+                param2 = self.getCalibrationErrorCodes(from: p2Data)
+            } else {
+                param1 = self.getReversedBitIndices(from: p1Data)
+                param2 = self.getReversedBitIndices(from: p2Data)
+            }
             
         }else if protocolID == .stopCheck{
             var p1Data = parser.next(1)
@@ -810,15 +814,26 @@ extension DataHelper {
             var p1Data = parser.next(1)
             var p2Data = parser.next(1)
             
-            param1 = self.getReversedBitIndices(from: p1Data)
-
-            param2 = self.getReversedBitIndices(from: p2Data)
+            if subId == 02 || subId == 03 {
+                param1 = self.getCalibrationErrorCodes(from: p1Data)
+                param2 = self.getCalibrationErrorCodes(from: p2Data)
+            } else {
+                param1 = self.getReversedBitIndices(from: p1Data)
+                param2 = self.getReversedBitIndices(from: p2Data)
+            }
             
         }else if protocolID == .finishCheck{
             var p1Data = parser.next(1)
             
             param1 = self.getReversedBitIndices(from: p1Data)
         }
+
+        dic = [
+            "subId" : subId,
+            "result" : returnRelust,
+            "param1" : param1,
+            "param2" : param2,
+        ]
         
         delegate?.finishCalibration(type, subId: subId, result: returnRelust, param1: param1, param2: param2)
 

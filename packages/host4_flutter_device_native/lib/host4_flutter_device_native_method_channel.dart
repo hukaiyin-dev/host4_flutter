@@ -275,11 +275,14 @@ class MethodChannelHost4FlutterDeviceNative
     return _protocolEventStreams.putIfAbsent(protocolSessionId, () {
       return EventChannel(
         'host4_flutter_device_native/protocol_events/$protocolSessionId',
-      ).receiveBroadcastStream().map(
-        (dynamic event) => NativeProtocolEvent.fromMap(
-          Map<String, Object?>.from(event as Map),
-        ),
-      );
+      ).receiveBroadcastStream().map((dynamic event) {
+        print('[NativeChannel] protocol event received raw=$event');
+        final map = Map<String, Object?>.from(event as Map);
+        if (map['reason'] == 'calibrationFinished') {
+          print('[NativeChannel] protocol calibrationFinished map=$map');
+        }
+        return NativeProtocolEvent.fromMap(map);
+      });
     });
   }
 
