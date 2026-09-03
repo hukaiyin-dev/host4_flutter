@@ -38,8 +38,9 @@ class _WebEmulatorPocPageState extends State<WebEmulatorPocPage>
   Host4WebEmulatorController? _controller;
   WebEmulatorSaveRepository? _repository;
   WebEmulatorSessionActions? _actions;
+  Directory? _coreCacheDirectory;
   String? _gameKey;
-  String _status = '请选择一个 .gb / .gbc / .gba / .zip ROM。';
+  String _status = '请选择六系统 ROM 或 .zip 文件。';
   bool _loadingRom = false;
   WebEmulatorLaunchState _launchState = const WebEmulatorLaunchState.loading();
   Host4EmulatorControlLayoutStyle _layoutStyle =
@@ -70,6 +71,18 @@ class _WebEmulatorPocPageState extends State<WebEmulatorPocPage>
     );
     unawaited(_loadLayoutStyle());
     unawaited(_loadSiliconeLayoutVariant());
+    unawaited(_initCoreCacheDirectory());
+  }
+
+  Future<void> _initCoreCacheDirectory() async {
+    final cacheDir = await getApplicationCacheDirectory();
+    if (mounted) {
+      setState(() {
+        _coreCacheDirectory = Directory(
+          '${cacheDir.path}/host4_web_emulator_core',
+        );
+      });
+    }
   }
 
   Future<void> _loadLayoutStyle() async {
@@ -169,7 +182,28 @@ class _WebEmulatorPocPageState extends State<WebEmulatorPocPage>
     try {
       final result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
-        allowedExtensions: const <String>['gb', 'gbc', 'gba', 'zip'],
+        allowedExtensions: const <String>[
+          'fds',
+          'nes',
+          'nsf',
+          'qd',
+          'rom',
+          'unif',
+          'unf',
+          'bin',
+          'gen',
+          'md',
+          'sg',
+          'smd',
+          'gb',
+          'smc',
+          'fig',
+          'sfc',
+          'swc',
+          'gbc',
+          'gba',
+          'zip',
+        ],
         withData: true,
       );
       final file = result?.files.single;
@@ -416,7 +450,7 @@ class _WebEmulatorPocPageState extends State<WebEmulatorPocPage>
             bottom: false,
             child: Host4NavigationBar(
               title: 'Web 模拟器',
-              subtitle: '选择本地 GB / GBC / GBA ROM 并在 WebView 启动',
+              subtitle: '选择本地六系统 ROM 并在 WebView 启动',
               leading: GestureDetector(
                 onTap: () => Navigator.of(context).pop(),
                 child: Icon(
@@ -521,6 +555,7 @@ class _WebEmulatorPocPageState extends State<WebEmulatorPocPage>
           Host4WebEmulatorView(
             key: ValueKey<String>('${_gameKey!}:$launchAttempt'),
             launchConfig: config,
+            coreCacheDirectory: _coreCacheDirectory,
             onControllerReady: (controller) {
               if (!mounted || _launchState.attempt != launchAttempt) {
                 controller.dispose();
@@ -598,7 +633,10 @@ class _WebEmulatorPocPageState extends State<WebEmulatorPocPage>
     Host4WebEmulatorSystem system,
   ) {
     return switch (system) {
+      Host4WebEmulatorSystem.nes => Host4EmulatorControlProfile.nes,
+      Host4WebEmulatorSystem.megaDrive => Host4EmulatorControlProfile.megaDrive,
       Host4WebEmulatorSystem.gb => Host4EmulatorControlProfile.gb,
+      Host4WebEmulatorSystem.snes => Host4EmulatorControlProfile.snes,
       Host4WebEmulatorSystem.gbc => Host4EmulatorControlProfile.gbc,
       Host4WebEmulatorSystem.gba => Host4EmulatorControlProfile.gba,
     };

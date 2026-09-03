@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:host4_flutter_webview/host4_flutter_webview.dart';
 
 import 'host4_web_emulator_bridge_message.dart';
+import 'host4_web_emulator_core_cache.dart';
 import 'host4_web_emulator_javascript.dart';
 import 'host4_web_emulator_launch_config.dart';
 
@@ -60,12 +61,18 @@ class Host4WebEmulatorController {
   int _requestSequence = 0;
   bool _disposed = false;
 
-  Future<void> launch(Host4WebEmulatorLaunchConfig config) async {
+  Future<void> launch(
+    Host4WebEmulatorLaunchConfig config, {
+    ResolvedCoreData? resolvedCoreData,
+  }) async {
     await _request(
       action: 'launch',
       successType: 'launched',
-      script: (requestId) =>
-          Host4WebEmulatorJavaScript.launch(config, requestId: requestId),
+      script: (requestId) => Host4WebEmulatorJavaScript.launch(
+        config,
+        requestId: requestId,
+        resolvedCoreData: resolvedCoreData,
+      ),
     );
   }
 

@@ -4,7 +4,15 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:host4_flutter_web_emulator/host4_flutter_web_emulator.dart';
 
 void main() {
-  test('maps GB GBC and GBA launcher types to the mgba core', () {
+  test('maps the six product systems to their pinned web cores', () {
+    expect(
+      Host4WebEmulatorSystem.fromLauncherType(0),
+      Host4WebEmulatorSystem.nes,
+    );
+    expect(
+      Host4WebEmulatorSystem.fromLauncherType(4),
+      Host4WebEmulatorSystem.megaDrive,
+    );
     expect(
       Host4WebEmulatorSystem.fromLauncherType(5),
       Host4WebEmulatorSystem.gb,
@@ -17,10 +25,24 @@ void main() {
       Host4WebEmulatorSystem.fromLauncherType(21),
       Host4WebEmulatorSystem.gba,
     );
+    expect(
+      Host4WebEmulatorSystem.fromLauncherType(7),
+      Host4WebEmulatorSystem.snes,
+    );
 
     expect(
-      Host4WebEmulatorSystem.values.map((system) => system.coreName).toSet(),
-      <String>{'mgba'},
+      <Host4WebEmulatorSystem, String>{
+        for (final system in Host4WebEmulatorSystem.values)
+          system: system.coreName,
+      },
+      <Host4WebEmulatorSystem, String>{
+        Host4WebEmulatorSystem.nes: 'fceumm',
+        Host4WebEmulatorSystem.megaDrive: 'genesis_plus_gx',
+        Host4WebEmulatorSystem.gb: 'mgba',
+        Host4WebEmulatorSystem.snes: 'snes9x',
+        Host4WebEmulatorSystem.gbc: 'mgba',
+        Host4WebEmulatorSystem.gba: 'mgba',
+      },
     );
   });
 
@@ -44,7 +66,18 @@ void main() {
       Host4WebEmulatorSystem.fromRomFileName('demo.gba'),
       Host4WebEmulatorSystem.gba,
     );
-    expect(Host4WebEmulatorSystem.tryFromRomFileName('demo.nes'), isNull);
+    expect(
+      Host4WebEmulatorSystem.fromRomFileName('demo.nes'),
+      Host4WebEmulatorSystem.nes,
+    );
+    expect(
+      Host4WebEmulatorSystem.fromRomFileName('demo.SFC'),
+      Host4WebEmulatorSystem.snes,
+    );
+    expect(
+      Host4WebEmulatorSystem.fromRomFileName('demo.smd'),
+      Host4WebEmulatorSystem.megaDrive,
+    );
     // ZIP 文件不能从文件名推断 system
     expect(Host4WebEmulatorSystem.tryFromRomFileName('roms.zip'), isNull);
     expect(Host4WebEmulatorSystem.isZipFile('roms.zip'), isTrue);
@@ -62,6 +95,20 @@ void main() {
       Host4WebEmulatorCore.mgba.zipSha256,
       'd195371c3ea626c9246e9d3ab82ded4d93f3f99f85634af1588724cc44d47644',
     );
+  });
+
+  test('pins every product core to the same RetroArch build version', () {
+    for (final core in <Host4WebEmulatorCore>{
+      Host4WebEmulatorCore.fceumm,
+      Host4WebEmulatorCore.genesisPlusGx,
+      Host4WebEmulatorCore.mgba,
+      Host4WebEmulatorCore.snes9x,
+    }) {
+      expect(core.version, 'v1.22.2');
+      expect(core.zipUrl, contains('@v1.22.2/retroarch/'));
+      expect(core.zipSha256, hasLength(64));
+      expect(core.wasmSha256, hasLength(64));
+    }
   });
 
   test('builds the initial launch payload consumed by index.html', () {

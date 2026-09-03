@@ -106,7 +106,8 @@ class Host4WebView extends StatefulWidget {
   /// edge-swipe should leave the page.
   final bool allowRoutePopGesture;
 
-  /// Called once the [Host4WebController] is ready, before the first URL loads.
+  /// Called once the [Host4WebController] is ready, after the current widget
+  /// build has completed.
   final void Function(Host4WebController controller)? onControllerReady;
 
   /// Called when a page starts loading.
@@ -142,7 +143,10 @@ class _Host4WebViewState extends State<Host4WebView> {
     super.initState();
     _controller = _buildController();
     _webController = Host4WebController(_controller);
-    widget.onControllerReady?.call(_webController);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      widget.onControllerReady?.call(_webController);
+    });
     final assetPath = widget.initialAssetPath;
     try {
       if (assetPath != null) {

@@ -129,6 +129,33 @@ void main() {
     expect(find.byKey(const ValueKey<String>('controls.dpad')), findsNothing);
   });
 
+  testWidgets('landscape SNES silicone exposes all four face buttons', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(844, 390);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Host4EmulatorControlsLayer(
+          profile: Host4EmulatorControlProfile.snes,
+          layoutStyle: Host4EmulatorControlLayoutStyle.silicone,
+          onInput: (_) {},
+          onMenuTap: () {},
+        ),
+      ),
+    );
+
+    for (final input in <String>['a', 'b', 'x', 'y']) {
+      expect(
+        find.byKey(ValueKey<String>('landscape.controls.btn_$input')),
+        findsOneWidget,
+      );
+    }
+  });
+
   testWidgets('landscape styles use the Pantas control positions', (
     tester,
   ) async {
@@ -289,7 +316,7 @@ void main() {
     expect(menu, findsOneWidget);
   });
 
-  testWidgets('silicone layout only exposes shoulder inputs for GBA', (
+  testWidgets('silicone layout exposes shoulder inputs by profile', (
     tester,
   ) async {
     Future<void> pumpProfile(Host4EmulatorControlProfile profile) {
@@ -320,6 +347,16 @@ void main() {
     );
 
     await pumpProfile(Host4EmulatorControlProfile.gba);
+    expect(
+      find.byKey(const ValueKey<String>('landscape.controls.btn_l1')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey<String>('landscape.controls.btn_r1')),
+      findsOneWidget,
+    );
+
+    await pumpProfile(Host4EmulatorControlProfile.snes);
     expect(
       find.byKey(const ValueKey<String>('landscape.controls.btn_l1')),
       findsOneWidget,

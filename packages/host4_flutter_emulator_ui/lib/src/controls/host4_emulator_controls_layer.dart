@@ -345,7 +345,9 @@ class _SiliconeControlsState extends State<_SiliconeControls> {
             screenSize: size,
             metrics: metrics,
           );
-          bindings = widget.profile.hasShoulderButtons
+          bindings = widget.profile.hasFourFaceButtons
+              ? _landscapeBindingsWithFourFaceButtons
+              : widget.profile.hasShoulderButtons
               ? _landscapeBindings
               : _landscapeBindingsWithoutShoulders;
         } else {
@@ -635,6 +637,46 @@ class _SiliconeControlsState extends State<_SiliconeControls> {
           ),
         ),
       ];
+
+  static final List<Host4EmulatorSiliconePadBinding>
+  _landscapeBindingsWithFourFaceButtons = _landscapeBindings
+      .map(_withFourFaceButtons)
+      .toList(growable: false);
+
+  static Host4EmulatorSiliconePadBinding _withFourFaceButtons(
+    Host4EmulatorSiliconePadBinding binding,
+  ) {
+    if (binding.side != Host4EmulatorSiliconePadSide.right) {
+      return binding;
+    }
+    return Host4EmulatorSiliconePadBinding(
+      side: binding.side,
+      dpadIdentifier: binding.dpadIdentifier,
+      actions: <Host4EmulatorSiliconePadActionBinding>[
+        const Host4EmulatorSiliconePadActionBinding(
+          slot: Host4EmulatorSiliconePadSlot.actionTop,
+          inputName: 'x',
+          label: 'X',
+          semanticsIdentifier: 'landscape.controls.btn_x',
+        ),
+        const Host4EmulatorSiliconePadActionBinding(
+          slot: Host4EmulatorSiliconePadSlot.actionLeft,
+          inputName: 'y',
+          label: 'Y',
+          semanticsIdentifier: 'landscape.controls.btn_y',
+        ),
+        ...binding.actions,
+      ],
+      dpadAliasIdentifier: binding.dpadAliasIdentifier,
+      actionClusterIdentifier: binding.actionClusterIdentifier,
+      actionDirectionDisplayQuarterTurns:
+          binding.actionDirectionDisplayQuarterTurns,
+      dpadDisplayQuarterTurns: binding.dpadDisplayQuarterTurns,
+      dpadInputQuarterTurns: binding.dpadInputQuarterTurns,
+      innerTop: binding.innerTop,
+      innerBottom: binding.innerBottom,
+    );
+  }
 
   static final List<Host4EmulatorSiliconePadBinding>
   _landscapeBindingsWithoutShoulders = _landscapeBindings

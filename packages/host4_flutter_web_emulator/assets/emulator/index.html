@@ -115,11 +115,24 @@
           return config.romFileUrl;
         }
 
-        // 使用本地打包的 zip.js 解压 core ZIP，绕过 Nostalgist 内部的
-        // import("https://...zip.js...+esm")，该动态导入在 file:// 源下会失败。
+        // core 加载：优先使用 Dart 缓存的 base64 数据，否则从网络下载 ZIP 并解压。
+        // 使用本地打包的 zip.js 解压，绕过 Nostalgist 内部的 dynamic import()
+        // （该导入在 file:// 源下会失败）。
+        // 不使用 file URL，因为 WKWebView / Android WebView 沙盒不允许读取外部目录。
         var coreCache = null;
-        async function extractCoreLocal(coreName, zipUrl) {
+        async function extractCoreLocal(coreName, zipUrl, jsBase64, wasmBase64) {
           if (coreCache) return coreCache;
+
+          // 有 Dart 缓存的 base64 数据时直接转 Blob
+          if (jsBase64 && wasmBase64) {
+            coreCache = {
+              js: base64ToBlob(jsBase64, 'application/javascript'),
+              wasm: base64ToBlob(wasmBase64, 'application/wasm')
+            };
+            return coreCache;
+          }
+
+          // 无缓存，从网络下载 ZIP 并解压
           var url = zipUrl || (
             'https://cdn.jsdelivr.net/gh/arianrhodsandlot/retroarch-emscripten-build@v1.22.2/retroarch/'
             + coreName + '_libretro.zip'
@@ -155,6 +168,8 @@
 
               var coreName = config.core || 'mgba';
               var coreZipUrl = config.coreZipUrl || null;
+              var coreJsBase64 = config.coreJsBase64 || null;
+              var coreWasmBase64 = config.coreWasmBase64 || null;
 
               current = await window.Nostalgist.launch({
                 element: document.getElementById('emulator'),
@@ -172,11 +187,11 @@
                   height: '100%'
                 },
                 resolveCoreJs: async function () {
-                  var r = await extractCoreLocal(coreName, coreZipUrl);
+                  var r = await extractCoreLocal(coreName, coreZipUrl, coreJsBase64, coreWasmBase64);
                   return r.js;
                 },
                 resolveCoreWasm: async function () {
-                  var r = await extractCoreLocal(coreName, coreZipUrl);
+                  var r = await extractCoreLocal(coreName, coreZipUrl, coreJsBase64, coreWasmBase64);
                   return r.wasm;
                 }
               });

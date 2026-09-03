@@ -20,6 +20,8 @@ class Host4EmulatorInputEvent {
     'right',
     'a',
     'b',
+    'x',
+    'y',
     'l',
     'r',
     'start',

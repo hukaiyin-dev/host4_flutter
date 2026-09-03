@@ -1,3 +1,4 @@
+import 'host4_web_emulator_core_cache.dart';
 import 'host4_web_emulator_system.dart';
 
 class Host4WebEmulatorLaunchConfig {
@@ -19,7 +20,7 @@ class Host4WebEmulatorLaunchConfig {
   final String? sramBase64;
   final String romName;
 
-  Map<String, Object?> toJson() {
+  Map<String, Object?> toJson({ResolvedCoreData? resolvedCoreData}) {
     final core = system.core;
     return <String, Object?>{
       'system': system.name,
@@ -29,7 +30,11 @@ class Host4WebEmulatorLaunchConfig {
       if (romBase64 != null) 'romBase64': romBase64,
       if (sramBase64 != null) 'sramBase64': sramBase64,
       'romName': romName,
-      'coreZipUrl': core.zipUrl,
+      if (resolvedCoreData != null) ...{
+        'coreJsBase64': resolvedCoreData.jsBase64,
+        'coreWasmBase64': resolvedCoreData.wasmBase64,
+      } else
+        'coreZipUrl': core.zipUrl,
     };
   }
 }

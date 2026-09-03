@@ -21,9 +21,22 @@ void main() {
       });
     });
 
+    test('accepts the complete RetroPad face-button contract', () {
+      for (final input in <String>['a', 'b', 'x', 'y', 'l', 'r']) {
+        expect(
+          Host4EmulatorInputEvent(
+            input: input,
+            phase: Host4EmulatorInputEvent.phaseDown,
+            timestamp: 1,
+          ).isValid,
+          isTrue,
+        );
+      }
+    });
+
     test('rejects unsupported inputs and phases', () {
       const unsupportedInput = Host4EmulatorInputEvent(
-        input: 'x',
+        input: 'c',
         phase: Host4EmulatorInputEvent.phaseDown,
         timestamp: 1,
       );
@@ -65,13 +78,25 @@ void main() {
   });
 
   group('Host4EmulatorControlProfile', () {
-    test('only GBA exposes shoulder buttons', () {
+    test('four-button systems expose the complete RetroPad controls', () {
       expect(Host4EmulatorControlProfile.gb.hasShoulderButtons, isFalse);
       expect(Host4EmulatorControlProfile.gbc.hasShoulderButtons, isFalse);
       expect(Host4EmulatorControlProfile.gba.hasShoulderButtons, isTrue);
+      expect(Host4EmulatorControlProfile.nes.hasShoulderButtons, isFalse);
+      expect(Host4EmulatorControlProfile.snes.hasShoulderButtons, isTrue);
+      expect(Host4EmulatorControlProfile.megaDrive.hasShoulderButtons, isTrue);
+
+      expect(
+        Host4EmulatorControlProfile.snes.inputs,
+        containsAll(<String>['a', 'b', 'x', 'y', 'l', 'r']),
+      );
+      expect(
+        Host4EmulatorControlProfile.megaDrive.inputs,
+        containsAll(<String>['a', 'b', 'x', 'y', 'l', 'r']),
+      );
     });
 
-    test('all three profiles expose the common buttons', () {
+    test('all profiles expose the common buttons', () {
       for (final profile in Host4EmulatorControlProfile.values) {
         expect(
           profile.inputs,

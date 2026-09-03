@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'host4_web_emulator_core_cache.dart';
 import 'host4_web_emulator_launch_config.dart';
 
 class Host4WebEmulatorJavaScript {
@@ -8,8 +9,9 @@ class Host4WebEmulatorJavaScript {
   static String launch(
     Host4WebEmulatorLaunchConfig config, {
     String? requestId,
+    ResolvedCoreData? resolvedCoreData,
   }) {
-    final payload = config.toJson();
+    final payload = config.toJson(resolvedCoreData: resolvedCoreData);
     if (requestId != null) payload['requestId'] = requestId;
     return 'window.Host4WebEmulator.launch(${jsonEncode(payload)});';
   }
