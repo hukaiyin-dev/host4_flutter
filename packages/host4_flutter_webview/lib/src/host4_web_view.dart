@@ -25,6 +25,7 @@ class Host4WebView extends StatefulWidget {
   const Host4WebView({
     super.key,
     required this.initialUrl,
+    this.initialAssetPath,
     this.bridge,
     this.backgroundColor,
     this.loadingOverlayBuilder,
@@ -41,8 +42,33 @@ class Host4WebView extends StatefulWidget {
     this.onWebResourceError,
   });
 
+  const Host4WebView.asset({
+    super.key,
+    required String this.initialAssetPath,
+    this.bridge,
+    this.backgroundColor,
+    this.loadingOverlayBuilder,
+    this.showProgressBar = true,
+    this.needTitleBar = false,
+    this.title,
+    this.enableZoom = false,
+    this.userAgent,
+    this.allowRoutePopGesture = false,
+    this.onControllerReady,
+    this.onPageStarted,
+    this.onPageFinished,
+    this.onNavigationRequest,
+    this.onWebResourceError,
+  }) : initialUrl = 'about:blank';
+
   /// The URL to load on launch.
   final String initialUrl;
+
+  /// Optional Flutter asset path to load on launch.
+  ///
+  /// Use package asset paths such as
+  /// `packages/my_package/assets/page/index.html`.
+  final String? initialAssetPath;
 
   /// Optional JS bridge adapter. When provided, `JsBridge` / `NativeBridge`
   /// JavaScript channels are registered and a generic `JsBridge.method(arg)`
@@ -80,7 +106,8 @@ class Host4WebView extends StatefulWidget {
   /// edge-swipe should leave the page.
   final bool allowRoutePopGesture;
 
-  /// Called once the [Host4WebController] is ready, before the first URL loads.
+  /// Called once the [Host4WebController] is ready, after the current widget
+  /// build has completed.
   final void Function(Host4WebController controller)? onControllerReady;
 
   /// Called when a page starts loading.
@@ -116,13 +143,24 @@ class _Host4WebViewState extends State<Host4WebView> {
     super.initState();
     _controller = _buildController();
     _webController = Host4WebController(_controller);
-    widget.onControllerReady?.call(_webController);
-    final uri = Uri.parse(widget.initialUrl);
-    debugPrint('[Host4WebView] loadRequest uri=$uri scheme=${uri.scheme} hasScheme=${uri.hasScheme}');
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      widget.onControllerReady?.call(_webController);
+    });
+    final assetPath = widget.initialAssetPath;
     try {
-      _controller.loadRequest(uri);
+      if (assetPath != null) {
+        debugPrint('[Host4WebView] loadFlutterAsset path=$assetPath');
+        _controller.loadFlutterAsset(assetPath);
+      } else {
+        final uri = Uri.parse(widget.initialUrl);
+        debugPrint(
+          '[Host4WebView] loadRequest uri=$uri scheme=${uri.scheme} hasScheme=${uri.hasScheme}',
+        );
+        _controller.loadRequest(uri);
+      }
     } catch (e, st) {
-      debugPrint('[Host4WebView] loadRequest failed: $e\n$st');
+      debugPrint('[Host4WebView] initial load failed: $e\n$st');
     }
   }
 
@@ -167,6 +205,7 @@ class _Host4WebViewState extends State<Host4WebView> {
     controller.setNavigationDelegate(
       NavigationDelegate(
         onPageStarted: (url) {
+          debugPrint('[Host4WebView] onPageStarted url=$url');
           if (!mounted) return;
           setState(() {
             _isLoading = true;
@@ -179,6 +218,7 @@ class _Host4WebViewState extends State<Host4WebView> {
           widget.onPageStarted?.call(url);
         },
         onPageFinished: (url) {
+          debugPrint('[Host4WebView] onPageFinished url=$url');
           if (!mounted) return;
           setState(() {
             _isLoading = false;
@@ -194,6 +234,13 @@ class _Host4WebViewState extends State<Host4WebView> {
           setState(() => _progress = p / 100.0);
         },
         onWebResourceError: (error) {
+          debugPrint(
+            '[Host4WebView] onWebResourceError '
+            'isMain=${error.isForMainFrame} '
+            'code=${error.errorCode} '
+            'desc=${error.description} '
+            'url=${error.url}',
+          );
           if (!mounted) return;
           final isMain = error.isForMainFrame ?? true;
           if (!isMain) return;
@@ -208,6 +255,7 @@ class _Host4WebViewState extends State<Host4WebView> {
         },
         onNavigationRequest: (req) {
           final uri = Uri.tryParse(req.url);
+          debugPrint('[Host4WebView] onNavigationRequest url=${req.url} scheme=${uri?.scheme}');
           if (uri == null) return NavigationDecision.prevent;
           final custom = widget.onNavigationRequest?.call(uri);
           if (custom != null) {
@@ -215,7 +263,9 @@ class _Host4WebViewState extends State<Host4WebView> {
                 ? NavigationDecision.navigate
                 : NavigationDecision.prevent;
           }
-          return (uri.scheme == 'http' || uri.scheme == 'https')
+          return (uri.scheme == 'http' ||
+                  uri.scheme == 'https' ||
+                  uri.scheme == 'file')
               ? NavigationDecision.navigate
               : NavigationDecision.prevent;
         },

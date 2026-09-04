@@ -9,6 +9,7 @@ import 'ios_tf_card_page.dart';
 import 'silicone_overlay_page.dart';
 import 'tester_page.dart';
 import 'usb_drive_page.dart';
+import 'web_emulator_poc_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({required this.onResetToDefaults, super.key});
@@ -34,48 +35,20 @@ class _HomePageState extends State<HomePage> {
         builder: (_) => const GmacroEntryPage(),
       ),
       _LabEntry(
-        title: '硅胶贴片',
-        subtitle: '物理尺寸热区预研',
-        icon: Icons.control_camera_outlined,
-        color: theme.colors.brandAccent,
+        title: 'Web 模拟器 POC',
+        subtitle: 'Nostalgist + mGBA 下载 core 验证',
+        icon: Icons.sports_esports_outlined,
+        color: Colors.indigo,
+        minHeight: 220,
+        builder: (_) => const WebEmulatorPocPage(),
+      ),
+      _LabEntry(
+        title: '历史实验',
+        subtitle: '已完成/已暂停',
+        icon: Icons.history_outlined,
+        color: theme.colors.textSecondary,
         minHeight: 210,
-        builder: (_) => const SiliconeOverlayPage(),
-      ),
-      _LabEntry(
-        title: l10n.labUsbDriveTitle,
-        subtitle: l10n.labUsbDriveSubtitle,
-        icon: Icons.usb_rounded,
-        color: theme.colors.brandSecondary,
-        minHeight: 260,
-        builder: (_) => SubPageScaffold(
-          title: l10n.usbDrivePageTitle,
-          subtitle: l10n.usbDrivePageSubtitle,
-          child: const UsbDrivePage(),
-        ),
-      ),
-      _LabEntry(
-        title: 'iOS TF 卡',
-        subtitle: '按规则读取 TF 卡内的游戏',
-        icon: Icons.sd_storage_rounded,
-        color: theme.colors.brandSecondary,
-        minHeight: 230,
-        builder: (_) => const SubPageScaffold(
-          title: 'iOS TF 卡',
-          subtitle: '按规则读取 TF 卡内的游戏',
-          child: IosTfCardPage(),
-        ),
-      ),
-      _LabEntry(
-        title: 'AI Voice',
-        subtitle: '火山引擎 RTC 语音对话测试',
-        icon: Icons.record_voice_over_outlined,
-        color: Colors.deepPurple,
-        minHeight: 210,
-        builder: (_) => SubPageScaffold(
-          title: 'AI Voice',
-          subtitle: '火山引擎 RTC 语音对话',
-          child: AiVoiceTestPage(),
-        ),
+        builder: (_) => const _LegacyLabListPage(),
       ),
       _LabEntry(
         title: l10n.labTesterTitle,
@@ -245,6 +218,156 @@ class _LabCard extends StatelessWidget {
                 ],
               ),
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _LegacyLabListPage extends StatelessWidget {
+  const _LegacyLabListPage();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = context.host4Theme;
+    return Host4PageScaffold(
+      useSafeArea: false,
+      body: Column(
+        children: <Widget>[
+          SafeArea(
+            bottom: false,
+            child: Host4NavigationBar(
+              title: '历史实验',
+              subtitle: '早期硬件验证项目',
+              leading: GestureDetector(
+                onTap: () => Navigator.of(context).pop(),
+                child: Icon(
+                  Icons.arrow_back_ios_new_rounded,
+                  color: theme.components.navigationBar.icon,
+                  size: 20,
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            child: ListView(
+              padding: EdgeInsets.symmetric(
+                horizontal: theme.spacing.page,
+                vertical: theme.spacing.md,
+              ),
+              children: <Widget>[
+                _LegacyLabTile(
+                  icon: Icons.control_camera_outlined,
+                  title: '硅胶贴片',
+                  subtitle: '物理尺寸热区预研',
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const SiliconeOverlayPage(),
+                    ),
+                  ),
+                ),
+                _LegacyLabTile(
+                  icon: Icons.record_voice_over_outlined,
+                  title: 'AI Voice',
+                  subtitle: '火山引擎 RTC 语音对话测试',
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => SubPageScaffold(
+                        title: 'AI Voice',
+                        subtitle: '火山引擎 RTC 语音对话',
+                        child: AiVoiceTestPage(),
+                      ),
+                    ),
+                  ),
+                ),
+                _LegacyLabTile(
+                  icon: Icons.usb_rounded,
+                  title: l10n.labUsbDriveTitle,
+                  subtitle: l10n.labUsbDriveSubtitle,
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => SubPageScaffold(
+                        title: l10n.usbDrivePageTitle,
+                        subtitle: l10n.usbDrivePageSubtitle,
+                        child: const UsbDrivePage(),
+                      ),
+                    ),
+                  ),
+                ),
+                _LegacyLabTile(
+                  icon: Icons.sd_storage_rounded,
+                  title: 'iOS TF 卡',
+                  subtitle: '按规则读取 TF 卡内的游戏',
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const SubPageScaffold(
+                        title: 'iOS TF 卡',
+                        subtitle: '按规则读取 TF 卡内的游戏',
+                        child: IosTfCardPage(),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LegacyLabTile extends StatelessWidget {
+  const _LegacyLabTile({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = context.host4Theme;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(theme.radius.md),
+        onTap: onTap,
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: theme.spacing.md,
+            vertical: theme.spacing.lg,
+          ),
+          child: Row(
+            children: <Widget>[
+              Icon(icon, color: theme.colors.textSecondary, size: 24),
+              SizedBox(width: theme.spacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Host4Text(title, role: Host4TextRole.body),
+                    SizedBox(height: theme.spacing.xs),
+                    Host4Text(
+                      subtitle,
+                      colorRole: Host4TextColorRole.secondary,
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.chevron_right_rounded,
+                color: theme.colors.textSecondary,
+                size: 20,
+              ),
+            ],
           ),
         ),
       ),

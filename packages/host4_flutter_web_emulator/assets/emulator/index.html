@@ -1,0 +1,410 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Host4 Web Emulator</title>
+    <style>
+      html,
+      body,
+      #emulator {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+        background: #000;
+      }
+
+      canvas {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: contain;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="emulator"></canvas>
+    <script src="./zip.min.js"></script>
+    <script src="./nostalgist.0.19.0.umd.js"></script>
+    <script>
+      (function () {
+        var current = null;
+        var currentRate = 1;
+        var bridgeReady = false;
+        var pendingMessages = [];
+
+        function post(method, payload) {
+          var channel = window.JsBridge || window.NativeBridge;
+          if (!channel || typeof channel.postMessage !== 'function') {
+            pendingMessages.push({ method: method, payload: payload });
+            return;
+          }
+          channel.postMessage(JSON.stringify({
+            method: method,
+            payload: payload
+          }));
+        }
+
+        function flushPendingMessages() {
+          if (bridgeReady) return;
+          bridgeReady = true;
+          var channel = window.JsBridge || window.NativeBridge;
+          if (!channel || typeof channel.postMessage !== 'function') return;
+          var queued = pendingMessages.splice(0);
+          for (var i = 0; i < queued.length; i++) {
+            channel.postMessage(JSON.stringify(queued[i]));
+          }
+        }
+
+        function report(type, requestId, ok, data, error) {
+          post(type, {
+            type: type,
+            requestId: requestId || '',
+            ok: ok,
+            data: data || null,
+            error: error ? String(error.message || error) : null
+          });
+        }
+
+        function currentStatus() {
+          if (!current || typeof current.getStatus !== 'function') return null;
+          return current.getStatus();
+        }
+
+        function applyRate(rate) {
+          if (rate !== 1 && rate !== 2) {
+            throw new Error('Only 1x and 2x rates are supported.');
+          }
+          if (typeof current.sendCommand !== 'function') {
+            throw new Error('Core does not support rate changes.');
+          }
+          if (rate !== currentRate) {
+            console.debug(
+              '[Host4WebEmulator] rate_command_sent previous=' + currentRate
+              + ' target=' + rate + ' command=FAST_FORWARD'
+            );
+            current.sendCommand('FAST_FORWARD');
+            currentRate = rate;
+          }
+        }
+
+        function waitForRunningFrames() {
+          return new Promise(function (resolve) {
+            requestAnimationFrame(function () {
+              requestAnimationFrame(resolve);
+            });
+          });
+        }
+
+        function base64ToBlob(base64, mimeType) {
+          var binary = atob(base64);
+          var bytes = new Uint8Array(binary.length);
+          for (var i = 0; i < binary.length; i += 1) {
+            bytes[i] = binary.charCodeAt(i);
+          }
+          return new Blob([bytes], mimeType ? { type: mimeType } : undefined);
+        }
+
+        function resolveRom(config) {
+          if (config.romBase64) {
+            return {
+              fileName: config.romName || 'game.rom',
+              fileContent: base64ToBlob(config.romBase64)
+            };
+          }
+          return config.romFileUrl;
+        }
+
+        // core 加载：优先使用 Dart 缓存的 base64 数据，否则从网络下载 ZIP 并解压。
+        // 使用本地打包的 zip.js 解压，绕过 Nostalgist 内部的 dynamic import()
+        // （该导入在 file:// 源下会失败）。
+        // 不使用 file URL，因为 WKWebView / Android WebView 沙盒不允许读取外部目录。
+        var coreCache = null;
+        async function extractCoreLocal(coreName, zipUrl, jsBase64, wasmBase64) {
+          if (coreCache) return coreCache;
+
+          // 有 Dart 缓存的 base64 数据时直接转 Blob
+          if (jsBase64 && wasmBase64) {
+            coreCache = {
+              js: base64ToBlob(jsBase64, 'application/javascript'),
+              wasm: base64ToBlob(wasmBase64, 'application/wasm')
+            };
+            return coreCache;
+          }
+
+          // 无缓存，从网络下载 ZIP 并解压
+          var url = zipUrl || (
+            'https://cdn.jsdelivr.net/gh/arianrhodsandlot/retroarch-emscripten-build@v1.22.2/retroarch/'
+            + coreName + '_libretro.zip'
+          );
+          var response = await fetch(url);
+          if (!response.ok) throw new Error('Failed to fetch core ZIP: ' + response.status);
+          var blob = await response.blob();
+          var reader = new zip.ZipReader(new zip.BlobReader(blob));
+          var entries = await reader.getEntries();
+          var result = {};
+          for (var i = 0; i < entries.length; i++) {
+            var entry = entries[i];
+            if (entry.directory) continue;
+            if (entry.filename.endsWith('.js')) {
+              result.js = await entry.getData(new zip.BlobWriter('application/javascript'));
+            } else if (entry.filename.endsWith('.wasm')) {
+              result.wasm = await entry.getData(new zip.BlobWriter('application/wasm'));
+            }
+          }
+          await reader.close();
+          if (!result.js || !result.wasm) throw new Error('Core ZIP missing .js or .wasm for ' + coreName);
+          coreCache = result;
+          return result;
+        }
+
+        window.Host4WebEmulator = {
+          launch: async function (config) {
+            flushPendingMessages();
+            var requestId = config.requestId || 'launch';
+            try {
+              if (!window.Nostalgist) throw new Error('Nostalgist is not loaded.');
+              if (current && typeof current.exit === 'function') current.exit();
+
+              var coreName = config.core || 'mgba';
+              var coreZipUrl = config.coreZipUrl || null;
+              var coreJsBase64 = config.coreJsBase64 || null;
+              var coreWasmBase64 = config.coreWasmBase64 || null;
+
+              current = await window.Nostalgist.launch({
+                element: document.getElementById('emulator'),
+                core: coreName,
+                rom: resolveRom(config),
+                sram: config.sramBase64
+                  ? base64ToBlob(config.sramBase64, 'application/octet-stream')
+                  : undefined,
+                respondToGlobalEvents: true,
+                retroarchConfig: {
+                  fastforward_ratio: 2
+                },
+                style: {
+                  width: '100%',
+                  height: '100%'
+                },
+                resolveCoreJs: async function () {
+                  var r = await extractCoreLocal(coreName, coreZipUrl, coreJsBase64, coreWasmBase64);
+                  return r.js;
+                },
+                resolveCoreWasm: async function () {
+                  var r = await extractCoreLocal(coreName, coreZipUrl, coreJsBase64, coreWasmBase64);
+                  return r.wasm;
+                }
+              });
+              currentRate = 1;
+              console.debug(
+                '[Host4WebEmulator] launch_rate_configured fastforward_ratio=2'
+              );
+              report('launched', requestId, true, {
+                system: config.system,
+                core: coreName,
+                fastforwardRatio: 2
+              }, null);
+            } catch (error) {
+              console.error('[Host4WebEmulator] launch failed:', error);
+              report('launchError', requestId, false, null, error);
+            }
+          },
+
+          pause: function (requestId) {
+            requestId = requestId || 'pause';
+            try {
+              if (!current) throw new Error('Emulator not running.');
+              if (typeof current.pause === 'function') current.pause();
+              report('paused', requestId, true, null, null);
+            } catch (error) {
+              report('pauseError', requestId, false, null, error);
+            }
+          },
+
+          resume: async function (requestId, rate) {
+            requestId = requestId || 'resume';
+            try {
+              if (!current) throw new Error('Emulator not running.');
+              if (typeof current.resume === 'function') current.resume();
+              if (rate != null) {
+                await waitForRunningFrames();
+                applyRate(rate);
+              }
+              report('resumed', requestId, true, { rate: currentRate }, null);
+            } catch (error) {
+              report('resumeError', requestId, false, null, error);
+            }
+          },
+
+          restart: async function (requestId) {
+            requestId = requestId || 'restart';
+            try {
+              if (!current) throw new Error('Emulator not running.');
+              await current.restart();
+              report('restarted', requestId, true, null, null);
+            } catch (error) {
+              report('restartError', requestId, false, null, error);
+            }
+          },
+
+          exit: function (requestId) {
+            requestId = requestId || 'exit';
+            try {
+              if (current && typeof current.exit === 'function') current.exit();
+              current = null;
+              currentRate = 1;
+              report('exited', requestId, true, null, null);
+            } catch (error) {
+              report('exitError', requestId, false, null, error);
+            }
+          },
+
+          saveState: async function (requestId) {
+            requestId = requestId || 'saveState';
+            try {
+              if (!current) throw new Error('Emulator not running.');
+              var result = await current.saveState();
+              // state 和 thumbnail 转 base64 回传
+              var stateBlob = new Blob([result.state]);
+              var thumbBlob = result.thumbnail ? new Blob([result.thumbnail]) : null;
+
+              var stateBase64 = await blobToBase64(stateBlob);
+              var thumbBase64 = thumbBlob ? await blobToBase64(thumbBlob) : null;
+
+              report('stateSaved', requestId, true, {
+                state: stateBase64,
+                thumbnail: thumbBase64
+              }, null);
+            } catch (error) {
+              report('saveStateError', requestId, false, null, error);
+            }
+          },
+
+          loadState: async function (requestId, stateBase64) {
+            requestId = requestId || 'loadState';
+            try {
+              if (!current) throw new Error('Emulator not running.');
+              var binary = atob(stateBase64);
+              var bytes = new Uint8Array(binary.length);
+              for (var i = 0; i < binary.length; i++) {
+                bytes[i] = binary.charCodeAt(i);
+              }
+              var statusBefore = currentStatus();
+              console.debug(
+                '[Host4WebEmulator] state_load_started request=' + requestId
+                + ' bytes=' + bytes.byteLength
+                + ' status_before=' + statusBefore
+              );
+              // RetroArch 在暂停状态执行 LOAD_STATE 时会临时运行一帧后再次暂停。
+              // 先通过 Nostalgist 恢复运行，避免 Flutter 随后的 resume 与该过渡状态
+              // 同时发送 PAUSE_TOGGLE，最终把游戏留在暂停状态。
+              if (statusBefore === 'paused' && typeof current.resume === 'function') {
+                current.resume();
+                console.debug(
+                  '[Host4WebEmulator] state_load_resumed_before_command request='
+                  + requestId
+                );
+              }
+              await current.loadState(bytes.buffer);
+              var statusAfter = currentStatus();
+              console.debug(
+                '[Host4WebEmulator] state_load_dispatched request=' + requestId
+                + ' status_after=' + statusAfter
+              );
+              report('stateLoaded', requestId, true, {
+                bytes: bytes.byteLength,
+                statusBefore: statusBefore,
+                statusAfter: statusAfter
+              }, null);
+            } catch (error) {
+              console.error('[Host4WebEmulator] state_load_failed:', error);
+              report('loadStateError', requestId, false, null, error);
+            }
+          },
+
+          screenshot: async function (requestId) {
+            requestId = requestId || 'screenshot';
+            try {
+              if (!current) throw new Error('Emulator not running.');
+              var blob = await current.screenshot();
+              var base64 = await blobToBase64(blob);
+              report('screenshotTaken', requestId, true, { image: base64 }, null);
+            } catch (error) {
+              report('screenshotError', requestId, false, null, error);
+            }
+          },
+
+          saveSRAM: async function (requestId) {
+            requestId = requestId || 'saveSRAM';
+            try {
+              if (!current) throw new Error('Emulator not running.');
+              if (typeof current.saveSRAM !== 'function') {
+                throw new Error('Core does not support SRAM export.');
+              }
+              var result = await current.saveSRAM();
+              var blob = result instanceof Blob ? result : new Blob([result]);
+              var base64 = await blobToBase64(blob);
+              report('sramSaved', requestId, true, { sram: base64 }, null);
+            } catch (error) {
+              report('saveSRAMError', requestId, false, null, error);
+            }
+          },
+
+          setRate: function (rate, requestId) {
+            requestId = requestId || 'setRate';
+            try {
+              if (!current) throw new Error('Emulator not running.');
+              if (currentStatus() === 'paused') {
+                throw new Error('Rate changes must be applied after resume.');
+              }
+              applyRate(rate);
+              report('rateSet', requestId, true, { rate: rate }, null);
+            } catch (error) {
+              report('setRateError', requestId, false, null, error);
+            }
+          },
+
+          keyEvent: function (event) {
+            if (!current) return;
+            var button = event.button;
+            var player = event.player || 1;
+            var action = event.action;
+
+            switch (action) {
+              case 'press':
+                current.press(button, player, event.duration);
+                break;
+              case 'down':
+                current.pressDown(button, player);
+                break;
+              case 'up':
+                current.pressUp(button, player);
+                break;
+            }
+          },
+
+          keyEvents: function (events) {
+            if (!current || !Array.isArray(events)) return;
+            for (var i = 0; i < events.length; i++) {
+              window.Host4WebEmulator.keyEvent(events[i]);
+            }
+          }
+        };
+
+        function blobToBase64(blob) {
+          return new Promise(function (resolve, reject) {
+            var reader = new FileReader();
+            reader.onloadend = function () {
+              var result = reader.result;
+              resolve(result ? result.split(',')[1] : null);
+            };
+            reader.onerror = function () { reject(reader.error); };
+            reader.readAsDataURL(blob);
+          });
+        }
+
+        post('ready', { type: 'ready', requestId: '', ok: true, data: null, error: null });
+      })();
+    </script>
+  </body>
+</html>

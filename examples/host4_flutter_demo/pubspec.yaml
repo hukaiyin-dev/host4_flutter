@@ -48,12 +48,16 @@ dependencies:
     path: ../../packages/host4_flutter_physical_overlay
   host4_flutter_ui:
     path: ../../packages/host4_flutter_ui
+  host4_flutter_emulator_ui:
+    path: ../../packages/host4_flutter_emulator_ui
   host4_flutter_system_status:
     path: ../../packages/host4_flutter_system_status
   host4_flutter_log:
     path: ../../packages/host4_flutter_log
   host4_flutter_utils:
     path: ../../packages/host4_flutter_utils
+  host4_flutter_web_emulator:
+    path: ../../packages/host4_flutter_web_emulator
   host4_flutter_transport:
     path: ../../packages/host4_flutter_transport
   host4_flutter_protocol:
