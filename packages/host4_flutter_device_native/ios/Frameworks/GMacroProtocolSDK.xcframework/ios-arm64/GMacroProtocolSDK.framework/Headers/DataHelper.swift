@@ -27,9 +27,6 @@ public protocol GMacroDataDelegate: AnyObject {
     //校准完成4301 5702 5703
     func finishCalibration(_ type: Int, subId : Int, result : Int, param1 : [Int], param2 : [Int])
     
-    //连接状态0x74 02
-    func devConnectState(_ state : Int)
-    
     //按键状态上报 7406
     func receiveDevKeysState(_ keys: [GamepadKey], j1x: Int, j1x_o : Int, j1y: Int, j1y_o : Int, j2x: Int, j2x_o : Int, j2y: Int, j2y_o : Int,  l2: Int, l2_o: Int, r2: Int, r2_o: Int)
 }
@@ -57,8 +54,6 @@ public class DataHelper: NSObject, @unchecked Sendable {
         _ response: ((NSDictionary?, NSError?) -> Void)?
     ) -> Void
     var sendPacketHandler: SendPacketHandler?
-    var mfiOTAUnsolicitedHandler: (([String: Any]) -> Void)?
-
     var sn: Int = 1
     var oneByteSN: Int = 1
     var bluetoothSN: Int = 1
@@ -126,5 +121,4 @@ extension DataHelper {
         }
     }
 }
-
 

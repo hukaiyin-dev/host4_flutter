@@ -139,48 +139,6 @@ extension DataHelper {
                 print("    • \(key)")
             }
             
-            if pId == .usbOta {
-                if let callback = self.pendingResponses[responseKey] {
-                    switch responseResult {
-                    case .success(let dic):
-                        if isComplete {
-                            self.pendingResponses.removeValue(forKey: responseKey)
-                            callback(.success(dic))
-                            didCallback = true
-                            print("✅ [usbOta] 精确匹配成功，触发回调并移除: \(responseKey)")
-                        } else {
-                            print("⏳ [usbOta] 数据未完整，保留等待后续包: \(responseKey)")
-                        }
-                    case .failure(let err):
-                        self.pendingResponses.removeValue(forKey: responseKey)
-                        callback(.failure(err))
-                        didCallback = true
-                        print("✅ [usbOta] 精确匹配成功（失败），触发回调并移除: \(responseKey)")
-                    }
-                } else if isComplete {
-                    if let (anyKey, anyCallback) = self.pendingResponses
-                            .first(where: { $0.key.protocolID == pId }) {
-                        self.pendingResponses.removeValue(forKey: anyKey)
-                        switch responseResult {
-                        case .success(let dic): anyCallback(.success(dic))
-                        case .failure(let err): anyCallback(.failure(err))
-                        }
-                        didCallback = true
-                        print("🟡 [usbOta] 忽略 SN 兜底匹配，触发挂起回调: \(anyKey)")
-                    } else {
-                        print("✅ [usbOta] 数据完整但无回调可触发，交给 MFI OTA 主动上报处理")
-                        if case .success(let dic) = responseResult {
-                            self.mfiOTAUnsolicitedHandler?(dic)
-                        }
-                    }
-                }
-
-                if !didCallback && !isComplete {
-                    print("⏳ [usbOta] 数据未完整，保留待后续包: \(responseKey)")
-                }
-                return
-            }
-
             if pId.hasSubID {
                 // ✅ 对有 subID 的协议：必须精确匹配 (protocolID, subID, sn)
                 if let callback = self.pendingResponses[responseKey] {
@@ -451,9 +409,6 @@ extension DataHelper {
             return analyzeResult(payload: payload)
         case .motion:
             return analyzeResult(payload: payload)
-        case .usbOta:
-            responseDic = analyzeMFIOTA(payload)
-            responseDic["sn"] = sn.toInt()
         case .fetchProfile:
             responseDic = analyzeProfile(payload)
         case .setVibrate:
@@ -489,8 +444,6 @@ extension DataHelper {
             }
         case .switchLayout:
             return analyzeResult(payload: payload)
-        case .iap2ConnectState:
-            responseDic = analyzeDevConnectState(payload)
         default:
             print("未处理的 protocolID 0x\(String(format: "%02X", protocolID.rawValue))")
             break
