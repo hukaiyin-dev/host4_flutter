@@ -556,28 +556,6 @@ extension DataHelper {
     }
     
     
-    //MFI设备连接上报的数据处理
-    func analyzeDevConnectState(_ data: Data) -> [String: Any] {
-        var dic: [String: Any] = [:]
-        
-        var parser = DataParser(data)
-        
-        let subId = parser.next(1).toInt()
-        
-        let _ = parser.next(1).toInt()
-        
-        let result = parser.next(1).toInt()
-        
-        dic = ["result" : result]
-        
-        //判断subId == 0x02
-        if subId == 0x02 && result == 2{
-            delegate?.devConnectState(result)
-        }
-        
-        return dic
-    }
-    
     // MARK: - 手柄工作模式解析 0x69
     /// 格式: [subID][dev][value]
     /// subID 0x01/0x07 → value = mode 直接传出

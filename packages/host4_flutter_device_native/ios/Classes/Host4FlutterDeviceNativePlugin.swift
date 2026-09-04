@@ -32,7 +32,6 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
     disabledEventChannels = [
       "host4_flutter_device_native/ble_scan",
       "host4_flutter_device_native/native_log",
-      "host4_flutter_device_native/mfi_accessory_events",
     ].map {
       FlutterEventChannel(name: $0, binaryMessenger: messenger)
     }
@@ -154,19 +153,6 @@ private func nativeLog(_ message: String) {
   NativeLogHandler.shared.log(message)
 }
 
-private final class EmptyEventStreamHandler: NSObject, FlutterStreamHandler {
-  func onListen(
-    withArguments arguments: Any?,
-    eventSink events: @escaping FlutterEventSink
-  ) -> FlutterError? {
-    nil
-  }
-
-  func onCancel(withArguments arguments: Any?) -> FlutterError? {
-    nil
-  }
-}
-
 private final class BleScanStreamHandler: NSObject, FlutterStreamHandler {
   private let runtime = BluetoothCentralRuntime.shared
   private var eventSink: FlutterEventSink?
@@ -281,7 +267,6 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
   private let methodChannel: FlutterMethodChannel
   private let messenger: FlutterBinaryMessenger
   private let bleScanHandler = BleScanStreamHandler()
-  private let mfiAccessoryEventHandler = EmptyEventStreamHandler()
   private var transportSessions: [String: TransportSessionRecord] = [:]
   private var gmacroProtocolSessions: [String: GMacroProtocolRecord] = [:]
 
@@ -306,12 +291,6 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
     )
     logChannel.setStreamHandler(NativeLogHandler.shared)
 
-    let mfiAccessoryChannel = FlutterEventChannel(
-      name: "host4_flutter_device_native/mfi_accessory_events",
-      binaryMessenger: messenger
-    )
-    mfiAccessoryChannel.setStreamHandler(mfiAccessoryEventHandler)
-
   }
 
   public static func register(with registrar: FlutterPluginRegistrar) {
@@ -329,11 +308,7 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
     case "connectBle":
       handleConnectBle(call, result: result)
     case "connectSystemConnectedBle":
-    handleConnectSystemConnectedBle(call, result: result)
-    case "connectMfi":
-      result(mfiUnsupportedError(method: call.method))
-    case "isMfiAccessoryConnected":
-      result(false)
+      handleConnectSystemConnectedBle(call, result: result)
     case "disconnectTransport":
       handleDisconnectTransport(call, result: result)
     case "attachGmacroProtocol":
@@ -1469,11 +1444,6 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
         "type": "error",
         "failure": failureMap(code: "gmacro-failure", message: message),
       ]
-    case .deviceConnected:
-      return [
-        "type": "ready",
-        "payload": ["event": "deviceConnected"],
-      ]
     case .testKeys(let keys, let j1x, let j1y, let j2x, let j2y, let l2, let r2):
       return [
         "type": "busy",
@@ -1818,14 +1788,6 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
 
   private func flutterError(code: String, message: String, details: Any? = nil) -> FlutterError {
     FlutterError(code: code, message: message, details: details)
-  }
-
-  private func mfiUnsupportedError(method: String) -> FlutterError {
-    flutterError(
-      code: "mfi-unsupported",
-      message: "MFi transport is not available in this build.",
-      details: ["method": method]
-    )
   }
 
   private func asFlutterError(_ error: Error) -> FlutterError {
