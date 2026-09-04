@@ -21,11 +21,10 @@ Flutter plugin shell for host4 native device communication.
   unless disable_native_sdks
     s.vendored_frameworks = [
       'Frameworks/BluetoothKit.xcframework',
-      'Frameworks/MFiKit.xcframework',
       'Frameworks/GMacroProtocolSDK.xcframework',
     ]
   end
-  s.frameworks = disable_native_sdks ? ['UIKit'] : ['CoreBluetooth', 'ExternalAccessory', 'GameController', 'UIKit']
+  s.frameworks = disable_native_sdks ? ['UIKit'] : ['CoreBluetooth', 'GameController', 'UIKit']
 
   # Flutter.framework does not contain a i386 slice.
   pod_target_xcconfig = {

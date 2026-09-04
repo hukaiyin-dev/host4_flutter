@@ -241,7 +241,7 @@ SPEC CHECKSUMS:
   GoogleUtilities: 766ace00c6b10d8148408f329d10c4f051931850
   host4_flutter_aivoice: 6696ff221f76de66d228c85dd25ae2e33540fdae
   host4_flutter_bridge: 3dba61b80f9d9dea557bfcd623dd9c12eba92f14
-  host4_flutter_device_native: 1a071b56557b2b63601ac11fd133cc6810e4a33f
+  host4_flutter_device_native: d26ad37ef99e9f14354ac5d6b5ffdd383f2c9a64
   nanopb: fad817b59e0457d11a5dfbde799381cd727c1275
   PromisesObjC: 752c3227f599e3467650e47ea36f433eeb10c273
   SDWebImage: e9fc87c1aab89a8ab1bbd74eba378c6f53be8abf

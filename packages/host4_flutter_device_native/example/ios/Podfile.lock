@@ -25,7 +25,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
-  host4_flutter_device_native: 1a071b56557b2b63601ac11fd133cc6810e4a33f
+  host4_flutter_device_native: d26ad37ef99e9f14354ac5d6b5ffdd383f2c9a64
   integration_test: 4a889634ef21a45d28d50d622cf412dc6d9f586e
   receive_sharing_intent: 222384f00ffe7e952bbfabaa9e3967cb87e5fe00
 
