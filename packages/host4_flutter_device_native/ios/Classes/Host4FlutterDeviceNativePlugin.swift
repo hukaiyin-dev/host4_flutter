@@ -67,11 +67,9 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
 #else
 import BluetoothKit
 import CoreBluetooth
-import ExternalAccessory
 import Flutter
 import Foundation
 import GMacroProtocolSDK
-import MFiKit
 import UIKit
 
 private final class QueuedEventStreamHandler: NSObject, FlutterStreamHandler {
@@ -156,103 +154,16 @@ private func nativeLog(_ message: String) {
   NativeLogHandler.shared.log(message)
 }
 
-private final class MfiAccessoryEventHandler: NSObject, FlutterStreamHandler {
-  private var eventSink: FlutterEventSink?
-  private var protocolString = ""
-  private var connectObserver: NSObjectProtocol?
-  private var disconnectObserver: NSObjectProtocol?
-
+private final class EmptyEventStreamHandler: NSObject, FlutterStreamHandler {
   func onListen(
     withArguments arguments: Any?,
     eventSink events: @escaping FlutterEventSink
   ) -> FlutterError? {
-    eventSink = events
-    let payload = arguments as? [String: Any]
-    protocolString = payload?["protocolString"] as? String ?? ""
-
-    EAAccessoryManager.shared().registerForLocalNotifications()
-    installObservers()
-    emitCurrentAccessories()
-    return nil
+    nil
   }
 
   func onCancel(withArguments arguments: Any?) -> FlutterError? {
-    eventSink = nil
-    removeObservers()
-    return nil
-  }
-
-  private func installObservers() {
-    removeObservers()
-    connectObserver = NotificationCenter.default.addObserver(
-      forName: .EAAccessoryDidConnect,
-      object: nil,
-      queue: .main
-    ) { [weak self] notification in
-      self?.handleAccessoryNotification(notification, type: "connected")
-    }
-    disconnectObserver = NotificationCenter.default.addObserver(
-      forName: .EAAccessoryDidDisconnect,
-      object: nil,
-      queue: .main
-    ) { [weak self] notification in
-      self?.handleAccessoryNotification(notification, type: "disconnected")
-    }
-  }
-
-  private func removeObservers() {
-    if let connectObserver {
-      NotificationCenter.default.removeObserver(connectObserver)
-      self.connectObserver = nil
-    }
-    if let disconnectObserver {
-      NotificationCenter.default.removeObserver(disconnectObserver)
-      self.disconnectObserver = nil
-    }
-  }
-
-  private func emitCurrentAccessories() {
-    let accessories = EAAccessoryManager.shared().connectedAccessories
-    for accessory in accessories where matches(accessory) {
-      emit(accessory: accessory, type: "connected")
-    }
-  }
-
-  private func handleAccessoryNotification(_ notification: Notification, type: String) {
-    guard let accessory = notification.userInfo?[EAAccessoryKey] as? EAAccessory else {
-      return
-    }
-    guard matches(accessory) else {
-      return
-    }
-    emit(accessory: accessory, type: type)
-  }
-
-  private func matches(_ accessory: EAAccessory) -> Bool {
-    protocolString.isEmpty || accessory.protocolStrings.contains(protocolString)
-  }
-
-  private func emit(accessory: EAAccessory, type: String) {
-    let matchedProtocol = accessory.protocolStrings.first { value in
-      protocolString.isEmpty || value == protocolString
-    } ?? protocolString
-    eventSink?([
-      "type": type,
-      "protocolString": matchedProtocol,
-      "name": accessory.name,
-      "metadata": [
-        "manufacturer": accessory.manufacturer,
-        "modelNumber": accessory.modelNumber,
-        "serialNumber": accessory.serialNumber,
-        "firmwareRevision": accessory.firmwareRevision,
-        "hardwareRevision": accessory.hardwareRevision,
-        "protocolStrings": accessory.protocolStrings,
-      ],
-    ] as [String: Any])
-  }
-
-  deinit {
-    removeObservers()
+    nil
   }
 }
 
@@ -316,38 +227,21 @@ private final class BleScanStreamHandler: NSObject, FlutterStreamHandler {
 }
 
 private final class TransportSessionRecord {
-  enum Source {
-    case ble
-    case mfi(session: MFiTransportSession, byteTransport: AnyByteStreamTransport)
-  }
-
   let sessionId: String
-  let source: Source
   let eventChannel: FlutterEventChannel
   let eventHandler: QueuedEventStreamHandler
   let disconnectHandler: () -> Void
 
   init(
     sessionId: String,
-    source: Source,
     eventChannel: FlutterEventChannel,
     eventHandler: QueuedEventStreamHandler,
     disconnectHandler: @escaping () -> Void
   ) {
     self.sessionId = sessionId
-    self.source = source
     self.eventChannel = eventChannel
     self.eventHandler = eventHandler
     self.disconnectHandler = disconnectHandler
-  }
-
-  var byteTransport: AnyByteStreamTransport? {
-    switch source {
-    case .ble:
-      return nil
-    case .mfi(_, let byteTransport):
-      return byteTransport
-    }
   }
 
   func disconnect() {
@@ -387,7 +281,7 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
   private let methodChannel: FlutterMethodChannel
   private let messenger: FlutterBinaryMessenger
   private let bleScanHandler = BleScanStreamHandler()
-  private let mfiAccessoryEventHandler = MfiAccessoryEventHandler()
+  private let mfiAccessoryEventHandler = EmptyEventStreamHandler()
   private var transportSessions: [String: TransportSessionRecord] = [:]
   private var gmacroProtocolSessions: [String: GMacroProtocolRecord] = [:]
 
@@ -437,9 +331,9 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
     case "connectSystemConnectedBle":
     handleConnectSystemConnectedBle(call, result: result)
     case "connectMfi":
-      handleConnectMfi(call, result: result)
+      result(mfiUnsupportedError(method: call.method))
     case "isMfiAccessoryConnected":
-      handleIsMfiAccessoryConnected(call, result: result)
+      result(false)
     case "disconnectTransport":
       handleDisconnectTransport(call, result: result)
     case "attachGmacroProtocol":
@@ -515,7 +409,6 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
 
     transportSessions[sessionId] = TransportSessionRecord(
       sessionId: sessionId,
-      source: .ble,
       eventChannel: eventChannel,
       eventHandler: eventHandler,
       disconnectHandler: {
@@ -580,7 +473,6 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
 
     transportSessions[sessionId] = TransportSessionRecord(
       sessionId: sessionId,
-      source: .ble,
       eventChannel: eventChannel,
       eventHandler: eventHandler,
       disconnectHandler: {
@@ -590,103 +482,6 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
 
     nativeLog("[SystemConnected] transport session registered: \(sessionId)")
     result(sessionId)
-  }
-
-  private func handleConnectMfi(
-    _ call: FlutterMethodCall,
-    result: @escaping FlutterResult
-  ) {
-    guard
-      let arguments = call.arguments as? [String: Any],
-      let protocolString = arguments["protocolString"] as? String,
-      !protocolString.isEmpty
-    else {
-      result(
-        flutterError(
-          code: "invalid-arguments",
-          message: "protocolString is required."
-        )
-      )
-      return
-    }
-
-    nativeLog("[MFi] connect requested, protocolString=\(protocolString)")
-    let sessionId = "mfi-\(UUID().uuidString)"
-    let mfiSession = MFiTransportSession(
-      sessionId: sessionId,
-      protocolString: protocolString
-    )
-    let eventHandler = QueuedEventStreamHandler()
-
-    let byteTransport = AnyByteStreamTransport(
-      id: sessionId,
-      send: { data in
-        try mfiSession.send(data)
-      },
-      onReceive: { handler in
-        mfiSession.onReceive(handler)
-      }
-    )
-
-    mfiSession.onStateChanged = { [weak self, weak eventHandler] state in
-      guard let self, let eventHandler else { return }
-      nativeLog("[MFi] state=\(state)")
-      eventHandler.emit(self.transportEventMap(fromMfiState: state))
-      switch state {
-      case .disconnected, .error:
-        NativeAdapterRuntime.shared.unregisterTransport(sessionId)
-        self.transportSessions.removeValue(forKey: sessionId)
-      default:
-        break
-      }
-    }
-
-    NativeAdapterRuntime.shared.registerTransport(byteTransport)
-
-    let eventChannel = FlutterEventChannel(
-      name: "host4_flutter_device_native/transport_events/\(sessionId)",
-      binaryMessenger: messenger
-    )
-    eventChannel.setStreamHandler(eventHandler)
-
-    transportSessions[sessionId] = TransportSessionRecord(
-      sessionId: sessionId,
-      source: .mfi(session: mfiSession, byteTransport: byteTransport),
-      eventChannel: eventChannel,
-      eventHandler: eventHandler,
-      disconnectHandler: { [weak self] in
-        mfiSession.disconnect()
-        NativeAdapterRuntime.shared.unregisterTransport(sessionId)
-        self?.transportSessions.removeValue(forKey: sessionId)
-      }
-    )
-
-    mfiSession.connect()
-    result(sessionId)
-  }
-
-  private func handleIsMfiAccessoryConnected(
-    _ call: FlutterMethodCall,
-    result: @escaping FlutterResult
-  ) {
-    guard
-      let arguments = call.arguments as? [String: Any],
-      let protocolString = arguments["protocolString"] as? String,
-      !protocolString.isEmpty
-    else {
-      result(
-        flutterError(
-          code: "invalid-arguments",
-          message: "protocolString is required."
-        )
-      )
-      return
-    }
-
-    let connected = EAAccessoryManager.shared().connectedAccessories.contains {
-      $0.protocolStrings.contains(protocolString)
-    }
-    result(connected)
   }
 
   private func handleDisconnectTransport(
@@ -718,7 +513,7 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
     guard
       let arguments = call.arguments as? [String: Any],
       let transportSessionId = arguments["transportSessionId"] as? String,
-      let transportRecord = transportSessions[transportSessionId]
+      transportSessions[transportSessionId] != nil
     else {
       result(
         flutterError(
@@ -749,86 +544,53 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
     let otaEventHandler = QueuedEventStreamHandler(debugLabel: "ota pending")
     let session: GMacroProtocolSession
 
-    switch transportRecord.source {
-    case .ble:
-      guard
-        let bleSession = NativeAdapterRuntime.shared.attachGMacroProtocol(
-          transportSessionId: transportSessionId,
-          onEvent: { [weak self, weak eventHandler] event in
-            guard let self, let eventHandler else { return }
-            self.emitGMacroEvent(
-              event,
-              protocolEventHandler: eventHandler,
-              otaEventHandler: otaEventHandler
-            )
-          }
-        )
-      else {
-        result(
-          flutterError(
-            code: "gmacro-bind-failed",
-            message: "Native runtime failed to create a GMacro protocol session."
+    guard
+      let bleSession = NativeAdapterRuntime.shared.attachGMacroProtocol(
+        transportSessionId: transportSessionId,
+        onEvent: { [weak self, weak eventHandler] event in
+          guard let self, let eventHandler else { return }
+          self.emitGMacroEvent(
+            event,
+            protocolEventHandler: eventHandler,
+            otaEventHandler: otaEventHandler
           )
+        }
+      )
+    else {
+      result(
+        flutterError(
+          code: "gmacro-bind-failed",
+          message: "Native runtime failed to create a GMacro protocol session."
         )
-        return
-      }
-      // 配置 OTA 写入通道
-      let bleTransport = TransportSessionRegistry.shared.getSession(transportSessionId) as? BluetoothTransportSession
-      if bleTransport == nil {
-        nativeLog("[GMacro] ⚠ attachGMacro: bleTransport cast failed, OTA writers will be no-op")
-      } else {
-        nativeLog("[GMacro] attachGMacro: bleTransport OK, OTA writers configured (\(otaCommandChar)/\(otaDataChar))")
-      }
-      bleSession.otaCommandWriter = { data, completion in
-        nativeLog("[OTA] commandWriter called, size=\(data.count)")
-        do {
-          try bleTransport?.writeValue(data, to: otaCommandChar, completion: completion)
-        } catch {
-          nativeLog("[OTA] commandWriter send error: \(error)")
-          completion?()
-        }
-      }
-      bleSession.otaDataWriter = { data, completion in
-        nativeLog("[OTA] dataWriter called, size=\(data.count)")
-        do {
-          try bleTransport?.writeValue(data, to: otaDataChar, completion: completion)
-        } catch {
-          nativeLog("[OTA] dataWriter send error: \(error)")
-          completion?()
-        }
-      }
-      session = bleSession
-    case .mfi(let mfiTransport, let byteTransport):
-      let sessionId = UUID().uuidString
-      let mfiSession = GMacroProtocolSession(sessionId: sessionId, transport: byteTransport)
-      mfiSession.onEvent = { [weak self, weak eventHandler] event in
-        guard let self, let eventHandler else { return }
-        self.emitGMacroEvent(
-          event,
-          protocolEventHandler: eventHandler,
-          otaEventHandler: otaEventHandler
-        )
-      }
-      mfiSession.otaCommandWriter = { data, completion in
-        nativeLog("[MFi OTA] commandWriter called, size=\(data.count)")
-        do {
-          try mfiTransport.writeValue(data, to: MFiTransportSession.otaCommandCharacteristic, completion: completion)
-        } catch {
-          nativeLog("[MFi OTA] commandWriter send error: \(error)")
-          completion?()
-        }
-      }
-      mfiSession.otaDataWriter = { data, completion in
-        nativeLog("[MFi OTA] dataWriter called, size=\(data.count)")
-        do {
-          try mfiTransport.writeValue(data, to: MFiTransportSession.otaDataCharacteristic, completion: completion)
-        } catch {
-          nativeLog("[MFi OTA] dataWriter send error: \(error)")
-          completion?()
-        }
-      }
-      session = mfiSession
+      )
+      return
     }
+    // 配置 OTA 写入通道
+    let bleTransport = TransportSessionRegistry.shared.getSession(transportSessionId) as? BluetoothTransportSession
+    if bleTransport == nil {
+      nativeLog("[GMacro] ⚠ attachGMacro: bleTransport cast failed, OTA writers will be no-op")
+    } else {
+      nativeLog("[GMacro] attachGMacro: bleTransport OK, OTA writers configured (\(otaCommandChar)/\(otaDataChar))")
+    }
+    bleSession.otaCommandWriter = { data, completion in
+      nativeLog("[OTA] commandWriter called, size=\(data.count)")
+      do {
+        try bleTransport?.writeValue(data, to: otaCommandChar, completion: completion)
+      } catch {
+        nativeLog("[OTA] commandWriter send error: \(error)")
+        completion?()
+      }
+    }
+    bleSession.otaDataWriter = { data, completion in
+      nativeLog("[OTA] dataWriter called, size=\(data.count)")
+      do {
+        try bleTransport?.writeValue(data, to: otaDataChar, completion: completion)
+      } catch {
+        nativeLog("[OTA] dataWriter send error: \(error)")
+        completion?()
+      }
+    }
+    session = bleSession
 
     let protocolSessionId = session.sessionId
     eventHandler.debugLabel = "protocol_events/\(protocolSessionId)"
@@ -1660,35 +1422,6 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
     }
   }
 
-  private func transportEventMap(fromMfiState state: MFiTransportState) -> [String: Any] {
-    switch state {
-    case .connecting:
-      return ["type": "connecting"]
-    case .connected:
-      return ["type": "connected"]
-    case .ready:
-      return ["type": "ready"]
-    case .disconnected:
-      return ["type": "disconnected"]
-    case .error:
-      return [
-        "type": "error",
-        "failure": failureMap(
-          code: "native-transport-error",
-          message: "MFi transport reported an error state."
-        ),
-      ]
-    @unknown default:
-      return [
-        "type": "error",
-        "failure": failureMap(
-          code: "unknown-transport-state",
-          message: "MFi transport reported an unknown state."
-        ),
-      ]
-    }
-  }
-
   private func emitGMacroEvent(
     _ event: GMacroProtocolEvent,
     protocolEventHandler: QueuedEventStreamHandler,
@@ -1884,14 +1617,8 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
   }
 
   private func startOta(protocolRecord: GMacroProtocolRecord, data: Data) {
-    switch transportSessions[protocolRecord.transportSessionId]?.source {
-    case .mfi:
-      nativeLog("[MFi OTA] startMFIOTA dispatched")
-      protocolRecord.session.startMFIOTA(data: data)
-    default:
-      nativeLog("[BLE OTA] startOTA dispatched")
-      protocolRecord.session.startOTA(data: data)
-    }
+    nativeLog("[BLE OTA] startOTA dispatched")
+    protocolRecord.session.startOTA(data: data)
   }
 
   private func intArg(_ key: String, from arguments: [String: Any]) throws -> Int {
@@ -2091,6 +1818,14 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
 
   private func flutterError(code: String, message: String, details: Any? = nil) -> FlutterError {
     FlutterError(code: code, message: message, details: details)
+  }
+
+  private func mfiUnsupportedError(method: String) -> FlutterError {
+    flutterError(
+      code: "mfi-unsupported",
+      message: "MFi transport is not available in this build.",
+      details: ["method": method]
+    )
   }
 
   private func asFlutterError(_ error: Error) -> FlutterError {
