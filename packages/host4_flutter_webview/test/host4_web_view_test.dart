@@ -58,6 +58,7 @@ void main() {
       // blank (about:blank) current page instead, black-screening the route.
       await tester.tap(find.text('重试'));
       await tester.pump();
+      expect(find.text('页面加载失败'), findsOneWidget);
       expect(platform.controller.loadRequestCount, 2);
       expect(
         platform.controller.lastRequestedUri,
@@ -76,6 +77,7 @@ void main() {
       // Once the network is available, the same retry can complete normally.
       await tester.tap(find.text('重试'));
       await tester.pump();
+      expect(find.text('页面加载失败'), findsOneWidget);
       platform.controller.emitPageStarted();
       platform.controller.emitPageFinished();
       await tester.pump();

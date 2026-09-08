@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
@@ -120,6 +121,9 @@ class _Host4WebViewState extends State<Host4WebView> {
   int? _errorCode;
   String _pageTitle = '';
   late final Uri _initialUri;
+  bool _retryInFlight = false;
+  bool _mainFrameErrorThisLoad = false;
+  Timer? _retryTimeout;
 
   @override
   void initState() {
@@ -144,6 +148,12 @@ class _Host4WebViewState extends State<Host4WebView> {
     } catch (e, st) {
       debugPrint('[Host4WebView] loadRequest failed: $e\n$st');
     }
+  }
+
+  @override
+  void dispose() {
+    _retryTimeout?.cancel();
+    super.dispose();
   }
 
   WebViewController _buildController() {
@@ -191,7 +201,10 @@ class _Host4WebViewState extends State<Host4WebView> {
           setState(() {
             _isLoading = true;
             _progress = 0;
-            _hasError = false;
+            _mainFrameErrorThisLoad = false;
+            // Keep the error overlay up during a retry. Hiding it on start
+            // reveals the blank WKWebView surface, which stays black if the
+            // next request also fails or never reports another error.
           });
           // 尽早注入 adapterJs，确保 H5 任何 JS 运行前 bridge 已就位
           // （Android @JavascriptInterface 在 WebView 创建时即可用，此处对齐该行为）
@@ -200,9 +213,14 @@ class _Host4WebViewState extends State<Host4WebView> {
         },
         onPageFinished: (url) {
           if (!mounted) return;
+          _retryTimeout?.cancel();
           setState(() {
             _isLoading = false;
             _progress = 1;
+            _retryInFlight = false;
+            if (!_mainFrameErrorThisLoad) {
+              _hasError = false;
+            }
           });
           // 再次注入，覆盖页面内部可能重置 window.JsBridge 的情况
           _injectAdapterJs();
@@ -219,8 +237,11 @@ class _Host4WebViewState extends State<Host4WebView> {
           if (!isMain) return;
           final handled = widget.onWebResourceError?.call(error) ?? false;
           if (!handled) {
+            _retryTimeout?.cancel();
             setState(() {
               _hasError = true;
+              _mainFrameErrorThisLoad = true;
+              _retryInFlight = false;
               _errorDescription = error.description;
               _errorCode = error.errorCode;
               _isLoading = false;
@@ -439,8 +460,14 @@ class _Host4WebViewState extends State<Host4WebView> {
               const SizedBox(height: 24),
               ElevatedButton.icon(
                 key: const ValueKey<String>('host4_webview_retry'),
-                onPressed: _retry,
-                icon: const Icon(Icons.refresh),
+                onPressed: _retryInFlight ? null : _retry,
+                icon: _retryInFlight
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.refresh),
                 label: Text(copy.retry),
               ),
             ],
@@ -451,36 +478,39 @@ class _Host4WebViewState extends State<Host4WebView> {
   }
 
   Future<void> _retry() async {
-    if (!mounted) return;
+    if (!mounted || _retryInFlight) return;
 
-    // Show the normal loading state while the existing native WebView starts
-    // its new request.  Keeping the controller/view pair intact is important
-    // for WKWebView; only the Flutter overlay is changed here.
+    // Keep the error overlay visible until a load actually finishes without a
+    // main-frame error. Removing it first shows the blank native WebView,
+    // which stays black on iOS when reload/loadRequest does not emit another
+    // error after a failed first navigation.
     setState(() {
-      _hasError = false;
+      _retryInFlight = true;
       _isLoading = true;
       _progress = 0;
-      _errorDescription = '';
-      _errorCode = null;
+      _mainFrameErrorThisLoad = false;
+    });
+    _retryTimeout?.cancel();
+    _retryTimeout = Timer(const Duration(seconds: 12), () {
+      if (!mounted || !_retryInFlight) return;
+      setState(() {
+        _retryInFlight = false;
+        _hasError = true;
+        _isLoading = false;
+      });
     });
 
     try {
-      // Do not use reload() here: it reloads the WebView's *current* page.
-      // After a failed first main-frame load nothing has committed, so the
-      // current page is the blank initial surface (about:blank). reload()
-      // "succeeds" reloading that blank page, leaving a black screen with
-      // neither content nor an error — even after the network recovers.
-      // Always re-request the original URL instead.
       await _controller.loadRequest(_initialUri);
     } catch (error, stackTrace) {
-      // A platform error should never leave the route with an empty/black
-      // surface.  Return to the same actionable error page so the user can
-      // retry again (or leave the route).
       debugPrint(
           '[Host4WebView] retry loadRequest failed: $error\n$stackTrace');
       if (!mounted) return;
+      _retryTimeout?.cancel();
       setState(() {
         _hasError = true;
+        _retryInFlight = false;
+        _mainFrameErrorThisLoad = true;
         _isLoading = false;
         _errorDescription = '$error';
         _errorCode = null;
