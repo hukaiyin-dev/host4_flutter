@@ -24,6 +24,10 @@ class Host4EmulatorControlsLayer extends StatelessWidget {
     this.onLocateTap,
     this.layoutStyle = Host4EmulatorControlLayoutStyle.modern,
     this.siliconeLayoutVariant = Host4EmulatorSiliconeLayoutVariant.silicone,
+    this.editing = false,
+    this.padPositions = const <String, double>{},
+    this.onPadPositionChanged,
+    this.onGameViewportTopChanged,
     super.key,
   });
 
@@ -33,6 +37,10 @@ class Host4EmulatorControlsLayer extends StatelessWidget {
   final VoidCallback? onLocateTap;
   final Host4EmulatorControlLayoutStyle layoutStyle;
   final Host4EmulatorSiliconeLayoutVariant siliconeLayoutVariant;
+  final ValueChanged<double>? onGameViewportTopChanged;
+  final bool editing;
+  final Map<String, double> padPositions;
+  final void Function(String key, double position)? onPadPositionChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -51,6 +59,10 @@ class Host4EmulatorControlsLayer extends StatelessWidget {
                 Host4EmulatorSiliconeLayoutVariant.silicone) {
           return DisplayMetricsWidget(
             child: _SiliconeControls(
+              editing: editing,
+              padPositions: padPositions,
+              onPadPositionChanged: onPadPositionChanged,
+              onGameViewportTopChanged: onGameViewportTopChanged,
               profile: profile,
               onInput: onInput,
               onMenuTap: onMenuTap,
@@ -73,6 +85,9 @@ class Host4EmulatorActiveMenuButton extends StatelessWidget {
   const Host4EmulatorActiveMenuButton({
     required this.layoutStyle,
     required this.onTap,
+    this.padPositions = const <String, double>{},
+    this.systemButtonsAtTop = false,
+    this.hasShoulderButtons = true,
     this.siliconeLayoutVariant = Host4EmulatorSiliconeLayoutVariant.silicone,
     super.key,
   });
@@ -80,6 +95,9 @@ class Host4EmulatorActiveMenuButton extends StatelessWidget {
   final Host4EmulatorControlLayoutStyle layoutStyle;
   final Host4EmulatorSiliconeLayoutVariant siliconeLayoutVariant;
   final VoidCallback onTap;
+  final Map<String, double> padPositions;
+  final bool systemButtonsAtTop;
+  final bool hasShoulderButtons;
 
   @override
   Widget build(BuildContext context) {
@@ -111,7 +129,7 @@ class Host4EmulatorActiveMenuButton extends StatelessWidget {
         if (!landscape ||
             siliconeLayoutVariant ==
                 Host4EmulatorSiliconeLayoutVariant.silicone) {
-          return DisplayMetricsWidget(child: _ActiveSiliconeMenuButton(onTap));
+          return DisplayMetricsWidget(child: _ActiveSiliconeMenuButton(onTap, padPositions, systemButtonsAtTop, hasShoulderButtons));
         }
         final scale = math.min(size.width / 844, size.height / 390);
         final offset = Offset(
@@ -138,7 +156,12 @@ class Host4EmulatorActiveMenuButton extends StatelessWidget {
 }
 
 class _ActiveSiliconeMenuButton extends StatelessWidget {
-  const _ActiveSiliconeMenuButton(this.onTap);
+  const _ActiveSiliconeMenuButton(this.onTap, this.padPositions,
+      this.systemButtonsAtTop, this.hasShoulderButtons);
+
+  final Map<String, double> padPositions;
+  final bool systemButtonsAtTop;
+  final bool hasShoulderButtons;
 
   final VoidCallback onTap;
 
@@ -160,6 +183,9 @@ class _ActiveSiliconeMenuButton extends StatelessWidget {
                 metrics: metrics,
                 topInset: padding.top,
                 bottomInset: padding.bottom,
+                padPosition: padPositions['portrait.single'],
+                systemButtonsAtTop: systemButtonsAtTop,
+                hasShoulderButtons: true,
               );
         final identifier = landscape
             ? 'landscape.controls.btn_set'
@@ -310,6 +336,10 @@ class _ModernControls extends StatelessWidget {
 
 class _SiliconeControls extends StatefulWidget {
   const _SiliconeControls({
+    required this.editing,
+    required this.padPositions,
+    required this.onPadPositionChanged,
+    required this.onGameViewportTopChanged,
     required this.profile,
     required this.onInput,
     required this.onMenuTap,
@@ -323,10 +353,83 @@ class _SiliconeControls extends StatefulWidget {
 
   @override
   State<_SiliconeControls> createState() => _SiliconeControlsState();
+
+  final ValueChanged<double>? onGameViewportTopChanged;
+
+  final bool editing;
+  final Map<String, double> padPositions;
+  final void Function(String key, double position)? onPadPositionChanged;
 }
 
 class _SiliconeControlsState extends State<_SiliconeControls> {
   bool _collapsed = false;
+  double _dragStart = 0;
+  bool _systemButtonsAtTop = false;
+  double _viewportTop = 0;
+
+  Widget _editablePad(
+    Host4EmulatorSiliconeResolvedLayout layout,
+    Host4EmulatorSiliconePadBinding binding,
+    Size size,
+    EdgeInsets padding,
+    bool landscape,
+  ) {
+    final bounds = layout.padBounds[binding.side]!;
+    final key = '${landscape ? 'landscape' : 'portrait'}.${binding.side.name}';
+    final extent = landscape ? size.width : size.height;
+    final minimum = landscape ? padding.left : layout.minimumPadTop;
+    final maximum = math.max(minimum, landscape
+        ? size.width - padding.right - bounds.width
+        : layout.maximumPadTop);
+    final origin = landscape ? bounds.left : bounds.top;
+    final position = landscape
+        ? ((widget.padPositions[key] ?? origin / extent) * extent)
+            .clamp(minimum, maximum).toDouble()
+        : origin;
+    final offset = landscape
+        ? Offset(position - origin, 0)
+        : Offset(0, position - origin);
+    return Positioned.fromRect(
+      rect: bounds.shift(offset),
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onLongPressStart: widget.editing ? (_) {
+          _dragStart = position;
+          HapticFeedback.selectionClick();
+        } : null,
+        onLongPressMoveUpdate: widget.editing ? (details) {
+          final delta = landscape
+              ? details.offsetFromOrigin.dx : details.offsetFromOrigin.dy;
+          widget.onPadPositionChanged?.call(
+            key, (_dragStart + delta).clamp(minimum, maximum) / extent,
+          );
+        } : null,
+        child: IgnorePointer(
+          ignoring: widget.editing,
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: <Widget>[
+              Host4EmulatorSiliconePad(
+                layout: layout,
+                binding: binding,
+                offset: -bounds.topLeft,
+                onEvent: widget.onInput,
+              ),
+              if (!landscape) Positioned.fill(child: IgnorePointer(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: widget.editing
+                        ? const Color(0x99FFFFFF) : const Color(0x55FFFFFF)),
+                    borderRadius: BorderRadius.circular(bounds.shortestSide / 2),
+                  ),
+                ),
+              )),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -356,11 +459,23 @@ class _SiliconeControlsState extends State<_SiliconeControls> {
             metrics: metrics,
             topInset: padding.top,
             bottomInset: padding.bottom,
+            padPosition: widget.padPositions['portrait.single'],
+            systemButtonsAtTop: _systemButtonsAtTop,
+            hasShoulderButtons: true,
           );
+          _systemButtonsAtTop = layout.systemButtonsAtTop;
           bindings = _portraitBindings;
         }
 
-        if (_collapsed) {
+        final viewportTop = landscape ? 0.0 : layout.gameViewportTop;
+        if (_viewportTop != viewportTop) {
+          _viewportTop = viewportTop;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) widget.onGameViewportTopChanged?.call(_viewportTop);
+          });
+        }
+
+        if (_collapsed && !widget.editing) {
           return SizedBox.fromSize(
             size: size,
             child: Stack(
@@ -376,12 +491,9 @@ class _SiliconeControlsState extends State<_SiliconeControls> {
             clipBehavior: Clip.none,
             children: <Widget>[
               for (final binding in bindings)
-                Host4EmulatorSiliconePad(
-                  layout: layout,
-                  binding: binding,
-                  onEvent: widget.onInput,
-                ),
-              if (!landscape) ..._portraitShoulders(layout),
+                _editablePad(layout, binding, size, padding, landscape),
+              if (!landscape)
+                ..._portraitShoulders(layout),
               if (widget.profile.hasShoulderButtons && landscape)
                 ..._landscapeShoulders(layout),
               if (!landscape && widget.onLocateTap != null)
@@ -556,9 +668,9 @@ class _SiliconeControlsState extends State<_SiliconeControls> {
           side: Host4EmulatorSiliconePadSide.left,
           dpadIdentifier: 'landscape.controls.dpad_left',
           actionClusterIdentifier: 'landscape.controls.action_cluster_left',
-          dpadDisplayQuarterTurns: 1,
-          dpadInputQuarterTurns: 1,
-          actionDirectionDisplayQuarterTurns: 1,
+          dpadDisplayQuarterTurns: 0,
+          dpadInputQuarterTurns: 0,
+          actionDirectionDisplayQuarterTurns: 0,
           actions: <Host4EmulatorSiliconePadActionBinding>[
             Host4EmulatorSiliconePadActionBinding(
               slot: Host4EmulatorSiliconePadSlot.actionTop,

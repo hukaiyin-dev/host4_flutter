@@ -226,14 +226,43 @@ class Host4WebEmulatorController {
     final requestId = _nextRequestId(action);
     final completer = Completer<Host4WebEmulatorBridgeMessage>();
     _pending[requestId] = completer;
+    final startedAt = DateTime.now();
+    final shouldLog = action == 'saveSRAM' || action == 'exit';
+    if (shouldLog) {
+      print(
+        '[Host4WebEmulator][${startedAt.toIso8601String()}] '
+        'request start action=$action requestId=$requestId',
+      );
+    }
     try {
       await _executeJavaScript(script(requestId));
+      if (shouldLog) {
+        print(
+          '[Host4WebEmulator][${DateTime.now().toIso8601String()}] '
+          'javascript dispatched action=$action requestId=$requestId',
+        );
+      }
       final message = await completer.future.timeout(
         requestTimeout,
-        onTimeout: () => throw Host4WebEmulatorException(
-          '$action timed out after ${requestTimeout.inSeconds}s.',
-        ),
+        onTimeout: () {
+          if (shouldLog) {
+            print(
+              '[Host4WebEmulator][${DateTime.now().toIso8601String()}] '
+              'request timeout action=$action elapsedMs=${DateTime.now().difference(startedAt).inMilliseconds}',
+            );
+          }
+          throw Host4WebEmulatorException(
+            '$action timed out after ${requestTimeout.inSeconds}s.',
+          );
+        },
       );
+      if (shouldLog) {
+        print(
+          '[Host4WebEmulator][${DateTime.now().toIso8601String()}] '
+          'response action=$action type=${message.type} ok=${message.ok} '
+          'elapsedMs=${DateTime.now().difference(startedAt).inMilliseconds}',
+        );
+      }
       if (!message.ok) {
         throw Host4WebEmulatorException(
           message.error?.toString() ?? '$action failed.',
@@ -245,8 +274,23 @@ class Host4WebEmulatorController {
         );
       }
       return message;
+    } catch (error) {
+      if (shouldLog) {
+        print(
+          '[Host4WebEmulator][${DateTime.now().toIso8601String()}] '
+          'request failed action=$action error=$error '
+          'elapsedMs=${DateTime.now().difference(startedAt).inMilliseconds}',
+        );
+      }
+      rethrow;
     } finally {
       _pending.remove(requestId);
+      if (shouldLog) {
+        print(
+          '[Host4WebEmulator][${DateTime.now().toIso8601String()}] '
+          'request end action=$action elapsedMs=${DateTime.now().difference(startedAt).inMilliseconds}',
+        );
+      }
     }
   }
 
