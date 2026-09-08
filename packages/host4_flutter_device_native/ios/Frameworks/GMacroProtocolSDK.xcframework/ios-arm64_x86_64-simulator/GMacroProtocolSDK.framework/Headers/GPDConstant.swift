@@ -21,4 +21,7 @@ public struct GPDConstant {
     /// 多条消息之间的发送间隔
     public nonisolated(unsafe) static var messageInterval: TimeInterval = 0.05
 
+    /// MFI OTA 原始固件分片之间的发送间隔
+    public nonisolated(unsafe) static var mfiOTAPacketInterval: TimeInterval = 0.00
 }
+

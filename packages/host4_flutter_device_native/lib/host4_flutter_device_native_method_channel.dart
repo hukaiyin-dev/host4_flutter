@@ -19,6 +19,10 @@ class MethodChannelHost4FlutterDeviceNative
     'host4_flutter_device_native/usb_scan',
   );
 
+  static const EventChannel _mfiAccessoryChannel = EventChannel(
+    'host4_flutter_device_native/mfi_accessory_events',
+  );
+
   /// One cached stream per session — multiple Dart listeners must not open
   /// duplicate native [EventChannel] subscriptions (that overwrites [eventSink]).
   final Map<String, Stream<NativeTransportEvent>> _transportEventStreams =
