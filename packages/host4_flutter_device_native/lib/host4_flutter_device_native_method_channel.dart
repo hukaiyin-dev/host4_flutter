@@ -159,22 +159,41 @@ class MethodChannelHost4FlutterDeviceNative
     required String protocolString,
     Map<String, Object?> options = const {},
   }) async {
-    throw PlatformException(
-      code: 'mfi-unsupported',
-      message: 'MFi transport is not available in this build.',
+    final sessionId = await methodChannel.invokeMethod<String>(
+      'connectMfi',
+      <String, Object?>{'protocolString': protocolString, 'options': options},
     );
+    if (sessionId == null || sessionId.isEmpty) {
+      throw PlatformException(
+        code: 'missing-transport-session-id',
+        message: 'Native MFi bridge returned an empty transport session id.',
+      );
+    }
+    return sessionId;
   }
 
   @override
   Future<bool> isMfiAccessoryConnected({required String protocolString}) async {
-    return false;
+    final connected = await methodChannel.invokeMethod<bool>(
+      'isMfiAccessoryConnected',
+      <String, Object?>{'protocolString': protocolString},
+    );
+    return connected ?? false;
   }
 
   @override
   Stream<NativeMfiAccessoryEvent> mfiAccessoryEvents({
     required String protocolString,
   }) {
-    return const Stream<NativeMfiAccessoryEvent>.empty();
+    return _mfiAccessoryChannel
+        .receiveBroadcastStream(<String, Object?>{
+          'protocolString': protocolString,
+        })
+        .map(
+          (dynamic event) => NativeMfiAccessoryEvent.fromMap(
+            Map<String, Object?>.from(event as Map),
+          ),
+        );
   }
 
   @override
