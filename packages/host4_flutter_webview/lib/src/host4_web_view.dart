@@ -8,6 +8,7 @@ import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 
 import 'host4_js_bridge_adapter.dart';
 import 'host4_web_controller.dart';
+import 'host4_web_view_copy.dart';
 
 /// A WebView widget with progress, error handling, and optional JS bridge support.
 ///
@@ -39,6 +40,7 @@ class Host4WebView extends StatefulWidget {
     this.onPageFinished,
     this.onNavigationRequest,
     this.onWebResourceError,
+    this.copy,
   });
 
   /// The URL to load on launch.
@@ -97,30 +99,48 @@ class Host4WebView extends StatefulWidget {
   /// handled; false shows the built-in error page.
   final bool Function(WebResourceError error)? onWebResourceError;
 
+  /// Optional override for the built-in error page strings.
+  ///
+  /// When null, strings follow [Localizations.localeOf].
+  final Host4WebViewCopy? copy;
+
   @override
   State<Host4WebView> createState() => _Host4WebViewState();
 }
 
 class _Host4WebViewState extends State<Host4WebView> {
   late final WebViewController _controller;
+  late final WebViewWidget _webViewWidget;
   late final Host4WebController _webController;
 
   double _progress = 0;
   bool _isLoading = true;
   bool _hasError = false;
-  String _errorMessage = '';
+  String _errorDescription = '';
+  int? _errorCode;
   String _pageTitle = '';
+  late final Uri _initialUri;
 
   @override
   void initState() {
     super.initState();
     _controller = _buildController();
     _webController = Host4WebController(_controller);
+    // Keep one widget/controller pair as well as keeping it mounted below.
+    // This avoids asking the platform implementation to recreate its native
+    // view on every state change (progress, errors, and retries).
+    _webViewWidget = WebViewWidget(controller: _controller);
+    // Initialize the widget before notifying consumers. A consumer is allowed
+    // to synchronously rebuild from onControllerReady, and that rebuild must
+    // not observe an uninitialized late field.
     widget.onControllerReady?.call(_webController);
-    final uri = Uri.parse(widget.initialUrl);
-    debugPrint('[Host4WebView] loadRequest uri=$uri scheme=${uri.scheme} hasScheme=${uri.hasScheme}');
+    _initialUri = Uri.parse(widget.initialUrl);
+    debugPrint(
+      '[Host4WebView] loadRequest uri=$_initialUri '
+      'scheme=${_initialUri.scheme} hasScheme=${_initialUri.hasScheme}',
+    );
     try {
-      _controller.loadRequest(uri);
+      _controller.loadRequest(_initialUri);
     } catch (e, st) {
       debugPrint('[Host4WebView] loadRequest failed: $e\n$st');
     }
@@ -201,7 +221,8 @@ class _Host4WebViewState extends State<Host4WebView> {
           if (!handled) {
             setState(() {
               _hasError = true;
-              _errorMessage = '${error.description} (错误码: ${error.errorCode})';
+              _errorDescription = error.description;
+              _errorCode = error.errorCode;
               _isLoading = false;
             });
           }
@@ -364,15 +385,22 @@ class _Host4WebViewState extends State<Host4WebView> {
             if (widget.showProgressBar && _isLoading)
               LinearProgressIndicator(value: _progress),
             Expanded(
-              child: _hasError
-                  ? _buildErrorPage()
-                  : Stack(
-                      children: [
-                        WebViewWidget(controller: _controller),
-                        if (_isLoading && widget.loadingOverlayBuilder != null)
-                          widget.loadingOverlayBuilder!(context),
-                      ],
-                    ),
+              key: const ValueKey<String>('host4_webview_content'),
+              // Keep the platform view mounted for the entire lifetime of the
+              // route.  On iOS, removing a UiKitView and then attaching a new
+              // one for the same WKWebView controller can leave the platform
+              // view with no surface after reload (a black screen).  Both the
+              // loading and error states are therefore overlays instead of
+              // alternate branches that replace WebViewWidget.
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  _webViewWidget,
+                  if (_isLoading && widget.loadingOverlayBuilder != null)
+                    widget.loadingOverlayBuilder!(context),
+                  if (_hasError) Positioned.fill(child: _buildErrorPage()),
+                ],
+              ),
             ),
           ],
         ),
@@ -381,33 +409,82 @@ class _Host4WebViewState extends State<Host4WebView> {
   }
 
   Widget _buildErrorPage() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.wifi_off, size: 64, color: Colors.grey),
-            const SizedBox(height: 16),
-            const Text('页面加载失败', style: TextStyle(fontSize: 18)),
-            const SizedBox(height: 8),
-            Text(
-              _errorMessage,
-              style: const TextStyle(color: Colors.grey),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton.icon(
-              onPressed: () {
-                setState(() => _hasError = false);
-                _controller.reload();
-              },
-              icon: const Icon(Icons.refresh),
-              label: const Text('重试'),
-            ),
-          ],
+    final copy = widget.copy ?? Host4WebViewCopy.of(context);
+    final detail = copy.errorDetail(
+      description: _errorDescription,
+      code: _errorCode,
+    );
+    return Material(
+      color: widget.backgroundColor ?? Colors.black,
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.wifi_off, size: 64, color: Colors.grey),
+              const SizedBox(height: 16),
+              Text(
+                copy.loadFailed,
+                key: const ValueKey<String>('host4_webview_error_title'),
+                style: const TextStyle(fontSize: 18, color: Colors.white),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                detail,
+                key: const ValueKey<String>('host4_webview_error_detail'),
+                style: const TextStyle(color: Colors.grey),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton.icon(
+                key: const ValueKey<String>('host4_webview_retry'),
+                onPressed: _retry,
+                icon: const Icon(Icons.refresh),
+                label: Text(copy.retry),
+              ),
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  Future<void> _retry() async {
+    if (!mounted) return;
+
+    // Show the normal loading state while the existing native WebView starts
+    // its new request.  Keeping the controller/view pair intact is important
+    // for WKWebView; only the Flutter overlay is changed here.
+    setState(() {
+      _hasError = false;
+      _isLoading = true;
+      _progress = 0;
+      _errorDescription = '';
+      _errorCode = null;
+    });
+
+    try {
+      // Do not use reload() here: it reloads the WebView's *current* page.
+      // After a failed first main-frame load nothing has committed, so the
+      // current page is the blank initial surface (about:blank). reload()
+      // "succeeds" reloading that blank page, leaving a black screen with
+      // neither content nor an error — even after the network recovers.
+      // Always re-request the original URL instead.
+      await _controller.loadRequest(_initialUri);
+    } catch (error, stackTrace) {
+      // A platform error should never leave the route with an empty/black
+      // surface.  Return to the same actionable error page so the user can
+      // retry again (or leave the route).
+      debugPrint(
+          '[Host4WebView] retry loadRequest failed: $error\n$stackTrace');
+      if (!mounted) return;
+      setState(() {
+        _hasError = true;
+        _isLoading = false;
+        _errorDescription = '$error';
+        _errorCode = null;
+      });
+    }
   }
 }
