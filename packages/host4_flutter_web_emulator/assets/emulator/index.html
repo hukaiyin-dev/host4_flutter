@@ -32,6 +32,48 @@
         var currentRate = 1;
         var bridgeReady = false;
         var pendingMessages = [];
+        var diagnosticInputs = 0;
+
+        function diagnose(reason) {
+          try {
+            var canvas = document.getElementById('emulator');
+            var rect = canvas.getBoundingClientRect();
+            post('diagnostic', {
+              reason: reason, time: Date.now(), status: currentStatus(),
+              visibility: document.visibilityState, focused: document.hasFocus(),
+              viewport: [window.innerWidth, window.innerHeight],
+              canvasBuffer: [canvas.width, canvas.height],
+              canvasRect: [rect.x, rect.y, rect.width, rect.height],
+              dpr: window.devicePixelRatio, rate: currentRate
+            });
+            if (reason !== 'input') {
+              var started = Date.now();
+              requestAnimationFrame(function () {
+                post('diagnostic', { reason: 'raf', trigger: reason,
+                  time: Date.now(), elapsedMs: Date.now() - started });
+              });
+            }
+          } catch (error) {
+            post('diagnostic', { reason: reason, error: String(error) });
+          }
+        }
+
+        if (typeof window.addEventListener === 'function') {
+          ['resize', 'orientationchange', 'focus', 'blur', 'pageshow', 'pagehide'].forEach(function (event) {
+            window.addEventListener(event, function () { diagnose(event); });
+          });
+          document.addEventListener('visibilitychange', function () {
+            diagnosticInputs = 0;
+            diagnose('visibilitychange');
+          });
+          var diagnosticCanvas = document.getElementById('emulator');
+          diagnosticCanvas.addEventListener('webglcontextlost', function () {
+            post('diagnostic', { reason: 'webglcontextlost', time: Date.now() });
+          });
+          diagnosticCanvas.addEventListener('webglcontextrestored', function () {
+            diagnose('webglcontextrestored');
+          });
+        }
 
         function post(method, payload) {
           var channel = window.JsBridge || window.NativeBridge;
@@ -159,6 +201,7 @@
         }
 
         window.Host4WebEmulator = {
+          diagnose: diagnose,
           launch: async function (config) {
             flushPendingMessages();
             var requestId = config.requestId || 'launch';
@@ -365,6 +408,10 @@
           },
 
           keyEvent: function (event) {
+            if (diagnosticInputs++ < 20) {
+              post('diagnostic', { reason: 'input', time: Date.now(),
+                button: event.button, action: event.action, status: currentStatus() });
+            }
             if (!current) return;
             var button = event.button;
             var player = event.player || 1;

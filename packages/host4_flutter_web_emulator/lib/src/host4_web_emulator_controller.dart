@@ -176,6 +176,10 @@ class Host4WebEmulatorController {
     );
   }
 
+  Future<void> logDiagnostics() => _executeJavaScript(
+    'window.Host4WebEmulator?.diagnose?.("flutter_probe");',
+  );
+
   Future<void> keyEvent(
     String button, {
     String action = 'down',
