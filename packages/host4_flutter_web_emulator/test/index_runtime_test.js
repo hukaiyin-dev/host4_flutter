@@ -86,6 +86,8 @@ async function main() {
   }
 
   vm.runInNewContext(scripts.at(-1)[1], context);
+  assert.equal(messages.filter(message => message.method === 'diagnostic').length, 0,
+    'normal boot must not emit temporary diagnostics');
   await window.Host4WebEmulator.launch({
     requestId: 'launch-1',
     system: 'gba',
