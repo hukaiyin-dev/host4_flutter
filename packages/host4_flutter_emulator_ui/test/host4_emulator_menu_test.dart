@@ -4,6 +4,27 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:host4_flutter_emulator_ui/host4_flutter_emulator_ui.dart';
 
 void main() {
+  testWidgets('portrait menu clears the fixed Pantas button with a safe inset', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(MaterialApp(home: MediaQuery(
+      data: const MediaQueryData(size: Size(390, 844), padding: EdgeInsets.only(top: 47)),
+      child: Stack(fit: StackFit.expand, children: [
+        Host4EmulatorMenuOverlay(actions: _FakeActions(), onOpenSaveManager: () {}),
+        Host4EmulatorActiveMenuButton(
+          layoutStyle: Host4EmulatorControlLayoutStyle.silicone,
+          onTap: () {},
+        ),
+      ]),
+    )));
+    await tester.pumpAndSettle();
+    final menu = tester.getRect(find.byKey(const ValueKey('menu.quick_save')));
+    final button = tester.getRect(find.byKey(const ValueKey('controls.active_menu')));
+    expect(menu.top, greaterThanOrEqualTo(button.bottom + 12));
+    expect(menu.top, 122);
+  });
   testWidgets('A activates focused menu action and B returns', (tester) async {
     final actions = _FakeActions();
     var backs = 0;

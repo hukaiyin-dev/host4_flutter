@@ -297,7 +297,10 @@ class _Host4EmulatorMenuOverlayState extends State<Host4EmulatorMenuOverlay> {
           return Stack(
             children: <Widget>[
               Positioned(
-                top: spec.layout.panelTop * scale,
+                // Portrait toolbar is anchored below the top safe inset.
+                // Keep the cards below it; landscape geometry is unchanged.
+                top: spec.layout.panelTop * scale +
+                    (landscape ? 0 : MediaQuery.paddingOf(context).top),
                 left: (constraints.maxWidth - panelWidth) / 2,
                 width: panelWidth,
                 child: IgnorePointer(

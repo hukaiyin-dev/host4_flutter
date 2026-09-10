@@ -67,6 +67,8 @@ async function main() {
     },
   };
   const context = {
+    setTimeout,
+    clearTimeout,
     Blob,
     FileReader: class {},
     Uint8Array,
@@ -86,6 +88,8 @@ async function main() {
   }
 
   vm.runInNewContext(scripts.at(-1)[1], context);
+  assert.equal(messages.filter(message => message.method === 'diagnostic').length, 0,
+    'normal boot must not emit temporary diagnostics');
   await window.Host4WebEmulator.launch({
     requestId: 'launch-1',
     system: 'gba',
@@ -95,6 +99,55 @@ async function main() {
     coreWasmBase64: 'AA==',
   });
   const patchedCore = await launchOptions.resolveCoreJs();
+  const originalGetEmscripten = emulator.getEmscripten;
+  emulator.getEmscripten = () => ({ Module: {
+    _cmd_savefiles() { throw new Error('export failed'); },
+  } });
+  emulator.getEmulator = () => ({
+    coreFullName: 'test-core',
+    sramFilePath: '/test.srm',
+    fs: { FS: { stat() { throw new Error('file absent'); } } },
+  });
+  emulator.saveSRAM = async () => { throw new Error('export failed'); };
+  await window.Host4WebEmulator.saveSRAM('sram-diagnostic-test');
+  const sramDiagnostics = messages.filter(message =>
+    message.method === 'diagnostic' && message.payload.reason === 'sram_trace');
+  assert.equal(sramDiagnostics.length, 2);
+  assert.equal(sramDiagnostics[0].payload.fileExists, false);
+  assert.equal(sramDiagnostics[1].payload.stage, 'core_export');
+  assert.equal(sramDiagnostics[1].payload.error, 'Error: export failed');
+  let savedBytes;
+  const coreModule = { _cmd_savefiles() {} };
+  emulator.getEmscripten = () => ({ Module: coreModule });
+  emulator.getEmulator = () => ({
+    coreFullName: 'test-core', sramFilePath: '/test.srm',
+    fs: {
+      readFile() {
+        if (!savedBytes) throw new Error('no SRAM produced');
+        return savedBytes;
+      },
+      FS: { stat() { return { size: savedBytes ? savedBytes.length : 0 }; } },
+    },
+  });
+  status = 'paused';
+  await window.Host4WebEmulator.saveSRAM('no-sram');
+  assert.match(messages.find(m => m.payload.requestId === 'no-sram' &&
+    m.method === 'saveSRAMError').payload.error, /no SRAM produced/);
+  context.FileReader = class {
+    readAsDataURL(blob) {
+      blob.arrayBuffer().then(bytes => {
+        this.result = 'data:application/octet-stream;base64,' + Buffer.from(bytes).toString('base64');
+        this.onloadend();
+      });
+    }
+  };
+  coreModule._cmd_savefiles = () => { savedBytes = new Uint8Array([1, 2, 3]); };
+  await window.Host4WebEmulator.saveSRAM('valid-sram');
+  assert.equal(messages.find(m => m.method === 'sramSaved' &&
+    m.payload.requestId === 'valid-sram').payload.data.sram, 'AQID');
+  assert.equal(status, 'paused', 'SRAM export must not toggle pause state');
+  status = 'running';
+  emulator.getEmscripten = originalGetEmscripten;
   let resumeCalls = 0;
   const testAudio = {
     context: { state: 'interrupted', currentTime: 12,

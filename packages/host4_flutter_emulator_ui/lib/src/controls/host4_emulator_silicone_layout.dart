@@ -115,6 +115,21 @@ class Host4EmulatorSiliconeLayoutResolver {
   static const double padHeightMm = 30.5;
   static const Size landscapeSystemButtonSize = Size.square(42);
 
+  /// Delta's portrait game area is 10:9, not half the screen height.
+  /// Reserve a fixed toolbar above it; landscape remains full-screen.
+  static Rect gameViewport({
+    required Size screenSize,
+    double topInset = 0,
+    double bottomInset = 0,
+  }) {
+    if (screenSize.width >= screenSize.height) return Offset.zero & screenSize;
+    final scale = screenSize.width / _portraitBaseWidth;
+    final top = topInset + (_portraitBottomButtonSize + 24) * scale;
+    return Rect.fromLTWH(0, top, screenSize.width,
+        math.min(screenSize.width / (10 / 9),
+            math.max(0, screenSize.height - bottomInset - top)));
+  }
+
   static Rect landscapeSetButtonRect(Size screenSize) {
     return Rect.fromCenter(
       center: Offset(
@@ -148,8 +163,6 @@ class Host4EmulatorSiliconeLayoutResolver {
   }) {
     final Size padSize = Size(metrics.mm(padWidthMm), metrics.mm(padHeightMm));
     final double left = (screenSize.width - padSize.width) / 2;
-    final double preferredTop =
-        topInset + (screenSize.height - topInset - bottomInset) / 2;
     final double scale = screenSize.width / _portraitBaseWidth;
     final double shoulderH = padSize.height * _portraitShoulderHeightRatio;
     final double lowerSlotCenterY =
@@ -158,37 +171,37 @@ class Host4EmulatorSiliconeLayoutResolver {
         shoulderH / 2;
     final double gap = 12 * scale;
     final double buttonSize = _portraitBottomButtonSize * scale;
+    final viewport = gameViewport(
+      screenSize: screenSize, topInset: topInset, bottomInset: bottomInset,
+    );
     final double buttonBottomTop = screenSize.height - bottomInset -
         _portraitBottomButtonBottomMargin * scale - buttonSize;
     final double maximumTop = math.max(topInset,
         screenSize.height - bottomInset - padSize.height);
-    final double minimumTop = math.min(maximumTop,
-        topInset + buttonSize + gap * 2);
+    final double minimumTop = math.min(maximumTop, viewport.bottom);
     final double defaultTop = math.min(
         lowerSlotCenterY - padSize.height / 2,
         buttonBottomTop - gap - padSize.height)
         .clamp(minimumTop, maximumTop).toDouble();
-    final double shoulderDefaultCenter = math.min(
-        preferredTop + padSize.height / 2,
-        defaultTop - gap - shoulderH / 2);
     double top = (padPosition == null
         ? defaultTop : padPosition * screenSize.height)
         .clamp(minimumTop, maximumTop).toDouble();
-    // Only the pad crossing the bottom toolbar moves that toolbar to the top.
-    // Keep a small return margin to avoid toggling at the collision boundary.
-    final bool buttonsAtTop = top + padSize.height >
-        buttonBottomTop - (systemButtonsAtTop ? 8 * scale : 0);
-    final bool shouldersBelow = hasShoulderButtons && !buttonsAtTop &&
-        top < shoulderDefaultCenter + shoulderH / 2;
+    // Use the original upper slot only as the crossover boundary.
+    // Above-pad LR follows the pad while dragging down.
+    final double upperShoulderCenter = math.max(
+        viewport.bottom + shoulderH / 2,
+        defaultTop - gap - shoulderH / 2);
+    final bool shouldersBelow = hasShoulderButtons &&
+        top < upperShoulderCenter + shoulderH / 2 + gap;
     if (shouldersBelow) {
       top = top.clamp(minimumTop, math.max(minimumTop,
-          buttonBottomTop - gap * 2 - shoulderH - padSize.height))
-          .toDouble();
+          maximumTop - gap - shoulderH)).toDouble();
     }
     final double shoulderCenter = shouldersBelow
-        ? top + padSize.height + gap + shoulderH / 2
+        ? math.max(defaultTop + padSize.height / 2,
+            top + padSize.height + gap + shoulderH / 2)
         : top - gap - shoulderH / 2;
-    final double buttonTop = buttonsAtTop ? topInset + gap : buttonBottomTop;
+    final double buttonTop = topInset + gap;
 
     final Offset origin = Offset(left, top);
     final Map<String, Host4EmulatorSiliconeResolvedControl> controls =
@@ -245,8 +258,8 @@ class Host4EmulatorSiliconeLayoutResolver {
     );
 
     return Host4EmulatorSiliconeResolvedLayout(
-      systemButtonsAtTop: buttonsAtTop,
-      gameViewportTop: buttonsAtTop ? buttonTop + buttonSize + gap : 0,
+      systemButtonsAtTop: true,
+      gameViewportTop: viewport.top,
       minimumPadTop: minimumTop,
       maximumPadTop: maximumTop,
       controls: controls,

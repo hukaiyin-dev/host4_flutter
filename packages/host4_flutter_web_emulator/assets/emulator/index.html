@@ -32,7 +32,6 @@
         var currentRate = 1;
         var bridgeReady = false;
         var pendingMessages = [];
-        var diagnosticInputs = 0;
         var diagnosticPageId = Date.now();
         var foregroundAudioPending = false;
         var isAppleMobile = typeof navigator !== 'undefined' &&
@@ -73,12 +72,12 @@
             return;
           }
           try {
-            var before = module.host4AudioSnapshot();
             var recovered = await module.host4RecoverAudio();
             if (current !== owner) return;
             if (recovered) foregroundAudioPending = false;
-            post('diagnostic', { reason: 'audio_recovery', trigger: reason,
-              recovered: recovered, before: before, after: module.host4AudioSnapshot() });
+            if (!recovered) post('diagnostic', {
+              reason: 'audio_recovery_failed', trigger: reason
+            });
           } catch (error) {
             post('diagnostic', { reason: 'audio_recovery_failed', error: String(error) });
           }
@@ -145,23 +144,16 @@
         }
 
         if (typeof window.addEventListener === 'function') {
-          ['resize', 'orientationchange', 'focus', 'blur', 'pageshow', 'pagehide'].forEach(function (event) {
-            window.addEventListener(event, function () {
-              diagnose(event);
-            });
-          });
           document.addEventListener('visibilitychange', function () {
-            diagnosticInputs = 0;
             if (document.visibilityState === 'hidden') foregroundAudioPending = true;
             else void recoverForegroundAudio('visibilitychange');
-            diagnose('visibilitychange');
           });
           var diagnosticCanvas = document.getElementById('emulator');
           diagnosticCanvas.addEventListener('webglcontextlost', function () {
             post('diagnostic', { reason: 'webglcontextlost', time: Date.now() });
           });
           diagnosticCanvas.addEventListener('webglcontextrestored', function () {
-            diagnose('webglcontextrestored');
+            post('diagnostic', { reason: 'webglcontextrestored', time: Date.now() });
           });
         }
 
@@ -483,17 +475,73 @@
 
           saveSRAM: async function (requestId) {
             requestId = requestId || 'saveSRAM';
+            var owner = current;
+            var started = Date.now();
+            var stage = 'begin';
+            var pendingTimer;
+            function traceSram(event, error) {
+              var data = { reason: 'sram_trace', event: event, requestId: requestId,
+                stage: stage, elapsedMs: Date.now() - started };
+              try {
+                data.status = owner && owner.getStatus();
+                var engine = owner && owner.getEmulator();
+                if (engine) {
+                  data.core = engine.coreFullName;
+                  var module = owner.getEmscripten().Module;
+                  data.saveCommandAvailable = typeof module._cmd_savefiles === 'function';
+                  if (typeof module._retro_get_memory_size === 'function') {
+                    data.sramBytes = module._retro_get_memory_size(0);
+                  }
+                  try {
+                    data.saveDirectoryExists = engine.fs.FS.stat(engine.sramFileDirectory) != null;
+                  } catch (_) { data.saveDirectoryExists = false; }
+                  try {
+                    var stat = engine.fs.FS.stat(engine.sramFilePath);
+                    data.fileExists = true;
+                    data.fileBytes = stat.size;
+                  } catch (fileError) {
+                    data.fileExists = false;
+                    data.fileError = String(fileError);
+                  }
+                }
+              } catch (probeError) { data.probeError = String(probeError); }
+              if (error) data.error = String(error);
+              post('diagnostic', data);
+            }
             try {
               if (!current) throw new Error('Emulator not running.');
               if (typeof current.saveSRAM !== 'function') {
                 throw new Error('Core does not support SRAM export.');
               }
-              var result = await current.saveSRAM();
+              traceSram('before_export');
+              stage = 'core_export';
+              pendingTimer = setTimeout(function () { traceSram('pending'); }, 2000);
+              // Pinned RetroArch 1.22.2 cmd_savefiles writes MEMFS synchronously.
+              // Nostalgist deletes the old file and polls for a non-empty one;
+              // games without SRAM never produce it, and iOS suspends the poll.
+              // Keep existing files and report missing exports/files immediately.
+              var engine = owner.getEmulator();
+              var module = owner.getEmscripten().Module;
+              if (typeof module._cmd_savefiles !== 'function') {
+                throw new Error('Core SRAM save command is unavailable.');
+              }
+              module._cmd_savefiles();
+              var result = engine.fs.readFile(engine.sramFilePath, 'binary');
+              if (!result || result.byteLength === 0) {
+                throw new Error('Core produced no SRAM data; existing save is preserved.');
+              }
+              traceSram('export_returned');
+              stage = 'base64';
               var blob = result instanceof Blob ? result : new Blob([result]);
               var base64 = await blobToBase64(blob);
+              stage = 'bridge_reply';
               report('sramSaved', requestId, true, { sram: base64 }, null);
+              traceSram('complete');
             } catch (error) {
+              traceSram('failed', error);
               report('saveSRAMError', requestId, false, null, error);
+            } finally {
+              clearTimeout(pendingTimer);
             }
           },
 
@@ -513,10 +561,6 @@
 
           keyEvent: function (event) {
             if (event.action !== 'up') void recoverForegroundAudio('input');
-            if (diagnosticInputs++ < 20) {
-              post('diagnostic', { reason: 'input', time: Date.now(),
-                button: event.button, action: event.action, status: currentStatus() });
-            }
             if (!current) return;
             var button = event.button;
             var player = event.player || 1;
@@ -556,8 +600,6 @@
         }
 
         post('ready', { type: 'ready', requestId: '', ok: true, data: null, error: null });
-        post('diagnostic', { version: 'diag-v7-audio', reason: 'js_boot',
-          pageId: diagnosticPageId, time: Date.now() });
       })();
     </script>
   </body>
