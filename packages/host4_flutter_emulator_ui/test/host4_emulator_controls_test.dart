@@ -371,6 +371,88 @@ void main() {
     );
   });
 
+  testWidgets('switched landscape controls show press and stick feedback', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(844, 390);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Host4EmulatorControlsLayer(
+          profile: Host4EmulatorControlProfile.gba,
+          layoutStyle: Host4EmulatorControlLayoutStyle.silicone,
+          siliconeLayoutVariant:
+              Host4EmulatorSiliconeLayoutVariant.modernSymmetric,
+          onInput: (_) {},
+          onMenuTap: () {},
+        ),
+      ),
+    );
+
+    final action = find.byKey(const ValueKey<String>('controls.a'));
+    final actionOpacity = find.descendant(
+      of: action,
+      matching: find.byType(AnimatedOpacity),
+    );
+    final actionGesture = await tester.startGesture(tester.getCenter(action));
+    await tester.pump(const Duration(milliseconds: 60));
+    expect(tester.widget<AnimatedOpacity>(actionOpacity).opacity, 0.85);
+    await actionGesture.up();
+
+    final stick = find.byKey(
+      const ValueKey<String>('landscape.controls.stick_left'),
+    );
+    final thumb = find.byKey(
+      const ValueKey<String>('landscape.controls.stick_left.thumb'),
+    );
+    expect(tester.widget<Transform>(thumb).transform.getTranslation().x, 0);
+    final stickGesture = await tester.startGesture(tester.getCenter(stick));
+    await stickGesture.moveBy(const Offset(45, 0));
+    await tester.pump();
+    expect(
+      tester.widget<Transform>(thumb).transform.getTranslation().x,
+      greaterThan(0),
+    );
+    await stickGesture.up();
+    await tester.pump();
+    expect(tester.widget<Transform>(thumb).transform.getTranslation().x, 0);
+  });
+
+  testWidgets('retro mode toggle shows pressed feedback', (tester) async {
+    tester.view.physicalSize = const Size(844, 390);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Host4EmulatorControlsLayer(
+          profile: Host4EmulatorControlProfile.gba,
+          layoutStyle: Host4EmulatorControlLayoutStyle.silicone,
+          siliconeLayoutVariant:
+              Host4EmulatorSiliconeLayoutVariant.retroTraditional,
+          onInput: (_) {},
+          onMenuTap: () {},
+        ),
+      ),
+    );
+
+    final toggle = find.byKey(
+      const ValueKey<String>('landscape.controls.retro_mode_toggle'),
+    );
+    final opacity = find.descendant(
+      of: toggle,
+      matching: find.byType(AnimatedOpacity),
+    );
+    final gesture = await tester.startGesture(tester.getCenter(toggle));
+    await tester.pump(const Duration(milliseconds: 60));
+    expect(tester.widget<AnimatedOpacity>(opacity).opacity, 0.85);
+    await gesture.up();
+  });
+
   testWidgets('portrait silicone keeps the full Pantas pad for GB', (
     tester,
   ) async {

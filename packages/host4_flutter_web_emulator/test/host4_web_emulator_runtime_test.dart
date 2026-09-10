@@ -224,6 +224,20 @@ void main() {
     );
   });
 
+  test('controller marks foreground recovery as retryable by default', () async {
+    final scripts = <String>[];
+    final controller = Host4WebEmulatorController.forJavaScriptExecutor(
+      (script) async => scripts.add(script),
+    );
+
+    await controller.recoverForeground();
+
+    expect(
+      scripts,
+      <String>['void window.Host4WebEmulator?.recoverForeground?.(false);'],
+    );
+  });
+
   test('packaged web runtime wires SRAM restore and export', () async {
     final html = await File('assets/emulator/index.html').readAsString();
     expect(html, contains('sram: config.sramBase64'));
