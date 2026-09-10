@@ -39,6 +39,14 @@ class _Host4WebEmulatorViewState extends State<Host4WebEmulatorView> {
   bool _pageFinished = false;
   bool _launched = false;
 
+  @override
+  void initState() {
+    super.initState();
+    print(
+      '[Host4WebEmulator][WebEmuDiag] diag-v3 webview_init id=${identityHashCode(this)}',
+    );
+  }
+
   void _tryLaunch() {
     final controller = _controller;
     if (controller == null || !_pageFinished || _launched) return;
@@ -54,10 +62,7 @@ class _Host4WebEmulatorViewState extends State<Host4WebEmulatorView> {
         final cache = Host4WebEmulatorCoreCache(cacheRoot: cacheDir);
         coreData = await cache.resolve(widget.launchConfig.system.core);
       }
-      await controller.launch(
-        widget.launchConfig,
-        resolvedCoreData: coreData,
-      );
+      await controller.launch(widget.launchConfig, resolvedCoreData: coreData);
     } catch (error) {
       widget.onWebError?.call(error);
     }
@@ -65,6 +70,9 @@ class _Host4WebEmulatorViewState extends State<Host4WebEmulatorView> {
 
   @override
   void dispose() {
+    print(
+      '[Host4WebEmulator][WebEmuDiag] diag-v3 webview_dispose id=${identityHashCode(this)}',
+    );
     _controller?.dispose();
     super.dispose();
   }
@@ -81,6 +89,11 @@ class _Host4WebEmulatorViewState extends State<Host4WebEmulatorView> {
       showProgressBar: false,
       allowRoutePopGesture: true,
       onControllerReady: (controller) {
+        print(
+          '[Host4WebEmulator][WebEmuDiag] diag-v3 webview_controller_ready '
+          'id=${identityHashCode(this)} replacing=${_controller != null} '
+          'pageFinished=$_pageFinished launched=$_launched',
+        );
         _controller?.dispose();
         final emulatorController = Host4WebEmulatorController(controller);
         _controller = emulatorController;
@@ -88,6 +101,10 @@ class _Host4WebEmulatorViewState extends State<Host4WebEmulatorView> {
         _tryLaunch();
       },
       onPageFinished: (_) {
+        print(
+          '[Host4WebEmulator][WebEmuDiag] diag-v3 webview_page_finished '
+          'id=${identityHashCode(this)} launched=$_launched',
+        );
         _pageFinished = true;
         _tryLaunch();
       },

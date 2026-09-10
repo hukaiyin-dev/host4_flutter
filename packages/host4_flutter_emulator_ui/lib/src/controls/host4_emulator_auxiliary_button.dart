@@ -59,6 +59,16 @@ class _Host4EmulatorAuxiliaryButtonState
 
   @override
   Widget build(BuildContext context) {
+    // These assets are dark glyphs, unlike the self-contained game-button SVGs.
+    final systemGlyph = widget.asset == 'logo_group.svg' ||
+        widget.asset == 'ic_expand.svg';
+    final icon = SvgPicture.asset(
+      'assets/controls/${widget.asset}',
+      package: 'host4_flutter_emulator_ui',
+      width: widget.size.width * (systemGlyph ? 24 / 42 : 1),
+      height: widget.size.height * (systemGlyph ? 24 / 42 : 1),
+      fit: BoxFit.fill,
+    );
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTapDown: (_) => _down(),
@@ -68,13 +78,18 @@ class _Host4EmulatorAuxiliaryButtonState
       child: AnimatedOpacity(
         duration: const Duration(milliseconds: 60),
         opacity: _pressed ? 0.85 : 1,
-        child: SvgPicture.asset(
-          'assets/controls/${widget.asset}',
-          package: 'host4_flutter_emulator_ui',
-          width: widget.size.width,
-          height: widget.size.height,
-          fit: BoxFit.fill,
-        ),
+        child: systemGlyph
+            ? SizedBox.fromSize(
+                size: widget.size,
+                child: DecoratedBox(
+                  key: ValueKey<String>('controls.system_background.${widget.asset}'),
+                  decoration: const BoxDecoration(
+                    color: Color(0xA6FFFFFF), shape: BoxShape.circle,
+                  ),
+                  child: Center(child: icon),
+                ),
+              )
+            : icon,
       ),
     );
   }

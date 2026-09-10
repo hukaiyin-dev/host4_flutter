@@ -27,6 +27,7 @@ class Host4EmulatorControlsLayer extends StatelessWidget {
     this.editing = false,
     this.padPositions = const <String, double>{},
     this.onPadPositionChanged,
+    this.onPadDragEnd,
     this.onGameViewportTopChanged,
     super.key,
   });
@@ -41,6 +42,7 @@ class Host4EmulatorControlsLayer extends StatelessWidget {
   final bool editing;
   final Map<String, double> padPositions;
   final void Function(String key, double position)? onPadPositionChanged;
+  final VoidCallback? onPadDragEnd;
 
   @override
   Widget build(BuildContext context) {
@@ -62,6 +64,7 @@ class Host4EmulatorControlsLayer extends StatelessWidget {
               editing: editing,
               padPositions: padPositions,
               onPadPositionChanged: onPadPositionChanged,
+              onPadDragEnd: onPadDragEnd,
               onGameViewportTopChanged: onGameViewportTopChanged,
               profile: profile,
               onInput: onInput,
@@ -339,6 +342,7 @@ class _SiliconeControls extends StatefulWidget {
     required this.editing,
     required this.padPositions,
     required this.onPadPositionChanged,
+    required this.onPadDragEnd,
     required this.onGameViewportTopChanged,
     required this.profile,
     required this.onInput,
@@ -359,6 +363,7 @@ class _SiliconeControls extends StatefulWidget {
   final bool editing;
   final Map<String, double> padPositions;
   final void Function(String key, double position)? onPadPositionChanged;
+  final VoidCallback? onPadDragEnd;
 }
 
 class _SiliconeControlsState extends State<_SiliconeControls> {
@@ -404,26 +409,42 @@ class _SiliconeControlsState extends State<_SiliconeControls> {
             key, (_dragStart + delta).clamp(minimum, maximum) / extent,
           );
         } : null,
+        onLongPressEnd: widget.editing ? (_) => widget.onPadDragEnd?.call() : null,
         child: IgnorePointer(
           ignoring: widget.editing,
           child: Stack(
             clipBehavior: Clip.none,
             children: <Widget>[
-              Host4EmulatorSiliconePad(
-                layout: layout,
-                binding: binding,
-                offset: -bounds.topLeft,
-                onEvent: widget.onInput,
-              ),
-              if (!landscape) Positioned.fill(child: IgnorePointer(
+              Positioned.fill(child: IgnorePointer(
                 child: DecoratedBox(
+                  key: ValueKey<String>('controls.pad_background.$key'),
                   decoration: BoxDecoration(
-                    border: Border.all(color: widget.editing
-                        ? const Color(0x99FFFFFF) : const Color(0x55FFFFFF)),
+                    color: widget.editing ? const Color(0x99FFFFFF) : null,
+                    border: Border.all(
+                      color: widget.editing
+                          ? const Color(0xCCFFFFFF) : const Color(0x66FFFFFF),
+                      width: 2,
+                    ),
                     borderRadius: BorderRadius.circular(bounds.shortestSide / 2),
                   ),
                 ),
               )),
+              ColorFiltered(
+                // Existing SVG bodies use 60% alpha; editing uses 80%.
+                // Opaque labels remain opaque. Keep this off the pad background.
+                colorFilter: ColorFilter.matrix(<double>[
+                  1, 0, 0, 0, 0,
+                  0, 1, 0, 0, 0,
+                  0, 0, 1, 0, 0,
+                  0, 0, 0, widget.editing ? 4 / 3 : 1, 0,
+                ]),
+                child: Stack(clipBehavior: Clip.none, children: [Host4EmulatorSiliconePad(
+                layout: layout,
+                binding: binding,
+                offset: -bounds.topLeft,
+                onEvent: widget.onInput,
+                )]),
+              ),
             ],
           ),
         ),
@@ -448,11 +469,8 @@ class _SiliconeControlsState extends State<_SiliconeControls> {
             screenSize: size,
             metrics: metrics,
           );
-          bindings = widget.profile.hasFourFaceButtons
-              ? _landscapeBindingsWithFourFaceButtons
-              : widget.profile.hasShoulderButtons
-              ? _landscapeBindings
-              : _landscapeBindingsWithoutShoulders;
+          // Gamepatch is a physical layout, not a core capability filter.
+          bindings = _landscapeBindingsWithFourFaceButtons;
         } else {
           layout = Host4EmulatorSiliconeLayoutResolver.portrait(
             screenSize: size,
@@ -494,7 +512,7 @@ class _SiliconeControlsState extends State<_SiliconeControls> {
                 _editablePad(layout, binding, size, padding, landscape),
               if (!landscape)
                 ..._portraitShoulders(layout),
-              if (widget.profile.hasShoulderButtons && landscape)
+              if (landscape)
                 ..._landscapeShoulders(layout),
               if (!landscape && widget.onLocateTap != null)
                 _locateButton(layout),
@@ -516,8 +534,8 @@ class _SiliconeControlsState extends State<_SiliconeControls> {
 
   List<Widget> _landscapeShoulders(Host4EmulatorSiliconeResolvedLayout layout) {
     return <Widget>[
-      _shoulderButton(layout, 'landscape.controls.btn_l2', 'l', 'L'),
-      _shoulderButton(layout, 'landscape.controls.btn_r2', 'r', 'R'),
+      _shoulderButton(layout, 'landscape.controls.btn_l2', 'l', 'L2'),
+      _shoulderButton(layout, 'landscape.controls.btn_r2', 'r', 'R2'),
     ];
   }
 
@@ -533,6 +551,7 @@ class _SiliconeControlsState extends State<_SiliconeControls> {
       left: control.hitRect.left,
       top: control.hitRect.top,
       child: Host4EmulatorSiliconeSmallButton(
+        key: ValueKey<String>(identifier),
         hitSize: control.hitRect.size,
         visualSize: control.visualSize,
         label: label,
@@ -669,7 +688,8 @@ class _SiliconeControlsState extends State<_SiliconeControls> {
           dpadIdentifier: 'landscape.controls.dpad_left',
           actionClusterIdentifier: 'landscape.controls.action_cluster_left',
           dpadDisplayQuarterTurns: 0,
-          dpadInputQuarterTurns: 0,
+          // The left pad hit zones are rotated clockwise by the layout.
+          dpadInputQuarterTurns: 1,
           actionDirectionDisplayQuarterTurns: 0,
           actions: <Host4EmulatorSiliconePadActionBinding>[
             Host4EmulatorSiliconePadActionBinding(
@@ -704,13 +724,13 @@ class _SiliconeControlsState extends State<_SiliconeControls> {
           innerTop: Host4EmulatorSiliconePadSmallBinding(
             slot: Host4EmulatorSiliconePadSlot.innerTop,
             inputName: 'l',
-            label: 'L',
+            label: 'L1',
             semanticsIdentifier: 'landscape.controls.btn_l1',
           ),
           innerBottom: Host4EmulatorSiliconePadSmallBinding(
             slot: Host4EmulatorSiliconePadSlot.innerBottom,
             inputName: 'select',
-            label: 'Select',
+            label: 'SE',
             semanticsIdentifier: 'landscape.controls.btn_select',
           ),
         ),
@@ -738,13 +758,13 @@ class _SiliconeControlsState extends State<_SiliconeControls> {
           innerTop: Host4EmulatorSiliconePadSmallBinding(
             slot: Host4EmulatorSiliconePadSlot.innerTop,
             inputName: 'r',
-            label: 'R',
+            label: 'R1',
             semanticsIdentifier: 'landscape.controls.btn_r1',
           ),
           innerBottom: Host4EmulatorSiliconePadSmallBinding(
             slot: Host4EmulatorSiliconePadSlot.innerBottom,
             inputName: 'start',
-            label: 'Start',
+            label: 'ST',
             semanticsIdentifier: 'landscape.controls.btn_start',
           ),
         ),
@@ -790,27 +810,6 @@ class _SiliconeControlsState extends State<_SiliconeControls> {
     );
   }
 
-  static final List<Host4EmulatorSiliconePadBinding>
-  _landscapeBindingsWithoutShoulders = _landscapeBindings
-      .map(_withoutShoulderBinding)
-      .toList(growable: false);
-
-  static Host4EmulatorSiliconePadBinding _withoutShoulderBinding(
-    Host4EmulatorSiliconePadBinding binding,
-  ) {
-    return Host4EmulatorSiliconePadBinding(
-      side: binding.side,
-      dpadIdentifier: binding.dpadIdentifier,
-      actions: binding.actions,
-      dpadAliasIdentifier: binding.dpadAliasIdentifier,
-      actionClusterIdentifier: binding.actionClusterIdentifier,
-      actionDirectionDisplayQuarterTurns:
-          binding.actionDirectionDisplayQuarterTurns,
-      dpadDisplayQuarterTurns: binding.dpadDisplayQuarterTurns,
-      dpadInputQuarterTurns: binding.dpadInputQuarterTurns,
-      innerBottom: binding.innerBottom,
-    );
-  }
 }
 
 class _SiliconeSystemButton extends StatefulWidget {

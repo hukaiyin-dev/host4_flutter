@@ -4,6 +4,156 @@ import 'package:host4_flutter_emulator_ui/host4_flutter_emulator_ui.dart';
 import 'package:display_metrics/display_metrics.dart';
 
 void main() {
+  testWidgets('landscape menu and collapse retain visible circular backgrounds', (tester) async {
+    tester.view.physicalSize = const Size(844, 390);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    var menus = 0;
+    for (final variant in Host4EmulatorSiliconeLayoutVariant.values.where((v) => v != Host4EmulatorSiliconeLayoutVariant.silicone)) {
+      await tester.pumpWidget(MaterialApp(home: ColoredBox(color: Colors.black,
+        child: Host4EmulatorControlsLayer(
+          key: ValueKey(variant), profile: Host4EmulatorControlProfile.nes,
+          layoutStyle: Host4EmulatorControlLayoutStyle.silicone,
+          siliconeLayoutVariant: variant, onInput: (_) {}, onMenuTap: () => menus++,
+        ),
+      )));
+      final menu = find.byKey(const ValueKey('controls.system_background.logo_group.svg'));
+      final hide = find.byKey(const ValueKey('controls.system_background.ic_expand.svg'));
+      expect(menu, findsOneWidget);
+      expect(hide, findsOneWidget);
+      expect((tester.widget<DecoratedBox>(hide).decoration as BoxDecoration).color, const Color(0xA6FFFFFF));
+      await tester.tap(menu);
+      await tester.tap(hide);
+      await tester.pumpAndSettle();
+      expect(menu, findsNothing);
+      expect(hide, findsOneWidget);
+      await tester.tap(hide);
+      await tester.pumpAndSettle();
+      expect(menu, findsOneWidget);
+    }
+    expect(menus, 3);
+  });
+  testWidgets('landscape capsules keep outlines and gain editing backgrounds', (tester) async {
+    tester.view.physicalSize = const Size(844, 390);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    Future<void> show(bool editing) => tester.pumpWidget(MaterialApp(
+      home: Host4EmulatorControlsLayer(
+        profile: Host4EmulatorControlProfile.nes,
+        layoutStyle: Host4EmulatorControlLayoutStyle.silicone,
+        editing: editing,
+        onInput: (_) {}, onMenuTap: () {},
+      ),
+    ));
+    await show(false);
+    for (final side in ['left', 'right']) {
+      final finder = find.byKey(ValueKey<String>('controls.pad_background.landscape.$side'));
+      expect(finder, findsOneWidget);
+      final decoration = tester.widget<DecoratedBox>(finder).decoration as BoxDecoration;
+      expect(decoration.color, isNull);
+      expect(decoration.border!.top.color, const Color(0x66FFFFFF));
+    }
+    final before = tester.getRect(find.byKey(const ValueKey<String>('landscape.controls.btn_a')));
+    await show(true);
+    for (final side in ['left', 'right']) {
+      final finder = find.byKey(ValueKey<String>('controls.pad_background.landscape.$side'));
+      final decoration = tester.widget<DecoratedBox>(finder).decoration as BoxDecoration;
+      expect(decoration.color, const Color(0x99FFFFFF));
+      expect(decoration.border!.top.color, const Color(0xCCFFFFFF));
+    }
+    expect(tester.getRect(find.byKey(const ValueKey<String>('landscape.controls.btn_a'))), before);
+  });
+  testWidgets('editing adds capsule fill without moving controls or sending input', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final events = <Host4EmulatorInputEvent>[];
+    Future<void> show(bool editing) => tester.pumpWidget(MaterialApp(
+      home: Host4EmulatorControlsLayer(
+        profile: Host4EmulatorControlProfile.gba,
+        layoutStyle: Host4EmulatorControlLayoutStyle.silicone,
+        editing: editing,
+        onInput: events.add,
+        onMenuTap: () {},
+      ),
+    ));
+    final pad = find.byKey(const ValueKey<String>('game.controls.dpad'));
+    final background = find.byKey(const ValueKey<String>('controls.pad_background.portrait.single'));
+    await show(false);
+    final before = tester.getRect(pad);
+    expect((tester.widget<DecoratedBox>(background).decoration as BoxDecoration).color, isNull);
+    await show(true);
+    final decoration = tester.widget<DecoratedBox>(background).decoration as BoxDecoration;
+    expect(decoration.color, const Color(0x99FFFFFF));
+    expect(decoration.border!.top.color, const Color(0xCCFFFFFF));
+    expect(decoration.border!.top.width, 2);
+    expect(tester.getRect(pad), before);
+    await tester.tapAt(before.topCenter + const Offset(0, 10));
+    expect(events, isEmpty);
+    await show(false);
+    expect((tester.widget<DecoratedBox>(background).decoration as BoxDecoration).color, isNull);
+  });
+
+  for (final profile in Host4EmulatorControlProfile.values) {
+    for (final landscape in [true, false]) {
+      testWidgets(
+        '${profile.name} silicone D-pad follows screen directions in ${landscape ? "landscape" : "portrait"}',
+        (tester) async {
+          tester.view.physicalSize = landscape
+              ? const Size(844, 390)
+              : const Size(390, 844);
+          tester.view.devicePixelRatio = 1;
+          addTearDown(tester.view.resetPhysicalSize);
+          addTearDown(tester.view.resetDevicePixelRatio);
+          final events = <Host4EmulatorInputEvent>[];
+          await tester.pumpWidget(
+            MaterialApp(
+              home: Host4EmulatorControlsLayer(
+                profile: profile,
+                layoutStyle: Host4EmulatorControlLayoutStyle.silicone,
+                onInput: events.add,
+                onMenuTap: () {},
+              ),
+            ),
+          );
+          final rect = tester.getRect(
+            find.byKey(
+              ValueKey<String>(
+                landscape
+                    ? 'landscape.controls.dpad_left'
+                    : 'game.controls.dpad',
+              ),
+            ),
+          );
+          const points = <String, Offset>{
+            'up': Offset(0.5, 0.15),
+            'down': Offset(0.5, 0.85),
+            'left': Offset(0.15, 0.5),
+            'right': Offset(0.85, 0.5),
+          };
+          for (final point in points.entries) {
+            events.clear();
+            final gesture = await tester.startGesture(
+              rect.topLeft +
+                  Offset(
+                    rect.width * point.value.dx,
+                    rect.height * point.value.dy,
+                  ),
+            );
+            await gesture.up();
+            expect(events.map((event) => '${event.input}:${event.phase}'), [
+              '${point.key}:down',
+              '${point.key}:up',
+            ]);
+          }
+        },
+      );
+    }
+  }
+
   test('D-pad hit model supports diagonal directions', () {
     expect(host4EmulatorDPadInputsAt(const Offset(5, 5), 120, 120), <String>{
       'up',
@@ -316,7 +466,7 @@ void main() {
     expect(menu, findsOneWidget);
   });
 
-  testWidgets('silicone layout exposes shoulder inputs by profile', (
+  testWidgets('Gamepatch keeps full buttons independently of core profile', (
     tester,
   ) async {
     Future<void> pumpProfile(Host4EmulatorControlProfile profile) {
@@ -339,12 +489,19 @@ void main() {
     await pumpProfile(Host4EmulatorControlProfile.gbc);
     expect(
       find.byKey(const ValueKey<String>('landscape.controls.btn_l1')),
-      findsNothing,
+      findsOneWidget,
     );
     expect(
       find.byKey(const ValueKey<String>('landscape.controls.btn_r1')),
-      findsNothing,
+      findsOneWidget,
     );
+    for (final profile in Host4EmulatorControlProfile.values) {
+      await pumpProfile(profile);
+      for (final button in ['a', 'b', 'x', 'y', 'l1', 'r1', 'l2', 'r2', 'start', 'select']) {
+        expect(find.byKey(ValueKey<String>('landscape.controls.btn_$button')), findsOneWidget,
+          reason: '${profile.name}: $button must not be hidden');
+      }
+    }
 
     await pumpProfile(Host4EmulatorControlProfile.gba);
     expect(
