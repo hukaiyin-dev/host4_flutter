@@ -32,6 +32,138 @@
         var currentRate = 1;
         var bridgeReady = false;
         var pendingMessages = [];
+        var diagnosticInputs = 0;
+        var diagnosticPageId = Date.now();
+        var foregroundAudioPending = false;
+        var isAppleMobile = typeof navigator !== 'undefined' &&
+          (/iPad|iPhone|iPod/.test(navigator.userAgent) ||
+            (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1));
+
+        // Installed in the pinned core's scope: RWA is not exported by Nostalgist.
+        // Keep the downloaded/cache bytes unchanged; adapt only the launch Blob.
+        function installAudioRecovery(module, audio) {
+          module.host4AudioSnapshot = function () {
+            if (!audio || !audio.context) return { driverAvailable: !!audio, state: null };
+            return { state: audio.context.state, currentTime: audio.context.currentTime,
+              endTime: audio.endTime, currentTimeDiff: audio.currentTimeDiff,
+              contextRunning: audio.contextRunning };
+          };
+          module.host4RecoverAudio = async function () {
+            if (!audio || !audio.context || audio.context.state === 'closed') return false;
+            var context = audio.context;
+            if (context.state !== 'running') await context.resume();
+            if (audio.context !== context || context.state !== 'running') return false;
+            // The wall clock advances during an iOS interruption, AudioContext's
+            // clock may not. Discard the stale scheduling horizon before the
+            // core recalibrates, otherwise its fake-block can wait indefinitely.
+            audio.currentTimeDiff = performance.now() / 1000 - context.currentTime;
+            audio.endTime = context.currentTime;
+            audio.contextRunning = true;
+            return true;
+          };
+        }
+
+        async function recoverForegroundAudio(reason) {
+          if (!isAppleMobile || !foregroundAudioPending || !current ||
+              document.visibilityState !== 'visible') return;
+          var owner = current;
+          var module = owner.getEmscripten().Module;
+          if (!module.host4RecoverAudio) {
+            post('diagnostic', { reason: 'audio_recovery_unavailable', trigger: reason });
+            return;
+          }
+          try {
+            var before = module.host4AudioSnapshot();
+            var recovered = await module.host4RecoverAudio();
+            if (current !== owner) return;
+            if (recovered) foregroundAudioPending = false;
+            post('diagnostic', { reason: 'audio_recovery', trigger: reason,
+              recovered: recovered, before: before, after: module.host4AudioSnapshot() });
+          } catch (error) {
+            post('diagnostic', { reason: 'audio_recovery_failed', error: String(error) });
+          }
+        }
+
+        function diagnose(reason) {
+          try {
+            var canvas = current && typeof current.getCanvas === 'function'
+              ? current.getCanvas()
+              : document.getElementById('canvas') || document.getElementById('emulator');
+            var rect = canvas ? canvas.getBoundingClientRect() : null;
+            var css = canvas ? window.getComputedStyle(canvas) : null;
+            var runtime = current && typeof current.getEmscripten === 'function'
+              ? current.getEmscripten() : null;
+            var loop = runtime && runtime.Browser && runtime.Browser.mainLoop;
+            var gl = runtime && runtime.Module && runtime.Module.ctx;
+            var graphics = null;
+            if (gl && typeof gl.getParameter === 'function') {
+              graphics = {
+                contextLost: gl.isContextLost(),
+                drawingBuffer: [gl.drawingBufferWidth, gl.drawingBufferHeight],
+                viewport: Array.from(gl.getParameter(gl.VIEWPORT) || []),
+                scissor: Array.from(gl.getParameter(gl.SCISSOR_BOX) || []),
+                scissorEnabled: gl.isEnabled(gl.SCISSOR_TEST)
+              };
+            }
+            post('diagnostic', {
+              version: 'diag-v7-audio', pageId: diagnosticPageId,
+              reason: reason, time: Date.now(), status: currentStatus(),
+              visibility: document.visibilityState, focused: document.hasFocus(),
+              viewport: [window.innerWidth, window.innerHeight],
+              canvasId: canvas ? canvas.id : null,
+              canvasConnected: canvas ? canvas.isConnected : null,
+              canvasBuffer: canvas ? [canvas.width, canvas.height] : null,
+              canvasRect: rect ? [rect.x, rect.y, rect.width, rect.height] : null,
+              mainLoop: loop ? { generation: loop.currentlyRunningMainloop,
+                frameNumber: loop.currentFrameNumber,
+                timingMode: loop.timingMode, timingValue: loop.timingValue,
+                queuedBlockers: loop.queue ? loop.queue.length : null,
+                scheduler: !!loop.scheduler, runner: !!loop.runner } : null,
+              graphics: graphics,
+              audio: runtime && runtime.Module && runtime.Module.host4AudioSnapshot
+                ? runtime.Module.host4AudioSnapshot() : null,
+              audioHookInstalled: !!(runtime && runtime.Module && runtime.Module.host4RecoverAudio),
+              appleMobile: isAppleMobile,
+              dpr: window.devicePixelRatio, rate: currentRate,
+              css: css ? { width: css.width, height: css.height, objectFit: css.objectFit } : null,
+              visualViewport: window.visualViewport ? {
+                width: window.visualViewport.width,
+                height: window.visualViewport.height,
+                scale: window.visualViewport.scale
+              } : null
+            });
+            if (reason !== 'input') {
+              var started = Date.now();
+              requestAnimationFrame(function () {
+                post('diagnostic', { reason: 'raf', trigger: reason,
+                  time: Date.now(), elapsedMs: Date.now() - started });
+              });
+            }
+          } catch (error) {
+            post('diagnostic', { reason: reason, error: String(error) });
+          }
+        }
+
+        if (typeof window.addEventListener === 'function') {
+          ['resize', 'orientationchange', 'focus', 'blur', 'pageshow', 'pagehide'].forEach(function (event) {
+            window.addEventListener(event, function () {
+              diagnose(event);
+            });
+          });
+          document.addEventListener('visibilitychange', function () {
+            diagnosticInputs = 0;
+            if (document.visibilityState === 'hidden') foregroundAudioPending = true;
+            else void recoverForegroundAudio('visibilitychange');
+            diagnose('visibilitychange');
+          });
+          var diagnosticCanvas = document.getElementById('emulator');
+          diagnosticCanvas.addEventListener('webglcontextlost', function () {
+            post('diagnostic', { reason: 'webglcontextlost', time: Date.now() });
+          });
+          diagnosticCanvas.addEventListener('webglcontextrestored', function () {
+            diagnose('webglcontextrestored');
+          });
+        }
 
         function post(method, payload) {
           var channel = window.JsBridge || window.NativeBridge;
@@ -159,6 +291,8 @@
         }
 
         window.Host4WebEmulator = {
+          diagnose: diagnose,
+          recoverForeground: function () { return recoverForegroundAudio('flutter_resumed'); },
           launch: async function (config) {
             flushPendingMessages();
             var requestId = config.requestId || 'launch';
@@ -188,7 +322,20 @@
                 },
                 resolveCoreJs: async function () {
                   var r = await extractCoreLocal(coreName, coreZipUrl, coreJsBase64, coreWasmBase64);
-                  return r.js;
+                  var source = await r.js.text();
+                  var hook = ';(' + installAudioRecovery.toString() +
+                    ')(Module, typeof RWA === "undefined" ? null : RWA);';
+                  // ESM cores enclose Module/RWA in their factory. Install before
+                  // readiness resolves, inside that scope. Keep the readiness
+                  // expression intact for Nostalgist's own export adaptation.
+                  if (source.includes('import.meta.url') && source.includes('readyPromiseResolve(Module)')) {
+                    source = source.replace('readyPromiseResolve(Module)', hook + 'readyPromiseResolve(Module)');
+                  } else if (source.startsWith('var Module')) {
+                    source += '\n' + hook;
+                  } else {
+                    throw new Error('Unsupported core format for audio recovery: ' + coreName);
+                  }
+                  return new Blob([source], { type: 'application/javascript' });
                 },
                 resolveCoreWasm: async function () {
                   var r = await extractCoreLocal(coreName, coreZipUrl, coreJsBase64, coreWasmBase64);
@@ -365,6 +512,11 @@
           },
 
           keyEvent: function (event) {
+            if (event.action !== 'up') void recoverForegroundAudio('input');
+            if (diagnosticInputs++ < 20) {
+              post('diagnostic', { reason: 'input', time: Date.now(),
+                button: event.button, action: event.action, status: currentStatus() });
+            }
             if (!current) return;
             var button = event.button;
             var player = event.player || 1;
@@ -404,6 +556,8 @@
         }
 
         post('ready', { type: 'ready', requestId: '', ok: true, data: null, error: null });
+        post('diagnostic', { version: 'diag-v7-audio', reason: 'js_boot',
+          pageId: diagnosticPageId, time: Date.now() });
       })();
     </script>
   </body>

@@ -1,4 +1,5 @@
 library;
+export 'src/input/host4_emulator_ui_shortcuts.dart';
 
 export 'src/input/host4_emulator_input_event.dart';
 export 'src/key_locator/host4_emulator_key_locator_overlay.dart';

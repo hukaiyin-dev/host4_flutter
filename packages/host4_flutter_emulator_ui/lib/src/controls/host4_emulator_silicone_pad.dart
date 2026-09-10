@@ -769,7 +769,7 @@ class _SmallButtonVisualPainter extends CustomPainter {
   final String label;
 
   static const Color _fillColor = Color(0x996A7691);
-  static const Color _strokeColor = Color(0xFF774FEF);
+  static const Color _strokeColor = Color(0x99774FEF);
   static const Color _textColor = Color(0xFFF1EDFD);
 
   @override

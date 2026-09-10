@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../model/host4_emulator_save_entry.dart';
 import '../session/host4_emulator_session_actions.dart';
 
 enum _MenuAction {
@@ -13,6 +14,7 @@ enum _MenuAction {
   exit,
   continueGame,
   layout,
+  keyLocator,
 }
 
 class _MenuItemModel {
@@ -78,14 +80,18 @@ class Host4EmulatorMenuOverlay extends StatefulWidget {
   const Host4EmulatorMenuOverlay({
     required this.actions,
     required this.onOpenSaveManager,
+    this.dataSource,
     this.onOpenLayoutPicker,
+    this.onOpenKeyLocator,
     this.showLayoutAction = true,
     super.key,
   });
 
   final Host4EmulatorSessionActions actions;
+  final Host4EmulatorSaveDataSource? dataSource;
   final VoidCallback onOpenSaveManager;
   final VoidCallback? onOpenLayoutPicker;
+  final VoidCallback? onOpenKeyLocator;
   final bool showLayoutAction;
 
   @override
@@ -111,7 +117,7 @@ class _Host4EmulatorMenuOverlayState extends State<Host4EmulatorMenuOverlay> {
         _MenuAction.saveManager,
         _MenuAction.quickSave,
       ],
-      <_MenuAction?>[_MenuAction.speed, null, _MenuAction.exit],
+      <_MenuAction?>[_MenuAction.speed, _MenuAction.keyLocator, _MenuAction.exit],
       <_MenuAction?>[_MenuAction.continueGame, _MenuAction.layout, null],
     ],
   );
@@ -124,7 +130,7 @@ class _Host4EmulatorMenuOverlayState extends State<Host4EmulatorMenuOverlay> {
         _MenuAction.saveManager,
         _MenuAction.quickSave,
       ],
-      <_MenuAction?>[_MenuAction.speed, null, _MenuAction.exit],
+      <_MenuAction?>[_MenuAction.speed, _MenuAction.keyLocator, _MenuAction.exit],
       <_MenuAction?>[_MenuAction.continueGame, null, null],
     ],
   );
@@ -139,16 +145,56 @@ class _Host4EmulatorMenuOverlayState extends State<Host4EmulatorMenuOverlay> {
 
   bool _busy = false;
   String? _error;
+  int? _manualSaveCount;
+  DateTime? _quickSaveTime;
+  int _summaryLoadEpoch = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_loadSaveSummary());
+  }
+
+  @override
+  void didUpdateWidget(Host4EmulatorMenuOverlay oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.dataSource != widget.dataSource) {
+      unawaited(_loadSaveSummary());
+    }
+  }
+
+  Future<void> _loadSaveSummary() async {
+    final epoch = ++_summaryLoadEpoch;
+    _manualSaveCount = null;
+    _quickSaveTime = null;
+    try {
+      final catalog = await widget.dataSource?.load();
+      if (!mounted || epoch != _summaryLoadEpoch) return;
+      setState(() {
+        _manualSaveCount = catalog?.manual.length;
+        _quickSaveTime = catalog?.quick?.modifiedAt.toLocal();
+      });
+    } catch (_) {
+      // Summary failure must not prevent opening the save manager.
+      if (!mounted || epoch != _summaryLoadEpoch) return;
+      setState(() => _manualSaveCount = null);
+    }
+  }
 
   Map<_MenuAction, _MenuItemModel> get _items => <_MenuAction, _MenuItemModel>{
-    _MenuAction.quickLoad: const _MenuItemModel(
+    _MenuAction.quickLoad: _MenuItemModel(
       identifier: 'menu.quick_load',
       title: '快速读档',
+      subtitle: _quickSaveTime == null ? null
+          : '${_quickSaveTime!.hour.toString().padLeft(2, '0')}:${_quickSaveTime!.minute.toString().padLeft(2, '0')}',
       asset: 'assets/controls/ic_save.svg',
     ),
-    _MenuAction.saveManager: const _MenuItemModel(
+    _MenuAction.saveManager: _MenuItemModel(
       identifier: 'menu.save_manager',
       title: '存档管理',
+      subtitle: _manualSaveCount == null
+          ? null
+          : '$_manualSaveCount/$host4EmulatorManualSaveSlotCount 已用',
       asset: 'assets/controls/ic_cundangguanli.svg',
     ),
     _MenuAction.quickSave: const _MenuItemModel(
@@ -178,6 +224,11 @@ class _Host4EmulatorMenuOverlayState extends State<Host4EmulatorMenuOverlay> {
       identifier: 'menu.layout',
       title: '切换布局',
       asset: 'assets/controls/ic_buju.svg',
+    ),
+    _MenuAction.keyLocator: const _MenuItemModel(
+      identifier: 'menu.key_locator',
+      title: '按键定位',
+      asset: 'assets/controls/ic_dingwei.svg',
     ),
   };
 
@@ -214,11 +265,15 @@ class _Host4EmulatorMenuOverlayState extends State<Host4EmulatorMenuOverlay> {
     return switch (action) {
       _MenuAction.quickLoad => () => unawaited(_run(widget.actions.quickLoad)),
       _MenuAction.saveManager => widget.onOpenSaveManager,
-      _MenuAction.quickSave => () => unawaited(_run(widget.actions.quickSave)),
+      _MenuAction.quickSave => () => unawaited(_run(() async {
+        await widget.actions.quickSave();
+        await _loadSaveSummary();
+      })),
       _MenuAction.speed => () => unawaited(_run(_toggleRate)),
       _MenuAction.exit => () => unawaited(_run(widget.actions.exit)),
       _MenuAction.continueGame => () => unawaited(_run(widget.actions.resume)),
       _MenuAction.layout => widget.onOpenLayoutPicker,
+      _MenuAction.keyLocator => widget.onOpenKeyLocator,
     };
   }
 
@@ -385,7 +440,11 @@ class _MenuButton extends StatelessWidget {
         ? _OverlayColors.icon
         : _OverlayColors.muted;
 
-    return _Pressable(
+    return Actions(
+      actions: <Type, Action<Intent>>{
+        ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: (_) { onTap?.call(); return null; }),
+      },
+      child: _Pressable(
       onTap: onTap,
       child: Focus(
         focusNode: focusNode,
@@ -473,6 +532,7 @@ class _MenuButton extends StatelessWidget {
             );
           },
         ),
+      ),
       ),
     );
   }

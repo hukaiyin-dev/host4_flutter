@@ -272,7 +272,8 @@ class Host4EmulatorSiliconeLayoutResolver {
       metrics.mm(padHeightMm),
       metrics.mm(padWidthMm),
     );
-    final double sideInset = math.max(8, screenSize.width * 0.075);
+    // Figma 3243:13026: 49 px edge inset on the 844 px reference canvas.
+    final double sideInset = math.max(8, screenSize.width * 49 / 844);
     final double top = math.max(
       0,
       (screenSize.height - rotatedPadSize.height) / 2,
@@ -650,13 +651,13 @@ class Host4EmulatorSiliconeLayoutResolver {
     Size screenSize,
     Host4EmulatorSiliconeMetrics metrics,
   ) {
-    final double shoulderW = metrics.mm(11.43);
-    final double shoulderH = metrics.mm(5);
+    final double shoulderW = 72;
+    final double shoulderH = 31.5;
     _addRectControl(
       controls,
       semanticsIdentifier: 'landscape.controls.btn_l2',
       rect: Rect.fromCenter(
-        center: Offset(screenSize.width * 0.384, 52),
+        center: Offset(screenSize.width / 2 - 98, 67),
         width: shoulderW,
         height: shoulderH,
       ),
@@ -665,7 +666,7 @@ class Host4EmulatorSiliconeLayoutResolver {
       controls,
       semanticsIdentifier: 'landscape.controls.btn_r2',
       rect: Rect.fromCenter(
-        center: Offset(screenSize.width * 0.616, 52),
+        center: Offset(screenSize.width / 2 + 98, 67),
         width: shoulderW,
         height: shoulderH,
       ),
