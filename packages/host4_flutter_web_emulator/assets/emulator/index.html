@@ -32,7 +32,6 @@
         var currentRate = 1;
         var bridgeReady = false;
         var pendingMessages = [];
-        var diagnosticInputs = 0;
         var diagnosticPageId = Date.now();
         var foregroundAudioPending = false;
         var isAppleMobile = typeof navigator !== 'undefined' &&
@@ -73,12 +72,12 @@
             return;
           }
           try {
-            var before = module.host4AudioSnapshot();
             var recovered = await module.host4RecoverAudio();
             if (current !== owner) return;
             if (recovered) foregroundAudioPending = false;
-            post('diagnostic', { reason: 'audio_recovery', trigger: reason,
-              recovered: recovered, before: before, after: module.host4AudioSnapshot() });
+            if (!recovered) post('diagnostic', {
+              reason: 'audio_recovery_failed', trigger: reason
+            });
           } catch (error) {
             post('diagnostic', { reason: 'audio_recovery_failed', error: String(error) });
           }
@@ -145,23 +144,16 @@
         }
 
         if (typeof window.addEventListener === 'function') {
-          ['resize', 'orientationchange', 'focus', 'blur', 'pageshow', 'pagehide'].forEach(function (event) {
-            window.addEventListener(event, function () {
-              diagnose(event);
-            });
-          });
           document.addEventListener('visibilitychange', function () {
-            diagnosticInputs = 0;
             if (document.visibilityState === 'hidden') foregroundAudioPending = true;
             else void recoverForegroundAudio('visibilitychange');
-            diagnose('visibilitychange');
           });
           var diagnosticCanvas = document.getElementById('emulator');
           diagnosticCanvas.addEventListener('webglcontextlost', function () {
             post('diagnostic', { reason: 'webglcontextlost', time: Date.now() });
           });
           diagnosticCanvas.addEventListener('webglcontextrestored', function () {
-            diagnose('webglcontextrestored');
+            post('diagnostic', { reason: 'webglcontextrestored', time: Date.now() });
           });
         }
 
@@ -513,10 +505,6 @@
 
           keyEvent: function (event) {
             if (event.action !== 'up') void recoverForegroundAudio('input');
-            if (diagnosticInputs++ < 20) {
-              post('diagnostic', { reason: 'input', time: Date.now(),
-                button: event.button, action: event.action, status: currentStatus() });
-            }
             if (!current) return;
             var button = event.button;
             var player = event.player || 1;
@@ -556,8 +544,6 @@
         }
 
         post('ready', { type: 'ready', requestId: '', ok: true, data: null, error: null });
-        post('diagnostic', { version: 'diag-v7-audio', reason: 'js_boot',
-          pageId: diagnosticPageId, time: Date.now() });
       })();
     </script>
   </body>
