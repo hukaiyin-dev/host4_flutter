@@ -180,6 +180,9 @@ class Host4WebEmulatorController {
     'window.Host4WebEmulator?.diagnose?.("flutter_probe");',
   );
 
+  Future<void> recoverForeground() => _executeJavaScript(
+    'void window.Host4WebEmulator?.recoverForeground?.();',
+  );
   Future<void> keyEvent(
     String button, {
     String action = 'down',

@@ -1,8 +1,56 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:host4_flutter_emulator_ui/host4_flutter_emulator_ui.dart';
 
 void main() {
+  testWidgets('A activates focused menu action and B returns', (tester) async {
+    final actions = _FakeActions();
+    var backs = 0;
+    await tester.pumpWidget(MaterialApp(home: Host4EmulatorUiShortcuts(
+      onBack: () => backs++,
+      child: Host4EmulatorMenuOverlay(actions: actions, onOpenSaveManager: () {}),
+    )));
+    await tester.pumpAndSettle();
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyA);
+    await tester.pump();
+    expect(actions.calls, ['resume']);
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyB);
+    expect(backs, 1);
+  });
+  testWidgets(
+    'reopening menu refreshes manual usage without counting quick save',
+    (tester) async {
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final source = _SaveSource();
+      Future<void> openMenu() async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Host4EmulatorMenuOverlay(
+              actions: _FakeActions(),
+              dataSource: source,
+              onOpenSaveManager: () {},
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+      }
+
+      await openMenu();
+      expect(find.text('0/5 已用'), findsOneWidget);
+      for (final count in [1, 5, 0]) {
+        await tester.pumpWidget(const SizedBox.shrink());
+        source.count = count;
+        await openMenu();
+        expect(find.text('$count/5 已用'), findsOneWidget);
+        expect(tester.takeException(), isNull);
+      }
+    },
+  );
+
   testWidgets('portrait menu matches the Pantas 2x3 card geometry', (
     tester,
   ) async {
@@ -46,6 +94,7 @@ void main() {
     final actions = _FakeActions();
     var openedSaveManager = false;
     var openedLayoutPicker = false;
+    var openedKeyLocator = false;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -53,6 +102,7 @@ void main() {
           actions: actions,
           onOpenSaveManager: () => openedSaveManager = true,
           onOpenLayoutPicker: () => openedLayoutPicker = true,
+          onOpenKeyLocator: () => openedKeyLocator = true,
         ),
       ),
     );
@@ -72,6 +122,7 @@ void main() {
     expect(find.byKey(const ValueKey<String>('menu.exit')), findsOneWidget);
     expect(find.byKey(const ValueKey<String>('menu.continue')), findsOneWidget);
     expect(find.byKey(const ValueKey<String>('menu.layout')), findsOneWidget);
+    expect(find.byKey(const ValueKey<String>('menu.key_locator')), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey<String>('menu.quick_save')));
     await tester.pump();
@@ -87,6 +138,8 @@ void main() {
     await tester.tap(find.byKey(const ValueKey<String>('menu.layout')));
     await tester.pump();
     expect(openedLayoutPicker, isTrue);
+    await tester.tap(find.byKey(const ValueKey<String>('menu.key_locator')));
+    expect(openedKeyLocator, isTrue);
 
     await tester.tap(find.byKey(const ValueKey<String>('menu.continue')));
     await tester.pump();
@@ -107,6 +160,19 @@ void main() {
     expect(find.byKey(const ValueKey<String>('menu.layout')), findsNothing);
     expect(find.text('切换布局'), findsNothing);
   });
+}
+
+class _SaveSource implements Host4EmulatorSaveDataSource {
+  int count = 0;
+
+  @override
+  Future<Host4EmulatorSaveCatalog> load() async => Host4EmulatorSaveCatalog(
+    quick: Host4EmulatorSaveEntry(slot: 0, modifiedAt: DateTime(2026)),
+    manual: [
+      for (var slot = 1; slot <= count; slot++)
+        Host4EmulatorSaveEntry(slot: slot, modifiedAt: DateTime(2026)),
+    ],
+  );
 }
 
 class _FakeActions extends Host4EmulatorSessionActions {

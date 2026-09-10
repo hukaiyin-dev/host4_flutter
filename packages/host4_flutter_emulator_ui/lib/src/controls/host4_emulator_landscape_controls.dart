@@ -82,8 +82,7 @@ class _Host4EmulatorLandscapeControlsState
           clipBehavior: Clip.none,
           children: <Widget>[
             ..._controlWidgets(positioned, scale),
-            if (widget.profile.hasShoulderButtons)
-              ..._shoulderWidgets(positioned, scale),
+            ..._shoulderWidgets(positioned, scale),
             positioned(
               identifier: 'controls.select',
               left: 156,
