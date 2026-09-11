@@ -1,3 +1,5 @@
+import '../l10n/emulator_ui_strings.dart';
+
 enum Host4EmulatorSiliconeLayoutVariant {
   silicone,
   modernSymmetric,
@@ -23,9 +25,13 @@ extension Host4EmulatorSiliconeLayoutVariantPresentation
   };
 
   String get title => switch (this) {
-    Host4EmulatorSiliconeLayoutVariant.silicone => '硅胶垫',
-    Host4EmulatorSiliconeLayoutVariant.modernSymmetric => '现代对称',
-    Host4EmulatorSiliconeLayoutVariant.modernAsymmetric => '现代非对称',
-    Host4EmulatorSiliconeLayoutVariant.retroTraditional => '复古传统',
+    Host4EmulatorSiliconeLayoutVariant.silicone =>
+      EmulatorUiStrings.t('layout.silicone'),
+    Host4EmulatorSiliconeLayoutVariant.modernSymmetric =>
+      EmulatorUiStrings.t('layout.modernSymmetric'),
+    Host4EmulatorSiliconeLayoutVariant.modernAsymmetric =>
+      EmulatorUiStrings.t('layout.modernAsymmetric'),
+    Host4EmulatorSiliconeLayoutVariant.retroTraditional =>
+      EmulatorUiStrings.t('layout.retroClassic'),
   };
 }

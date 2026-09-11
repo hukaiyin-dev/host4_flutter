@@ -1,4 +1,5 @@
 library;
+export 'src/l10n/emulator_ui_strings.dart';
 export 'src/input/host4_emulator_ui_shortcuts.dart';
 
 export 'src/input/host4_emulator_input_event.dart';
