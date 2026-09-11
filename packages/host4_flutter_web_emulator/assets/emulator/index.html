@@ -164,11 +164,12 @@
             diagnose(recovered ? 'audio_recovery_end' : 'audio_recovery_failed', {
               trigger: reason, force: !!force, recovered: !!recovered
             });
-            if (recovered) scheduleSettledResize(reason);
+            scheduleSettledResize(reason);
           } catch (error) {
             diagnose('audio_recovery_failed', {
               trigger: reason, force: !!force, error: String(error)
             });
+            scheduleSettledResize(reason + '_error');
           }
         }
 
@@ -269,6 +270,7 @@
             });
             diagnosticCanvas.addEventListener('webglcontextrestored', function () {
               diagnose('webglcontextrestored');
+              scheduleSettledResize('webglcontextrestored');
             });
           }
           if (window.visualViewport &&
