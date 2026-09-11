@@ -33,6 +33,8 @@
         var bridgeReady = false;
         var pendingMessages = [];
         var diagnosticPageId = Date.now();
+        var diagnosticSequence = 0;
+        var diagnosticStartedAt = Date.now();
         var foregroundAudioPending = false;
         var isAppleMobile = typeof navigator !== 'undefined' &&
           (/iPad|iPhone|iPod/.test(navigator.userAgent) ||
@@ -47,43 +49,131 @@
               endTime: audio.endTime, currentTimeDiff: audio.currentTimeDiff,
               contextRunning: audio.contextRunning };
           };
-          module.host4RecoverAudio = async function () {
+          module.host4RecoverAudio = async function (verifyClock) {
             if (!audio || !audio.context || audio.context.state === 'closed') return false;
             var context = audio.context;
             if (context.state !== 'running') await context.resume();
             if (audio.context !== context || context.state !== 'running') return false;
+            var clockBefore = context.currentTime;
+            if (verifyClock) {
+              await new Promise(function (resolve) { setTimeout(resolve, 120); });
+              if (audio.context !== context) return false;
+              if (context.currentTime <= clockBefore + 0.005) {
+                module.host4LastAudioRecovery = {
+                  clockStalled: true, rebuilt: false,
+                  clockBefore: clockBefore, clockAfter: context.currentTime
+                };
+                var AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContextClass) return false;
+                var replacement;
+                try {
+                  replacement = new AudioContextClass({ sampleRate: context.sampleRate });
+                } catch (_) {
+                  replacement = new AudioContextClass();
+                }
+                replacement.addEventListener('statechange', function () {
+                  audio.contextRunning = replacement.state === 'running';
+                });
+                audio.context = replacement;
+                audio.currentTimeDiff = performance.now() / 1000 - replacement.currentTime;
+                audio.endTime = replacement.currentTime;
+                audio.contextRunning = replacement.state === 'running';
+                if (typeof audio.latency === 'number') {
+                  audio.virtualBufferFrames = Math.round(
+                    audio.latency * replacement.sampleRate / 1000
+                  );
+                }
+                if (replacement.state !== 'running') await replacement.resume();
+                audio.contextRunning = replacement.state === 'running';
+                module.host4LastAudioRecovery.replacementState = replacement.state;
+                if (!audio.contextRunning) return false;
+                var replacementClockBefore = replacement.currentTime;
+                await new Promise(function (resolve) { setTimeout(resolve, 120); });
+                if (replacement.currentTime <= replacementClockBefore + 0.005) {
+                  module.host4LastAudioRecovery.replacementClockStalled = true;
+                  return false;
+                }
+                module.host4LastAudioRecovery.rebuilt = true;
+                try { void context.close(); } catch (_) {}
+                context = replacement;
+              }
+            }
             // The wall clock advances during an iOS interruption, AudioContext's
             // clock may not. Discard the stale scheduling horizon before the
             // core recalibrates, otherwise its fake-block can wait indefinitely.
             audio.currentTimeDiff = performance.now() / 1000 - context.currentTime;
             audio.endTime = context.currentTime;
             audio.contextRunning = true;
+            if (!module.host4LastAudioRecovery ||
+                !module.host4LastAudioRecovery.clockStalled) {
+              module.host4LastAudioRecovery = {
+                clockStalled: false, rebuilt: false,
+                clockBefore: clockBefore, clockAfter: context.currentTime
+              };
+            }
             return true;
           };
         }
 
-        async function recoverForegroundAudio(reason) {
+        function scheduleSettledResize(trigger) {
+          [0, 120, 400].forEach(function (delay) {
+            setTimeout(function () {
+              if (!current || typeof current.resize !== 'function') return;
+              var canvas = current.getCanvas();
+              if (!canvas) return;
+              var rect = canvas.getBoundingClientRect();
+              var dpr = window.devicePixelRatio || 1;
+              var width = Math.max(1, Math.round(rect.width * dpr));
+              var height = Math.max(1, Math.round(rect.height * dpr));
+              current.resize({ width: width, height: height });
+              diagnose('resize_after_audio_recovery', {
+                trigger: trigger, delayMs: delay, targetBuffer: [width, height]
+              });
+            }, delay);
+          });
+        }
+
+        async function recoverForegroundAudio(reason, force) {
+          var pendingBefore = foregroundAudioPending;
+          if (force) foregroundAudioPending = true;
           if (!isAppleMobile || !foregroundAudioPending || !current ||
-              document.visibilityState !== 'visible') return;
+              document.visibilityState !== 'visible') {
+            if (force || pendingBefore) diagnose('audio_recovery_skipped', {
+              trigger: reason, force: !!force, pendingBefore: pendingBefore
+            });
+            return;
+          }
           var owner = current;
           var module = owner.getEmscripten().Module;
           if (!module.host4RecoverAudio) {
-            post('diagnostic', { reason: 'audio_recovery_unavailable', trigger: reason });
+            diagnose('audio_recovery_unavailable', { trigger: reason, force: !!force });
             return;
           }
           try {
-            var recovered = await module.host4RecoverAudio();
+            diagnose('audio_recovery_start', { trigger: reason, force: !!force });
+            var recovered = await module.host4RecoverAudio(true);
             if (current !== owner) return;
+            var recovery = module.host4LastAudioRecovery || {};
+            if (recovery.clockStalled) {
+              diagnose('audio_clock_stalled', recovery);
+            }
+            if (recovery.rebuilt) {
+              diagnose('audio_output_rebuilt', recovery);
+            }
             if (recovered) foregroundAudioPending = false;
-            if (!recovered) post('diagnostic', {
-              reason: 'audio_recovery_failed', trigger: reason
+            diagnose(recovered ? 'audio_recovery_end' : 'audio_recovery_failed', {
+              trigger: reason, force: !!force, recovered: !!recovered
             });
+            scheduleSettledResize(reason);
           } catch (error) {
-            post('diagnostic', { reason: 'audio_recovery_failed', error: String(error) });
+            diagnose('audio_recovery_failed', {
+              trigger: reason, force: !!force, error: String(error)
+            });
+            scheduleSettledResize(reason + '_error');
           }
         }
 
-        function diagnose(reason) {
+        function diagnose(reason, details) {
           try {
             var canvas = current && typeof current.getCanvas === 'function'
               ? current.getCanvas()
@@ -104,9 +194,11 @@
                 scissorEnabled: gl.isEnabled(gl.SCISSOR_TEST)
               };
             }
-            post('diagnostic', {
-              version: 'diag-v7-audio', pageId: diagnosticPageId,
-              reason: reason, time: Date.now(), status: currentStatus(),
+            var payload = {
+              version: 'diag-v8-audio-clock', pageId: diagnosticPageId,
+              sequence: ++diagnosticSequence, reason: reason,
+              time: Date.now(), elapsedMs: Date.now() - diagnosticStartedAt,
+              status: currentStatus(), foregroundAudioPending: foregroundAudioPending,
               visibility: document.visibilityState, focused: document.hasFocus(),
               viewport: [window.innerWidth, window.innerHeight],
               canvasId: canvas ? canvas.id : null,
@@ -130,12 +222,24 @@
                 height: window.visualViewport.height,
                 scale: window.visualViewport.scale
               } : null
-            });
+            };
+            if (typeof screen !== 'undefined') {
+              payload.screen = [screen.width, screen.height, screen.availWidth, screen.availHeight];
+              payload.screenOrientation = screen.orientation ? {
+                type: screen.orientation.type, angle: screen.orientation.angle
+              } : null;
+            }
+            if (details) {
+              Object.keys(details).forEach(function (key) { payload[key] = details[key]; });
+            }
+            post('diagnostic', payload);
             if (reason !== 'input') {
               var started = Date.now();
               requestAnimationFrame(function () {
-                post('diagnostic', { reason: 'raf', trigger: reason,
-                  time: Date.now(), elapsedMs: Date.now() - started });
+                post('diagnostic', { version: 'diag-v8-audio-clock', pageId: diagnosticPageId,
+                  sequence: ++diagnosticSequence, reason: 'raf', trigger: reason,
+                  time: Date.now(), elapsedMs: Date.now() - started,
+                  status: currentStatus(), visibility: document.visibilityState });
               });
             }
           } catch (error) {
@@ -144,17 +248,37 @@
         }
 
         if (typeof window.addEventListener === 'function') {
+          ['resize', 'orientationchange', 'focus', 'blur', 'pageshow', 'pagehide'].forEach(
+            function (eventName) {
+              window.addEventListener(eventName, function () {
+                diagnose(eventName);
+                if (eventName === 'orientationchange') {
+                  scheduleSettledResize('orientationchange');
+                }
+              });
+            }
+          );
           document.addEventListener('visibilitychange', function () {
             if (document.visibilityState === 'hidden') foregroundAudioPending = true;
             else void recoverForegroundAudio('visibilitychange');
+            diagnose('visibilitychange');
           });
           var diagnosticCanvas = document.getElementById('emulator');
-          diagnosticCanvas.addEventListener('webglcontextlost', function () {
-            post('diagnostic', { reason: 'webglcontextlost', time: Date.now() });
-          });
-          diagnosticCanvas.addEventListener('webglcontextrestored', function () {
-            post('diagnostic', { reason: 'webglcontextrestored', time: Date.now() });
-          });
+          if (diagnosticCanvas) {
+            diagnosticCanvas.addEventListener('webglcontextlost', function () {
+              diagnose('webglcontextlost');
+            });
+            diagnosticCanvas.addEventListener('webglcontextrestored', function () {
+              diagnose('webglcontextrestored');
+              scheduleSettledResize('webglcontextrestored');
+            });
+          }
+          if (window.visualViewport &&
+              typeof window.visualViewport.addEventListener === 'function') {
+            window.visualViewport.addEventListener('resize', function () {
+              diagnose('visual_viewport_resize');
+            });
+          }
         }
 
         function post(method, payload) {
@@ -284,7 +408,9 @@
 
         window.Host4WebEmulator = {
           diagnose: diagnose,
-          recoverForeground: function () { return recoverForegroundAudio('flutter_resumed'); },
+          recoverForeground: function (force) {
+            return recoverForegroundAudio('flutter_resumed', force === true);
+          },
           launch: async function (config) {
             flushPendingMessages();
             var requestId = config.requestId || 'launch';
@@ -475,17 +601,78 @@
 
           saveSRAM: async function (requestId) {
             requestId = requestId || 'saveSRAM';
+            var owner = current;
+            var started = Date.now();
+            var stage = 'begin';
+            var pendingTimer;
+            function traceSram(event, error) {
+              var data = { reason: 'sram_trace', event: event, requestId: requestId,
+                stage: stage, elapsedMs: Date.now() - started };
+              try {
+                data.status = owner && owner.getStatus();
+                var engine = owner && owner.getEmulator();
+                if (engine) {
+                  data.core = engine.coreFullName;
+                  var module = owner.getEmscripten().Module;
+                  data.saveCommandAvailable = typeof module._cmd_savefiles === 'function';
+                  if (typeof module._retro_get_memory_size === 'function') {
+                    data.sramBytes = module._retro_get_memory_size(0);
+                  }
+                  try {
+                    data.saveDirectoryExists = engine.fs.FS.stat(engine.sramFileDirectory) != null;
+                  } catch (_) { data.saveDirectoryExists = false; }
+                  try {
+                    var stat = engine.fs.FS.stat(engine.sramFilePath);
+                    data.fileExists = true;
+                    data.fileBytes = stat.size;
+                  } catch (fileError) {
+                    data.fileExists = false;
+                    data.fileError = String(fileError);
+                  }
+                }
+              } catch (probeError) { data.probeError = String(probeError); }
+              if (error) data.error = String(error);
+              post('diagnostic', data);
+              diagnose('sram_' + event, {
+                requestId: requestId, stage: stage,
+                sramElapsedMs: Date.now() - started,
+                sramError: error ? String(error) : null
+              });
+            }
             try {
               if (!current) throw new Error('Emulator not running.');
               if (typeof current.saveSRAM !== 'function') {
                 throw new Error('Core does not support SRAM export.');
               }
-              var result = await current.saveSRAM();
+              traceSram('before_export');
+              stage = 'core_export';
+              pendingTimer = setTimeout(function () { traceSram('pending'); }, 2000);
+              // Pinned RetroArch 1.22.2 cmd_savefiles writes MEMFS synchronously.
+              // Nostalgist deletes the old file and polls for a non-empty one;
+              // games without SRAM never produce it, and iOS suspends the poll.
+              // Keep existing files and report missing exports/files immediately.
+              var engine = owner.getEmulator();
+              var module = owner.getEmscripten().Module;
+              if (typeof module._cmd_savefiles !== 'function') {
+                throw new Error('Core SRAM save command is unavailable.');
+              }
+              module._cmd_savefiles();
+              var result = engine.fs.readFile(engine.sramFilePath, 'binary');
+              if (!result || result.byteLength === 0) {
+                throw new Error('Core produced no SRAM data; existing save is preserved.');
+              }
+              traceSram('export_returned');
+              stage = 'base64';
               var blob = result instanceof Blob ? result : new Blob([result]);
               var base64 = await blobToBase64(blob);
+              stage = 'bridge_reply';
               report('sramSaved', requestId, true, { sram: base64 }, null);
+              traceSram('complete');
             } catch (error) {
+              traceSram('failed', error);
               report('saveSRAMError', requestId, false, null, error);
+            } finally {
+              clearTimeout(pendingTimer);
             }
           },
 
@@ -509,17 +696,31 @@
             var button = event.button;
             var player = event.player || 1;
             var action = event.action;
-
-            switch (action) {
-              case 'press':
-                current.press(button, player, event.duration);
-                break;
-              case 'down':
-                current.pressDown(button, player);
-                break;
-              case 'up':
-                current.pressUp(button, player);
-                break;
+            try {
+              switch (action) {
+                case 'press':
+                  current.press(button, player, event.duration);
+                  break;
+                case 'down':
+                  current.pressDown(button, player);
+                  break;
+                case 'up':
+                  current.pressUp(button, player);
+                  break;
+              }
+              post('diagnostic', {
+                version: 'diag-v8-audio-clock', pageId: diagnosticPageId,
+                sequence: ++diagnosticSequence, reason: 'input_dispatched',
+                time: Date.now(), button: button, action: action, player: player,
+                status: currentStatus(), visibility: document.visibilityState
+              });
+            } catch (error) {
+              post('diagnostic', {
+                version: 'diag-v8-audio-clock', pageId: diagnosticPageId,
+                sequence: ++diagnosticSequence, reason: 'input_failed',
+                time: Date.now(), button: button, action: action, player: player,
+                error: String(error)
+              });
             }
           },
 

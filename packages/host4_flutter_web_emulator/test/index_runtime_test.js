@@ -13,11 +13,24 @@ async function main() {
   const commands = [];
   const stateLifecycle = [];
   const animationFrames = [];
+  const windowListeners = new Map();
+  const documentListeners = new Map();
+  const canvasListeners = new Map();
   let launchOptions;
   let status = 'running';
+  let runtimeModule = { ctx: {
+    VIEWPORT: 1, SCISSOR_BOX: 2, SCISSOR_TEST: 3,
+    drawingBufferWidth: 1179, drawingBufferHeight: 2556,
+    isContextLost: () => false,
+    getParameter: () => [0, 0, 2556, 1179],
+    isEnabled: () => false,
+  } };
   let activeCanvas = {
     id: 'canvas', width: 844, height: 390, isConnected: true,
     getBoundingClientRect: () => ({x: 0, y: 0, width: 390, height: 844}),
+    addEventListener(type, callback) {
+      canvasListeners.set(type, callback);
+    },
   };
   const emulator = {
     getCanvas() { return activeCanvas; },
@@ -25,13 +38,7 @@ async function main() {
       return { Browser: { mainLoop: {
         currentlyRunningMainloop: 0, currentFrameNumber: 123,
         timingMode: 1, timingValue: 1, queue: [],
-      } }, Module: { ctx: {
-        VIEWPORT: 1, SCISSOR_BOX: 2, SCISSOR_TEST: 3,
-        drawingBufferWidth: 1179, drawingBufferHeight: 2556,
-        isContextLost: () => false,
-        getParameter: () => [0, 0, 2556, 1179],
-        isEnabled: () => false,
-      } } };
+      } }, Module: runtimeModule };
     },
     exit() {},
     getStatus() {
@@ -53,6 +60,9 @@ async function main() {
     },
   };
   const window = {
+    addEventListener(type, callback) {
+      windowListeners.set(type, callback);
+    },
     getComputedStyle: () => ({width: '390px', height: '844px', objectFit: 'contain'}),
     JsBridge: {
       postMessage(value) {
@@ -66,13 +76,24 @@ async function main() {
       },
     },
   };
+  const document = {
+    getElementById: () => activeCanvas,
+    hasFocus: () => true,
+    visibilityState: 'visible',
+    addEventListener(type, callback) {
+      documentListeners.set(type, callback);
+    },
+  };
   const context = {
+    setTimeout,
+    clearTimeout,
     Blob,
     FileReader: class {},
     Uint8Array,
     atob,
     console,
-    document: {getElementById: () => null, hasFocus: () => true, visibilityState: 'visible'},
+    document,
+    navigator: {userAgent: 'iPhone', platform: 'iPhone', maxTouchPoints: 5},
     requestAnimationFrame(callback) {
       animationFrames.push(callback);
     },
@@ -96,20 +117,95 @@ async function main() {
     coreJsBase64: Buffer.from('var Module = {}; var RWA = globalThis.testAudio;').toString('base64'),
     coreWasmBase64: 'AA==',
   });
+  assert.ok(windowListeners.has('orientationchange'),
+    'orientation changes must emit a runtime diagnostic');
+  windowListeners.get('orientationchange')();
+  const orientationDiagnostic = messages.at(-1);
+  assert.equal(orientationDiagnostic.method, 'diagnostic');
+  assert.equal(orientationDiagnostic.payload.reason, 'orientationchange');
+  assert.deepEqual(orientationDiagnostic.payload.canvasBuffer, [844, 390]);
+  assert.equal(orientationDiagnostic.payload.mainLoop.frameNumber, 123);
   const patchedCore = await launchOptions.resolveCoreJs();
+  const originalGetEmscripten = emulator.getEmscripten;
+  emulator.getEmscripten = () => ({ Module: {
+    _cmd_savefiles() { throw new Error('export failed'); },
+  } });
+  emulator.getEmulator = () => ({
+    coreFullName: 'test-core',
+    sramFilePath: '/test.srm',
+    fs: { FS: { stat() { throw new Error('file absent'); } } },
+  });
+  emulator.saveSRAM = async () => { throw new Error('export failed'); };
+  await window.Host4WebEmulator.saveSRAM('sram-diagnostic-test');
+  const sramDiagnostics = messages.filter(message =>
+    message.method === 'diagnostic' && message.payload.reason === 'sram_trace');
+  assert.equal(sramDiagnostics.length, 2);
+  assert.equal(sramDiagnostics[0].payload.fileExists, false);
+  assert.equal(sramDiagnostics[1].payload.stage, 'core_export');
+  assert.equal(sramDiagnostics[1].payload.error, 'Error: export failed');
+  let savedBytes;
+  const coreModule = { _cmd_savefiles() {} };
+  emulator.getEmscripten = () => ({ Module: coreModule });
+  emulator.getEmulator = () => ({
+    coreFullName: 'test-core', sramFilePath: '/test.srm',
+    fs: {
+      readFile() {
+        if (!savedBytes) throw new Error('no SRAM produced');
+        return savedBytes;
+      },
+      FS: { stat() { return { size: savedBytes ? savedBytes.length : 0 }; } },
+    },
+  });
+  status = 'paused';
+  await window.Host4WebEmulator.saveSRAM('no-sram');
+  assert.match(messages.find(m => m.payload.requestId === 'no-sram' &&
+    m.method === 'saveSRAMError').payload.error, /no SRAM produced/);
+  context.FileReader = class {
+    readAsDataURL(blob) {
+      blob.arrayBuffer().then(bytes => {
+        this.result = 'data:application/octet-stream;base64,' + Buffer.from(bytes).toString('base64');
+        this.onloadend();
+      });
+    }
+  };
+  coreModule._cmd_savefiles = () => { savedBytes = new Uint8Array([1, 2, 3]); };
+  await window.Host4WebEmulator.saveSRAM('valid-sram');
+  assert.equal(messages.find(m => m.method === 'sramSaved' &&
+    m.payload.requestId === 'valid-sram').payload.data.sram, 'AQID');
+  assert.equal(status, 'paused', 'SRAM export must not toggle pause state');
+  status = 'running';
+  emulator.getEmscripten = originalGetEmscripten;
   let resumeCalls = 0;
   const testAudio = {
     context: { state: 'interrupted', currentTime: 12,
       async resume() { resumeCalls++; this.state = 'running'; } },
     endTime: 1000, currentTimeDiff: -50, contextRunning: false,
   };
-  const coreContext = { testAudio, performance: { now: () => 25000 } };
+  const coreContext = {
+    testAudio,
+    performance: { now: () => 25000 },
+    setTimeout(callback) {
+      testAudio.context.currentTime += 0.1;
+      callback();
+    },
+  };
   vm.runInNewContext(await patchedCore.text(), coreContext);
   assert.equal(await coreContext.Module.host4RecoverAudio(), true);
   assert.equal(resumeCalls, 1);
-  assert.equal(testAudio.endTime, 12);
+  assert.equal(testAudio.endTime, testAudio.context.currentTime);
   assert.equal(testAudio.currentTimeDiff, 13);
   assert.equal(testAudio.contextRunning, true);
+  runtimeModule.host4RecoverAudio = coreContext.Module.host4RecoverAudio;
+  runtimeModule.host4AudioSnapshot = coreContext.Module.host4AudioSnapshot;
+  testAudio.context.state = 'interrupted';
+  resumeCalls = 0;
+  await window.Host4WebEmulator.recoverForeground(true);
+  assert.equal(resumeCalls, 1,
+    'Flutter resumed must recover even when visibilitychange(hidden) was skipped');
+  testAudio.context.state = 'interrupted';
+  await window.Host4WebEmulator.recoverForeground(false);
+  assert.equal(resumeCalls, 1,
+    'normal retries must stop after the forced recovery succeeds');
   testAudio.context.state = 'closed';
   assert.equal(await coreContext.Module.host4RecoverAudio(), false);
   assert.equal(resumeCalls, 1);
@@ -200,7 +296,36 @@ async function main() {
   testAudio.context.state = 'running';
   testAudio.endTime = 1000;
   assert.equal(await factoryModule.host4RecoverAudio(), true);
-  assert.equal(testAudio.endTime, 12);
+  assert.equal(testAudio.endTime, testAudio.context.currentTime);
+
+  const stalledContext = testAudio.context;
+  let replacementClock = 0;
+  factoryContext.window = {
+    AudioContext: class {
+      constructor() {
+        this.state = 'running';
+        this.sampleRate = 48000;
+      }
+      get currentTime() { return replacementClock; }
+      addEventListener() {}
+      async resume() { this.state = 'running'; }
+    },
+  };
+  factoryContext.setTimeout = (callback) => {
+    replacementClock += 0.1;
+    callback();
+  };
+  assert.equal(await factoryModule.host4RecoverAudio(true), true);
+  assert.notEqual(testAudio.context, stalledContext);
+  assert.equal(factoryModule.host4LastAudioRecovery.clockStalled, true);
+  assert.equal(factoryModule.host4LastAudioRecovery.rebuilt, true);
+
+  assert.match(html, /audio_clock_stalled/,
+    'foreground recovery must detect a running context with a stalled clock');
+  assert.match(html, /audio_output_rebuilt/,
+    'foreground recovery must rebuild a stalled WebAudio output');
+  assert.match(html, /resize_after_audio_recovery/,
+    'successful audio recovery must schedule a settled emulator resize');
 }
 
 main().catch((error) => {

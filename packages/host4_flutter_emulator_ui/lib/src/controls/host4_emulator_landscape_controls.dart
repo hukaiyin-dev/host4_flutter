@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -339,7 +340,7 @@ class _LandscapeActionCluster extends StatelessWidget {
   }
 }
 
-class _LandscapeStick extends StatelessWidget {
+class _LandscapeStick extends StatefulWidget {
   const _LandscapeStick({
     required this.scale,
     required this.label,
@@ -353,34 +354,123 @@ class _LandscapeStick extends StatelessWidget {
   final ValueChanged<Host4EmulatorInputEvent> onInput;
 
   @override
+  State<_LandscapeStick> createState() => _LandscapeStickState();
+}
+
+class _LandscapeStickState extends State<_LandscapeStick> {
+  int? _activePointer;
+  Set<String> _activeInputs = const <String>{};
+  Offset _thumbOffset = Offset.zero;
+
+  double get _size => 126 * widget.scale;
+
+  void _update(Offset localPosition) {
+    final size = Size.square(_size);
+    final next = _joystickInputsAt(localPosition, size);
+    final nextThumbOffset = _joystickThumbOffsetAt(localPosition, size);
+    final previous = _activeInputs;
+    final now = DateTime.now().millisecondsSinceEpoch;
+
+    if (!_setEquals(previous, next) || _thumbOffset != nextThumbOffset) {
+      setState(() {
+        _activeInputs = next;
+        _thumbOffset = nextThumbOffset;
+      });
+    }
+
+    for (final input in previous.difference(next)) {
+      _send(input, Host4EmulatorInputEvent.phaseUp, 0, now);
+    }
+    final activated = next.difference(previous);
+    if (activated.isNotEmpty) HapticFeedback.mediumImpact();
+    for (final input in activated) {
+      _send(input, Host4EmulatorInputEvent.phaseDown, 1, now);
+    }
+  }
+
+  void _send(String input, String phase, double value, int timestamp) {
+    widget.onInput(
+      Host4EmulatorInputEvent(
+        input: input,
+        phase: phase,
+        value: value,
+        timestamp: timestamp,
+        source: widget.semanticsIdentifier,
+      ),
+    );
+  }
+
+  void _clearPointer(int pointer) {
+    if (_activePointer != pointer) return;
+    final previous = _activeInputs;
+    final now = DateTime.now().millisecondsSinceEpoch;
+    _activePointer = null;
+    setState(() {
+      _activeInputs = const <String>{};
+      _thumbOffset = Offset.zero;
+    });
+    for (final input in previous) {
+      _send(input, Host4EmulatorInputEvent.phaseUp, 0, now);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return SizedBox.square(
-      dimension: 126 * scale,
-      child: Stack(
-        children: <Widget>[
-          Positioned.fill(
-            child: CustomPaint(painter: _LandscapeStickPainter(label)),
-          ),
-          Positioned.fill(
-            child: Opacity(
-              opacity: 0,
-              child: Host4EmulatorDPad(
-                size: 126 * scale,
-                semanticsIdentifier: semanticsIdentifier,
-                onEvent: onInput,
+      dimension: _size,
+      child: Semantics(
+        container: true,
+        enabled: true,
+        identifier: widget.semanticsIdentifier,
+        child: Stack(
+          children: <Widget>[
+            const Positioned.fill(
+              child: IgnorePointer(
+                child: CustomPaint(painter: _LandscapeStickBasePainter()),
               ),
             ),
-          ),
-        ],
+            Center(
+              child: IgnorePointer(
+                child: Transform.translate(
+                  key: ValueKey<String>('${widget.semanticsIdentifier}.thumb'),
+                  offset: _thumbOffset,
+                  child: SizedBox.square(
+                    dimension: 60 * widget.scale,
+                    child: CustomPaint(
+                      painter: _LandscapeStickThumbPainter(
+                        label: widget.label,
+                        active: _activeInputs.isNotEmpty,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Positioned.fill(
+              child: Listener(
+                behavior: HitTestBehavior.opaque,
+                onPointerDown: (event) {
+                  if (_activePointer != null) return;
+                  _activePointer = event.pointer;
+                  _update(event.localPosition);
+                },
+                onPointerMove: (event) {
+                  if (_activePointer != event.pointer) return;
+                  _update(event.localPosition);
+                },
+                onPointerUp: (event) => _clearPointer(event.pointer),
+                onPointerCancel: (event) => _clearPointer(event.pointer),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
-class _LandscapeStickPainter extends CustomPainter {
-  const _LandscapeStickPainter(this.label);
-
-  final String label;
+class _LandscapeStickBasePainter extends CustomPainter {
+  const _LandscapeStickBasePainter();
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -394,10 +484,31 @@ class _LandscapeStickPainter extends CustomPainter {
         ..style = PaintingStyle.stroke
         ..strokeWidth = 2 * scale,
     );
+  }
+
+  @override
+  bool shouldRepaint(covariant _LandscapeStickBasePainter oldDelegate) =>
+      false;
+}
+
+class _LandscapeStickThumbPainter extends CustomPainter {
+  const _LandscapeStickThumbPainter({
+    required this.label,
+    required this.active,
+  });
+
+  final String label;
+  final bool active;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final scale = size.width / 60;
+    final center = Offset(size.width / 2, size.height / 2);
     canvas.drawCircle(
       center,
       30 * scale,
-      Paint()..color = const Color(0x996A7691),
+      Paint()
+        ..color = active ? const Color(0xCC7A4DF3) : const Color(0x996A7691),
     );
     canvas.drawCircle(
       center,
@@ -406,6 +517,12 @@ class _LandscapeStickPainter extends CustomPainter {
         ..color = const Color(0xFF774FEF)
         ..style = PaintingStyle.stroke
         ..strokeWidth = 2.25 * scale,
+    );
+    canvas.drawCircle(
+      center,
+      20 * scale,
+      Paint()
+        ..color = active ? const Color(0x99C9B9F9) : const Color(0x886A7691),
     );
     final text = TextPainter(
       text: TextSpan(
@@ -422,11 +539,11 @@ class _LandscapeStickPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _LandscapeStickPainter oldDelegate) =>
-      label != oldDelegate.label;
+  bool shouldRepaint(covariant _LandscapeStickThumbPainter oldDelegate) =>
+      label != oldDelegate.label || active != oldDelegate.active;
 }
 
-class _RetroModeToggle extends StatelessWidget {
+class _RetroModeToggle extends StatefulWidget {
   const _RetroModeToggle({
     required this.scale,
     required this.showStickIcon,
@@ -438,24 +555,71 @@ class _RetroModeToggle extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
+  State<_RetroModeToggle> createState() => _RetroModeToggleState();
+}
+
+class _RetroModeToggleState extends State<_RetroModeToggle> {
+  bool _pressed = false;
+
+  void _setPressed(bool value) {
+    if (_pressed == value) return;
+    setState(() => _pressed = value);
+    if (value) HapticFeedback.mediumImpact();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTap: onTap,
-      child: DecoratedBox(
-        decoration: const BoxDecoration(
-          shape: BoxShape.circle,
-          color: Color(0xA6FFFFFF),
-        ),
-        child: Center(
-          child: SvgPicture.asset(
-            'assets/controls/${showStickIcon ? 'ic_yaogan.svg' : 'ic_shizijian.svg'}',
-            package: 'host4_flutter_emulator_ui',
-            width: 24 * scale,
-            height: 24 * scale,
+      onTapDown: (_) => _setPressed(true),
+      onTapUp: (_) => _setPressed(false),
+      onTapCancel: () => _setPressed(false),
+      onTap: widget.onTap,
+      child: AnimatedOpacity(
+        duration: const Duration(milliseconds: 60),
+        opacity: _pressed ? 0.85 : 1,
+        child: DecoratedBox(
+          decoration: const BoxDecoration(
+            shape: BoxShape.circle,
+            color: Color(0xA6FFFFFF),
+          ),
+          child: Center(
+            child: SvgPicture.asset(
+              'assets/controls/${widget.showStickIcon ? 'ic_yaogan.svg' : 'ic_shizijian.svg'}',
+              package: 'host4_flutter_emulator_ui',
+              width: 24 * widget.scale,
+              height: 24 * widget.scale,
+            ),
           ),
         ),
       ),
     );
   }
 }
+
+Set<String> _joystickInputsAt(Offset local, Size size) {
+  final center = Offset(size.width / 2, size.height / 2);
+  final delta = local - center;
+  final distance = delta.distance;
+  if (distance < size.shortestSide * 0.12) return const <String>{};
+
+  final result = <String>{};
+  if (delta.dx.abs() / distance >= 0.35) {
+    result.add(delta.dx > 0 ? 'right' : 'left');
+  }
+  if (delta.dy.abs() / distance >= 0.35) {
+    result.add(delta.dy > 0 ? 'down' : 'up');
+  }
+  return result;
+}
+
+Offset _joystickThumbOffsetAt(Offset local, Size size) {
+  final center = Offset(size.width / 2, size.height / 2);
+  final delta = local - center;
+  final maxDistance = size.shortestSide * 0.24;
+  if (delta.distance <= maxDistance) return delta;
+  return Offset.fromDirection(delta.direction, maxDistance);
+}
+
+bool _setEquals(Set<String> a, Set<String> b) =>
+    a.length == b.length && a.containsAll(b);

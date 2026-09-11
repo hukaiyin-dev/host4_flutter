@@ -180,8 +180,8 @@ class Host4WebEmulatorController {
     'window.Host4WebEmulator?.diagnose?.("flutter_probe");',
   );
 
-  Future<void> recoverForeground() => _executeJavaScript(
-    'void window.Host4WebEmulator?.recoverForeground?.();',
+  Future<void> recoverForeground({bool force = false}) => _executeJavaScript(
+    'void window.Host4WebEmulator?.recoverForeground?.($force);',
   );
   Future<void> keyEvent(
     String button, {
