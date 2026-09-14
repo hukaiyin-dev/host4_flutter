@@ -624,7 +624,9 @@ class _ThemeCardState extends State<_ThemeCard> {
               borderRadius: BorderRadius.circular(8),
               child: SizedBox(
                 width: 172,
-                height: 124,
+                // Keep enough vertical room for localized names that wrap to
+                // a second line below the preview image.
+                height: 140,
                 child: Stack(
                   children: [
                     Positioned.fill(
@@ -663,11 +665,12 @@ class _ThemeCardState extends State<_ThemeCard> {
                       left: 11,
                       top: 98,
                       width: 96,
-                      height: 18,
+                      height: 36,
                       child: Text(
                         widget.themeName,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                        maxLines: null,
+                        softWrap: true,
+                        overflow: TextOverflow.visible,
                         style: TextStyle(
                           color: theme.colors.textSecondary,
                           fontSize: 13.6,
@@ -678,8 +681,8 @@ class _ThemeCardState extends State<_ThemeCard> {
                       ),
                     ),
                     Positioned(
-                      left: 116,
-                      top: 100,
+                      right: 8,
+                      bottom: 8,
                       width: 48,
                       height: 16,
                       child: _ThemeActionPill(
