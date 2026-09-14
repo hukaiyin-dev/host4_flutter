@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../l10n/emulator_ui_strings.dart';
 import '../model/host4_emulator_save_entry.dart';
 import '../session/host4_emulator_session_actions.dart';
 
@@ -184,50 +185,53 @@ class _Host4EmulatorMenuOverlayState extends State<Host4EmulatorMenuOverlay> {
   Map<_MenuAction, _MenuItemModel> get _items => <_MenuAction, _MenuItemModel>{
     _MenuAction.quickLoad: _MenuItemModel(
       identifier: 'menu.quick_load',
-      title: '快速读档',
+      title: EmulatorUiStrings.t('menu.quickLoad'),
       subtitle: _quickSaveTime == null ? null
           : '${_quickSaveTime!.hour.toString().padLeft(2, '0')}:${_quickSaveTime!.minute.toString().padLeft(2, '0')}',
       asset: 'assets/controls/ic_save.svg',
     ),
     _MenuAction.saveManager: _MenuItemModel(
       identifier: 'menu.save_manager',
-      title: '存档管理',
+      title: EmulatorUiStrings.t('menu.saveManager'),
       subtitle: _manualSaveCount == null
           ? null
-          : '$_manualSaveCount/$host4EmulatorManualSaveSlotCount 已用',
+          : EmulatorUiStrings.t('menu.saveManagerUsed', {
+              'used': _manualSaveCount,
+              'total': host4EmulatorManualSaveSlotCount,
+            }),
       asset: 'assets/controls/ic_cundangguanli.svg',
     ),
-    _MenuAction.quickSave: const _MenuItemModel(
+    _MenuAction.quickSave: _MenuItemModel(
       identifier: 'menu.quick_save',
-      title: '快速存档',
-      subtitle: '覆盖快速存档',
+      title: EmulatorUiStrings.t('menu.quickSave'),
+      subtitle: EmulatorUiStrings.t('menu.quickSaveSubtitle'),
       asset: 'assets/controls/ic_load.svg',
     ),
-    _MenuAction.speed: const _MenuItemModel(
+    _MenuAction.speed: _MenuItemModel(
       identifier: 'menu.speed',
-      title: '倍速',
+      title: EmulatorUiStrings.t('menu.speed'),
       asset: 'assets/controls/ic_beisu.svg',
     ),
-    _MenuAction.exit: const _MenuItemModel(
+    _MenuAction.exit: _MenuItemModel(
       identifier: 'menu.exit',
-      title: '退出游戏',
+      title: EmulatorUiStrings.t('menu.exit'),
       asset: 'assets/controls/ic_quit.svg',
     ),
-    _MenuAction.continueGame: const _MenuItemModel(
+    _MenuAction.continueGame: _MenuItemModel(
       identifier: 'menu.continue',
-      title: '继续游戏',
-      subtitle: '返回游戏',
+      title: EmulatorUiStrings.t('menu.continue'),
+      subtitle: EmulatorUiStrings.t('menu.continueSubtitle'),
       asset: 'assets/controls/ic_jixuyouxi.svg',
       highlight: true,
     ),
-    _MenuAction.layout: const _MenuItemModel(
+    _MenuAction.layout: _MenuItemModel(
       identifier: 'menu.layout',
-      title: '切换布局',
+      title: EmulatorUiStrings.t('menu.layout'),
       asset: 'assets/controls/ic_buju.svg',
     ),
-    _MenuAction.keyLocator: const _MenuItemModel(
+    _MenuAction.keyLocator: _MenuItemModel(
       identifier: 'menu.key_locator',
-      title: '按键定位',
+      title: EmulatorUiStrings.t('menu.keyLocator'),
       asset: 'assets/controls/ic_dingwei.svg',
     ),
   };
@@ -365,7 +369,7 @@ class _MenuPanel extends StatelessWidget {
       key: const ValueKey<String>('menu.title'),
       container: true,
       identifier: 'menu.title',
-      label: '暂停菜单',
+      label: EmulatorUiStrings.t('menu.pauseLabel'),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,

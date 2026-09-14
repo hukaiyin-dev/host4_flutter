@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../l10n/emulator_ui_strings.dart';
+
 class Host4EmulatorKeyLocatorOverlay extends StatefulWidget {
   const Host4EmulatorKeyLocatorOverlay({
     this.visibleDuration = const Duration(seconds: 3),
@@ -109,8 +111,8 @@ class _LocatorHeader extends StatelessWidget {
           identifier: landscape
               ? 'landscape.key_locate.title'
               : 'key_locate.title',
-          child: const Text(
-            '调整虚拟按键位置',
+          child: Text(
+            EmulatorUiStrings.t('keyLocator.title'),
             textAlign: TextAlign.center,
             style: TextStyle(
               color: Colors.white,
@@ -123,8 +125,8 @@ class _LocatorHeader extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        const Text(
-          '按住并拖动虚拟按键，调整至合适的位置',
+        Text(
+          EmulatorUiStrings.t('keyLocator.instruction'),
           textAlign: TextAlign.center,
           style: TextStyle(
             color: Color(0xFFF4F7FC),
@@ -151,7 +153,7 @@ class _LocatorFooter extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         Text(
-          landscape ? '支持左右拖动，再次按Pantas键保存全局布局' : '支持上下拖动，再次按Pantas键保存全局布局',
+          EmulatorUiStrings.t(landscape ? 'keyLocator.landscapeHint' : 'keyLocator.portraitHint'),
           textAlign: TextAlign.center,
           style: const TextStyle(
             color: Color(0xFFF4F7FC),
@@ -165,8 +167,8 @@ class _LocatorFooter extends StatelessWidget {
         const SizedBox(height: 8),
         Semantics(
           identifier: 'key_locate.status_text',
-          child: const Text(
-            '如使用Gamepatch，可与其按键位置对齐，获得更好的按键手感',
+          child: Text(
+            EmulatorUiStrings.t('keyLocator.gamepatchHint'),
             textAlign: TextAlign.center,
             style: TextStyle(
               color: Color(0xFF9BA8C3),

@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 
+import '../l10n/emulator_ui_strings.dart';
 import '../model/host4_emulator_save_entry.dart';
 import '../session/host4_emulator_session_actions.dart';
 
@@ -75,17 +76,17 @@ class _Host4EmulatorSaveManagerState extends State<Host4EmulatorSaveManager> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('删除存档？'),
-        content: const Text('删除后无法恢复。'),
+        title: Text(EmulatorUiStrings.t('save.deleteTitle')),
+        content: Text(EmulatorUiStrings.t('save.deleteMessage')),
         actions: <Widget>[
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('取消'),
+            child: Text(EmulatorUiStrings.t('save.cancel')),
           ),
           FilledButton(
             key: const ValueKey<String>('save.delete.confirm'),
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('删除'),
+            child: Text(EmulatorUiStrings.t('save.delete')),
           ),
         ],
       ),
@@ -124,23 +125,23 @@ class _Host4EmulatorSaveManagerState extends State<Host4EmulatorSaveManager> {
                       child: ListView(
                         padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
                         children: <Widget>[
-                          const _SectionTitle('快速存档'),
+                          _SectionTitle(EmulatorUiStrings.t('save.quickSection')),
                           if (catalog.quick case final quick?)
                             _SaveCard(
                               key: const ValueKey<String>('save.quick'),
-                              title: '快速存档',
+                              title: EmulatorUiStrings.t('save.quickLabel'),
                               entry: quick,
                               actions: <Widget>[
                                 _ActionButton(
                                   keyName: 'save.quick.load',
                                   icon: Icons.play_arrow,
-                                  label: '读取',
+                                  label: EmulatorUiStrings.t('save.load'),
                                   onTap: () => _run(widget.actions.quickLoad),
                                 ),
                                 _ActionButton(
                                   keyName: 'save.quick.delete',
                                   icon: Icons.delete_outline,
-                                  label: '删除',
+                                  label: EmulatorUiStrings.t('save.delete'),
                                   onTap: () =>
                                       _confirmDelete(slot: 0, quick: true),
                                 ),
@@ -149,7 +150,7 @@ class _Host4EmulatorSaveManagerState extends State<Host4EmulatorSaveManager> {
                           else
                             const _EmptyQuickSave(),
                           const SizedBox(height: 18),
-                          const _SectionTitle('手动存档'),
+                          _SectionTitle(EmulatorUiStrings.t('save.manualSection')),
                           for (
                             var slot = 1;
                             slot <= host4EmulatorManualSaveSlotCount;
@@ -174,14 +175,14 @@ class _Host4EmulatorSaveManagerState extends State<Host4EmulatorSaveManager> {
     final entry = catalog.manualAt(slot);
     return _SaveCard(
       key: ValueKey<String>('save.slot.$slot'),
-      title: '存档 $slot',
+      title: EmulatorUiStrings.t('save.slotName', {'slot': slot}),
       entry: entry,
       actions: entry == null
           ? <Widget>[
               _ActionButton(
                 keyName: 'save.slot.$slot.save',
                 icon: Icons.add,
-                label: '保存',
+                label: EmulatorUiStrings.t('save.save'),
                 onTap: () => _run(() => widget.actions.saveSlot(slot)),
               ),
             ]
@@ -189,19 +190,19 @@ class _Host4EmulatorSaveManagerState extends State<Host4EmulatorSaveManager> {
               _ActionButton(
                 keyName: 'save.slot.$slot.load',
                 icon: Icons.play_arrow,
-                label: '读取',
+                label: EmulatorUiStrings.t('save.load'),
                 onTap: () => _run(() => widget.actions.loadSlot(slot)),
               ),
               _ActionButton(
                 keyName: 'save.slot.$slot.overwrite',
                 icon: Icons.save_outlined,
-                label: '覆盖',
+                label: EmulatorUiStrings.t('save.overwrite'),
                 onTap: () => _run(() => widget.actions.saveSlot(slot)),
               ),
               _ActionButton(
                 keyName: 'save.slot.$slot.delete',
                 icon: Icons.delete_outline,
-                label: '删除',
+                label: EmulatorUiStrings.t('save.delete'),
                 onTap: () => _confirmDelete(slot: slot, quick: false),
               ),
             ],
@@ -226,9 +227,9 @@ class _Header extends StatelessWidget {
             color: Colors.white,
             icon: const Icon(Icons.arrow_back),
           ),
-          const Expanded(
+          Expanded(
             child: Text(
-              '存档管理',
+              EmulatorUiStrings.t('save.title'),
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 20,
@@ -267,9 +268,9 @@ class _EmptyQuickSave extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const _SaveCard(
-      key: ValueKey<String>('save.quick.empty'),
-      title: '暂无快速存档',
+    return _SaveCard(
+      key: const ValueKey<String>('save.quick.empty'),
+      title: EmulatorUiStrings.t('save.noQuickSave'),
       actions: <Widget>[],
     );
   }

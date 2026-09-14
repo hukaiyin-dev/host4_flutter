@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../l10n/emulator_ui_strings.dart';
 import '../model/host4_emulator_silicone_layout_variant.dart';
 
 class Host4EmulatorSiliconeLayoutPicker extends StatefulWidget {
@@ -120,7 +121,7 @@ class _LayoutPickerHeader extends StatelessWidget {
               ),
               SizedBox(width: 8 * scale),
               Text(
-                '切换布局',
+                EmulatorUiStrings.t('layout.title'),
                 style: TextStyle(
                   color: _LayoutPickerColors.label,
                   fontSize: 14 * scale,
