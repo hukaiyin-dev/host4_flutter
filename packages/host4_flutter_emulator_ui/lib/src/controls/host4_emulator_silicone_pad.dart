@@ -133,8 +133,7 @@ class Host4EmulatorSiliconePad extends StatelessWidget {
           ),
           useHitRect: true,
         ),
-      if (binding.innerTop
-          case final Host4EmulatorSiliconePadSmallBinding top)
+      if (binding.innerTop case final Host4EmulatorSiliconePadSmallBinding top)
         _smallButton(top),
       if (binding.innerBottom
           case final Host4EmulatorSiliconePadSmallBinding bottom)
@@ -239,8 +238,7 @@ class Host4EmulatorSiliconePad extends StatelessWidget {
   }
 
   Positioned _positionRect(Rect rect, Widget child) {
-    final Rect localRect =
-        rect.shift(-layout.padBounds[binding.side]!.topLeft);
+    final Rect localRect = rect.shift(-layout.padBounds[binding.side]!.topLeft);
     return Positioned.fromRect(rect: localRect, child: child);
   }
 
@@ -454,9 +452,28 @@ class _DPadHotZonesState extends State<_DPadHotZones> {
   }
 
   Set<String> _inputsAt(Offset position) {
+    final Size size = widget.bounds.size;
+    if (size.isEmpty || !(Offset.zero & size).contains(position)) {
+      return <String>{};
+    }
+    final Offset delta = Offset(
+      position.dx / size.width - 0.5,
+      position.dy / size.height - 0.5,
+    );
+    // One finger can cover two silicone arms but still produce one touch.
+    // Resolve eight angular sectors, keeping a small central dead zone.
+    if (delta.distance < 0.10) return <String>{};
+    final double threshold =
+        math.max(delta.dx.abs(), delta.dy.abs()) *
+        (math.sqrt2 - 1); // tan(22.5 degrees)
     final Set<String> inputs = <String>{};
     for (final _DPadDirectionHitZone zone in _hitZones) {
-      if (zone.localRect.contains(position)) inputs.add(zone.inputName);
+      // Use the physical arm to retain the existing landscape input rotation.
+      final Offset arm = zone.localRect.center - size.center(Offset.zero);
+      final double projection = arm.dy.abs() > arm.dx.abs()
+          ? delta.dy * arm.dy.sign
+          : delta.dx * arm.dx.sign;
+      if (projection >= threshold) inputs.add(zone.inputName);
     }
     return inputs;
   }
