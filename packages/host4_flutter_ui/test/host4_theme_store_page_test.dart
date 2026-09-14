@@ -259,14 +259,10 @@ void main() {
       expect(_findSemanticsId(id), findsOneWidget);
     }
 
-    final semanticsFile = File(
-      '/Users/tangxiaolu/project/pantas_launcher/'
-      '.dev-flow/R015/evidence/ai_artifacts/R015-FB004/semantics/current.json',
-    );
-    final stateFile = File(
-      '/Users/tangxiaolu/project/pantas_launcher/'
-      '.dev-flow/R015/evidence/ai_artifacts/R015-FB004/state.json',
-    );
+    final artifactDirectory = Directory.systemTemp.createTempSync('host4-theme-');
+    addTearDown(() => artifactDirectory.deleteSync(recursive: true));
+    final semanticsFile = File('${artifactDirectory.path}/semantics/current.json');
+    final stateFile = File('${artifactDirectory.path}/state.json');
 
     semanticsFile.parent.createSync(recursive: true);
     stateFile.parent.createSync(recursive: true);
