@@ -134,6 +134,9 @@ extension DataHelper {
 
         let nextTask = writeQueue.removeFirst()
 
+        // 如果你们确认 MFi 确实不需要串行控制，可以继续保持 false；MFI为流内容，无需像蓝牙一样保持串行队列以防数据堆积缓存异常
+//        isWriting = true
+
         let safeNextTask = SDKSendableBox(value: nextTask)
 
         var mutableQueue = nextTask.datas

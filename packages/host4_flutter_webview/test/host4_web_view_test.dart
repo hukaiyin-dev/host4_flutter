@@ -167,8 +167,43 @@ void main() {
     expect(find.byKey(_FakePlatformWebViewWidget.surfaceKey), findsOneWidget);
   });
 
-  testWidgets('localizes the error page for English',
-      (WidgetTester tester) async {
+  testWidgets('asset retry reloads the asset and preserves the native view', (
+    tester,
+  ) async {
+    var ready = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Host4WebView.asset(
+          initialAssetPath: 'games/index.html',
+          copy: const Host4WebViewCopy(
+            loadFailed: 'Asset failed',
+            retry: 'Retry asset',
+            errorCodeLabel: 'Code',
+          ),
+          onControllerReady: (_) => ready = true,
+        ),
+      ),
+    );
+    expect(ready, isTrue);
+    platform.controller.emitError();
+    await tester.pump();
+    expect(find.text('Asset failed'), findsOneWidget);
+    await tester.tap(find.text('Retry asset'));
+    await tester.pump();
+    expect(platform.controller.loadedAssets, [
+      'games/index.html',
+      'games/index.html',
+    ]);
+    expect(platform.controller.loadRequestCount, 0);
+    expect(platform.widgetCreationCount, 1);
+    platform.controller.emitPageFinished();
+    await tester.pump();
+    expect(find.text('Asset failed'), findsNothing);
+  });
+
+  testWidgets('localizes the error page for English', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
       const MaterialApp(
         locale: Locale('en'),
@@ -187,10 +222,7 @@ void main() {
     expect(find.text('Retry'), findsOneWidget);
     expect(find.text('页面加载失败'), findsNothing);
     expect(find.text('重试'), findsNothing);
-    expect(
-      find.text('offline (Error code: -1009)'),
-      findsOneWidget,
-    );
+    expect(find.text('offline (Error code: -1009)'), findsOneWidget);
   });
 }
 
@@ -224,13 +256,14 @@ class _FakeWebViewPlatform extends WebViewPlatform {
 
 class _FakeWebViewController extends PlatformWebViewController {
   _FakeWebViewController(PlatformWebViewControllerCreationParams params)
-      : super.implementation(params);
+    : super.implementation(params);
 
   _FakeNavigationDelegate? navigationDelegate;
   int loadRequestCount = 0;
   int reloadCount = 0;
   int loadAssetCount = 0;
   String? lastAssetPath;
+  final loadedAssets = <String>[];
   Uri? lastRequestedUri;
   Object? loadRequestFailure;
 
@@ -266,6 +299,7 @@ class _FakeWebViewController extends PlatformWebViewController {
   Future<void> loadFlutterAsset(String key) async {
     loadAssetCount++;
     lastAssetPath = key;
+    loadedAssets.add(key);
   }
 
   @override
@@ -293,19 +327,21 @@ class _FakeWebViewController extends PlatformWebViewController {
   }
 
   void emitPageStarted() {
-    navigationDelegate?.onPageStartedCallback
-        ?.call('https://example.com/login');
+    navigationDelegate?.onPageStartedCallback?.call(
+      'https://example.com/login',
+    );
   }
 
   void emitPageFinished() {
-    navigationDelegate?.onPageFinishedCallback
-        ?.call('https://example.com/login');
+    navigationDelegate?.onPageFinishedCallback?.call(
+      'https://example.com/login',
+    );
   }
 }
 
 class _FakeNavigationDelegate extends PlatformNavigationDelegate {
   _FakeNavigationDelegate(PlatformNavigationDelegateCreationParams params)
-      : super.implementation(params);
+    : super.implementation(params);
 
   PageEventCallback? onPageStartedCallback;
   PageEventCallback? onPageFinishedCallback;
@@ -345,7 +381,7 @@ class _FakeNavigationDelegate extends PlatformNavigationDelegate {
 
 class _FakePlatformWebViewWidget extends PlatformWebViewWidget {
   _FakePlatformWebViewWidget(PlatformWebViewWidgetCreationParams params)
-      : super.implementation(params);
+    : super.implementation(params);
 
   static const ValueKey<String> surfaceKey = ValueKey<String>(
     'fake-webview-surface',

@@ -107,6 +107,8 @@ enum GMacroProtocolID: UInt8 {
     
     case motion             = 0x5B // 体感设置二
     
+    case usbOta             = 0x53 // MFI/USB 双备份升级（Dual Bank Update）
+    
     case handleMode         = 0x69 // 手柄工作模式
     
     case vibration          = 0x67 // 振动状态
@@ -117,6 +119,7 @@ enum GMacroProtocolID: UInt8 {
     case mapping            = 0x6C // 手柄按键映射
     case error              = 0x00 // 错误值
     
+    case iap2ConnectState = 0x75 // iap2设备连接状态
 }
 
 enum GamepadMode: Int {

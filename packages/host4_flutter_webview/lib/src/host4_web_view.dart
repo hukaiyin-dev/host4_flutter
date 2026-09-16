@@ -160,6 +160,7 @@ class _Host4WebViewState extends State<Host4WebView> {
     _webController = Host4WebController(_controller);
     // Keep one widget/controller pair across progress, errors, and retries.
     _webViewWidget = WebViewWidget(controller: _controller);
+    _initialUri = Uri.parse(widget.initialUrl);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       widget.onControllerReady?.call(_webController);
@@ -170,7 +171,6 @@ class _Host4WebViewState extends State<Host4WebView> {
         debugPrint('[Host4WebView] loadFlutterAsset path=$assetPath');
         _controller.loadFlutterAsset(assetPath);
       } else {
-        _initialUri = Uri.parse(widget.initialUrl);
         debugPrint(
           '[Host4WebView] loadRequest uri=$_initialUri '
           'scheme=${_initialUri.scheme} hasScheme=${_initialUri.hasScheme}',
@@ -291,7 +291,9 @@ class _Host4WebViewState extends State<Host4WebView> {
         },
         onNavigationRequest: (req) {
           final uri = Uri.tryParse(req.url);
-          debugPrint('[Host4WebView] onNavigationRequest url=${req.url} scheme=${uri?.scheme}');
+          debugPrint(
+            '[Host4WebView] onNavigationRequest url=${req.url} scheme=${uri?.scheme}',
+          );
           if (uri == null) return NavigationDecision.prevent;
           final custom = widget.onNavigationRequest?.call(uri);
           if (custom != null) {
@@ -552,8 +554,7 @@ class _Host4WebViewState extends State<Host4WebView> {
         await _controller.loadRequest(_initialUri);
       }
     } catch (error, stackTrace) {
-      debugPrint(
-          '[Host4WebView] retry load failed: $error\n$stackTrace');
+      debugPrint('[Host4WebView] retry load failed: $error\n$stackTrace');
       if (!mounted) return;
       _retryTimeout?.cancel();
       setState(() {
