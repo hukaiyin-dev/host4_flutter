@@ -276,6 +276,45 @@ void main() {
     expect(backCount, 1);
   });
 
+  testWidgets('theme store places controller hints at tablet bottom', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1280, 720);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    final manager = Host4ThemeManager(
+      catalog: _testCatalog,
+      bundle: _testBundle,
+    );
+    addTearDown(manager.dispose);
+    await tester.runAsync(
+      () => manager.initialize(Host4ThemeAssets.defaultThemeId),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(home: Host4ThemeStorePage(manager: manager)),
+    );
+    await tester.pumpAndSettle();
+
+    final hintsRect = tester.getRect(
+      find.byKey(const ValueKey<String>('host4_theme_store_controller_hints')),
+    );
+    final topBarRect = tester.getRect(
+      find.byKey(const ValueKey<String>('host4_theme_store_top_bar')),
+    );
+    final cardRect = tester.getRect(
+      find.byKey(const ValueKey<String>('host4_theme_card_default')),
+    );
+
+    expect(720 - hintsRect.bottom, lessThan(32));
+    expect(topBarRect.top, 0);
+    expect(cardRect.top, greaterThan(topBarRect.bottom));
+  });
+
   testWidgets('captures R015-FB004 visual artifacts', (tester) async {
     tester.view.physicalSize = const Size(1280, 720);
     tester.view.devicePixelRatio = 1;

@@ -155,38 +155,52 @@ class Host4ThemeStorePageState extends State<Host4ThemeStorePage> {
                           removeTop: true,
                           removeRight: true,
                           removeBottom: true,
-                          child: SizedBox.expand(
-                            child: FittedBox(
-                              fit: BoxFit.fill,
-                              child: SizedBox(
+                          child: LayoutBuilder(
+                            builder: (context, constraints) {
+                              final viewport = constraints.biggest;
+                              final scene = _ThemeStoreScene(
+                                manager: manager,
+                                pendingThemeId: _pendingThemeId,
+                                cardFocusNodes: _cardFocusNodes,
+                                title: widget.title,
+                                confirmLabel: widget.confirmLabel,
+                                backLabel: widget.backLabel,
+                                statusSource: widget.statusSource,
+                                showSearchButton: widget.showSearchButton,
+                                showControllerHints: widget.showControllerHints,
+                                themeNameBuilder: widget.themeNameBuilder,
+                                onConfirm:
+                                    widget.onConfirm ??
+                                    () => Navigator.maybePop(context),
+                                onBack:
+                                    widget.onBack ??
+                                    () => Navigator.maybePop(context),
+                                onSearch: widget.onSearch,
+                                onApplyTheme: _applyTheme,
+                              );
+                              if (!_isThemeStoreTabletLike(viewport)) {
+                                return SizedBox.expand(
+                                  child: FittedBox(
+                                    fit: BoxFit.fill,
+                                    child: SizedBox(
+                                      key: const ValueKey<String>(
+                                        'host4_theme_store_page',
+                                      ),
+                                      width: _ThemeStoreScene.designWidth,
+                                      height: _ThemeStoreScene.designHeight,
+                                      child: scene,
+                                    ),
+                                  ),
+                                );
+                              }
+                              return _ThemeStoreTabletViewport(
                                 key: const ValueKey<String>(
                                   'host4_theme_store_page',
                                 ),
-                                width: _ThemeStoreScene.designWidth,
-                                height: _ThemeStoreScene.designHeight,
-                                child: _ThemeStoreScene(
-                                  manager: manager,
-                                  pendingThemeId: _pendingThemeId,
-                                  cardFocusNodes: _cardFocusNodes,
-                                  title: widget.title,
-                                  confirmLabel: widget.confirmLabel,
-                                  backLabel: widget.backLabel,
-                                  statusSource: widget.statusSource,
-                                  showSearchButton: widget.showSearchButton,
-                                  showControllerHints:
-                                      widget.showControllerHints,
-                                  themeNameBuilder: widget.themeNameBuilder,
-                                  onConfirm:
-                                      widget.onConfirm ??
-                                      () => Navigator.maybePop(context),
-                                  onBack:
-                                      widget.onBack ??
-                                      () => Navigator.maybePop(context),
-                                  onSearch: widget.onSearch,
-                                  onApplyTheme: _applyTheme,
-                                ),
-                              ),
-                            ),
+                                scene: scene,
+                                viewport: viewport,
+                              );
+                            },
                           ),
                         ),
                       ),
@@ -344,6 +358,31 @@ class Host4ThemeStorePageState extends State<Host4ThemeStorePage> {
   }
 }
 
+bool _isThemeStoreTabletLike(Size viewport) {
+  if (viewport.isEmpty) {
+    return false;
+  }
+  final shortest = viewport.shortestSide;
+  final longest = viewport.longestSide;
+  return shortest >= 560 || (shortest >= 520 && longest >= 900);
+}
+
+double _themeStoreUniformScale(Size viewport) {
+  final widthScale = viewport.width / _ThemeStoreScene.designWidth;
+  final heightScale = viewport.height / _ThemeStoreScene.designHeight;
+  final scale = widthScale < heightScale ? widthScale : heightScale;
+  if (!scale.isFinite || scale <= 0) {
+    return 1;
+  }
+  return scale;
+}
+
+double _themeStoreGridHeight(int itemCount) {
+  final rows = ((itemCount + 2) ~/ 3).clamp(1, 999).toDouble();
+  return rows * _ThemeStoreScene.cardHeight +
+      (rows - 1) * _ThemeStoreScene.gridRunSpacing;
+}
+
 bool _isActivateKey(LogicalKeyboardKey key) {
   return key == LogicalKeyboardKey.keyA ||
       key == LogicalKeyboardKey.enter ||
@@ -360,6 +399,120 @@ TraversalDirection? _directionForKey(LogicalKeyboardKey key) {
     LogicalKeyboardKey.arrowDown => TraversalDirection.down,
     _ => null,
   };
+}
+
+class _ThemeStoreTabletViewport extends StatelessWidget {
+  const _ThemeStoreTabletViewport({
+    required this.scene,
+    required this.viewport,
+    super.key,
+  });
+
+  final _ThemeStoreScene scene;
+  final Size viewport;
+
+  @override
+  Widget build(BuildContext context) {
+    final scale = _themeStoreUniformScale(viewport);
+    final gridHeight = _themeStoreGridHeight(scene.manager.catalog.length);
+
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: const ColoredBox(
+            key: ValueKey<String>('host4_theme_store_content_background'),
+            color: Color(0xFFF4F7FC),
+          ),
+        ),
+        Positioned(
+          left: 0,
+          top: 0,
+          width: _ThemeStoreScene.designWidth * scale,
+          height: _ThemeStoreScene.topBarHeight * scale,
+          child: _ThemeStoreScaledBox(
+            scale: scale,
+            width: _ThemeStoreScene.designWidth,
+            height: _ThemeStoreScene.topBarHeight,
+            child: scene.buildTopBar(context),
+          ),
+        ),
+        Positioned(
+          left: _ThemeStoreScene.gridLeft * scale,
+          top: _ThemeStoreScene.gridTop * scale,
+          width: _ThemeStoreScene.gridWidth * scale,
+          child: _ThemeStoreScaledBox(
+            scale: scale,
+            width: _ThemeStoreScene.gridWidth,
+            height: gridHeight,
+            child: scene.buildGrid(context),
+          ),
+        ),
+        if (scene.showControllerHints)
+          Positioned(
+            right: _ThemeStoreScene.hintsRight * scale,
+            bottom: _ThemeStoreScene.hintsBottom * scale,
+            child: _ThemeStoreScaledIntrinsicBox(
+              scale: scale,
+              alignment: Alignment.bottomRight,
+              child: scene.buildControllerHints(context),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _ThemeStoreScaledBox extends StatelessWidget {
+  const _ThemeStoreScaledBox({
+    required this.scale,
+    required this.width,
+    required this.height,
+    required this.child,
+    this.alignment = Alignment.topLeft,
+  });
+
+  final double scale;
+  final double width;
+  final double height;
+  final Widget child;
+  final Alignment alignment;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: width * scale,
+      height: height * scale,
+      child: OverflowBox(
+        alignment: alignment,
+        minWidth: 0,
+        minHeight: 0,
+        maxWidth: width,
+        maxHeight: height,
+        child: Transform.scale(
+          scale: scale,
+          alignment: alignment,
+          child: SizedBox(width: width, height: height, child: child),
+        ),
+      ),
+    );
+  }
+}
+
+class _ThemeStoreScaledIntrinsicBox extends StatelessWidget {
+  const _ThemeStoreScaledIntrinsicBox({
+    required this.scale,
+    required this.child,
+    this.alignment = Alignment.center,
+  });
+
+  final double scale;
+  final Widget child;
+  final Alignment alignment;
+
+  @override
+  Widget build(BuildContext context) {
+    return Transform.scale(scale: scale, alignment: alignment, child: child);
+  }
 }
 
 class _ThemeStoreScene extends StatelessWidget {
@@ -382,6 +535,14 @@ class _ThemeStoreScene extends StatelessWidget {
 
   static const designWidth = 844.0;
   static const designHeight = 390.0;
+  static const topBarHeight = 68.0;
+  static const gridLeft = 66.0;
+  static const gridTop = 84.0;
+  static const gridWidth = 532.0;
+  static const gridRunSpacing = 8.0;
+  static const cardHeight = 140.0;
+  static const hintsRight = 24.0;
+  static const hintsBottom = 14.0;
 
   final Host4ThemeManager manager;
   final String? pendingThemeId;
@@ -408,56 +569,61 @@ class _ThemeStoreScene extends StatelessWidget {
             color: Color(0xFFF4F7FC),
           ),
         ),
+        Positioned(left: 0, top: 0, right: 0, child: buildTopBar(context)),
         Positioned(
-          left: 0,
-          top: 0,
-          right: 0,
-          child: Host4TopBar(
-            key: const ValueKey<String>('host4_theme_store_top_bar'),
-            safeAreaTop: 0,
-            title: title,
-            titleKey: const ValueKey<String>('host4_theme_store_title'),
-            trailing: showSearchButton
-                ? _HeaderIconButton(
-                    keyValue: 'host4_theme_store_search',
-                    icon: Icons.search_rounded,
-                    onTap: onSearch,
-                  )
-                : null,
-            status: statusSource == null
-                ? null
-                : Host4SystemStatus(
-                    key: const ValueKey<String>(
-                      'host4_theme_store_system_status',
-                    ),
-                    source: statusSource!,
-                  ),
-          ),
-        ),
-        Positioned(
-          left: 66,
-          top: 84,
-          width: 532,
-          child: _ThemeStoreGrid(
-            manager: manager,
-            pendingThemeId: pendingThemeId,
-            cardFocusNodes: cardFocusNodes,
-            themeNameBuilder: themeNameBuilder,
-            onApplyTheme: onApplyTheme,
-          ),
+          left: gridLeft,
+          top: gridTop,
+          width: gridWidth,
+          child: buildGrid(context),
         ),
         if (showControllerHints)
           Positioned(
-            right: 24,
-            bottom: 14,
-            child: _ThemeStoreControllerHints(
-              confirmLabel: confirmLabel,
-              backLabel: backLabel,
-              onConfirm: onConfirm,
-              onBack: onBack,
-            ),
+            right: hintsRight,
+            bottom: hintsBottom,
+            child: buildControllerHints(context),
           ),
       ],
+    );
+  }
+
+  Widget buildTopBar(BuildContext context) {
+    return Host4TopBar(
+      key: const ValueKey<String>('host4_theme_store_top_bar'),
+      safeAreaTop: 0,
+      title: title,
+      titleKey: const ValueKey<String>('host4_theme_store_title'),
+      trailing: showSearchButton
+          ? _HeaderIconButton(
+              keyValue: 'host4_theme_store_search',
+              icon: Icons.search_rounded,
+              onTap: onSearch,
+            )
+          : null,
+      status: statusSource == null
+          ? null
+          : Host4SystemStatus(
+              key: const ValueKey<String>('host4_theme_store_system_status'),
+              source: statusSource!,
+            ),
+    );
+  }
+
+  Widget buildGrid(BuildContext context) {
+    return _ThemeStoreGrid(
+      manager: manager,
+      pendingThemeId: pendingThemeId,
+      cardFocusNodes: cardFocusNodes,
+      themeNameBuilder: themeNameBuilder,
+      onApplyTheme: onApplyTheme,
+    );
+  }
+
+  Widget buildControllerHints(BuildContext context) {
+    return _ThemeStoreControllerHints(
+      confirmLabel: confirmLabel,
+      backLabel: backLabel,
+      onConfirm: onConfirm,
+      onBack: onBack,
     );
   }
 }
