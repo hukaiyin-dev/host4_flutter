@@ -9,6 +9,7 @@ import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 
 import 'host4_js_bridge_adapter.dart';
 import 'host4_web_controller.dart';
+import 'host4_web_view_copy.dart';
 
 /// A WebView widget with progress, error handling, and optional JS bridge support.
 ///
@@ -40,6 +41,7 @@ class Host4WebView extends StatefulWidget {
     this.onPageFinished,
     this.onNavigationRequest,
     this.onWebResourceError,
+    this.copy,
   });
 
   /// The URL to load on launch.
@@ -98,19 +100,30 @@ class Host4WebView extends StatefulWidget {
   /// handled; false shows the built-in error page.
   final bool Function(WebResourceError error)? onWebResourceError;
 
+  /// Optional override for the built-in error page strings.
+  ///
+  /// When null, strings follow [Localizations.localeOf].
+  final Host4WebViewCopy? copy;
+
   @override
   State<Host4WebView> createState() => _Host4WebViewState();
 }
 
 class _Host4WebViewState extends State<Host4WebView> {
   late final WebViewController _controller;
+  late final WebViewWidget _webViewWidget;
   late final Host4WebController _webController;
 
   double _progress = 0;
   bool _isLoading = true;
   bool _hasError = false;
-  String _errorMessage = '';
+  String _errorDescription = '';
+  int? _errorCode;
   String _pageTitle = '';
+  late final Uri _initialUri;
+  bool _retryInFlight = false;
+  bool _mainFrameErrorThisLoad = false;
+  Timer? _retryTimeout;
   Timer? _bridgeReadinessTimer;
   bool _bridgeRepairInFlight = false;
 
@@ -119,12 +132,21 @@ class _Host4WebViewState extends State<Host4WebView> {
     super.initState();
     _controller = _buildController();
     _webController = Host4WebController(_controller);
+    // Keep one widget/controller pair as well as keeping it mounted below.
+    // This avoids asking the platform implementation to recreate its native
+    // view on every state change (progress, errors, and retries).
+    _webViewWidget = WebViewWidget(controller: _controller);
+    // Initialize the widget before notifying consumers. A consumer is allowed
+    // to synchronously rebuild from onControllerReady, and that rebuild must
+    // not observe an uninitialized late field.
     widget.onControllerReady?.call(_webController);
+    _initialUri = Uri.parse(widget.initialUrl);
     unawaited(_initializeAndLoad());
   }
 
   @override
   void dispose() {
+    _retryTimeout?.cancel();
     _stopBridgeReadinessGuard();
     super.dispose();
   }
@@ -164,12 +186,12 @@ class _Host4WebViewState extends State<Host4WebView> {
 
     await _controller.setNavigationDelegate(_navigationDelegate());
 
-    final uri = Uri.parse(widget.initialUrl);
     debugPrint(
-      '[Host4WebView] loadRequest uri=$uri scheme=${uri.scheme} hasScheme=${uri.hasScheme}',
+      '[Host4WebView] loadRequest uri=$_initialUri '
+      'scheme=${_initialUri.scheme} hasScheme=${_initialUri.hasScheme}',
     );
     try {
-      await _controller.loadRequest(uri);
+      await _controller.loadRequest(_initialUri);
     } catch (e, st) {
       debugPrint('[Host4WebView] loadRequest failed: $e\n$st');
     }
@@ -194,7 +216,10 @@ class _Host4WebViewState extends State<Host4WebView> {
       setState(() {
         _isLoading = true;
         _progress = 0;
-        _hasError = false;
+        _mainFrameErrorThisLoad = false;
+        // Keep the error overlay up during a retry. Hiding it on start
+        // reveals the blank WKWebView surface, which stays black if the
+        // next request also fails or never reports another error.
       });
       // evaluateJavascript 在重定向期间可能落入旧 document，因此持续检查
       // 当前 document，直到主页面完成加载。
@@ -203,9 +228,14 @@ class _Host4WebViewState extends State<Host4WebView> {
     },
     onPageFinished: (url) {
       if (!mounted) return;
+      _retryTimeout?.cancel();
       setState(() {
         _isLoading = false;
         _progress = 1;
+        _retryInFlight = false;
+        if (!_mainFrameErrorThisLoad) {
+          _hasError = false;
+        }
       });
       // 最终补注入完成后再停止守护，覆盖最后一次 document 切换。
       unawaited(_finishBridgeReadinessGuard());
@@ -223,9 +253,13 @@ class _Host4WebViewState extends State<Host4WebView> {
       _stopBridgeReadinessGuard();
       final handled = widget.onWebResourceError?.call(error) ?? false;
       if (!handled) {
+        _retryTimeout?.cancel();
         setState(() {
           _hasError = true;
-          _errorMessage = '${error.description} (错误码: ${error.errorCode})';
+          _mainFrameErrorThisLoad = true;
+          _retryInFlight = false;
+          _errorDescription = error.description;
+          _errorCode = error.errorCode;
           _isLoading = false;
         });
       }
@@ -432,15 +466,22 @@ class _Host4WebViewState extends State<Host4WebView> {
             if (widget.showProgressBar && _isLoading)
               LinearProgressIndicator(value: _progress),
             Expanded(
-              child: _hasError
-                  ? _buildErrorPage()
-                  : Stack(
-                      children: [
-                        WebViewWidget(controller: _controller),
-                        if (_isLoading && widget.loadingOverlayBuilder != null)
-                          widget.loadingOverlayBuilder!(context),
-                      ],
-                    ),
+              key: const ValueKey<String>('host4_webview_content'),
+              // Keep the platform view mounted for the entire lifetime of the
+              // route.  On iOS, removing a UiKitView and then attaching a new
+              // one for the same WKWebView controller can leave the platform
+              // view with no surface after reload (a black screen).  Both the
+              // loading and error states are therefore overlays instead of
+              // alternate branches that replace WebViewWidget.
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  _webViewWidget,
+                  if (_isLoading && widget.loadingOverlayBuilder != null)
+                    widget.loadingOverlayBuilder!(context),
+                  if (_hasError) Positioned.fill(child: _buildErrorPage()),
+                ],
+              ),
             ),
           ],
         ),
@@ -449,33 +490,92 @@ class _Host4WebViewState extends State<Host4WebView> {
   }
 
   Widget _buildErrorPage() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.wifi_off, size: 64, color: Colors.grey),
-            const SizedBox(height: 16),
-            const Text('页面加载失败', style: TextStyle(fontSize: 18)),
-            const SizedBox(height: 8),
-            Text(
-              _errorMessage,
-              style: const TextStyle(color: Colors.grey),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton.icon(
-              onPressed: () {
-                setState(() => _hasError = false);
-                _controller.reload();
-              },
-              icon: const Icon(Icons.refresh),
-              label: const Text('重试'),
-            ),
-          ],
+    final copy = widget.copy ?? Host4WebViewCopy.of(context);
+    final detail = copy.errorDetail(
+      description: _errorDescription,
+      code: _errorCode,
+    );
+    return Material(
+      color: widget.backgroundColor ?? Colors.black,
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.wifi_off, size: 64, color: Colors.grey),
+              const SizedBox(height: 16),
+              Text(
+                copy.loadFailed,
+                key: const ValueKey<String>('host4_webview_error_title'),
+                style: const TextStyle(fontSize: 18, color: Colors.white),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                detail,
+                key: const ValueKey<String>('host4_webview_error_detail'),
+                style: const TextStyle(color: Colors.grey),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton.icon(
+                key: const ValueKey<String>('host4_webview_retry'),
+                onPressed: _retryInFlight ? null : _retry,
+                icon: _retryInFlight
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.refresh),
+                label: Text(copy.retry),
+              ),
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  Future<void> _retry() async {
+    if (!mounted || _retryInFlight) return;
+
+    // Keep the error overlay visible until a load actually finishes without a
+    // main-frame error. Removing it first shows the blank native WebView,
+    // which stays black on iOS when reload/loadRequest does not emit another
+    // error after a failed first navigation.
+    setState(() {
+      _retryInFlight = true;
+      _isLoading = true;
+      _progress = 0;
+      _mainFrameErrorThisLoad = false;
+    });
+    _retryTimeout?.cancel();
+    _retryTimeout = Timer(const Duration(seconds: 12), () {
+      if (!mounted || !_retryInFlight) return;
+      setState(() {
+        _retryInFlight = false;
+        _hasError = true;
+        _isLoading = false;
+      });
+    });
+
+    try {
+      await _controller.loadRequest(_initialUri);
+    } catch (error, stackTrace) {
+      debugPrint(
+        '[Host4WebView] retry loadRequest failed: $error\n$stackTrace',
+      );
+      if (!mounted) return;
+      _retryTimeout?.cancel();
+      setState(() {
+        _hasError = true;
+        _retryInFlight = false;
+        _mainFrameErrorThisLoad = true;
+        _isLoading = false;
+        _errorDescription = '$error';
+        _errorCode = null;
+      });
+    }
   }
 }

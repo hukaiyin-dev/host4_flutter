@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:host4_flutter_ui/host4_flutter_ui.dart';
@@ -152,6 +153,60 @@ void main() {
     expect(find.text('Default Aurora'), findsNothing);
   });
 
+  testWidgets('theme store wraps long English names without ellipsis', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1280, 720);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    final manager = Host4ThemeManager(
+      catalog: _testCatalog,
+      bundle: _testBundle,
+    );
+    addTearDown(manager.dispose);
+    await tester.runAsync(
+      () => manager.initialize(Host4ThemeAssets.defaultThemeId),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Host4ThemeStorePage(
+          manager: manager,
+          themeNameBuilder: (entry) => switch (entry.id) {
+            'default' => 'Default Theme',
+            'obsidian' => 'Obsidian Theme',
+            _ => entry.name,
+          },
+        ),
+      ),
+    );
+    await tester.pump();
+
+    final title = find.text('Obsidian Theme');
+    expect(title, findsOneWidget);
+    final titleWidget = tester.widget<Text>(title);
+    final paragraph = tester.renderObject<RenderParagraph>(title);
+    expect(titleWidget.maxLines, isNull);
+    expect(titleWidget.softWrap, isTrue);
+    expect(titleWidget.overflow, TextOverflow.visible);
+    expect(paragraph.didExceedMaxLines, isFalse);
+    expect(tester.getSize(title).height, greaterThan(18));
+
+    final card = find.byKey(
+      const ValueKey<String>('host4_theme_card_obsidian'),
+    );
+    expect(tester.getSize(card).height, greaterThan(124));
+    final titleRect = tester.getRect(title);
+    final cardRect = tester.getRect(card);
+    expect(titleRect.top, greaterThanOrEqualTo(cardRect.top));
+    expect(titleRect.bottom, lessThanOrEqualTo(cardRect.bottom));
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('theme store uses per-card focus and sinks repeat activate', (
     tester,
   ) async {
@@ -219,6 +274,45 @@ void main() {
     await tester.sendKeyUpEvent(LogicalKeyboardKey.keyB);
 
     expect(backCount, 1);
+  });
+
+  testWidgets('theme store places controller hints at tablet bottom', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1280, 720);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    final manager = Host4ThemeManager(
+      catalog: _testCatalog,
+      bundle: _testBundle,
+    );
+    addTearDown(manager.dispose);
+    await tester.runAsync(
+      () => manager.initialize(Host4ThemeAssets.defaultThemeId),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(home: Host4ThemeStorePage(manager: manager)),
+    );
+    await tester.pumpAndSettle();
+
+    final hintsRect = tester.getRect(
+      find.byKey(const ValueKey<String>('host4_theme_store_controller_hints')),
+    );
+    final topBarRect = tester.getRect(
+      find.byKey(const ValueKey<String>('host4_theme_store_top_bar')),
+    );
+    final cardRect = tester.getRect(
+      find.byKey(const ValueKey<String>('host4_theme_card_default')),
+    );
+
+    expect(720 - hintsRect.bottom, lessThan(32));
+    expect(topBarRect.top, 0);
+    expect(cardRect.top, greaterThan(topBarRect.bottom));
   });
 
   testWidgets('captures R015-FB004 visual artifacts', (tester) async {
