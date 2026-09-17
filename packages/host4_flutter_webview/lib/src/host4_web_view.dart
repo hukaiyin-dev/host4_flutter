@@ -124,6 +124,8 @@ class _Host4WebViewState extends State<Host4WebView> {
   bool _retryInFlight = false;
   bool _mainFrameErrorThisLoad = false;
   Timer? _retryTimeout;
+  Timer? _bridgeReadinessTimer;
+  bool _bridgeRepairInFlight = false;
 
   @override
   void initState() {
@@ -139,21 +141,60 @@ class _Host4WebViewState extends State<Host4WebView> {
     // not observe an uninitialized late field.
     widget.onControllerReady?.call(_webController);
     _initialUri = Uri.parse(widget.initialUrl);
-    debugPrint(
-      '[Host4WebView] loadRequest uri=$_initialUri '
-      'scheme=${_initialUri.scheme} hasScheme=${_initialUri.hasScheme}',
-    );
-    try {
-      _controller.loadRequest(_initialUri);
-    } catch (e, st) {
-      debugPrint('[Host4WebView] loadRequest failed: $e\n$st');
-    }
+    unawaited(_initializeAndLoad());
   }
 
   @override
   void dispose() {
     _retryTimeout?.cancel();
+    _stopBridgeReadinessGuard();
     super.dispose();
+  }
+
+  Future<void> _initializeAndLoad() async {
+    await _controller.setJavaScriptMode(JavaScriptMode.unrestricted);
+    await _controller.setBackgroundColor(
+      widget.backgroundColor ?? Colors.black,
+    );
+
+    if (widget.userAgent != null) {
+      await _controller.setUserAgent(widget.userAgent);
+    }
+
+    if (!widget.enableZoom &&
+        _controller.platform is AndroidWebViewController) {
+      await (_controller.platform as AndroidWebViewController).enableZoom(
+        false,
+      );
+    }
+
+    if (widget.bridge != null) {
+      await _controller.addJavaScriptChannel(
+        'JsBridge',
+        onMessageReceived: _onJsMessage,
+      );
+      await _controller.addJavaScriptChannel(
+        'NativeBridge',
+        onMessageReceived: _onJsMessage,
+      );
+    }
+
+    await _controller.addJavaScriptChannel(
+      '_FlutterJsLog',
+      onMessageReceived: (msg) => debugPrint('[JS] ${msg.message}'),
+    );
+
+    await _controller.setNavigationDelegate(_navigationDelegate());
+
+    debugPrint(
+      '[Host4WebView] loadRequest uri=$_initialUri '
+      'scheme=${_initialUri.scheme} hasScheme=${_initialUri.hasScheme}',
+    );
+    try {
+      await _controller.loadRequest(_initialUri);
+    } catch (e, st) {
+      debugPrint('[Host4WebView] loadRequest failed: $e\n$st');
+    }
   }
 
   WebViewController _buildController() {
@@ -166,105 +207,122 @@ class _Host4WebViewState extends State<Host4WebView> {
       params = const PlatformWebViewControllerCreationParams();
     }
 
-    final controller = WebViewController.fromPlatformCreationParams(params)
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setBackgroundColor(widget.backgroundColor ?? Colors.black);
+    return WebViewController.fromPlatformCreationParams(params);
+  }
 
-    if (widget.userAgent != null) {
-      controller.setUserAgent(widget.userAgent);
-    }
+  NavigationDelegate _navigationDelegate() => NavigationDelegate(
+    onPageStarted: (url) {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = true;
+        _progress = 0;
+        _mainFrameErrorThisLoad = false;
+        // Keep the error overlay up during a retry. Hiding it on start
+        // reveals the blank WKWebView surface, which stays black if the
+        // next request also fails or never reports another error.
+      });
+      // evaluateJavascript 在重定向期间可能落入旧 document，因此持续检查
+      // 当前 document，直到主页面完成加载。
+      _startBridgeReadinessGuard();
+      widget.onPageStarted?.call(url);
+    },
+    onPageFinished: (url) {
+      if (!mounted) return;
+      _retryTimeout?.cancel();
+      setState(() {
+        _isLoading = false;
+        _progress = 1;
+        _retryInFlight = false;
+        if (!_mainFrameErrorThisLoad) {
+          _hasError = false;
+        }
+      });
+      // 最终补注入完成后再停止守护，覆盖最后一次 document 切换。
+      unawaited(_finishBridgeReadinessGuard());
+      widget.onPageFinished?.call(url);
+      _updatePageTitle();
+    },
+    onProgress: (p) {
+      if (!mounted) return;
+      setState(() => _progress = p / 100.0);
+    },
+    onWebResourceError: (error) {
+      if (!mounted) return;
+      final isMain = error.isForMainFrame ?? true;
+      if (!isMain) return;
+      _stopBridgeReadinessGuard();
+      final handled = widget.onWebResourceError?.call(error) ?? false;
+      if (!handled) {
+        _retryTimeout?.cancel();
+        setState(() {
+          _hasError = true;
+          _mainFrameErrorThisLoad = true;
+          _retryInFlight = false;
+          _errorDescription = error.description;
+          _errorCode = error.errorCode;
+          _isLoading = false;
+        });
+      }
+    },
+    onNavigationRequest: (req) {
+      final uri = Uri.tryParse(req.url);
+      if (uri == null) return NavigationDecision.prevent;
+      final custom = widget.onNavigationRequest?.call(uri);
+      if (custom != null) {
+        return custom
+            ? NavigationDecision.navigate
+            : NavigationDecision.prevent;
+      }
+      return (uri.scheme == 'http' || uri.scheme == 'https')
+          ? NavigationDecision.navigate
+          : NavigationDecision.prevent;
+    },
+  );
 
-    if (!widget.enableZoom && controller.platform is AndroidWebViewController) {
-      (controller.platform as AndroidWebViewController).enableZoom(false);
-    }
-
-    if (widget.bridge != null) {
-      controller.addJavaScriptChannel(
-        'JsBridge',
-        onMessageReceived: _onJsMessage,
-      );
-      controller.addJavaScriptChannel(
-        'NativeBridge',
-        onMessageReceived: _onJsMessage,
-      );
-    }
-
-    controller.addJavaScriptChannel(
-      '_FlutterJsLog',
-      onMessageReceived: (msg) => debugPrint('[JS] ${msg.message}'),
+  void _startBridgeReadinessGuard() {
+    if (widget.bridge == null || _bridgeReadinessTimer != null) return;
+    unawaited(_repairBridgeInCurrentDocument());
+    _bridgeReadinessTimer = Timer.periodic(
+      const Duration(milliseconds: 25),
+      (_) => unawaited(_repairBridgeInCurrentDocument()),
     );
+  }
 
-    controller.setNavigationDelegate(
-      NavigationDelegate(
-        onPageStarted: (url) {
-          if (!mounted) return;
-          setState(() {
-            _isLoading = true;
-            _progress = 0;
-            _mainFrameErrorThisLoad = false;
-            // Keep the error overlay up during a retry. Hiding it on start
-            // reveals the blank WKWebView surface, which stays black if the
-            // next request also fails or never reports another error.
-          });
-          // 尽早注入 adapterJs，确保 H5 任何 JS 运行前 bridge 已就位
-          // （Android @JavascriptInterface 在 WebView 创建时即可用，此处对齐该行为）
-          _injectAdapterJs();
-          widget.onPageStarted?.call(url);
-        },
-        onPageFinished: (url) {
-          if (!mounted) return;
-          _retryTimeout?.cancel();
-          setState(() {
-            _isLoading = false;
-            _progress = 1;
-            _retryInFlight = false;
-            if (!_mainFrameErrorThisLoad) {
-              _hasError = false;
-            }
-          });
-          // 再次注入，覆盖页面内部可能重置 window.JsBridge 的情况
-          _injectAdapterJs();
-          widget.onPageFinished?.call(url);
-          _updatePageTitle();
-        },
-        onProgress: (p) {
-          if (!mounted) return;
-          setState(() => _progress = p / 100.0);
-        },
-        onWebResourceError: (error) {
-          if (!mounted) return;
-          final isMain = error.isForMainFrame ?? true;
-          if (!isMain) return;
-          final handled = widget.onWebResourceError?.call(error) ?? false;
-          if (!handled) {
-            _retryTimeout?.cancel();
-            setState(() {
-              _hasError = true;
-              _mainFrameErrorThisLoad = true;
-              _retryInFlight = false;
-              _errorDescription = error.description;
-              _errorCode = error.errorCode;
-              _isLoading = false;
-            });
-          }
-        },
-        onNavigationRequest: (req) {
-          final uri = Uri.tryParse(req.url);
-          if (uri == null) return NavigationDecision.prevent;
-          final custom = widget.onNavigationRequest?.call(uri);
-          if (custom != null) {
-            return custom
-                ? NavigationDecision.navigate
-                : NavigationDecision.prevent;
-          }
-          return (uri.scheme == 'http' || uri.scheme == 'https')
-              ? NavigationDecision.navigate
-              : NavigationDecision.prevent;
-        },
-      ),
-    );
+  Future<void> _finishBridgeReadinessGuard() async {
+    while (_bridgeRepairInFlight) {
+      await Future<void>.delayed(const Duration(milliseconds: 5));
+    }
+    await _repairBridgeInCurrentDocument(force: true);
+    _stopBridgeReadinessGuard();
+  }
 
-    return controller;
+  void _stopBridgeReadinessGuard() {
+    _bridgeReadinessTimer?.cancel();
+    _bridgeReadinessTimer = null;
+  }
+
+  Future<void> _repairBridgeInCurrentDocument({bool force = false}) async {
+    if (_bridgeRepairInFlight || widget.bridge == null) return;
+    _bridgeRepairInFlight = true;
+    try {
+      if (force || !await _isBridgeReadyInCurrentDocument()) {
+        await _injectAdapterJs();
+      }
+    } catch (_) {
+      // Navigation can replace the document while JavaScript is evaluated.
+      // The next guard tick retries against the active document.
+    } finally {
+      _bridgeRepairInFlight = false;
+    }
+  }
+
+  Future<bool> _isBridgeReadyInCurrentDocument() async {
+    final result = await _controller.runJavaScriptReturningResult(r'''
+(function() {
+  return window.__Host4BridgeAdapterReady === true;
+})()
+''');
+    return result == true || result.toString() == 'true';
   }
 
   void _onJsMessage(JavaScriptMessage message) {
@@ -283,13 +341,15 @@ class _Host4WebViewState extends State<Host4WebView> {
     } catch (_) {}
   }
 
-  void _injectAdapterJs() {
+  Future<void> _injectAdapterJs() async {
     final adapter = widget.bridge;
     if (adapter == null) return;
-    _controller.runJavaScript(_kGenericBridgeAdapterJs);
-    _controller.runJavaScript(adapter.adapterJs);
+    await _controller.runJavaScript(
+      '\n$_kGenericBridgeAdapterJs\n${adapter.adapterJs}\n'
+      'window.__Host4BridgeAdapterReady = true;',
+    );
     if (kDebugMode) {
-      _controller.runJavaScript(_kJsDebugSnippet);
+      await _controller.runJavaScript(_kJsDebugSnippet);
     }
   }
 
@@ -504,7 +564,8 @@ class _Host4WebViewState extends State<Host4WebView> {
       await _controller.loadRequest(_initialUri);
     } catch (error, stackTrace) {
       debugPrint(
-          '[Host4WebView] retry loadRequest failed: $error\n$stackTrace');
+        '[Host4WebView] retry loadRequest failed: $error\n$stackTrace',
+      );
       if (!mounted) return;
       _retryTimeout?.cancel();
       setState(() {
