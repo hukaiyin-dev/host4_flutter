@@ -1,7 +1,6 @@
 package com.host4.host4_flutter_device_native
 
 import Host4FlutterGmacroConstants
-import io.flutter.plugin.common.MethodChannel
 
 internal object GmacroMethodInvoker {
     private const val MODE_NORMAL = 0x04
@@ -24,7 +23,7 @@ internal object GmacroMethodInvoker {
         transportKind: String,
         method: String,
         arguments: Map<String, Any?>,
-        result: MethodChannel.Result,
+        onResult: (GmacroResult) -> Unit,
     ) {
         val commands = GmacroSdkAccess.commands(deviceKey, transportKind)
 
@@ -32,12 +31,12 @@ internal object GmacroMethodInvoker {
             when (method) {
                 //手柄信息
                 Host4FlutterGmacroConstants.fetchDeviceVersion ->{
-                    commands.queryDeviceInfo(GmacroCallbackBridge.fetchDeviceVersion(result))
+                    commands.queryDeviceInfo(GmacroCallbackBridge.fetchDeviceVersion(onResult))
                 }
 
                 //查询长按按键类型
                 Host4FlutterGmacroConstants.fetchAppWakeKeyType-> {
-                    commands.fetchAppWakeKeyType(GmacroCallbackBridge.fetchAppWakeKeyType(result))
+                    commands.fetchAppWakeKeyType(GmacroCallbackBridge.fetchAppWakeKeyType(onResult))
                 }
 
                 // 0x77 04 查询 Game Macro 默认值
@@ -45,44 +44,44 @@ internal object GmacroMethodInvoker {
                     val profile = GmacroArgParser.intArg(arguments, "profile")
                     commands.queryMacroHandle(
                         profile,
-                        GmacroCallbackBridge.fetchGameMacroDefaultInfo(result),
+                        GmacroCallbackBridge.fetchGameMacroDefaultInfo(onResult),
                     )
                 }
                 //0x77 08
                 Host4FlutterGmacroConstants.fetchMobapadDeviceInfo -> {
                     val profile = GmacroArgParser.intArg(arguments, "profile")
-                    commands.queryMacroHandleInfo(profile, GmacroCallbackBridge.message(result))
+                    commands.queryMacroHandleInfo(profile, GmacroCallbackBridge.message(onResult))
                 }
 
                 //0x44 查询实物外观
                 Host4FlutterGmacroConstants.fetchPrintingType ->
-                    commands.queryPhysicalAppearance(GmacroCallbackBridge.fetchPrintingType(result))
+                    commands.queryPhysicalAppearance(GmacroCallbackBridge.fetchPrintingType(onResult))
 
                 //恢复出厂
-                Host4FlutterGmacroConstants.resetDevice -> commands.resetKeyBoard(GmacroCallbackBridge.message(result))
+                Host4FlutterGmacroConstants.resetDevice -> commands.resetKeyBoard(GmacroCallbackBridge.message(onResult))
 
                 //切换模式
-                Host4FlutterGmacroConstants.switchToNormalMode -> commands.switchHandleMode(MODE_NORMAL, GmacroCallbackBridge.message(result))
-                Host4FlutterGmacroConstants.switchToTestMode -> commands.switchHandleMode(MODE_TEST, GmacroCallbackBridge.message(result))
-                Host4FlutterGmacroConstants.switchToConfigMode -> commands.switchHandleMode(MODE_MACRO, GmacroCallbackBridge.message(result))
+                Host4FlutterGmacroConstants.switchToNormalMode -> commands.switchHandleMode(MODE_NORMAL, GmacroCallbackBridge.message(onResult))
+                Host4FlutterGmacroConstants.switchToTestMode -> commands.switchHandleMode(MODE_TEST, GmacroCallbackBridge.message(onResult))
+                Host4FlutterGmacroConstants.switchToConfigMode -> commands.switchHandleMode(MODE_MACRO, GmacroCallbackBridge.message(onResult))
                 //触点映射配置模式
-                Host4FlutterGmacroConstants.switchToSettingMode -> commands.switchHandleMode(MODE_SETTING, GmacroCallbackBridge.message(result))
-                Host4FlutterGmacroConstants.switchToTouchMappingMode -> commands.switchHandleMode(MODE_TOUCH_MAPPING, GmacroCallbackBridge.message(result))
+                Host4FlutterGmacroConstants.switchToSettingMode -> commands.switchHandleMode(MODE_SETTING, GmacroCallbackBridge.message(onResult))
+                Host4FlutterGmacroConstants.switchToTouchMappingMode -> commands.switchHandleMode(MODE_TOUCH_MAPPING, GmacroCallbackBridge.message(onResult))
 
                 //查询上报率
-                Host4FlutterGmacroConstants.fetchReportRate -> commands.QueryRateOfReturn(GmacroCallbackBridge.message(result))
+                Host4FlutterGmacroConstants.fetchReportRate -> commands.QueryRateOfReturn(GmacroCallbackBridge.message(onResult))
                 //设置上报率
                 Host4FlutterGmacroConstants.updateReportRate -> {
                     val rate = GmacroArgParser.intArg(arguments, "rate")
-                    commands.setRateOfReturn(rate, GmacroCallbackBridge.message(result))
+                    commands.setRateOfReturn(rate, GmacroCallbackBridge.message(onResult))
                 }
 
                 //查询充电底座启停开关
-                Host4FlutterGmacroConstants.fetchChargingDock -> commands.queryChargingDock(GmacroCallbackBridge.message(result))
+                Host4FlutterGmacroConstants.fetchChargingDock -> commands.queryChargingDock(GmacroCallbackBridge.message(onResult))
                 //设置充电底座启停开关
                 Host4FlutterGmacroConstants.updateChargingDock -> {
                     val isOn = GmacroArgParser.boolArg(arguments, "isOn")
-                    commands.setChargingDock(if (isOn) 1 else 2, GmacroCallbackBridge.message(result))
+                    commands.setChargingDock(if (isOn) 1 else 2, GmacroCallbackBridge.message(onResult))
                 }
 
                 //查询设备支持灯效及当前灯效（支持模式固定，无小模式）0x82 01
@@ -90,15 +89,15 @@ internal object GmacroMethodInvoker {
                     //TODO 0x82 01
                 }
                 //0x82 04
-                Host4FlutterGmacroConstants.fetchLightPosition -> commands.queryLightingPositionGroup(GmacroCallbackBridge.message(result))
+                Host4FlutterGmacroConstants.fetchLightPosition -> commands.queryLightingPositionGroup(GmacroCallbackBridge.message(onResult))
                 //0x82 05
-                Host4FlutterGmacroConstants.fetchSupportedLightEffects -> commands.queryLightingPositionEffect(GmacroCallbackBridge.message(result))
+                Host4FlutterGmacroConstants.fetchSupportedLightEffects -> commands.queryLightingPositionEffect(GmacroCallbackBridge.message(onResult))
                 //0x82 06
-                Host4FlutterGmacroConstants.fetchCurrentLightEffect -> commands.queryCurrentLightingEffect(GmacroCallbackBridge.message(result))
+                Host4FlutterGmacroConstants.fetchCurrentLightEffect -> commands.queryCurrentLightingEffect(GmacroCallbackBridge.message(onResult))
 
                 //查询等效 0x71
                 Host4FlutterGmacroConstants.fetchCurrentLightConfig ->
-                    commands.queryCurrentLightEffect(GmacroCallbackBridge.fetchCurrentLightConfig(result))
+                    commands.queryCurrentLightEffect(GmacroCallbackBridge.fetchCurrentLightConfig(onResult))
 
                 //设置灯光 0x72
                 Host4FlutterGmacroConstants.setLightConfig -> {
@@ -110,7 +109,7 @@ internal object GmacroMethodInvoker {
                         GmacroArgParser.intArg(arguments, "colorR"),
                         GmacroArgParser.intArg(arguments, "colorG"),
                         GmacroArgParser.intArg(arguments, "colorB"),
-                        GmacroCallbackBridge.message(result),
+                        GmacroCallbackBridge.message(onResult),
                     )
                 }
 
@@ -126,7 +125,7 @@ internal object GmacroMethodInvoker {
                         green,
                         blue,
                         groupCount,
-                        GmacroCallbackBridge.message(result),
+                        GmacroCallbackBridge.message(onResult),
                     )
                 }
 
@@ -140,7 +139,7 @@ internal object GmacroMethodInvoker {
                         GmacroArgParser.intArg(arguments, "speed"),
                         GmacroArgParser.intArg(arguments, "mode"),
                         GmacroArgParser.intArg(arguments, "subMode"),
-                        GmacroCallbackBridge.message(result),
+                        GmacroCallbackBridge.message(onResult),
                     )
                 }
 
@@ -149,78 +148,78 @@ internal object GmacroMethodInvoker {
                     GmacroArgParser.intArg(arguments, "leftMax"),
                     GmacroArgParser.intArg(arguments, "rightMin"),
                     GmacroArgParser.intArg(arguments, "rightMax"),
-                    GmacroCallbackBridge.message(result),
+                    GmacroCallbackBridge.message(onResult),
                 )
 
                 Host4FlutterGmacroConstants.leftTriggerCurve -> {
                     val points = GmacroModelFactory.macroPoints(GmacroArgParser.mapList(arguments, "cgPoints"))
-                    commands.setMacroTriggerPoint(TRIGGER_LEFT, points.size, points, GmacroCallbackBridge.message(result))
+                    commands.setMacroTriggerPoint(TRIGGER_LEFT, points.size, points, GmacroCallbackBridge.message(onResult))
                 }
 
                 Host4FlutterGmacroConstants.rightTriggerCurve -> {
                     val points = GmacroModelFactory.macroPoints(GmacroArgParser.mapList(arguments, "cgPoints"))
-                    commands.setMacroTriggerPoint(TRIGGER_RIGHT, points.size, points, GmacroCallbackBridge.message(result))
+                    commands.setMacroTriggerPoint(TRIGGER_RIGHT, points.size, points, GmacroCallbackBridge.message(onResult))
                 }
 
                 Host4FlutterGmacroConstants.triggerQuickSwitch -> commands.setQuickTriggerSwitch(
                     if (GmacroArgParser.boolArg(arguments, "leftOn")) 1 else 2,
                     if (GmacroArgParser.boolArg(arguments, "rightOn")) 1 else 2,
-                    GmacroCallbackBridge.message(result),
+                    GmacroCallbackBridge.message(onResult),
                 )
 
-                Host4FlutterGmacroConstants.getTriggerQuickSwitch -> commands.queryQuickTriggerSwitch(GmacroCallbackBridge.message(result))
+                Host4FlutterGmacroConstants.getTriggerQuickSwitch -> commands.queryQuickTriggerSwitch(GmacroCallbackBridge.message(onResult))
 
                 //板机校准
                 Host4FlutterGmacroConstants.startTriggerCalibration ->
-                    commands.beginAlignRockerOrTrigger(CALIB_TRIGGER_SUB_ID,  GmacroCallbackBridge.message(result))
+                    commands.beginAlignRockerOrTrigger(CALIB_TRIGGER_SUB_ID,  GmacroCallbackBridge.message(onResult))
                 Host4FlutterGmacroConstants.endTriggerCalibration ->
-                    commands.endAlignRockerOrTrigger(CALIB_TRIGGER_SUB_ID,  GmacroCallbackBridge.endAlignRockerOrTrigger(result))
+                    commands.endAlignRockerOrTrigger(CALIB_TRIGGER_SUB_ID,  GmacroCallbackBridge.endAlignRockerOrTrigger(onResult))
 
                 //设置左右扳机线性输出
                 Host4FlutterGmacroConstants.triggerLinearOutput -> commands.switchLinerTrigger(
                     GmacroArgParser.intArg(arguments, "leftMode"),
-                    GmacroCallbackBridge.message(result),
+                    GmacroCallbackBridge.message(onResult),
                 )
 
                 Host4FlutterGmacroConstants.updateTriggerTestVibrationSwitch -> commands.setTriggerTestVibration(
                     if (GmacroArgParser.boolArg(arguments, "triggerTestVibration")) 1 else 0,
-                    GmacroCallbackBridge.message(result),
+                    GmacroCallbackBridge.message(onResult),
                 )
 
-                Host4FlutterGmacroConstants.fetchTriggerTestVibrationSwitch -> commands.queryTriggerTestVibration(GmacroCallbackBridge.message(result))
+                Host4FlutterGmacroConstants.fetchTriggerTestVibrationSwitch -> commands.queryTriggerTestVibration(GmacroCallbackBridge.message(onResult))
 
                 Host4FlutterGmacroConstants.updateTriggerVibration -> commands.setTriggerVibration(
                     if (GmacroArgParser.boolArg(arguments, "triggerVibration")) 1 else 0,
-                    GmacroCallbackBridge.message(result),
+                    GmacroCallbackBridge.message(onResult),
                 )
 
-                Host4FlutterGmacroConstants.fetchTriggerVibration -> commands.queryTriggerVibration(GmacroCallbackBridge.message(result))
+                Host4FlutterGmacroConstants.fetchTriggerVibration -> commands.queryTriggerVibration(GmacroCallbackBridge.message(onResult))
 
                 Host4FlutterGmacroConstants.updateRockerLinear -> commands.setMacroRockerLinear(
                     GmacroModelFactory.macroRockerLinear(arguments),
-                    GmacroCallbackBridge.message(result),
+                    GmacroCallbackBridge.message(onResult),
                 )
 
                 Host4FlutterGmacroConstants.updateLeftRocker3DCurve -> {
                     val points = GmacroModelFactory.macroPoints(GmacroArgParser.mapList(arguments, "cgPoints"))
-                    commands.setMacroRockerPoint(SIDE_LEFT, points.size, points, GmacroCallbackBridge.message(result))
+                    commands.setMacroRockerPoint(SIDE_LEFT, points.size, points, GmacroCallbackBridge.message(onResult))
                 }
 
                 Host4FlutterGmacroConstants.updateRightRocker3DCurve -> {
                     val points = GmacroModelFactory.macroPoints(GmacroArgParser.mapList(arguments, "cgPoints"))
-                    commands.setMacroRockerPoint(SIDE_RIGHT, points.size, points, GmacroCallbackBridge.message(result))
+                    commands.setMacroRockerPoint(SIDE_RIGHT, points.size, points, GmacroCallbackBridge.message(onResult))
                 }
 
                 Host4FlutterGmacroConstants.rockerDeadZoneCompensation -> commands.setRockerDeadCompensate(
                     GmacroArgParser.intArg(arguments, "left"),
                     GmacroArgParser.intArg(arguments, "right"),
-                    GmacroCallbackBridge.message(result),
+                    GmacroCallbackBridge.message(onResult),
                 )
 
                 Host4FlutterGmacroConstants.rockerDeadZoneRegressionComp -> commands.setRockerDeadBackCompensate(
                     GmacroArgParser.intArg(arguments, "left"),
                     GmacroArgParser.intArg(arguments, "right"),
-                    GmacroCallbackBridge.message(result),
+                    GmacroCallbackBridge.message(onResult),
                 )
 
                 Host4FlutterGmacroConstants.rockerTriggerType -> commands.setRockerMethodAndKey(
@@ -228,61 +227,61 @@ internal object GmacroMethodInvoker {
                     GmacroArgParser.intArg(arguments, "leftGamepadKey"),
                     GmacroArgParser.intArg(arguments, "rightRigger"),
                     GmacroArgParser.intArg(arguments, "rightGamepadKey"),
-                    GmacroCallbackBridge.message(result),
+                    GmacroCallbackBridge.message(onResult),
                 )
 
                 Host4FlutterGmacroConstants.rockerOutputGraphics -> commands.setRockerOutputTrajectory(
                     GmacroArgParser.intArg(arguments, "left"),
                     GmacroArgParser.intArg(arguments, "right"),
-                    GmacroCallbackBridge.message(result),
+                    GmacroCallbackBridge.message(onResult),
                 )
 
                 //摇杆校准
                 Host4FlutterGmacroConstants.startRockerCalibration ->
-                    commands.beginAlignRockerOrTrigger(CALIB_ROCKER_SUB_ID, GmacroCallbackBridge.message(result))
+                    commands.beginAlignRockerOrTrigger(CALIB_ROCKER_SUB_ID, GmacroCallbackBridge.message(onResult))
                 Host4FlutterGmacroConstants.endRockerCalibration ->
-                    commands.endAlignRockerOrTrigger(CALIB_ROCKER_SUB_ID,  GmacroCallbackBridge.endAlignRockerOrTrigger(result))
+                    commands.endAlignRockerOrTrigger(CALIB_ROCKER_SUB_ID,  GmacroCallbackBridge.endAlignRockerOrTrigger(onResult))
 
                 Host4FlutterGmacroConstants.updateRockerAdditional -> commands.setRockerAdditional(
                     GmacroModelFactory.rockerParam(arguments),
-                    GmacroCallbackBridge.message(result),
+                    GmacroCallbackBridge.message(onResult),
                 )
 
                 // 0x5C 查询手柄当前配置页
                 Host4FlutterGmacroConstants.fetchCurrentProfile ->
-                    commands.queryMacroProfileNum( GmacroCallbackBridge.fetchCurrentProfile(result))
+                    commands.queryMacroProfileNum( GmacroCallbackBridge.fetchCurrentProfile(onResult))
 
                 // 0x36 平台设置
                 Host4FlutterGmacroConstants.startMacroPlatform -> {
                     val profile = GmacroArgParser.intArg(arguments, "profile")
-                    commands.setMacroPlatform(profile,GmacroCallbackBridge.message(result))
+                    commands.setMacroPlatform(profile,GmacroCallbackBridge.message(onResult))
                 }
 
                 // 0x34 结束配置
                 Host4FlutterGmacroConstants.endMacroConfig ->
-                    commands.setMacroProfileEnd(GmacroCallbackBridge.message(result))
+                    commands.setMacroProfileEnd(GmacroCallbackBridge.message(onResult))
 
                 Host4FlutterGmacroConstants.queryCurrentMacro -> {
                     val profile = GmacroArgParser.intArg(arguments, "profile")
-                    commands.queryMacroCurrentConfig(profile, GmacroCallbackBridge.message(result))
+                    commands.queryMacroCurrentConfig(profile, GmacroCallbackBridge.message(onResult))
                 }
 
                 Host4FlutterGmacroConstants.queryMacroKeys -> {
                     val profile = GmacroArgParser.intArg(arguments, "profile")
-                    commands.queryMacroSupport(profile, GmacroCallbackBridge.message(result))
+                    commands.queryMacroSupport(profile, GmacroCallbackBridge.message(onResult))
                 }
 
                 Host4FlutterGmacroConstants.queryMacroRecordableKeys -> {
                     val profile = GmacroArgParser.intArg(arguments, "profile")
-                    commands.queryRecordSupport(profile, GmacroCallbackBridge.message(result))
+                    commands.queryRecordSupport(profile, GmacroCallbackBridge.message(onResult))
                 }
 
-                Host4FlutterGmacroConstants.queryMacroTimeRange -> commands.queryHandleTime(GmacroCallbackBridge.message(result))
+                Host4FlutterGmacroConstants.queryMacroTimeRange -> commands.queryHandleTime(GmacroCallbackBridge.message(onResult))
 
                 //查询宏录制最大支持组数
                 Host4FlutterGmacroConstants.queryMacroMaxGroups -> {
                     val profile = GmacroArgParser.intArg(arguments, "profile")
-                    commands.querySupportMacroMaxNum(profile, GmacroCallbackBridge.message(result))
+                    commands.querySupportMacroMaxNum(profile, GmacroCallbackBridge.message(onResult))
                 }
 
                 Host4FlutterGmacroConstants.setMacroKeys -> {
@@ -299,7 +298,7 @@ internal object GmacroMethodInvoker {
                         comKeys.size,
                         GmacroArgParser.intArg(firstComKey, "keepTime", 100),
                         keys,
-                        GmacroCallbackBridge.message(result),
+                        GmacroCallbackBridge.message(onResult),
                     )
                 }
 
@@ -307,26 +306,26 @@ internal object GmacroMethodInvoker {
                     val profile = GmacroArgParser.intArg(arguments, "profile")
                     val key = GmacroArgParser.intArg(arguments, "key")
                     val intervalTime = GmacroArgParser.intArg(arguments, "intervalTime")
-                    commands.setMacroCycleTime(profile, key, intervalTime, GmacroCallbackBridge.message(result))
+                    commands.setMacroCycleTime(profile, key, intervalTime, GmacroCallbackBridge.message(onResult))
                 }
 
-                Host4FlutterGmacroConstants.startRecord -> commands.setRecordMacroStart(GmacroCallbackBridge.message(result))
-                Host4FlutterGmacroConstants.endRecord -> commands.setRecordMacroStop(true, GmacroCallbackBridge.message(result))
+                Host4FlutterGmacroConstants.startRecord -> commands.setRecordMacroStart(GmacroCallbackBridge.message(onResult))
+                Host4FlutterGmacroConstants.endRecord -> commands.setRecordMacroStop(true, GmacroCallbackBridge.message(onResult))
 
                 //支持体感触发按键 魔派
                 Host4FlutterGmacroConstants.queryGyroTriggerKeys -> {
                     val profile = GmacroArgParser.intArg(arguments, "profile")
-                    commands.QueryKinectTriggerSupport(profile,GmacroCallbackBridge.message(result))
+                    commands.QueryKinectTriggerSupport(profile,GmacroCallbackBridge.message(onResult))
                 }
                 //支持体感映射模式 魔派
                 Host4FlutterGmacroConstants.queryGyroMappingModes -> {
                     val profile = GmacroArgParser.intArg(arguments, "profile")
-                    commands.queryKinectMappingMode(profile,GmacroCallbackBridge.message(result))
+                    commands.queryKinectMappingMode(profile,GmacroCallbackBridge.message(onResult))
                 }
 
                 Host4FlutterGmacroConstants.setMotion -> commands.setKinectConfig(
                     GmacroModelFactory.macroKinect(arguments),
-                    GmacroCallbackBridge.message(result),
+                    GmacroCallbackBridge.message(onResult),
                 )
 
                 Host4FlutterGmacroConstants.setMotionSecondary -> commands.setMotionSecondarySensitivity(
@@ -334,22 +333,22 @@ internal object GmacroMethodInvoker {
                     GmacroArgParser.intArg(arguments, "triggerMode"),
                     GmacroArgParser.intArg(arguments, "triggerKey"),
                     GmacroArgParser.intArg(arguments, "sensitivity"),
-                    GmacroCallbackBridge.message(result),
+                    GmacroCallbackBridge.message(onResult),
                 )
 
                 Host4FlutterGmacroConstants.setMotionHorizontalAxis -> commands.setMotionHorizontalAxial(
                     GmacroArgParser.intArg(arguments, "axis"),
-                    GmacroCallbackBridge.message(result),
+                    GmacroCallbackBridge.message(onResult),
                 )
 
-                Host4FlutterGmacroConstants.fetchMotionHorizontalAxis -> commands.queryMotionHorizontalAxial(GmacroCallbackBridge.message(result))
+                Host4FlutterGmacroConstants.fetchMotionHorizontalAxis -> commands.queryMotionHorizontalAxial(GmacroCallbackBridge.message(onResult))
                 //查询陀螺仪死区补偿
                 Host4FlutterGmacroConstants.fetchGyroDeadZoneComp ->
-                    commands.queryMotionDeadZoneCompensate(GmacroCallbackBridge.message(result))
+                    commands.queryMotionDeadZoneCompensate(GmacroCallbackBridge.message(onResult))
 
                 //查询陀螺仪灵敏度曲线 0x6A 0x1D
                 Host4FlutterGmacroConstants.fetchGyroSensitivityCurve ->{
-                    commands.queryMotionSensitivityCurve(GmacroCallbackBridge.message(result))
+                    commands.queryMotionSensitivityCurve(GmacroCallbackBridge.message(onResult))
                 }
 
                 //查询陀螺仪二级灵敏度 0x6A 0x1F
@@ -360,7 +359,7 @@ internal object GmacroMethodInvoker {
                 Host4FlutterGmacroConstants.setGyroXYInvert -> commands.setMotionXYReversal(
                     if (GmacroArgParser.boolArg(arguments, "xOn")) 2 else 1,
                     if (GmacroArgParser.boolArg(arguments, "yOn")) 2 else 1,
-                    GmacroCallbackBridge.message(result),
+                    GmacroCallbackBridge.message(onResult),
                 )
 
                 //查询陀螺仪 XY 轴反转信息 0x6A 0x10
@@ -370,7 +369,7 @@ internal object GmacroMethodInvoker {
 
                 Host4FlutterGmacroConstants.setGyroDeadZone -> commands.setMotionDeadZoneCompensate(
                     GmacroArgParser.intArg(arguments, "compensate"),
-                    GmacroCallbackBridge.message(result),
+                    GmacroCallbackBridge.message(onResult),
                 )
 
                 Host4FlutterGmacroConstants.setGyroSensitivityCurve -> {
@@ -390,43 +389,43 @@ internal object GmacroMethodInvoker {
                             ),
                         ),
                     )
-                    commands.setMotionSensitivityCurve(points, GmacroCallbackBridge.message(result))
+                    commands.setMotionSensitivityCurve(points, GmacroCallbackBridge.message(onResult))
                 }
 
                 Host4FlutterGmacroConstants.updateGyroOuterDeadZone -> commands.setMotionOuterDeadZone(
                     GmacroArgParser.intArg(arguments, "gyroOuterDeadZone"),
-                    GmacroCallbackBridge.message(result),
+                    GmacroCallbackBridge.message(onResult),
                 )
 
-                Host4FlutterGmacroConstants.fetchGyroOuterDeadZone -> commands.queryMotionOuterDeadZone(GmacroCallbackBridge.message(result))
+                Host4FlutterGmacroConstants.fetchGyroOuterDeadZone -> commands.queryMotionOuterDeadZone(GmacroCallbackBridge.message(onResult))
 
-                Host4FlutterGmacroConstants.startGyroCalibration -> commands.beginAlignGyroscope( GmacroCallbackBridge.message(result))
-                Host4FlutterGmacroConstants.endGyroCalibration -> commands.endAlignGyroscope( GmacroCallbackBridge.endGyroCalibration(result))
+                Host4FlutterGmacroConstants.startGyroCalibration -> commands.beginAlignGyroscope( GmacroCallbackBridge.message(onResult))
+                Host4FlutterGmacroConstants.endGyroCalibration -> commands.endAlignGyroscope( GmacroCallbackBridge.endGyroCalibration(onResult))
 
                 Host4FlutterGmacroConstants.updateGyroXYRatio -> commands.setMotionXYAxisRatio(
                     GmacroArgParser.intArg(arguments, "gyroXYRatio"),
-                    GmacroCallbackBridge.message(result),
+                    GmacroCallbackBridge.message(onResult),
                 )
 
-                Host4FlutterGmacroConstants.fetchGyroXYRatio -> commands.queryMotionXYAxisRatio(GmacroCallbackBridge.message(result))
+                Host4FlutterGmacroConstants.fetchGyroXYRatio -> commands.queryMotionXYAxisRatio(GmacroCallbackBridge.message(onResult))
 
                 Host4FlutterGmacroConstants.updateGyroMappingType -> commands.setMotionMappingType(
                     GmacroArgParser.intArg(arguments, "gyroMappingType"),
-                    GmacroCallbackBridge.message(result),
+                    GmacroCallbackBridge.message(onResult),
                 )
 
-                Host4FlutterGmacroConstants.fetchGyroMappingType -> commands.queryMotionMappingType(GmacroCallbackBridge.message(result))
+                Host4FlutterGmacroConstants.fetchGyroMappingType -> commands.queryMotionMappingType(GmacroCallbackBridge.message(onResult))
 
                 //查询支持映射的按键
                 Host4FlutterGmacroConstants.queryMappableKeys -> {
                     val profile = GmacroArgParser.intArg(arguments, "profile")
-                    commands.queryMapperSupport(profile, GmacroCallbackBridge.message(result))
+                    commands.queryMapperSupport(profile, GmacroCallbackBridge.message(onResult))
                 }
 
                 //查询支持映射为手柄的按键
                 Host4FlutterGmacroConstants.queryMappableGamepadKeys -> {
                     val profile = GmacroArgParser.intArg(arguments, "profile")
-                    commands.queryMapperSetting(profile, GmacroCallbackBridge.message(result))
+                    commands.queryMapperSetting(profile, GmacroCallbackBridge.message(onResult))
                 }
 
                 //设置按键映射为手柄
@@ -437,7 +436,7 @@ internal object GmacroMethodInvoker {
                     commands.setMacroKeyMapping(
                         GmacroArgParser.intArg(first, "original"),
                         GmacroArgParser.intArg(first, "mapped"),
-                        GmacroCallbackBridge.message(result),
+                        GmacroCallbackBridge.message(onResult),
                     )
                 }
 
@@ -448,7 +447,7 @@ internal object GmacroMethodInvoker {
                     commands.sendMacroMapping(
                         original,
                         mapped,
-                        GmacroCallbackBridge.message(result))
+                        GmacroCallbackBridge.message(onResult))
                 }
 
                 //设置按键映射为鼠标
@@ -459,7 +458,7 @@ internal object GmacroMethodInvoker {
                     commands.setMacroKeyMouse(
                         GmacroArgParser.intArg(first, "original"),
                         GmacroArgParser.intArg(first, "mapped"),
-                        GmacroCallbackBridge.message(result),
+                        GmacroCallbackBridge.message(onResult),
                     )
                 }
 
@@ -470,14 +469,14 @@ internal object GmacroMethodInvoker {
                     commands.setMacroKeyKeyboard(
                         GmacroArgParser.intArg(first, "original"),
                         GmacroArgParser.intArg(first, "mapped"),
-                        GmacroCallbackBridge.message(result),
+                        GmacroCallbackBridge.message(onResult),
                     )
                 }
 
                 //查询当前按键映射配置
                 Host4FlutterGmacroConstants.queryCurrentMapping -> {
                     val profile = GmacroArgParser.intArg(arguments, "profile")
-                    commands.queryMappingKey(profile, GmacroCallbackBridge.queryCurrentMapping(result))
+                    commands.queryMappingKey(profile, GmacroCallbackBridge.queryCurrentMapping(onResult))
                 }
 
                 //设置手柄按键映射（支持同时映射多种类型键值）
@@ -486,16 +485,16 @@ internal object GmacroMethodInvoker {
                         setOriginalKey(GmacroArgParser.intArg(arguments, "original"))
                         setTypeNum(GmacroArgParser.mapList(arguments, "mappedKeys").size)
                     }
-                    commands.setMultiKeyMapping(mapping, GmacroCallbackBridge.message(result))
+                    commands.setMultiKeyMapping(mapping, GmacroCallbackBridge.message(onResult))
                 }
 
                 //获取手柄按键映射
-                Host4FlutterGmacroConstants.queryAllMultiMappings -> commands.queryAllMultiMappingKey(GmacroCallbackBridge.message(result))
+                Host4FlutterGmacroConstants.queryAllMultiMappings -> commands.queryAllMultiMappingKey(GmacroCallbackBridge.message(onResult))
 
                 //查询某个手柄按键的多映射配置
                 Host4FlutterGmacroConstants.queryMultiMapping -> commands.queryMultiMappingByKey(
                     GmacroArgParser.intArg(arguments, "original"),
-                    GmacroCallbackBridge.message(result),
+                    GmacroCallbackBridge.message(onResult),
                 )
 
                 //设置触点映射屏幕尺寸
@@ -503,7 +502,7 @@ internal object GmacroMethodInvoker {
                     GmacroArgParser.intArg(arguments, "orientation"),
                     GmacroArgParser.intArg(arguments, "width"),
                     GmacroArgParser.intArg(arguments, "height"),
-                    GmacroCallbackBridge.message(result),
+                    GmacroCallbackBridge.message(onResult),
                 )
 
                 //设置触点映射按键
@@ -518,7 +517,7 @@ internal object GmacroMethodInvoker {
                     GmacroArgParser.intArg(arguments, "y1"),
                     GmacroArgParser.intArg(arguments, "attribute"),
                     GmacroArgParser.intArg(arguments, "page"),
-                    GmacroCallbackBridge.message(result),
+                    GmacroCallbackBridge.message(onResult),
                 )
 
                 //设置触点宏按键
@@ -533,49 +532,49 @@ internal object GmacroMethodInvoker {
                     GmacroArgParser.intArg(arguments, "range"),
                     GmacroArgParser.intArg(arguments, "sensitivity"),
                     GmacroArgParser.intArg(arguments, "opposite"),
-                    GmacroCallbackBridge.message(result),
+                    GmacroCallbackBridge.message(onResult),
                 )
 
                 //设置触点宏按键触发方式
                 Host4FlutterGmacroConstants.setMacroKeyTrigger -> commands.setMacroKeyTrigger(
                     GmacroArgParser.longArg(arguments, "keyCode"),
                     GmacroArgParser.intArg(arguments, "touchType"),
-                    GmacroCallbackBridge.message(result),
+                    GmacroCallbackBridge.message(onResult),
                 )
 
                 //设置触点宏终止按键
                 Host4FlutterGmacroConstants.setMacroTerminationKey -> commands.setMacroTerminationKey(
                     GmacroArgParser.longArg(arguments, "keyCode"),
                     GmacroArgParser.longArg(arguments, "terminateKey"),
-                    GmacroCallbackBridge.message(result),
+                    GmacroCallbackBridge.message(onResult),
                 )
 
                 //设置触点映射的 turbo 速率
                 Host4FlutterGmacroConstants.setKeyTurboSpeed -> commands.setKeyTurboSpeed(
                     GmacroArgParser.longArg(arguments, "keyCode"),
                     GmacroArgParser.intArg(arguments, "turbo"),
-                    GmacroCallbackBridge.message(result),
+                    GmacroCallbackBridge.message(onResult),
                 )
 
                 //结束触点映射配置
                 Host4FlutterGmacroConstants.keyMappingEnd -> commands.keyMappingEnd(
                     GmacroArgParser.intArg(arguments, "page"),
                     GmacroArgParser.intArg(arguments, "packet"),
-                    GmacroCallbackBridge.message(result),
+                    GmacroCallbackBridge.message(onResult),
                 )
 
-                Host4FlutterGmacroConstants.getSleepTime -> commands.querySleepTime(GmacroCallbackBridge.message(result))
+                Host4FlutterGmacroConstants.getSleepTime -> commands.querySleepTime(GmacroCallbackBridge.message(onResult))
 
                 Host4FlutterGmacroConstants.setSleepTime -> commands.setSleepTime(
                     GmacroArgParser.intArg(arguments, "time"),
-                    GmacroCallbackBridge.message(result),
+                    GmacroCallbackBridge.message(onResult),
                 )
 
                 //设置振动
                 Host4FlutterGmacroConstants.setVibrationLevel -> commands.setVibrationLevel(
                     GmacroArgParser.intArg(arguments, "left"),
                     GmacroArgParser.intArg(arguments, "right"),
-                    GmacroCallbackBridge.message(result),
+                    GmacroCallbackBridge.message(onResult),
                 )
 
                 //测试振动
@@ -587,7 +586,7 @@ internal object GmacroMethodInvoker {
                         left,
                         right,
                         position,
-                        GmacroCallbackBridge.message(result),
+                        GmacroCallbackBridge.message(onResult),
                     )
                 }
 
@@ -600,48 +599,48 @@ internal object GmacroMethodInvoker {
                         GmacroArgParser.intArg(first, "key"),
                         GmacroArgParser.intArg(first, "turbo"),
                         GmacroArgParser.intArg(first, "speed"),
-                        GmacroCallbackBridge.message(result),
+                        GmacroCallbackBridge.message(onResult),
                     )
                 }
 
                 //查询支持连发的按键
                 Host4FlutterGmacroConstants.querySupportedTurboKeys -> {
                     val profile = GmacroArgParser.intArg(arguments, "profile")
-                    commands.queryBurstSupport(profile, GmacroCallbackBridge.message(result))
+                    commands.queryBurstSupport(profile, GmacroCallbackBridge.message(onResult))
                 }
 
                 Host4FlutterGmacroConstants.switchVibrateOpen -> {
                     val status = GmacroArgParser.intArg(arguments, "status")
-                    commands.switchVibrateOpen(status, GmacroCallbackBridge.message(result))
+                    commands.switchVibrateOpen(status, GmacroCallbackBridge.message(onResult))
                 }
 
                 Host4FlutterGmacroConstants.queryVibrateOpen ->
-                    commands.queryVibrateOpen(GmacroCallbackBridge.queryVibrateOpen(result))
+                    commands.queryVibrateOpen(GmacroCallbackBridge.queryVibrateOpen(onResult))
 
                 Host4FlutterGmacroConstants.switchWorkStyle -> {
                     val mode = GmacroArgParser.intArg(arguments, "mode")
-                    commands.switchWorkStyle(mode, GmacroCallbackBridge.message(result))
+                    commands.switchWorkStyle(mode, GmacroCallbackBridge.message(onResult))
                 }
 
                 Host4FlutterGmacroConstants.queryWorkStyle ->
-                    commands.queryWorkStyle(GmacroCallbackBridge.queryWorkStyle(result))
+                    commands.queryWorkStyle(GmacroCallbackBridge.queryWorkStyle(onResult))
 
                 Host4FlutterGmacroConstants.switchOutputMode -> {
                     val mode = GmacroArgParser.intArg(arguments, "mode")
-                    commands.switchOutputMode(mode, GmacroCallbackBridge.message(result))
+                    commands.switchOutputMode(mode, GmacroCallbackBridge.message(onResult))
                 }
 
                 Host4FlutterGmacroConstants.queryOutputMode ->
-                    commands.queryOutputMode(GmacroCallbackBridge.message(result))
+                    commands.queryOutputMode(GmacroCallbackBridge.message(onResult))
 
                 Host4FlutterGmacroConstants.sendHandleBeta -> {
                     val profile = GmacroArgParser.intArg(arguments, "profile")
-                    commands.sendHandleBeta(profile, GmacroCallbackBridge.message(result))
+                    commands.sendHandleBeta(profile, GmacroCallbackBridge.message(onResult))
                 }
 
                 Host4FlutterGmacroConstants.switchHandleConfig -> {
                     val profile = GmacroArgParser.intArg(arguments, "profile")
-                    commands.switchHandleConfig(profile, GmacroCallbackBridge.message(result))
+                    commands.switchHandleConfig(profile, GmacroCallbackBridge.message(onResult))
                 }
 
                 //0x83 02 开关手柄功能以及 EP3 回调，按 bit 参数兼容 Android 旧 SDK
@@ -649,28 +648,28 @@ internal object GmacroMethodInvoker {
                     val handleOn = GmacroArgParser.boolArg(arguments, "handleOn")
                     val ep3CallbackOn = GmacroArgParser.boolArg(arguments, "ep3CallbackOn")
                     val method = (if (handleOn) 1 else 0) or (if (ep3CallbackOn) 2 else 0)
-                    commands.switchHandleCallbacks(method, GmacroCallbackBridge.message(result))
+                    commands.switchHandleCallbacks(method, GmacroCallbackBridge.message(onResult))
                 }
 
                 //0x83 02
                 Host4FlutterGmacroConstants.switchHandleCallbacks -> {
                     val method = GmacroArgParser.intArg(arguments, "method")
-                    commands.switchHandleCallbacks(method, GmacroCallbackBridge.message(result))
+                    commands.switchHandleCallbacks(method, GmacroCallbackBridge.message(onResult))
                 }
 
                 /**
                  * 查询左右扳机线性输出
                  */
                 Host4FlutterGmacroConstants.queryLinerTrigger ->
-                    commands.queryLinerTrigger(GmacroCallbackBridge.queryLinerTrigger(result))
+                    commands.queryLinerTrigger(GmacroCallbackBridge.queryLinerTrigger(onResult))
 
                 Host4FlutterGmacroConstants.switchLinerTrigger -> {
                     val mode = GmacroArgParser.intArg(arguments, "mode")
-                    commands.switchLinerTrigger(mode, GmacroCallbackBridge.message(result))
+                    commands.switchLinerTrigger(mode, GmacroCallbackBridge.message(onResult))
                 }
 
                 Host4FlutterGmacroConstants.queryLightingEffectPantas ->
-                    commands.queryLightingEffectPantas(GmacroCallbackBridge.message(result))
+                    commands.queryLightingEffectPantas(GmacroCallbackBridge.message(onResult))
 
                 Host4FlutterGmacroConstants.setLightGroupEffectPantas -> {
                     commands.setLightGroupEffectPantas(
@@ -680,26 +679,16 @@ internal object GmacroMethodInvoker {
                         GmacroArgParser.intArg(arguments, "colorR"),
                         GmacroArgParser.intArg(arguments, "colorG"),
                         GmacroArgParser.intArg(arguments, "colorB"),
-                        GmacroCallbackBridge.message(result),
+                        GmacroCallbackBridge.message(onResult),
                     )
                 }
 
-                else -> {
-                    result.error(
-                        "unsupported-gmacro-method",
-                        "Unsupported GMacro method on Android: $method",
-                        null,
-                    )
-                }
+                else -> onResult(GmacroResult.unsupported(method))
             }
         } catch (error: IllegalArgumentException) {
-            result.error("invalid-arguments", error.message, null)
+            onResult(GmacroResult.invalidArguments(error.message))
         } catch (error: Exception) {
-            result.error(
-                "gmacro-invocation-error",
-                error.message ?: "Failed to invoke GMacro method '$method'.",
-                null,
-            )
+            onResult(GmacroResult.invocationError(method, error))
         }
     }
 }

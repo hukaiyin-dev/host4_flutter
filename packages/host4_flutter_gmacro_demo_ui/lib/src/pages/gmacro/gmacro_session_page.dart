@@ -41,7 +41,8 @@ GmacroBundledOtaFirmware gmacroBundledOtaFirmwareForTransportKind(
 ) {
   return switch (kind) {
     TransportKind.mfi => _mfiBundledOtaFirmware,
-    TransportKind.ble || TransportKind.usb => _bleBundledOtaFirmware,
+    TransportKind.ble || TransportKind.usb || TransportKind.uart =>
+      _bleBundledOtaFirmware,
   };
 }
 

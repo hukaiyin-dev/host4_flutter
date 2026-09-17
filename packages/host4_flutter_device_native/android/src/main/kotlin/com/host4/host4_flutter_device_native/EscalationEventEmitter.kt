@@ -8,18 +8,24 @@ import com.host4.platform.kr.response.TestModeEventRsp
 internal object EscalationEventEmitter {
     fun emit(handler: QueuedEventStreamHandler?, message: EscalationRsp) {
         val target = handler ?: return
-        when (message) {
+        GmacroEscalationMapper.toEvent(message)?.let(target::emit)
+    }
+}
+
+/** Shared active-report mapping for direct USB/BLE and brokered UART transports. */
+object GmacroEscalationMapper {
+    fun toEvent(message: EscalationRsp): Map<String, Any?>? {
+        return when (message) {
             is DPKeyEventRsp -> {
-                val modeEvent = message.modeEvent ?: return
-                target.emit(DpKeyEventMapper.map(modeEvent))
+                val modeEvent = message.modeEvent ?: return null
+                DpKeyEventMapper.map(modeEvent)
             }
             is TestModeEventRsp -> {
-                val modeEvent = message.testModeEvent ?: return
-                target.emit(DpKeyEventMapper.map(modeEvent, type = "testModeEvent"))
+                val modeEvent = message.testModeEvent ?: return null
+                DpKeyEventMapper.map(modeEvent, type = "testModeEvent")
             }
-            is DeviceAlignRsp -> {
-                target.emit(DeviceAlignEventMapper.map(message))
-            }
+            is DeviceAlignRsp -> DeviceAlignEventMapper.map(message)
+            else -> null
         }
     }
 }

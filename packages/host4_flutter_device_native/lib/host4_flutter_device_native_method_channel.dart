@@ -121,6 +121,23 @@ class MethodChannelHost4FlutterDeviceNative
   }
 
   @override
+  Future<String> connectUart({
+    Map<String, Object?> options = const {},
+  }) async {
+    final sessionId = await methodChannel.invokeMethod<String>(
+      'connectUart',
+      <String, Object?>{'options': options},
+    );
+    if (sessionId == null || sessionId.isEmpty) {
+      throw PlatformException(
+        code: 'missing-transport-session-id',
+        message: 'Native UART bridge returned an empty transport session id.',
+      );
+    }
+    return sessionId;
+  }
+
+  @override
   Future<void> reconnectUsb() {
     return methodChannel.invokeMethod<void>('reconnectUsb');
   }

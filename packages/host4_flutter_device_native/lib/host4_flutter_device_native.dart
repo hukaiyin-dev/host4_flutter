@@ -53,6 +53,15 @@ class Host4FlutterDeviceNative {
     );
   }
 
+  /// Android only: binds the in-app DeviceBroker and opens a UART transport session.
+  Future<String> connectUart({
+    Map<String, Object?> options = const {},
+  }) {
+    return Host4FlutterDeviceNativePlatform.instance.connectUart(
+      options: options,
+    );
+  }
+
   /// Re-triggers SDK [ReliableUsbCommManager.searchAndConnectAsync].
   Future<void> reconnectUsb() {
     return Host4FlutterDeviceNativePlatform.instance.reconnectUsb();

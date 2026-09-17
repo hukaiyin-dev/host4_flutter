@@ -22,6 +22,12 @@ class TransportDisconnected extends TransportEvent {
   final TransportFailure? cause;
 }
 
+class TransportRecovering extends TransportEvent {
+  const TransportRecovering({this.cause});
+
+  final TransportFailure? cause;
+}
+
 class TransportError extends TransportEvent {
   const TransportError(this.failure);
 

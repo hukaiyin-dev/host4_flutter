@@ -190,6 +190,34 @@ void main() {
     await session.close();
     await native.dispose();
   });
+
+  test('Android UART merges native escalation events', () async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.android;
+    final native = _FakeDeviceNative();
+    final session = GmacroSession(
+      id: 'protocol-1',
+      transport: _FakeTransportSession(kind: TransportKind.uart),
+      native: native,
+    );
+    final eventFuture = session.realtimeEvents.first;
+
+    native.escalationEvents.add(<String, Object?>{
+      'type': 'testModeEvent',
+      'keyValue': 1,
+      'keys': <int>[1],
+      'leftRockerXValue': 11,
+      'leftRockerYValue': 22,
+      'rightRockerXValue': 33,
+      'rightRockerYValue': 44,
+      'leftKeyLTwoValue': 55,
+      'rightKeyRTwoValue': 66,
+    });
+
+    final event = await eventFuture;
+    expect(event, isA<TestEventMode>());
+    await session.close();
+    await native.dispose();
+  });
 }
 
 class _FakeDeviceNative extends Host4FlutterDeviceNative {
@@ -237,11 +265,15 @@ class _FakeDeviceNative extends Host4FlutterDeviceNative {
 }
 
 class _FakeTransportSession implements TransportSession {
+  _FakeTransportSession({this.kind = TransportKind.ble});
+
+  final TransportKind kind;
+
   @override
-  final DeviceDescriptor device = const DeviceDescriptor(
-    id: 'ble-device-1',
+  DeviceDescriptor get device => DeviceDescriptor(
+    id: 'device-1',
     name: 'Gamepad',
-    kind: TransportKind.ble,
+    kind: kind,
   );
 
   @override

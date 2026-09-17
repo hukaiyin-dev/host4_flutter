@@ -15,11 +15,9 @@ import com.host4.platform.kr.response.QueryUsbResetRsp
 import com.host4.platform.kr.response.VibrateOpenRsp
 import com.host4.platform.kr.response.WorkStyleRsp
 import com.host4.platform.listener.OnMessageCallback
-import com.host4.platform.util.Constants
 import com.host4.platform.v2.api.FullPlatformSdk
 import com.host4.platform.v2.api.PlatformSdkFactory
 import com.host4.platform.v2.protocol.V2KrCmdController
-import io.flutter.plugin.common.MethodChannel
 import java.util.Collections.emptyMap
 import kotlin.collections.map
 import kotlin.collections.orEmpty
@@ -42,15 +40,31 @@ internal object GmacroSdkAccess {
 internal object Host4FlutterTransportKinds {
     const val BLE = "ble"
     const val USB = "usb"
+    const val UART = "uart"
 }
 
 internal object GmacroCallbackBridge {
-    private val mainHandler = android.os.Handler(android.os.Looper.getMainLooper())
+    private inline fun <T : BaseRsp> protocolResult(
+        code: Int,
+        rsp: T?,
+        successPayload: (T) -> Any?,
+    ): GmacroResult {
+        val details = GmacroResponseSerializer.toMap(rsp)
+        if (!GmacroResult.isProtocolSuccess(code)) {
+            return GmacroResult.fromProtocol(code, emptyMap<String, Any?>(), details)
+        }
+        val response = rsp ?: return GmacroResult.Error(
+            GmacroResult.FAILED_CODE,
+            "GMacro method returned no response with code=$code",
+            details,
+        )
+        return GmacroResult.fromProtocol(code, successPayload(response), details)
+    }
 
     @Suppress("UNCHECKED_CAST")
-    fun <T : BaseRsp> message(result: MethodChannel.Result): OnMessageCallback<T> {
+    fun <T : BaseRsp> message(onResult: (GmacroResult) -> Unit): OnMessageCallback<T> {
         val callback = OnMessageCallback<BaseRsp> { code, rsp ->
-            mainHandler.post { deliver(code, rsp, result) }
+            onResult(GmacroResult.fromProtocol(code, GmacroResponseSerializer.toMap(rsp)))
         }
         return callback as OnMessageCallback<T>
     }
@@ -58,280 +72,170 @@ internal object GmacroCallbackBridge {
     /**
      * 查询设备版本（0x80），与 iOS fetchDeviceVersion 返回字段对齐。
      */
-    fun fetchDeviceVersion(result: MethodChannel.Result): OnMessageCallback<QueryHandleInfoRsp> {
+    fun fetchDeviceVersion(onResult: (GmacroResult) -> Unit): OnMessageCallback<QueryHandleInfoRsp> {
         return OnMessageCallback { code, rsp ->
-            mainHandler.post {
-                if (code == Constants.SUCCESS || code == 80) {
-                    result.success(
-                        mapOf(
-                            "project" to (rsp.projectCoding ?: ""),
-                            "protocol" to (rsp.agreementVersion ?: ""),
-                            "firmware" to (rsp.firmwareVersion ?: ""),
-                            "hardware" to (rsp.hardwareVersion ?: ""),
-                        ),
-                    )
-                } else {
-                    result.error(
-                        "gmacro-method-failed",
-                        "GMacro method failed with code=$code",
-                        GmacroResponseSerializer.toMap(rsp),
-                    )
-                }
-            }
+            onResult(protocolResult(code, rsp) { response ->
+                mapOf(
+                    "project" to response.projectCoding,
+                    "protocol" to response.agreementVersion,
+                    "firmware" to response.firmwareVersion,
+                    "hardware" to response.hardwareVersion,
+                )
+            })
         }
     }
-
 
     /**
      * 查询实物外观类型（0x44），与 iOS 统一返回 type 原始值。
      */
-    fun fetchPrintingType(result: MethodChannel.Result): OnMessageCallback<PhysicalAppearanceRsp> {
+    fun fetchPrintingType(onResult: (GmacroResult) -> Unit): OnMessageCallback<PhysicalAppearanceRsp> {
         return OnMessageCallback { code, rsp ->
-            mainHandler.post {
-                if (code == Constants.SUCCESS || code == 80) {
-                    result.success(mapOf("type" to rsp.physicalAppearance))
-                } else {
-                    result.error(
-                        "gmacro-method-failed",
-                        "GMacro method failed with code=$code",
-                        GmacroResponseSerializer.toMap(rsp),
-                    )
-                }
-            }
+            onResult(protocolResult(code, rsp) { response ->
+                mapOf("type" to response.physicalAppearance)
+            })
         }
     }
 
     /**
      * 结束摇杆板机校准
      */
-    fun endAlignRockerOrTrigger(result: MethodChannel.Result): OnMessageCallback<AlignRockerOrTriggerRsp>{
-        return OnMessageCallback { code, rsp ->
-            mainHandler.post {
-                result.success(
+    fun endAlignRockerOrTrigger(onResult: (GmacroResult) -> Unit): OnMessageCallback<AlignRockerOrTriggerRsp> {
+        return OnMessageCallback { _, rsp ->
+            onResult(
+                GmacroResult.Success(
                     mapOf(
-                        "subId" to (rsp.subId),
-                        "result" to (rsp.result),
-                        "param1" to (rsp.param1),
-                        "param2" to (rsp.param2),
+                        "subId" to rsp.subId,
+                        "result" to rsp.result,
+                        "param1" to rsp.param1,
+                        "param2" to rsp.param2,
                     ),
-                )
-            }
+                ),
+            )
         }
     }
 
     /**
      * 结束体感校准
      */
-    fun endGyroCalibration(result: MethodChannel.Result): OnMessageCallback<AlignGyroscopeRsp>{
-        return OnMessageCallback { code, rsp ->
-            mainHandler.post {
-                result.success(
+    fun endGyroCalibration(onResult: (GmacroResult) -> Unit): OnMessageCallback<AlignGyroscopeRsp> {
+        return OnMessageCallback { _, rsp ->
+            onResult(
+                GmacroResult.Success(
                     mapOf(
                         "subId" to (rsp?.subId ?: 1),
                         "result" to (rsp?.result ?: 1),
-                        "param1" to (rsp?.param ),
+                        "param1" to rsp?.param,
                     ),
-                )
-            }
+                ),
+            )
         }
     }
 
     /**
      * 查询振动开关
      */
-    fun queryVibrateOpen(result: MethodChannel.Result): OnMessageCallback<VibrateOpenRsp> {
-        return OnMessageCallback{ code, rsp ->
-            mainHandler.post {
-                if (code == Constants.SUCCESS || code == 80) {
-                    result.success(mapOf("isOn" to (rsp.status != 2)))
-                } else {
-                    result.error(
-                        "gmacro-method-failed",
-                        "GMacro method failed with code=$code",
-                        GmacroResponseSerializer.toMap(rsp),
-                    )
-                }
-            }
+    fun queryVibrateOpen(onResult: (GmacroResult) -> Unit): OnMessageCallback<VibrateOpenRsp> {
+        return OnMessageCallback { code, rsp ->
+            onResult(protocolResult(code, rsp) { response ->
+                mapOf("isOn" to (response.status != 2))
+            })
         }
     }
 
     /**
-     * 查询振动开关
+     * 查询当前按键映射
      */
-    fun queryCurrentMapping(result: MethodChannel.Result): OnMessageCallback<MacroMappingKeyRsp> {
-        return OnMessageCallback{ code, rsp ->
-            mainHandler.post {
-                if (code == Constants.SUCCESS || code == 80) {
-                    result.success(
+    fun queryCurrentMapping(onResult: (GmacroResult) -> Unit): OnMessageCallback<MacroMappingKeyRsp> {
+        return OnMessageCallback { code, rsp ->
+            onResult(protocolResult(code, rsp) { response ->
+                mapOf(
+                    "keyMappings" to response.macroMappings.orEmpty().map {
                         mapOf(
-                            "keyMappings" to rsp.macroMappings.orEmpty().map {
-                                mapOf(
-                                    "original" to it.original,
-                                    "mapped" to it.mapping,
-                                    "type" to it.type,
-                                )
-                            }),
-                    )
-                } else {
-                    result.error(
-                        "gmacro-method-failed",
-                        "GMacro method failed with code=$code",
-                        GmacroResponseSerializer.toMap(rsp),
-                    )
-                }
-            }
+                            "original" to it.original,
+                            "mapped" to it.mapping,
+                            "type" to it.type,
+                        )
+                    },
+                )
+            })
         }
     }
 
     /**
      * 查询当前灯效配置（0x71），与 iOS fetchCurrentLightConfig 返回结构对齐。
      */
-    fun fetchCurrentLightConfig(result: MethodChannel.Result): OnMessageCallback<QueryCurrentLightEffectRsp> {
+    fun fetchCurrentLightConfig(onResult: (GmacroResult) -> Unit): OnMessageCallback<QueryCurrentLightEffectRsp> {
         return OnMessageCallback { code, rsp ->
-            mainHandler.post {
-                if (code == Constants.SUCCESS || code == 80) {
-                    val effect = rsp.lightEffect
-                    result.success(
-                        mapOf(
-                            "effect" to (effect?.effect ?: 0),
-                            "colorR" to (effect?.colorR ?: 0),
-                            "colorG" to (effect?.colorG ?: 0),
-                            "colorB" to (effect?.colorB ?: 0),
-                            "light" to (effect?.brightness ?: 0),
-                            "speed" to (effect?.speed ?: 0),
-                            "profile" to (effect?.profile ?: 0),
-                        ),
-                    )
-                } else {
-                    result.error(
-                        "gmacro-method-failed",
-                        "GMacro method failed with code=$code",
-                        GmacroResponseSerializer.toMap(rsp),
-                    )
-                }
-            }
+            onResult(protocolResult(code, rsp) { response ->
+                val effect = response.lightEffect
+                mapOf(
+                    "effect" to (effect?.effect ?: 0),
+                    "colorR" to (effect?.colorR ?: 0),
+                    "colorG" to (effect?.colorG ?: 0),
+                    "colorB" to (effect?.colorB ?: 0),
+                    "light" to (effect?.brightness ?: 0),
+                    "speed" to (effect?.speed ?: 0),
+                    "profile" to (effect?.profile ?: 0),
+                )
+            })
         }
     }
 
     /**
      * 查询手柄工作模式（0x69），与 iOS fetchHandleWorkMode 返回结构对齐。
      */
-    fun queryWorkStyle(result: MethodChannel.Result): OnMessageCallback<WorkStyleRsp> {
+    fun queryWorkStyle(onResult: (GmacroResult) -> Unit): OnMessageCallback<WorkStyleRsp> {
         return OnMessageCallback { code, rsp ->
-            mainHandler.post {
-                if (code == Constants.SUCCESS || code == 80) {
-                    result.success(mapOf("mode" to rsp.mode))
-                } else {
-                    result.error(
-                        "gmacro-method-failed",
-                        "GMacro method failed with code=$code",
-                        GmacroResponseSerializer.toMap(rsp),
-                    )
-                }
-            }
+            onResult(protocolResult(code, rsp) { response ->
+                mapOf("mode" to response.mode)
+            })
         }
     }
 
     /**
      * 查询当前配置页
      */
-    fun fetchCurrentProfile(result: MethodChannel.Result): OnMessageCallback<MacroProfileRsp> {
+    fun fetchCurrentProfile(onResult: (GmacroResult) -> Unit): OnMessageCallback<MacroProfileRsp> {
         return OnMessageCallback { code, rsp ->
-            mainHandler.post {
-                if (code == Constants.SUCCESS || code == 80) {
-                    result.success(mapOf("profile" to rsp.mode))
-                } else {
-                    result.error(
-                        "gmacro-method-failed",
-                        "GMacro method failed with code=$code",
-                        GmacroResponseSerializer.toMap(rsp),
-                    )
-                }
-            }
+            onResult(protocolResult(code, rsp) { response ->
+                mapOf("profile" to response.mode)
+            })
         }
     }
 
     /**
      * 0x77 04 查询 Game Macro 默认值，与 Dart GmacroDefaultInfo 字段对齐。
      */
-    fun fetchGameMacroDefaultInfo(result: MethodChannel.Result): OnMessageCallback<MacroHandleConfigRsp> {
+    fun fetchGameMacroDefaultInfo(onResult: (GmacroResult) -> Unit): OnMessageCallback<MacroHandleConfigRsp> {
         return OnMessageCallback { code, rsp ->
-            mainHandler.post {
-                if (code == Constants.SUCCESS || code == 80) {
-                    result.success(GmacroDefaultInfoMapper.toMap(rsp))
-                } else {
-                    result.error(
-                        "gmacro-method-failed",
-                        "GMacro method failed with code=$code",
-                        GmacroResponseSerializer.toMap(rsp),
-                    )
-                }
-            }
+            onResult(protocolResult(code, rsp, GmacroDefaultInfoMapper::toMap))
         }
     }
 
     /**
      * 查询左右扳机线性输出
-     * final leftMode
-     * final leftThreshold
-     * final rightThreshold
      */
-    fun queryLinerTrigger(result: MethodChannel.Result): OnMessageCallback<LinerTriggerRsp> {
+    fun queryLinerTrigger(onResult: (GmacroResult) -> Unit): OnMessageCallback<LinerTriggerRsp> {
         return OnMessageCallback { code, rsp ->
-            mainHandler.post {
-                if (code == Constants.SUCCESS || code == 80) {
-                    result.success(
-                        mapOf(
-                            "leftMode" to (rsp.triggerLeft),
-                            "rightMode" to (rsp.triggerRight),
-                            "leftThreshold" to 0,
-                            "rightThreshold" to 0,
-                        ),
-                    )
-                } else {
-                    result.error(
-                        "gmacro-method-failed",
-                        "GMacro method failed with code=$code",
-                        GmacroResponseSerializer.toMap(rsp),
-                    )
-                }
-            }
+            onResult(protocolResult(code, rsp) { response ->
+                mapOf(
+                    "leftMode" to response.triggerLeft,
+                    "rightMode" to response.triggerRight,
+                    "leftThreshold" to 0,
+                    "rightThreshold" to 0,
+                )
+            })
         }
     }
-
 
     /**
      * 按键类型
      */
-    fun fetchAppWakeKeyType(result: MethodChannel.Result) : OnMessageCallback<QueryUsbResetRsp> {
+    fun fetchAppWakeKeyType(onResult: (GmacroResult) -> Unit): OnMessageCallback<QueryUsbResetRsp> {
         return OnMessageCallback { code, rsp ->
-            mainHandler.post {
-                if (code == Constants.SUCCESS || code == 80) {
-                    result.success(
-                        mapOf(
-                            "keyType" to (rsp.keyType),
-                        ),
-                    )
-                } else {
-                    result.error(
-                        "gmacro-method-failed",
-                        "GMacro method failed with code=$code",
-                        GmacroResponseSerializer.toMap(rsp),
-                    )
-                }
-            }
-        }
-    }
-
-    private fun deliver(code: Int, rsp: Any?, result: MethodChannel.Result) {
-        if (code == Constants.SUCCESS || code == 80) {
-            result.success(GmacroResponseSerializer.toMap(rsp))
-        } else {
-            result.error(
-                "gmacro-method-failed",
-                "GMacro method failed with code=$code",
-                GmacroResponseSerializer.toMap(rsp),
-            )
+            onResult(protocolResult(code, rsp) { response ->
+                mapOf("keyType" to response.keyType)
+            })
         }
     }
 }
