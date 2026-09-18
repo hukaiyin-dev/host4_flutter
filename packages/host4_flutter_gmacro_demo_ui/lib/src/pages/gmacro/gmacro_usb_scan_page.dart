@@ -104,6 +104,14 @@ class _GmacroUsbScanPageState extends State<GmacroUsbScanPage> {
           _isConnected = false;
           _status = cause?.message ?? '设备已拔出，请重新插入';
         });
+      case TransportRecovering(cause: final cause):
+        _log.warn('USB transport recovering', error: cause?.message);
+        setState(() {
+          _isConnected = false;
+          _status = cause == null
+              ? 'USB 通信中断，正在自动恢复…'
+              : 'USB 通信中断，正在自动恢复…\n${cause.message}';
+        });
       case TransportError(failure: final failure):
         _log.error('USB transport error', error: failure.message);
         setState(() {
