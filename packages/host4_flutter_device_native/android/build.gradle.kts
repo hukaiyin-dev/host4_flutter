@@ -74,12 +74,11 @@ android {
 dependencies {
     // Pantas DeviceBrokerService is the UART owner and therefore needs the same
     // platformlib types that back the public broker dispatcher API.
-    api(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar", "*.aar"))))
+    api("com.host4.platform:platformlib:1.1.21")
     implementation("androidx.appcompat:appcompat:1.7.0")
     implementation("io.reactivex.rxjava2:rxandroid:2.1.1")
     implementation("io.reactivex.rxjava2:rxjava:2.2.21")
     implementation("com.polidea.rxandroidble2:rxandroidble:1.19.0")
-    implementation("com.licheedev:android-serialport:2.1.5")
     // Flutter embedding: normally injected by the Flutter app build; required when opening
     // this android/ folder standalone in Android Studio.
     compileOnly("io.flutter:flutter_embedding_debug:1.0.0-$engineVersion") {
