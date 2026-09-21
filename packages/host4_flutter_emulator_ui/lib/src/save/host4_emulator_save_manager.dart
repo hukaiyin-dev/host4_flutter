@@ -2,7 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 
-import '../l10n/emulator_ui_strings.dart';
+import '../../l10n/generated/emulator_ui_localizations.dart';
 import '../model/host4_emulator_save_entry.dart';
 import '../session/host4_emulator_session_actions.dart';
 
@@ -76,17 +76,17 @@ class _Host4EmulatorSaveManagerState extends State<Host4EmulatorSaveManager> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(EmulatorUiStrings.t('save.deleteTitle')),
-        content: Text(EmulatorUiStrings.t('save.deleteMessage')),
+        title: Text(EmulatorUiLocalizations.of(context).saveDeleteTitle),
+        content: Text(EmulatorUiLocalizations.of(context).saveDeleteMessage),
         actions: <Widget>[
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text(EmulatorUiStrings.t('save.cancel')),
+            child: Text(EmulatorUiLocalizations.of(context).saveCancel),
           ),
           FilledButton(
             key: const ValueKey<String>('save.delete.confirm'),
             onPressed: () => Navigator.pop(context, true),
-            child: Text(EmulatorUiStrings.t('save.delete')),
+            child: Text(EmulatorUiLocalizations.of(context).saveDelete),
           ),
         ],
       ),
@@ -125,23 +125,33 @@ class _Host4EmulatorSaveManagerState extends State<Host4EmulatorSaveManager> {
                       child: ListView(
                         padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
                         children: <Widget>[
-                          _SectionTitle(EmulatorUiStrings.t('save.quickSection')),
+                          _SectionTitle(
+                            EmulatorUiLocalizations.of(
+                              context,
+                            ).saveQuickSection,
+                          ),
                           if (catalog.quick case final quick?)
                             _SaveCard(
                               key: const ValueKey<String>('save.quick'),
-                              title: EmulatorUiStrings.t('save.quickLabel'),
+                              title: EmulatorUiLocalizations.of(
+                                context,
+                              ).saveQuickLabel,
                               entry: quick,
                               actions: <Widget>[
                                 _ActionButton(
                                   keyName: 'save.quick.load',
                                   icon: Icons.play_arrow,
-                                  label: EmulatorUiStrings.t('save.load'),
+                                  label: EmulatorUiLocalizations.of(
+                                    context,
+                                  ).saveLoad,
                                   onTap: () => _run(widget.actions.quickLoad),
                                 ),
                                 _ActionButton(
                                   keyName: 'save.quick.delete',
                                   icon: Icons.delete_outline,
-                                  label: EmulatorUiStrings.t('save.delete'),
+                                  label: EmulatorUiLocalizations.of(
+                                    context,
+                                  ).saveDelete,
                                   onTap: () =>
                                       _confirmDelete(slot: 0, quick: true),
                                 ),
@@ -150,7 +160,11 @@ class _Host4EmulatorSaveManagerState extends State<Host4EmulatorSaveManager> {
                           else
                             const _EmptyQuickSave(),
                           const SizedBox(height: 18),
-                          _SectionTitle(EmulatorUiStrings.t('save.manualSection')),
+                          _SectionTitle(
+                            EmulatorUiLocalizations.of(
+                              context,
+                            ).saveManualSection,
+                          ),
                           for (
                             var slot = 1;
                             slot <= host4EmulatorManualSaveSlotCount;
@@ -175,14 +189,14 @@ class _Host4EmulatorSaveManagerState extends State<Host4EmulatorSaveManager> {
     final entry = catalog.manualAt(slot);
     return _SaveCard(
       key: ValueKey<String>('save.slot.$slot'),
-      title: EmulatorUiStrings.t('save.slotName', {'slot': slot}),
+      title: EmulatorUiLocalizations.of(context).saveSlotName(slot),
       entry: entry,
       actions: entry == null
           ? <Widget>[
               _ActionButton(
                 keyName: 'save.slot.$slot.save',
                 icon: Icons.add,
-                label: EmulatorUiStrings.t('save.save'),
+                label: EmulatorUiLocalizations.of(context).saveSave,
                 onTap: () => _run(() => widget.actions.saveSlot(slot)),
               ),
             ]
@@ -190,19 +204,19 @@ class _Host4EmulatorSaveManagerState extends State<Host4EmulatorSaveManager> {
               _ActionButton(
                 keyName: 'save.slot.$slot.load',
                 icon: Icons.play_arrow,
-                label: EmulatorUiStrings.t('save.load'),
+                label: EmulatorUiLocalizations.of(context).saveLoad,
                 onTap: () => _run(() => widget.actions.loadSlot(slot)),
               ),
               _ActionButton(
                 keyName: 'save.slot.$slot.overwrite',
                 icon: Icons.save_outlined,
-                label: EmulatorUiStrings.t('save.overwrite'),
+                label: EmulatorUiLocalizations.of(context).saveOverwrite,
                 onTap: () => _run(() => widget.actions.saveSlot(slot)),
               ),
               _ActionButton(
                 keyName: 'save.slot.$slot.delete',
                 icon: Icons.delete_outline,
-                label: EmulatorUiStrings.t('save.delete'),
+                label: EmulatorUiLocalizations.of(context).saveDelete,
                 onTap: () => _confirmDelete(slot: slot, quick: false),
               ),
             ],
@@ -229,7 +243,7 @@ class _Header extends StatelessWidget {
           ),
           Expanded(
             child: Text(
-              EmulatorUiStrings.t('save.title'),
+              EmulatorUiLocalizations.of(context).saveTitle,
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 20,
@@ -270,7 +284,7 @@ class _EmptyQuickSave extends StatelessWidget {
   Widget build(BuildContext context) {
     return _SaveCard(
       key: const ValueKey<String>('save.quick.empty'),
-      title: EmulatorUiStrings.t('save.noQuickSave'),
+      title: EmulatorUiLocalizations.of(context).saveNoQuickSave,
       actions: <Widget>[],
     );
   }

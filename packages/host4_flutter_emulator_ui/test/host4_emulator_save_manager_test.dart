@@ -18,6 +18,9 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        locale: const Locale('zh'),
+        localizationsDelegates: EmulatorUiLocalizations.localizationsDelegates,
+        supportedLocales: EmulatorUiLocalizations.supportedLocales,
         home: Host4EmulatorSaveManager(
           actions: actions,
           dataSource: dataSource,
@@ -72,6 +75,9 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        locale: const Locale('zh'),
+        localizationsDelegates: EmulatorUiLocalizations.localizationsDelegates,
+        supportedLocales: EmulatorUiLocalizations.supportedLocales,
         home: Host4EmulatorSaveManager(
           actions: actions,
           dataSource: dataSource,

@@ -1,0 +1,55 @@
+{
+  "@@locale": "ja",
+  "menuQuickLoad": "クイックロード",
+  "menuSaveManager": "セーブ管理",
+  "menuSaveManagerUsed": "{used}/{total} 使用済",
+  "@menuSaveManagerUsed": {
+    "placeholders": {
+      "used": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "menuQuickSave": "クイックセーブ",
+  "menuQuickSaveSubtitle": "クイックセーブを上書き",
+  "menuSpeed": "倍速",
+  "menuExit": "ゲーム終了",
+  "menuContinue": "ゲームを続ける",
+  "menuContinueSubtitle": "ゲームに戻る",
+  "menuLayout": "レイアウト切替",
+  "menuKeyLocator": "キー位置調整",
+  "menuPauseLabel": "ポーズメニュー",
+  "saveDeleteTitle": "セーブを削除しますか？",
+  "saveDeleteMessage": "削除すると元に戻せません。",
+  "saveCancel": "キャンセル",
+  "saveDelete": "削除",
+  "saveQuickSection": "クイックセーブ",
+  "saveQuickLabel": "クイックセーブ",
+  "saveLoad": "ロード",
+  "saveManualSection": "手動セーブ",
+  "saveSlotName": "セーブ {slot}",
+  "@saveSlotName": {
+    "placeholders": {
+      "slot": {
+        "type": "int"
+      }
+    }
+  },
+  "saveSave": "保存",
+  "saveOverwrite": "上書き",
+  "saveTitle": "セーブ管理",
+  "saveNoQuickSave": "クイックセーブなし",
+  "keyLocatorTitle": "仮想ボタンの位置を調整",
+  "keyLocatorInstruction": "仮想ボタンを長押しして適切な位置にドラッグします",
+  "keyLocatorLandscapeHint": "左右にドラッグ可能、Pantasキーを再度押すとグローバルレイアウトを保存",
+  "keyLocatorPortraitHint": "上下にドラッグ可能、Pantasキーを再度押すとグローバルレイアウトを保存",
+  "keyLocatorGamepatchHint": "Gamepatchをお使いの場合、ボタン位置を合わせると操作感が向上します",
+  "layoutTitle": "レイアウト切替",
+  "layoutSilicone": "シリコンパッド",
+  "layoutModernSymmetric": "モダン対称",
+  "layoutModernAsymmetric": "モダン非対称",
+  "layoutRetroClassic": "レトロクラシック"
+}

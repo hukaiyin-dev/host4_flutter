@@ -1,0 +1,55 @@
+{
+  "@@locale": "es",
+  "menuQuickLoad": "Carga rápida",
+  "menuSaveManager": "Gestor de guardado",
+  "menuSaveManagerUsed": "{used}/{total} usados",
+  "@menuSaveManagerUsed": {
+    "placeholders": {
+      "used": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "menuQuickSave": "Guardado rápido",
+  "menuQuickSaveSubtitle": "Sobrescribir guardado rápido",
+  "menuSpeed": "Velocidad",
+  "menuExit": "Salir del juego",
+  "menuContinue": "Continuar",
+  "menuContinueSubtitle": "Volver al juego",
+  "menuLayout": "Cambiar diseño",
+  "menuKeyLocator": "Posición de teclas",
+  "menuPauseLabel": "Menú de pausa",
+  "saveDeleteTitle": "¿Eliminar guardado?",
+  "saveDeleteMessage": "Esto no se puede deshacer.",
+  "saveCancel": "Cancelar",
+  "saveDelete": "Eliminar",
+  "saveQuickSection": "Guardado rápido",
+  "saveQuickLabel": "Guardado rápido",
+  "saveLoad": "Cargar",
+  "saveManualSection": "Guardado manual",
+  "saveSlotName": "Guardado {slot}",
+  "@saveSlotName": {
+    "placeholders": {
+      "slot": {
+        "type": "int"
+      }
+    }
+  },
+  "saveSave": "Guardar",
+  "saveOverwrite": "Sobrescribir",
+  "saveTitle": "Gestor de guardado",
+  "saveNoQuickSave": "Sin guardado rápido",
+  "keyLocatorTitle": "Ajustar posiciones de botones",
+  "keyLocatorInstruction": "Mantén y arrastra los botones virtuales para ajustar su posición",
+  "keyLocatorLandscapeHint": "Arrastra izquierda/derecha, presiona Pantas para guardar el diseño",
+  "keyLocatorPortraitHint": "Arrastra arriba/abajo, presiona Pantas para guardar el diseño",
+  "keyLocatorGamepatchHint": "Si usas Gamepatch, alinea con sus botones para mejor sensación",
+  "layoutTitle": "Cambiar diseño",
+  "layoutSilicone": "Almohadilla de silicona",
+  "layoutModernSymmetric": "Moderno simétrico",
+  "layoutModernAsymmetric": "Moderno asimétrico",
+  "layoutRetroClassic": "Retro clásico"
+}

@@ -12,7 +12,12 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
 
     await tester.pumpWidget(
-      const MaterialApp(home: Host4EmulatorKeyLocatorOverlay()),
+      const MaterialApp(
+        locale: const Locale('zh'),
+        localizationsDelegates: EmulatorUiLocalizations.localizationsDelegates,
+        supportedLocales: EmulatorUiLocalizations.supportedLocales,
+        home: Host4EmulatorKeyLocatorOverlay(),
+      ),
     );
 
     expect(find.text('调整虚拟按键位置'), findsOneWidget);

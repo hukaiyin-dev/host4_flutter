@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../l10n/emulator_ui_strings.dart';
+import '../../l10n/generated/emulator_ui_localizations.dart';
 
 class Host4EmulatorKeyLocatorOverlay extends StatefulWidget {
   const Host4EmulatorKeyLocatorOverlay({
@@ -112,7 +112,7 @@ class _LocatorHeader extends StatelessWidget {
               ? 'landscape.key_locate.title'
               : 'key_locate.title',
           child: Text(
-            EmulatorUiStrings.t('keyLocator.title'),
+            EmulatorUiLocalizations.of(context).keyLocatorTitle,
             textAlign: TextAlign.center,
             style: TextStyle(
               color: Colors.white,
@@ -126,7 +126,7 @@ class _LocatorHeader extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         Text(
-          EmulatorUiStrings.t('keyLocator.instruction'),
+          EmulatorUiLocalizations.of(context).keyLocatorInstruction,
           textAlign: TextAlign.center,
           style: TextStyle(
             color: Color(0xFFF4F7FC),
@@ -153,7 +153,9 @@ class _LocatorFooter extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         Text(
-          EmulatorUiStrings.t(landscape ? 'keyLocator.landscapeHint' : 'keyLocator.portraitHint'),
+          landscape
+              ? EmulatorUiLocalizations.of(context).keyLocatorLandscapeHint
+              : EmulatorUiLocalizations.of(context).keyLocatorPortraitHint,
           textAlign: TextAlign.center,
           style: const TextStyle(
             color: Color(0xFFF4F7FC),
@@ -168,7 +170,7 @@ class _LocatorFooter extends StatelessWidget {
         Semantics(
           identifier: 'key_locate.status_text',
           child: Text(
-            EmulatorUiStrings.t('keyLocator.gamepatchHint'),
+            EmulatorUiLocalizations.of(context).keyLocatorGamepatchHint,
             textAlign: TextAlign.center,
             style: TextStyle(
               color: Color(0xFF9BA8C3),

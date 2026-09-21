@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-import '../l10n/emulator_ui_strings.dart';
+import '../../l10n/generated/emulator_ui_localizations.dart';
+import '../input/host4_emulator_ui_shortcuts.dart';
 import '../model/host4_emulator_silicone_layout_variant.dart';
 
 class Host4EmulatorSiliconeLayoutPicker extends StatefulWidget {
@@ -25,6 +26,21 @@ class _Host4EmulatorSiliconeLayoutPickerState
     extends State<Host4EmulatorSiliconeLayoutPicker> {
   late Host4EmulatorSiliconeLayoutVariant _selected = widget.selectedVariant;
 
+  final _scope = FocusScopeNode(debugLabel: 'layout_picker');
+  late final _nodes = {
+    for (final variant in host4EmulatorSiliconeLayoutPickerOrder)
+      variant: FocusNode(debugLabel: 'layout.${variant.wireName}'),
+  };
+
+  @override
+  void dispose() {
+    for (final node in _nodes.values) {
+      node.dispose();
+    }
+    _scope.dispose();
+    super.dispose();
+  }
+
   @override
   void didUpdateWidget(covariant Host4EmulatorSiliconeLayoutPicker oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -40,55 +56,78 @@ class _Host4EmulatorSiliconeLayoutPickerState
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: _LayoutPickerColors.mask,
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final landscape = constraints.maxWidth > constraints.maxHeight;
-          final baseWidth = landscape ? 844.0 : 390.0;
-          final scale = (constraints.maxWidth / baseWidth).clamp(0.0, 2.0);
-          final panelWidth = (landscape ? 352.0 : 342.0) * scale;
-          final top = (landscape ? 28.0 : 72.0) * scale;
-          return Stack(
-            children: <Widget>[
-              Positioned(
-                left: (constraints.maxWidth - panelWidth) / 2,
-                top: top,
-                width: panelWidth,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+    return Host4EmulatorUiShortcuts(
+      onBack: widget.onBack,
+      child: FocusScope(
+        node: _scope,
+        autofocus: true,
+        child: FocusTraversalGroup(
+          policy: ReadingOrderTraversalPolicy(),
+          child: Material(
+            color: _LayoutPickerColors.mask,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final landscape = constraints.maxWidth > constraints.maxHeight;
+                final baseWidth = landscape ? 844.0 : 390.0;
+                final scale = (constraints.maxWidth / baseWidth).clamp(
+                  0.0,
+                  2.0,
+                );
+                final panelWidth = (landscape ? 352.0 : 342.0) * scale;
+                final top = (landscape ? 28.0 : 72.0) * scale;
+                return Stack(
                   children: <Widget>[
-                    _LayoutPickerHeader(scale: scale, onBack: widget.onBack),
-                    SizedBox(height: 12 * scale),
-                    GridView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      padding: EdgeInsets.zero,
-                      itemCount: host4EmulatorSiliconeLayoutPickerOrder.length,
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        mainAxisSpacing: 8 * scale,
-                        crossAxisSpacing: 8 * scale,
-                        childAspectRatio: landscape ? 172 / 115 : 1.44,
+                    Positioned(
+                      left: (constraints.maxWidth - panelWidth) / 2,
+                      top: top,
+                      width: panelWidth,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: <Widget>[
+                          _LayoutPickerHeader(
+                            scale: scale,
+                            onBack: widget.onBack,
+                          ),
+                          SizedBox(height: 12 * scale),
+                          GridView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            padding: EdgeInsets.zero,
+                            itemCount:
+                                host4EmulatorSiliconeLayoutPickerOrder.length,
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 2,
+                                  mainAxisSpacing: 8 * scale,
+                                  crossAxisSpacing: 8 * scale,
+                                  childAspectRatio: landscape
+                                      ? 172 / 115
+                                      : 1.44,
+                                ),
+                            itemBuilder: (context, index) {
+                              final variant =
+                                  host4EmulatorSiliconeLayoutPickerOrder[index];
+                              return _LayoutOptionCard(
+                                variant: variant,
+                                scale: scale,
+                                selected: variant == _selected,
+                                focusNode: _nodes[variant]!,
+                                autofocus: variant == widget.selectedVariant,
+                                onFocusChange: (_) => setState(() {}),
+                                onTap: () => _select(variant),
+                              );
+                            },
+                          ),
+                        ],
                       ),
-                      itemBuilder: (context, index) {
-                        final variant =
-                            host4EmulatorSiliconeLayoutPickerOrder[index];
-                        return _LayoutOptionCard(
-                          variant: variant,
-                          scale: scale,
-                          selected: variant == _selected,
-                          onTap: () => _select(variant),
-                        );
-                      },
                     ),
                   ],
-                ),
-              ),
-            ],
-          );
-        },
+                );
+              },
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -121,7 +160,7 @@ class _LayoutPickerHeader extends StatelessWidget {
               ),
               SizedBox(width: 8 * scale),
               Text(
-                EmulatorUiStrings.t('layout.title'),
+                EmulatorUiLocalizations.of(context).layoutTitle,
                 style: TextStyle(
                   color: _LayoutPickerColors.label,
                   fontSize: 14 * scale,
@@ -142,12 +181,18 @@ class _LayoutOptionCard extends StatelessWidget {
     required this.variant,
     required this.scale,
     required this.selected,
+    required this.focusNode,
+    required this.autofocus,
+    required this.onFocusChange,
     required this.onTap,
   });
 
   final Host4EmulatorSiliconeLayoutVariant variant;
   final double scale;
   final bool selected;
+  final FocusNode focusNode;
+  final bool autofocus;
+  final ValueChanged<bool> onFocusChange;
   final VoidCallback onTap;
 
   @override
@@ -160,6 +205,9 @@ class _LayoutOptionCard extends StatelessWidget {
       button: true,
       selected: selected,
       child: InkWell(
+        focusNode: focusNode,
+        autofocus: autofocus,
+        onFocusChange: onFocusChange,
         onTap: onTap,
         borderRadius: BorderRadius.circular(8 * scale),
         child: AnimatedContainer(
@@ -170,10 +218,12 @@ class _LayoutOptionCard extends StatelessWidget {
                 : _LayoutPickerColors.card,
             borderRadius: BorderRadius.circular(8 * scale),
             border: Border.all(
-              color: selected
+              color: focusNode.hasFocus
+                  ? _LayoutPickerColors.radialEdge
+                  : selected
                   ? _LayoutPickerColors.selected
                   : _LayoutPickerColors.cardBorder,
-              width: scale,
+              width: (focusNode.hasFocus ? 3 : 1) * scale,
             ),
           ),
           child: Stack(
@@ -208,7 +258,7 @@ class _LayoutOptionCard extends StatelessWidget {
                 right: 64 * scale,
                 bottom: 8 * scale,
                 child: Text(
-                  variant.title,
+                  variant.title(context),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
