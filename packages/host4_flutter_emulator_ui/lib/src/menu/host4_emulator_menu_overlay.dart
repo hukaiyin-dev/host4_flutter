@@ -24,14 +24,12 @@ class _MenuItemModel {
     required this.title,
     required this.asset,
     this.subtitle,
-    this.highlight = false,
   });
 
   final String identifier;
   final String title;
   final String asset;
   final String? subtitle;
-  final bool highlight;
 }
 
 class _MenuLayoutSpec {
@@ -235,7 +233,6 @@ class _Host4EmulatorMenuOverlayState extends State<Host4EmulatorMenuOverlay> {
       title: EmulatorUiLocalizations.of(context).menuContinue,
       subtitle: EmulatorUiLocalizations.of(context).menuContinueSubtitle,
       asset: 'assets/controls/ic_jixuyouxi.svg',
-      highlight: true,
     ),
     _MenuAction.layout: _MenuItemModel(
       identifier: 'menu.layout',
@@ -454,21 +451,7 @@ class _MenuButton extends StatelessWidget {
     final focusOutset = 4 * scale;
     final cardRadius = 8 * scale;
     final focusRadius = cardRadius + focusOutset;
-    final highlighted = item.highlight;
     final enabled = onTap != null;
-    final titleColor = highlighted
-        ? _OverlayColors.brand
-        : enabled
-        ? _OverlayColors.title
-        : _OverlayColors.muted;
-    final subtitleColor = highlighted
-        ? _OverlayColors.brand
-        : _OverlayColors.muted;
-    final iconColor = highlighted
-        ? _OverlayColors.brand
-        : enabled
-        ? _OverlayColors.icon
-        : _OverlayColors.muted;
 
     return Actions(
       actions: <Type, Action<Intent>>{
@@ -488,6 +471,19 @@ class _MenuButton extends StatelessWidget {
           child: Builder(
             builder: (context) {
               final focused = Focus.of(context).hasFocus;
+              final titleColor = focused
+                  ? _OverlayColors.brand
+                  : enabled
+                  ? _OverlayColors.title
+                  : _OverlayColors.muted;
+              final subtitleColor = focused
+                  ? _OverlayColors.brand
+                  : _OverlayColors.muted;
+              final iconColor = focused
+                  ? _OverlayColors.brand
+                  : enabled
+                  ? _OverlayColors.icon
+                  : _OverlayColors.muted;
               return Semantics(
                 key: ValueKey<String>(item.identifier),
                 container: true,
@@ -519,7 +515,7 @@ class _MenuButton extends StatelessWidget {
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 120),
                           decoration: BoxDecoration(
-                            color: highlighted
+                            color: focused
                                 ? _OverlayColors.highlight
                                 : _OverlayColors.card,
                             borderRadius: BorderRadius.circular(cardRadius),

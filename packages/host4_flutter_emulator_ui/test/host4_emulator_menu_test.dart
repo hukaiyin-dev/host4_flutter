@@ -1,9 +1,92 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:host4_flutter_emulator_ui/host4_flutter_emulator_ui.dart';
 
 void main() {
+  for (final size in [const Size(844, 390), const Size(390, 844)]) {
+    testWidgets('menu highlight follows directional focus at $size', (
+      tester,
+    ) async {
+      tester.view.physicalSize = size;
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      await tester.pumpWidget(
+        MaterialApp(
+          locale: const Locale('zh'),
+          localizationsDelegates:
+              EmulatorUiLocalizations.localizationsDelegates,
+          supportedLocales: EmulatorUiLocalizations.supportedLocales,
+          home: Host4EmulatorUiShortcuts(
+            onBack: () {},
+            child: Host4EmulatorMenuOverlay(
+              actions: _FakeActions(),
+              onOpenSaveManager: () {},
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      void expectHighlight(String id, bool highlighted) {
+        final button = find.byKey(ValueKey('menu.$id'));
+        final card = tester.widget<AnimatedContainer>(
+          find.descendant(of: button, matching: find.byType(AnimatedContainer)),
+        );
+        expect(
+          (card.decoration! as BoxDecoration).color,
+          highlighted ? const Color(0xFFC9B9F9) : const Color(0xFFE7EDF8),
+        );
+        final ring = find.descendant(
+          of: button,
+          matching: find.byWidgetPredicate(
+            (widget) =>
+                widget is DecoratedBox &&
+                widget.decoration is BoxDecoration &&
+                (widget.decoration as BoxDecoration).border != null,
+          ),
+        );
+        expect(ring, highlighted ? findsOneWidget : findsNothing);
+        final texts = tester
+            .widgetList<Text>(
+              find.descendant(of: button, matching: find.byType(Text)),
+            )
+            .toList();
+        expect(
+          texts.first.style!.color,
+          highlighted ? const Color(0xFF774FEF) : const Color(0xFF121A29),
+        );
+        expect(
+          texts.last.style!.color,
+          highlighted ? const Color(0xFF774FEF) : const Color(0xFF6A7691),
+        );
+        final icon = tester.widget<SvgPicture>(
+          find.descendant(of: button, matching: find.byType(SvgPicture)),
+        );
+        expect(
+          icon.colorFilter,
+          ColorFilter.mode(
+            highlighted ? const Color(0xFF774FEF) : const Color(0xFF3A424F),
+            BlendMode.srcIn,
+          ),
+        );
+      }
+
+      expectHighlight('continue', true);
+      expectHighlight('speed', false);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+      await tester.pumpAndSettle();
+      expectHighlight('speed', true);
+      expectHighlight('continue', false);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pumpAndSettle();
+      expectHighlight('continue', true);
+      expectHighlight('speed', false);
+    });
+  }
+
   testWidgets('missing HTML capabilities disable only save and speed actions', (
     tester,
   ) async {
