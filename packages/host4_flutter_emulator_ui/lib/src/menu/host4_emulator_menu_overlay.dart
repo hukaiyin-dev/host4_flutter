@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-import '../l10n/emulator_ui_strings.dart';
+import '../../l10n/generated/emulator_ui_localizations.dart';
 import '../model/host4_emulator_save_entry.dart';
 import '../session/host4_emulator_session_actions.dart';
 
@@ -24,14 +24,12 @@ class _MenuItemModel {
     required this.title,
     required this.asset,
     this.subtitle,
-    this.highlight = false,
   });
 
   final String identifier;
   final String title;
   final String asset;
   final String? subtitle;
-  final bool highlight;
 }
 
 class _MenuLayoutSpec {
@@ -85,6 +83,8 @@ class Host4EmulatorMenuOverlay extends StatefulWidget {
     this.onOpenLayoutPicker,
     this.onOpenKeyLocator,
     this.showLayoutAction = true,
+    this.enableSaveActions = true,
+    this.enableSpeedAction = true,
     super.key,
   });
 
@@ -94,6 +94,8 @@ class Host4EmulatorMenuOverlay extends StatefulWidget {
   final VoidCallback? onOpenLayoutPicker;
   final VoidCallback? onOpenKeyLocator;
   final bool showLayoutAction;
+  final bool enableSaveActions;
+  final bool enableSpeedAction;
 
   @override
   State<Host4EmulatorMenuOverlay> createState() =>
@@ -118,7 +120,11 @@ class _Host4EmulatorMenuOverlayState extends State<Host4EmulatorMenuOverlay> {
         _MenuAction.saveManager,
         _MenuAction.quickSave,
       ],
-      <_MenuAction?>[_MenuAction.speed, _MenuAction.keyLocator, _MenuAction.exit],
+      <_MenuAction?>[
+        _MenuAction.speed,
+        _MenuAction.keyLocator,
+        _MenuAction.exit,
+      ],
       <_MenuAction?>[_MenuAction.continueGame, _MenuAction.layout, null],
     ],
   );
@@ -131,7 +137,11 @@ class _Host4EmulatorMenuOverlayState extends State<Host4EmulatorMenuOverlay> {
         _MenuAction.saveManager,
         _MenuAction.quickSave,
       ],
-      <_MenuAction?>[_MenuAction.speed, _MenuAction.keyLocator, _MenuAction.exit],
+      <_MenuAction?>[
+        _MenuAction.speed,
+        _MenuAction.keyLocator,
+        _MenuAction.exit,
+      ],
       <_MenuAction?>[_MenuAction.continueGame, null, null],
     ],
   );
@@ -185,53 +195,53 @@ class _Host4EmulatorMenuOverlayState extends State<Host4EmulatorMenuOverlay> {
   Map<_MenuAction, _MenuItemModel> get _items => <_MenuAction, _MenuItemModel>{
     _MenuAction.quickLoad: _MenuItemModel(
       identifier: 'menu.quick_load',
-      title: EmulatorUiStrings.t('menu.quickLoad'),
-      subtitle: _quickSaveTime == null ? null
+      title: EmulatorUiLocalizations.of(context).menuQuickLoad,
+      subtitle: _quickSaveTime == null
+          ? null
           : '${_quickSaveTime!.hour.toString().padLeft(2, '0')}:${_quickSaveTime!.minute.toString().padLeft(2, '0')}',
       asset: 'assets/controls/ic_save.svg',
     ),
     _MenuAction.saveManager: _MenuItemModel(
       identifier: 'menu.save_manager',
-      title: EmulatorUiStrings.t('menu.saveManager'),
+      title: EmulatorUiLocalizations.of(context).menuSaveManager,
       subtitle: _manualSaveCount == null
           ? null
-          : EmulatorUiStrings.t('menu.saveManagerUsed', {
-              'used': _manualSaveCount,
-              'total': host4EmulatorManualSaveSlotCount,
-            }),
+          : EmulatorUiLocalizations.of(context).menuSaveManagerUsed(
+              _manualSaveCount!,
+              host4EmulatorManualSaveSlotCount,
+            ),
       asset: 'assets/controls/ic_cundangguanli.svg',
     ),
     _MenuAction.quickSave: _MenuItemModel(
       identifier: 'menu.quick_save',
-      title: EmulatorUiStrings.t('menu.quickSave'),
-      subtitle: EmulatorUiStrings.t('menu.quickSaveSubtitle'),
+      title: EmulatorUiLocalizations.of(context).menuQuickSave,
+      subtitle: EmulatorUiLocalizations.of(context).menuQuickSaveSubtitle,
       asset: 'assets/controls/ic_load.svg',
     ),
     _MenuAction.speed: _MenuItemModel(
       identifier: 'menu.speed',
-      title: EmulatorUiStrings.t('menu.speed'),
+      title: EmulatorUiLocalizations.of(context).menuSpeed,
       asset: 'assets/controls/ic_beisu.svg',
     ),
     _MenuAction.exit: _MenuItemModel(
       identifier: 'menu.exit',
-      title: EmulatorUiStrings.t('menu.exit'),
+      title: EmulatorUiLocalizations.of(context).menuExit,
       asset: 'assets/controls/ic_quit.svg',
     ),
     _MenuAction.continueGame: _MenuItemModel(
       identifier: 'menu.continue',
-      title: EmulatorUiStrings.t('menu.continue'),
-      subtitle: EmulatorUiStrings.t('menu.continueSubtitle'),
+      title: EmulatorUiLocalizations.of(context).menuContinue,
+      subtitle: EmulatorUiLocalizations.of(context).menuContinueSubtitle,
       asset: 'assets/controls/ic_jixuyouxi.svg',
-      highlight: true,
     ),
     _MenuAction.layout: _MenuItemModel(
       identifier: 'menu.layout',
-      title: EmulatorUiStrings.t('menu.layout'),
+      title: EmulatorUiLocalizations.of(context).menuLayout,
       asset: 'assets/controls/ic_buju.svg',
     ),
     _MenuAction.keyLocator: _MenuItemModel(
       identifier: 'menu.key_locator',
-      title: EmulatorUiStrings.t('menu.keyLocator'),
+      title: EmulatorUiLocalizations.of(context).menuKeyLocator,
       asset: 'assets/controls/ic_dingwei.svg',
     ),
   };
@@ -266,13 +276,22 @@ class _Host4EmulatorMenuOverlayState extends State<Host4EmulatorMenuOverlay> {
   }
 
   VoidCallback? _onTapFor(_MenuAction action) {
+    if (!widget.enableSaveActions &&
+        (action == _MenuAction.quickLoad ||
+            action == _MenuAction.quickSave ||
+            action == _MenuAction.saveManager)) {
+      return null;
+    }
+    if (!widget.enableSpeedAction && action == _MenuAction.speed) return null;
     return switch (action) {
       _MenuAction.quickLoad => () => unawaited(_run(widget.actions.quickLoad)),
       _MenuAction.saveManager => widget.onOpenSaveManager,
-      _MenuAction.quickSave => () => unawaited(_run(() async {
-        await widget.actions.quickSave();
-        await _loadSaveSummary();
-      })),
+      _MenuAction.quickSave => () => unawaited(
+        _run(() async {
+          await widget.actions.quickSave();
+          await _loadSaveSummary();
+        }),
+      ),
       _MenuAction.speed => () => unawaited(_run(_toggleRate)),
       _MenuAction.exit => () => unawaited(_run(widget.actions.exit)),
       _MenuAction.continueGame => () => unawaited(_run(widget.actions.resume)),
@@ -303,7 +322,8 @@ class _Host4EmulatorMenuOverlayState extends State<Host4EmulatorMenuOverlay> {
               Positioned(
                 // Portrait toolbar is anchored below the top safe inset.
                 // Keep the cards below it; landscape geometry is unchanged.
-                top: spec.layout.panelTop * scale +
+                top:
+                    spec.layout.panelTop * scale +
                     (landscape ? 0 : MediaQuery.paddingOf(context).top),
                 left: (constraints.maxWidth - panelWidth) / 2,
                 width: panelWidth,
@@ -369,7 +389,7 @@ class _MenuPanel extends StatelessWidget {
       key: const ValueKey<String>('menu.title'),
       container: true,
       identifier: 'menu.title',
-      label: EmulatorUiStrings.t('menu.pauseLabel'),
+      label: EmulatorUiLocalizations.of(context).menuPauseLabel,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -431,115 +451,119 @@ class _MenuButton extends StatelessWidget {
     final focusOutset = 4 * scale;
     final cardRadius = 8 * scale;
     final focusRadius = cardRadius + focusOutset;
-    final highlighted = item.highlight;
     final enabled = onTap != null;
-    final titleColor = highlighted
-        ? _OverlayColors.brand
-        : enabled
-        ? _OverlayColors.title
-        : _OverlayColors.muted;
-    final subtitleColor = highlighted
-        ? _OverlayColors.brand
-        : _OverlayColors.muted;
-    final iconColor = highlighted
-        ? _OverlayColors.brand
-        : enabled
-        ? _OverlayColors.icon
-        : _OverlayColors.muted;
 
     return Actions(
       actions: <Type, Action<Intent>>{
-        ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: (_) { onTap?.call(); return null; }),
+        ActivateIntent: CallbackAction<ActivateIntent>(
+          onInvoke: (_) {
+            onTap?.call();
+            return null;
+          },
+        ),
       },
       child: _Pressable(
-      onTap: onTap,
-      child: Focus(
-        focusNode: focusNode,
-        autofocus: autofocus,
-        canRequestFocus: enabled,
-        child: Builder(
-          builder: (context) {
-            final focused = Focus.of(context).hasFocus;
-            return Semantics(
-              key: ValueKey<String>(item.identifier),
-              container: true,
-              identifier: item.identifier,
-              button: enabled,
-              enabled: enabled,
-              child: SizedBox(
-                height: buttonHeight * scale,
-                child: Stack(
-                  clipBehavior: Clip.none,
-                  children: <Widget>[
-                    if (focused)
+        onTap: onTap,
+        child: Focus(
+          focusNode: focusNode,
+          autofocus: autofocus,
+          canRequestFocus: enabled,
+          child: Builder(
+            builder: (context) {
+              final focused = Focus.of(context).hasFocus;
+              final titleColor = focused
+                  ? _OverlayColors.brand
+                  : enabled
+                  ? _OverlayColors.title
+                  : _OverlayColors.muted;
+              final subtitleColor = focused
+                  ? _OverlayColors.brand
+                  : _OverlayColors.muted;
+              final iconColor = focused
+                  ? _OverlayColors.brand
+                  : enabled
+                  ? _OverlayColors.icon
+                  : _OverlayColors.muted;
+              return Semantics(
+                key: ValueKey<String>(item.identifier),
+                container: true,
+                identifier: item.identifier,
+                button: enabled,
+                enabled: enabled,
+                child: SizedBox(
+                  height: buttonHeight * scale,
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: <Widget>[
+                      if (focused)
+                        Positioned.fill(
+                          left: -focusOutset,
+                          top: -focusOutset,
+                          right: -focusOutset,
+                          bottom: -focusOutset,
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(focusRadius),
+                              border: Border.all(
+                                color: _OverlayColors.focusRing,
+                                width: 2 * scale,
+                              ),
+                            ),
+                          ),
+                        ),
                       Positioned.fill(
-                        left: -focusOutset,
-                        top: -focusOutset,
-                        right: -focusOutset,
-                        bottom: -focusOutset,
-                        child: DecoratedBox(
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 120),
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(focusRadius),
-                            border: Border.all(
-                              color: _OverlayColors.focusRing,
-                              width: 2 * scale,
+                            color: focused
+                                ? _OverlayColors.highlight
+                                : _OverlayColors.card,
+                            borderRadius: BorderRadius.circular(cardRadius),
+                          ),
+                          child: Padding(
+                            padding: EdgeInsets.all(8 * scale),
+                            child: Row(
+                              children: <Widget>[
+                                SizedBox(
+                                  width: 34 * scale,
+                                  height: 34 * scale,
+                                  child: Center(
+                                    child: SvgPicture.asset(
+                                      item.asset,
+                                      package: 'host4_flutter_emulator_ui',
+                                      width: 24 * scale,
+                                      height: 24 * scale,
+                                      fit: BoxFit.contain,
+                                      colorFilter: ColorFilter.mode(
+                                        iconColor,
+                                        BlendMode.srcIn,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(width: 4 * scale),
+                                Expanded(
+                                  child: _MenuButtonText(
+                                    item: item,
+                                    action: action,
+                                    speed: speed,
+                                    scale: scale,
+                                    titleColor: titleColor,
+                                    subtitleColor: subtitleColor,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ),
                       ),
-                    Positioned.fill(
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 120),
-                        decoration: BoxDecoration(
-                          color: highlighted
-                              ? _OverlayColors.highlight
-                              : _OverlayColors.card,
-                          borderRadius: BorderRadius.circular(cardRadius),
-                        ),
-                        child: Padding(
-                          padding: EdgeInsets.all(8 * scale),
-                          child: Row(
-                            children: <Widget>[
-                              SizedBox(
-                                width: 34 * scale,
-                                height: 34 * scale,
-                                child: Center(
-                                  child: SvgPicture.asset(
-                                    item.asset,
-                                    package: 'host4_flutter_emulator_ui',
-                                    width: 24 * scale,
-                                    height: 24 * scale,
-                                    fit: BoxFit.contain,
-                                    colorFilter: ColorFilter.mode(
-                                      iconColor,
-                                      BlendMode.srcIn,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              SizedBox(width: 4 * scale),
-                              Expanded(
-                                child: _MenuButtonText(
-                                  item: item,
-                                  action: action,
-                                  speed: speed,
-                                  scale: scale,
-                                  titleColor: titleColor,
-                                  subtitleColor: subtitleColor,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         ),
-      ),
       ),
     );
   }
@@ -579,17 +603,21 @@ class _MenuButtonText extends StatelessWidget {
       children: <Widget>[
         title,
         if (subtitle != null)
-          Semantics(
-            key: action == _MenuAction.speed
-                ? const ValueKey<String>('menu.speed_label')
-                : null,
-            container: action == _MenuAction.speed,
-            identifier: action == _MenuAction.speed ? 'menu.speed_label' : null,
-            child: Text(
-              subtitle,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: _OverlayText.caption(scale, color: subtitleColor),
+          Flexible(
+            child: Semantics(
+              key: action == _MenuAction.speed
+                  ? const ValueKey<String>('menu.speed_label')
+                  : null,
+              container: action == _MenuAction.speed,
+              identifier: action == _MenuAction.speed
+                  ? 'menu.speed_label'
+                  : null,
+              child: Text(
+                subtitle,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: _OverlayText.caption(scale, color: subtitleColor),
+              ),
             ),
           ),
       ],

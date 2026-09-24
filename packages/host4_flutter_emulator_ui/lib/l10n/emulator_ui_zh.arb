@@ -1,0 +1,55 @@
+{
+  "@@locale": "zh",
+  "menuQuickLoad": "快速读档",
+  "menuSaveManager": "存档管理",
+  "menuSaveManagerUsed": "{used}/{total} 已用",
+  "@menuSaveManagerUsed": {
+    "placeholders": {
+      "used": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "menuQuickSave": "快速存档",
+  "menuQuickSaveSubtitle": "覆盖快速存档",
+  "menuSpeed": "倍速",
+  "menuExit": "退出游戏",
+  "menuContinue": "继续游戏",
+  "menuContinueSubtitle": "返回游戏",
+  "menuLayout": "切换布局",
+  "menuKeyLocator": "按键定位",
+  "menuPauseLabel": "暂停菜单",
+  "saveDeleteTitle": "删除存档？",
+  "saveDeleteMessage": "删除后无法恢复。",
+  "saveCancel": "取消",
+  "saveDelete": "删除",
+  "saveQuickSection": "快速存档",
+  "saveQuickLabel": "快速存档",
+  "saveLoad": "读取",
+  "saveManualSection": "手动存档",
+  "saveSlotName": "存档 {slot}",
+  "@saveSlotName": {
+    "placeholders": {
+      "slot": {
+        "type": "int"
+      }
+    }
+  },
+  "saveSave": "保存",
+  "saveOverwrite": "覆盖",
+  "saveTitle": "存档管理",
+  "saveNoQuickSave": "暂无快速存档",
+  "keyLocatorTitle": "调整虚拟按键位置",
+  "keyLocatorInstruction": "按住并拖动虚拟按键，调整至合适的位置",
+  "keyLocatorLandscapeHint": "支持左右拖动，再次按Pantas键保存全局布局",
+  "keyLocatorPortraitHint": "支持上下拖动，再次按Pantas键保存全局布局",
+  "keyLocatorGamepatchHint": "如使用Gamepatch，可与其按键位置对齐，获得更好的按键手感",
+  "layoutTitle": "切换布局",
+  "layoutSilicone": "硅胶垫",
+  "layoutModernSymmetric": "现代对称",
+  "layoutModernAsymmetric": "现代非对称",
+  "layoutRetroClassic": "复古传统"
+}

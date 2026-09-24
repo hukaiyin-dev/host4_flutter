@@ -1,4 +1,6 @@
-import '../l10n/emulator_ui_strings.dart';
+import 'package:flutter/widgets.dart';
+
+import '../../l10n/generated/emulator_ui_localizations.dart';
 
 enum Host4EmulatorSiliconeLayoutVariant {
   silicone,
@@ -24,14 +26,15 @@ extension Host4EmulatorSiliconeLayoutVariantPresentation
     Host4EmulatorSiliconeLayoutVariant.retroTraditional => 'retro_traditional',
   };
 
-  String get title => switch (this) {
-    Host4EmulatorSiliconeLayoutVariant.silicone =>
-      EmulatorUiStrings.t('layout.silicone'),
+  String title(BuildContext context) => switch (this) {
+    Host4EmulatorSiliconeLayoutVariant.silicone => EmulatorUiLocalizations.of(
+      context,
+    ).layoutSilicone,
     Host4EmulatorSiliconeLayoutVariant.modernSymmetric =>
-      EmulatorUiStrings.t('layout.modernSymmetric'),
+      EmulatorUiLocalizations.of(context).layoutModernSymmetric,
     Host4EmulatorSiliconeLayoutVariant.modernAsymmetric =>
-      EmulatorUiStrings.t('layout.modernAsymmetric'),
+      EmulatorUiLocalizations.of(context).layoutModernAsymmetric,
     Host4EmulatorSiliconeLayoutVariant.retroTraditional =>
-      EmulatorUiStrings.t('layout.retroClassic'),
+      EmulatorUiLocalizations.of(context).layoutRetroClassic,
   };
 }

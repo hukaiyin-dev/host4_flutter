@@ -1,0 +1,55 @@
+{
+  "@@locale": "en",
+  "menuQuickLoad": "Quick Load",
+  "menuSaveManager": "Save Manager",
+  "menuSaveManagerUsed": "{used}/{total} used",
+  "@menuSaveManagerUsed": {
+    "placeholders": {
+      "used": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "menuQuickSave": "Quick Save",
+  "menuQuickSaveSubtitle": "Overwrite quick save",
+  "menuSpeed": "Speed",
+  "menuExit": "Exit Game",
+  "menuContinue": "Continue",
+  "menuContinueSubtitle": "Back to game",
+  "menuLayout": "Switch Layout",
+  "menuKeyLocator": "Key Position",
+  "menuPauseLabel": "Pause Menu",
+  "saveDeleteTitle": "Delete save?",
+  "saveDeleteMessage": "This cannot be undone.",
+  "saveCancel": "Cancel",
+  "saveDelete": "Delete",
+  "saveQuickSection": "Quick Save",
+  "saveQuickLabel": "Quick Save",
+  "saveLoad": "Load",
+  "saveManualSection": "Manual Save",
+  "saveSlotName": "Save {slot}",
+  "@saveSlotName": {
+    "placeholders": {
+      "slot": {
+        "type": "int"
+      }
+    }
+  },
+  "saveSave": "Save",
+  "saveOverwrite": "Overwrite",
+  "saveTitle": "Save Manager",
+  "saveNoQuickSave": "No quick save yet",
+  "keyLocatorTitle": "Adjust virtual button positions",
+  "keyLocatorInstruction": "Hold and drag virtual buttons to adjust their positions",
+  "keyLocatorLandscapeHint": "Drag left/right, press Pantas key again to save global layout",
+  "keyLocatorPortraitHint": "Drag up/down, press Pantas key again to save global layout",
+  "keyLocatorGamepatchHint": "If using Gamepatch, align with its button positions for better feel",
+  "layoutTitle": "Switch Layout",
+  "layoutSilicone": "Silicone Pad",
+  "layoutModernSymmetric": "Modern Symmetric",
+  "layoutModernAsymmetric": "Modern Asymmetric",
+  "layoutRetroClassic": "Retro Classic"
+}

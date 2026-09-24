@@ -1,0 +1,55 @@
+{
+  "@@locale": "id",
+  "menuQuickLoad": "Muat Cepat",
+  "menuSaveManager": "Kelola Simpanan",
+  "menuSaveManagerUsed": "{used}/{total} terpakai",
+  "@menuSaveManagerUsed": {
+    "placeholders": {
+      "used": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "menuQuickSave": "Simpan Cepat",
+  "menuQuickSaveSubtitle": "Timpa simpanan cepat",
+  "menuSpeed": "Kecepatan",
+  "menuExit": "Keluar Game",
+  "menuContinue": "Lanjutkan",
+  "menuContinueSubtitle": "Kembali ke game",
+  "menuLayout": "Ganti Tata Letak",
+  "menuKeyLocator": "Posisi Tombol",
+  "menuPauseLabel": "Menu Jeda",
+  "saveDeleteTitle": "Hapus simpanan?",
+  "saveDeleteMessage": "Tidak dapat dibatalkan.",
+  "saveCancel": "Batal",
+  "saveDelete": "Hapus",
+  "saveQuickSection": "Simpan Cepat",
+  "saveQuickLabel": "Simpan Cepat",
+  "saveLoad": "Muat",
+  "saveManualSection": "Simpan Manual",
+  "saveSlotName": "Simpanan {slot}",
+  "@saveSlotName": {
+    "placeholders": {
+      "slot": {
+        "type": "int"
+      }
+    }
+  },
+  "saveSave": "Simpan",
+  "saveOverwrite": "Timpa",
+  "saveTitle": "Kelola Simpanan",
+  "saveNoQuickSave": "Belum ada simpanan cepat",
+  "keyLocatorTitle": "Sesuaikan posisi tombol virtual",
+  "keyLocatorInstruction": "Tahan dan seret tombol virtual untuk menyesuaikan posisi",
+  "keyLocatorLandscapeHint": "Seret kiri/kanan, tekan tombol Pantas lagi untuk menyimpan tata letak",
+  "keyLocatorPortraitHint": "Seret atas/bawah, tekan tombol Pantas lagi untuk menyimpan tata letak",
+  "keyLocatorGamepatchHint": "Jika menggunakan Gamepatch, sejajarkan dengan posisi tombolnya",
+  "layoutTitle": "Ganti Tata Letak",
+  "layoutSilicone": "Bantalan Silikon",
+  "layoutModernSymmetric": "Modern Simetris",
+  "layoutModernAsymmetric": "Modern Asimetris",
+  "layoutRetroClassic": "Retro Klasik"
+}

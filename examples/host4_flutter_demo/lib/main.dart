@@ -1,3 +1,4 @@
+import 'package:host4_flutter_emulator_ui/host4_flutter_emulator_ui.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -156,7 +157,10 @@ class _Host4DemoBootstrapState extends State<Host4DemoBootstrap> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       locale: _effectiveLocale,
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      localizationsDelegates: const [
+        ...AppLocalizations.localizationsDelegates,
+        EmulatorUiLocalizations.delegate,
+      ],
       supportedLocales: AppLocalizations.supportedLocales,
       onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
       theme: ThemeData(

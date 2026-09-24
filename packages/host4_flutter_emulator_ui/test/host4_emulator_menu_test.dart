@@ -1,37 +1,182 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:host4_flutter_emulator_ui/host4_flutter_emulator_ui.dart';
 
 void main() {
-  testWidgets('portrait menu clears the fixed Pantas button with a safe inset', (tester) async {
-    tester.view.physicalSize = const Size(390, 844);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
-    await tester.pumpWidget(MaterialApp(home: MediaQuery(
-      data: const MediaQueryData(size: Size(390, 844), padding: EdgeInsets.only(top: 47)),
-      child: Stack(fit: StackFit.expand, children: [
-        Host4EmulatorMenuOverlay(actions: _FakeActions(), onOpenSaveManager: () {}),
-        Host4EmulatorActiveMenuButton(
-          layoutStyle: Host4EmulatorControlLayoutStyle.silicone,
-          onTap: () {},
+  for (final size in [const Size(844, 390), const Size(390, 844)]) {
+    testWidgets('menu highlight follows directional focus at $size', (
+      tester,
+    ) async {
+      tester.view.physicalSize = size;
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      await tester.pumpWidget(
+        MaterialApp(
+          locale: const Locale('zh'),
+          localizationsDelegates:
+              EmulatorUiLocalizations.localizationsDelegates,
+          supportedLocales: EmulatorUiLocalizations.supportedLocales,
+          home: Host4EmulatorUiShortcuts(
+            onBack: () {},
+            child: Host4EmulatorMenuOverlay(
+              actions: _FakeActions(),
+              onOpenSaveManager: () {},
+            ),
+          ),
         ),
-      ]),
-    )));
+      );
+      await tester.pumpAndSettle();
+
+      void expectHighlight(String id, bool highlighted) {
+        final button = find.byKey(ValueKey('menu.$id'));
+        final card = tester.widget<AnimatedContainer>(
+          find.descendant(of: button, matching: find.byType(AnimatedContainer)),
+        );
+        expect(
+          (card.decoration! as BoxDecoration).color,
+          highlighted ? const Color(0xFFC9B9F9) : const Color(0xFFE7EDF8),
+        );
+        final ring = find.descendant(
+          of: button,
+          matching: find.byWidgetPredicate(
+            (widget) =>
+                widget is DecoratedBox &&
+                widget.decoration is BoxDecoration &&
+                (widget.decoration as BoxDecoration).border != null,
+          ),
+        );
+        expect(ring, highlighted ? findsOneWidget : findsNothing);
+        final texts = tester
+            .widgetList<Text>(
+              find.descendant(of: button, matching: find.byType(Text)),
+            )
+            .toList();
+        expect(
+          texts.first.style!.color,
+          highlighted ? const Color(0xFF774FEF) : const Color(0xFF121A29),
+        );
+        expect(
+          texts.last.style!.color,
+          highlighted ? const Color(0xFF774FEF) : const Color(0xFF6A7691),
+        );
+        final icon = tester.widget<SvgPicture>(
+          find.descendant(of: button, matching: find.byType(SvgPicture)),
+        );
+        expect(
+          icon.colorFilter,
+          ColorFilter.mode(
+            highlighted ? const Color(0xFF774FEF) : const Color(0xFF3A424F),
+            BlendMode.srcIn,
+          ),
+        );
+      }
+
+      expectHighlight('continue', true);
+      expectHighlight('speed', false);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+      await tester.pumpAndSettle();
+      expectHighlight('speed', true);
+      expectHighlight('continue', false);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pumpAndSettle();
+      expectHighlight('continue', true);
+      expectHighlight('speed', false);
+    });
+  }
+
+  testWidgets('missing HTML capabilities disable only save and speed actions', (
+    tester,
+  ) async {
+    final actions = _FakeActions();
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('zh'),
+        localizationsDelegates: EmulatorUiLocalizations.localizationsDelegates,
+        supportedLocales: EmulatorUiLocalizations.supportedLocales,
+        home: Host4EmulatorMenuOverlay(
+          actions: actions,
+          onOpenSaveManager: () {},
+          enableSaveActions: false,
+          enableSpeedAction: false,
+        ),
+      ),
+    );
     await tester.pumpAndSettle();
-    final menu = tester.getRect(find.byKey(const ValueKey('menu.quick_save')));
-    final button = tester.getRect(find.byKey(const ValueKey('controls.active_menu')));
-    expect(menu.top, greaterThanOrEqualTo(button.bottom + 12));
-    expect(menu.top, 122);
+    for (final id in ['quick_save', 'quick_load', 'save_manager', 'speed']) {
+      final semantics = tester.widget<Semantics>(
+        find.byKey(ValueKey('menu.$id')),
+      );
+      expect(semantics.properties.enabled, isFalse);
+    }
+    await tester.tap(find.byKey(const ValueKey('menu.continue')));
+    await tester.pump();
+    expect(actions.calls, ['resume']);
   });
+  testWidgets(
+    'portrait menu clears the fixed Pantas button with a safe inset',
+    (tester) async {
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      await tester.pumpWidget(
+        MaterialApp(
+          locale: const Locale('zh'),
+          localizationsDelegates:
+              EmulatorUiLocalizations.localizationsDelegates,
+          supportedLocales: EmulatorUiLocalizations.supportedLocales,
+          home: MediaQuery(
+            data: const MediaQueryData(
+              size: Size(390, 844),
+              padding: EdgeInsets.only(top: 47),
+            ),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Host4EmulatorMenuOverlay(
+                  actions: _FakeActions(),
+                  onOpenSaveManager: () {},
+                ),
+                Host4EmulatorActiveMenuButton(
+                  layoutStyle: Host4EmulatorControlLayoutStyle.silicone,
+                  onTap: () {},
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final menu = tester.getRect(
+        find.byKey(const ValueKey('menu.quick_save')),
+      );
+      final button = tester.getRect(
+        find.byKey(const ValueKey('controls.active_menu')),
+      );
+      expect(menu.top, greaterThanOrEqualTo(button.bottom + 12));
+      expect(menu.top, 122);
+    },
+  );
   testWidgets('A activates focused menu action and B returns', (tester) async {
     final actions = _FakeActions();
     var backs = 0;
-    await tester.pumpWidget(MaterialApp(home: Host4EmulatorUiShortcuts(
-      onBack: () => backs++,
-      child: Host4EmulatorMenuOverlay(actions: actions, onOpenSaveManager: () {}),
-    )));
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('zh'),
+        localizationsDelegates: EmulatorUiLocalizations.localizationsDelegates,
+        supportedLocales: EmulatorUiLocalizations.supportedLocales,
+        home: Host4EmulatorUiShortcuts(
+          onBack: () => backs++,
+          child: Host4EmulatorMenuOverlay(
+            actions: actions,
+            onOpenSaveManager: () {},
+          ),
+        ),
+      ),
+    );
     await tester.pumpAndSettle();
     await tester.sendKeyEvent(LogicalKeyboardKey.keyA);
     await tester.pump();
@@ -50,6 +195,10 @@ void main() {
       Future<void> openMenu() async {
         await tester.pumpWidget(
           MaterialApp(
+            locale: const Locale('zh'),
+            localizationsDelegates:
+                EmulatorUiLocalizations.localizationsDelegates,
+            supportedLocales: EmulatorUiLocalizations.supportedLocales,
             home: Host4EmulatorMenuOverlay(
               actions: _FakeActions(),
               dataSource: source,
@@ -82,6 +231,9 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        locale: const Locale('zh'),
+        localizationsDelegates: EmulatorUiLocalizations.localizationsDelegates,
+        supportedLocales: EmulatorUiLocalizations.supportedLocales,
         home: Host4EmulatorMenuOverlay(
           actions: _FakeActions(),
           onOpenSaveManager: () {},
@@ -119,6 +271,9 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        locale: const Locale('zh'),
+        localizationsDelegates: EmulatorUiLocalizations.localizationsDelegates,
+        supportedLocales: EmulatorUiLocalizations.supportedLocales,
         home: Host4EmulatorMenuOverlay(
           actions: actions,
           onOpenSaveManager: () => openedSaveManager = true,
@@ -143,7 +298,10 @@ void main() {
     expect(find.byKey(const ValueKey<String>('menu.exit')), findsOneWidget);
     expect(find.byKey(const ValueKey<String>('menu.continue')), findsOneWidget);
     expect(find.byKey(const ValueKey<String>('menu.layout')), findsOneWidget);
-    expect(find.byKey(const ValueKey<String>('menu.key_locator')), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey<String>('menu.key_locator')),
+      findsOneWidget,
+    );
 
     await tester.tap(find.byKey(const ValueKey<String>('menu.quick_save')));
     await tester.pump();
@@ -170,6 +328,9 @@ void main() {
   testWidgets('consumer can hide the manual layout action', (tester) async {
     await tester.pumpWidget(
       MaterialApp(
+        locale: const Locale('zh'),
+        localizationsDelegates: EmulatorUiLocalizations.localizationsDelegates,
+        supportedLocales: EmulatorUiLocalizations.supportedLocales,
         home: Host4EmulatorMenuOverlay(
           actions: _FakeActions(),
           onOpenSaveManager: () {},
