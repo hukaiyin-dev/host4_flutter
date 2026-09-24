@@ -24,4 +24,14 @@ void main() {
   test('getPlatformVersion', () async {
     expect(await platform.getPlatformVersion(), '42');
   });
+
+  test('connectUart returns native uart session id', () async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
+          expect(methodCall.method, 'connectUart');
+          return 'uart-session-1';
+        });
+
+    expect(await platform.connectUart(), 'uart-session-1');
+  });
 }

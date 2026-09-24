@@ -109,13 +109,13 @@ class GmacroSession implements ProtocolSession {
     }
   }
 
-  /// Android BLE / USB：native 侧通过 escalation 推送 DP 按键与校准数据。
+  /// Android BLE / USB / UART：native 侧通过 escalation 推送 DP 按键与校准数据。
   bool get _shouldMergeNativeEscalationEvents {
     if (kIsWeb || defaultTargetPlatform != TargetPlatform.android) {
       return false;
     }
     return switch (transport.device.kind) {
-      TransportKind.ble || TransportKind.usb => true,
+      TransportKind.ble || TransportKind.usb || TransportKind.uart => true,
       TransportKind.mfi => false,
     };
   }

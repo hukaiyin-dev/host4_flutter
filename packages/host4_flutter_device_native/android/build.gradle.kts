@@ -1,3 +1,4 @@
+import org.gradle.kotlin.dsl.api
 import java.util.Properties
 
 group = "com.host4.host4_flutter_device_native"
@@ -32,6 +33,10 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
+    buildFeatures {
+        aidl = true
+    }
+
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_17.toString()
     }
@@ -51,7 +56,7 @@ android {
 
     testOptions {
         unitTests {
-            isIncludeAndroidResources = true
+            isIncludeAndroidResources = false
             all {
                 it.useJUnitPlatform()
 
@@ -67,12 +72,13 @@ android {
 }
 
 dependencies {
-    implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
+    // Pantas DeviceBrokerService is the UART owner and therefore needs the same
+    // platformlib types that back the public broker dispatcher API.
+    api("com.host4.platform:platformlib:1.1.21")
     implementation("androidx.appcompat:appcompat:1.7.0")
     implementation("io.reactivex.rxjava2:rxandroid:2.1.1")
     implementation("io.reactivex.rxjava2:rxjava:2.2.21")
     implementation("com.polidea.rxandroidble2:rxandroidble:1.19.0")
-
     // Flutter embedding: normally injected by the Flutter app build; required when opening
     // this android/ folder standalone in Android Studio.
     compileOnly("io.flutter:flutter_embedding_debug:1.0.0-$engineVersion") {

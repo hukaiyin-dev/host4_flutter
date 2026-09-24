@@ -123,6 +123,8 @@ class Host4BleTransportSession implements TransportSession {
         return const TransportReady();
       case NativeTransportEventType.disconnected:
         return TransportDisconnected(cause: failure);
+      case NativeTransportEventType.recovering:
+        return TransportRecovering(cause: failure);
       case NativeTransportEventType.error:
         return TransportError(
           failure ??

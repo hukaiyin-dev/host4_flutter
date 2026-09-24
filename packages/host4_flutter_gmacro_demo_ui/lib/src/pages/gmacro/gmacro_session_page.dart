@@ -41,7 +41,8 @@ GmacroBundledOtaFirmware gmacroBundledOtaFirmwareForTransportKind(
 ) {
   return switch (kind) {
     TransportKind.mfi => _mfiBundledOtaFirmware,
-    TransportKind.ble || TransportKind.usb => _bleBundledOtaFirmware,
+    TransportKind.ble || TransportKind.usb || TransportKind.uart =>
+      _bleBundledOtaFirmware,
   };
 }
 
@@ -131,6 +132,8 @@ class _GmacroSessionPageState extends State<GmacroSessionPage> {
         TransportReady() => '📡 Transport: Ready',
         TransportDisconnected(cause: final c) =>
           '📡 Transport: Disconnected${c != null ? ' (${c.code})' : ''}',
+        TransportRecovering(cause: final c) =>
+          '📡 Transport: Recovering${c != null ? ' (${c.code})' : ''}',
         TransportError(failure: final f) =>
           '📡 Transport: Error ${f.code} - ${f.message}',
       };

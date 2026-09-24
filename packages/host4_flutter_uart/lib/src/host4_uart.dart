@@ -1,80 +1,36 @@
 import 'package:host4_flutter_device_native/host4_flutter_device_native.dart';
 import 'package:host4_flutter_transport/host4_flutter_transport.dart';
 
-class Host4Usb {
-  Host4Usb({Host4FlutterDeviceNative? native})
+class Host4Uart {
+  Host4Uart({Host4FlutterDeviceNative? native})
     : _native = native ?? Host4FlutterDeviceNative();
 
   final Host4FlutterDeviceNative _native;
 
-  bool get isImplemented => true;
+  static const String deviceId = '__uart__';
 
-  DeviceDiscovery discovery() => Host4UsbDiscovery(_native);
-
-  /// Starts the SDK USB host stack ([UsbDeviceSessionHandle.init]) and opens a
-  /// transport session. Permission and plug/unplug are handled inside the JAR.
-  Future<TransportSession> connectAuto({
+  /// Binds the in-app DeviceBroker and returns a transport session.
+  ///
+  /// Ready / disconnected / recovering / error come from the broker. This
+  /// method does not fabricate a connected session.
+  Future<TransportSession> connect({
     Map<String, Object?> options = const <String, Object?>{},
   }) async {
-    final sessionId = await _native.connectUsb(options: options);
-    return Host4UsbTransportSession(
+    final sessionId = await _native.connectUart(options: options);
+    return Host4UartTransportSession(
       id: sessionId,
       device: const DeviceDescriptor(
-        id: 'usb-auto',
-        name: 'USB Device',
-        kind: TransportKind.usb,
+        id: deviceId,
+        name: 'UART Device',
+        kind: TransportKind.uart,
       ),
       native: _native,
     );
   }
-
-  Future<TransportSession> connect(
-    DeviceDescriptor device, {
-    Map<String, Object?> options = const <String, Object?>{},
-  }) async {
-    final sessionId = await _native.connectUsb(
-      deviceId: device.id,
-      options: options,
-    );
-    return Host4UsbTransportSession(
-      id: sessionId,
-      device: device,
-      native: _native,
-    );
-  }
-
-  Future<void> reconnect() => _native.reconnectUsb();
-
-  Future<void> release() => _native.releaseUsb();
 }
 
-class Host4UsbDiscovery implements DeviceDiscovery {
-  Host4UsbDiscovery(this._native);
-
-  final Host4FlutterDeviceNative _native;
-
-  @override
-  Stream<DeviceDescriptor> scan(DeviceScanQuery query) {
-    return _native.scanUsb(hints: query.hints).map(_mapDevice);
-  }
-
-  @override
-  Future<void> stop() {
-    return _native.stopUsbScan();
-  }
-
-  DeviceDescriptor _mapDevice(NativeDiscoveredDevice device) {
-    return DeviceDescriptor(
-      id: device.deviceId,
-      name: device.name,
-      kind: TransportKind.usb,
-      metadata: device.metadata,
-    );
-  }
-}
-
-class Host4UsbTransportSession implements TransportSession {
-  Host4UsbTransportSession({
+class Host4UartTransportSession implements TransportSession {
+  Host4UartTransportSession({
     required this.id,
     required this.device,
     required Host4FlutterDeviceNative native,
@@ -93,7 +49,6 @@ class Host4UsbTransportSession implements TransportSession {
     return _native.transportEvents(id).map(_mapTransportEvent);
   }
 
-  /// USB [DPKeyEventRsp] key / rocker events from the native SDK.
   Stream<NativeDpKeyEvent> get dpKeyEvents => _native.usbDpKeyEvents(id);
 
   Stream<NativeDeviceAlignEvent> get calibrationEvents =>
@@ -129,7 +84,7 @@ class Host4UsbTransportSession implements TransportSession {
           failure ??
               const TransportFailure(
                 code: 'native-transport-error',
-                message: 'Native transport reported an unspecified error.',
+                message: 'Native UART transport reported an unspecified error.',
               ),
         );
     }

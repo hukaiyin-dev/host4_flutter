@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:host4_flutter_webview/host4_flutter_webview.dart';
@@ -21,6 +23,30 @@ void main() {
       WebViewPlatform.instance = previous;
     }
   });
+
+  for (final fromAsset in [false, true]) {
+    testWidgets(
+      'waits for native setup before loading ${fromAsset ? 'an asset' : 'a URL'}',
+      (tester) async {
+        final gate = Completer<void>();
+        platform.navigationSetupGate = gate.future;
+        await tester.pumpWidget(
+          MaterialApp(
+            home: fromAsset
+                ? const Host4WebView.asset(initialAssetPath: 'games/index.html')
+                : const Host4WebView(initialUrl: 'https://example.com/game'),
+          ),
+        );
+
+        expect(platform.controller.loadAssetCount, 0);
+        expect(platform.controller.loadRequestCount, 0);
+        gate.complete();
+        await tester.pump();
+        expect(platform.controller.loadAssetCount, fromAsset ? 1 : 0);
+        expect(platform.controller.loadRequestCount, fromAsset ? 0 : 1);
+      },
+    );
+  }
 
   testWidgets(
     'keeps the native view mounted across failed and successful retries',
@@ -229,12 +255,14 @@ void main() {
 class _FakeWebViewPlatform extends WebViewPlatform {
   late final _FakeWebViewController controller;
   int widgetCreationCount = 0;
+  Future<void>? navigationSetupGate;
 
   @override
   PlatformWebViewController createPlatformWebViewController(
     PlatformWebViewControllerCreationParams params,
   ) {
-    controller = _FakeWebViewController(params);
+    controller = _FakeWebViewController(params)
+      ..navigationSetupGate = navigationSetupGate;
     return controller;
   }
 
@@ -259,6 +287,7 @@ class _FakeWebViewController extends PlatformWebViewController {
     : super.implementation(params);
 
   _FakeNavigationDelegate? navigationDelegate;
+  Future<void>? navigationSetupGate;
   int loadRequestCount = 0;
   int reloadCount = 0;
   int loadAssetCount = 0;
@@ -282,6 +311,7 @@ class _FakeWebViewController extends PlatformWebViewController {
   Future<void> setPlatformNavigationDelegate(
     PlatformNavigationDelegate handler,
   ) async {
+    await navigationSetupGate;
     navigationDelegate = handler as _FakeNavigationDelegate;
   }
 
