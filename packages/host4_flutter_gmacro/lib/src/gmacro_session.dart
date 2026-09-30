@@ -205,13 +205,17 @@ class GmacroSession implements ProtocolSession {
     String method, {
     Map<String, Object?> arguments = const <String, Object?>{},
   }) {
-    return _native
-        .invokeGmacroMethod(
-          protocolSessionId: id,
-          method: method,
-          arguments: arguments,
-        )
-        .timeout(const Duration(seconds: 3));
+    final invocation = _native.invokeGmacroMethod(
+      protocolSessionId: id,
+      method: method,
+      arguments: arguments,
+    );
+    // UART starts its three-second timeout after the queued request is written.
+    // A second Dart timeout here can win the race and hide native code=-3.
+    if (transport.device.kind == TransportKind.uart) {
+      return invocation;
+    }
+    return invocation.timeout(const Duration(seconds: 3));
   }
 
   ProtocolEvent _mapProtocolEvent(NativeProtocolEvent event) {

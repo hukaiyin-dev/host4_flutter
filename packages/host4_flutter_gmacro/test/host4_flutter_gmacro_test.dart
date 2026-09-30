@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:host4_flutter_gmacro/host4_flutter_gmacro.dart';
 import 'package:host4_flutter_device_native/host4_flutter_device_native.dart';
@@ -218,10 +219,60 @@ void main() {
     await session.close();
     await native.dispose();
   });
+
+  test('UART request returns native -3 after its three-second wait', () async {
+    final native = _FakeDeviceNative();
+    final reply = Completer<Map<String, Object?>>();
+    native.nextInvoke = reply.future;
+    final session = GmacroSession(
+      id: 'protocol-1',
+      transport: _FakeTransportSession(kind: TransportKind.uart),
+      native: native,
+    );
+
+    final result = expectLater(
+      session.invoke('fetchDeviceVersion'),
+      throwsA(
+        isA<PlatformException>().having(
+          (error) => error.message,
+          'native status',
+          contains('code=-3'),
+        ),
+      ),
+    );
+    await Future<void>.delayed(const Duration(milliseconds: 3100));
+    reply.completeError(
+      PlatformException(
+        code: 'gmacro-method-failed',
+        message: 'GMacro method failed with code=-3',
+      ),
+    );
+    await result;
+    await session.close();
+    await native.dispose();
+  });
+
+  test('USB requests keep the Dart three-second fallback', () async {
+    final native = _FakeDeviceNative();
+    native.nextInvoke = Completer<Map<String, Object?>>().future;
+    final session = GmacroSession(
+      id: 'protocol-1',
+      transport: _FakeTransportSession(kind: TransportKind.usb),
+      native: native,
+    );
+
+    await expectLater(
+      session.invoke('fetchDeviceVersion'),
+      throwsA(isA<TimeoutException>()),
+    );
+    await session.close();
+    await native.dispose();
+  });
 }
 
 class _FakeDeviceNative extends Host4FlutterDeviceNative {
   final List<Map<String, Object?>> invocations = <Map<String, Object?>>[];
+  Future<Map<String, Object?>>? nextInvoke;
   final StreamController<Map<String, Object?>> escalationEvents =
       StreamController<Map<String, Object?>>.broadcast();
 
@@ -255,7 +306,7 @@ class _FakeDeviceNative extends Host4FlutterDeviceNative {
       'method': method,
       'arguments': Map<String, Object?>.from(arguments),
     });
-    return <String, Object?>{};
+    return nextInvoke ?? <String, Object?>{};
   }
 
   @override
@@ -270,11 +321,8 @@ class _FakeTransportSession implements TransportSession {
   final TransportKind kind;
 
   @override
-  DeviceDescriptor get device => DeviceDescriptor(
-    id: 'device-1',
-    name: 'Gamepad',
-    kind: kind,
-  );
+  DeviceDescriptor get device =>
+      DeviceDescriptor(id: 'device-1', name: 'Gamepad', kind: kind);
 
   @override
   Future<void> disconnect() async {}
