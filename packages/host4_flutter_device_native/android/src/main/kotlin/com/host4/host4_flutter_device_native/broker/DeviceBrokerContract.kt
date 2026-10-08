@@ -2,6 +2,7 @@ package com.host4.host4_flutter_device_native.broker
 
 object DeviceBrokerContract {
     const val SERVICE_ACTION = "com.host4.devicebroker.BIND"
+    const val SERVICE_PACKAGE = "com.host4.server"
     const val SERVICE_CLASS_NAME = "com.host4.grymax.devicebroker.DeviceBrokerService"
     const val UART_DEVICE_ID = "__uart__"
 

@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.os.Bundle
-import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.os.ParcelFileDescriptor
@@ -386,14 +385,10 @@ internal class ContextDeviceBrokerConnector(
         }
         this.connection = connection
         val intent = Intent(DeviceBrokerContract.SERVICE_ACTION)
-            .setClassName(context.packageName, serviceClassName)
+            .setClassName(DeviceBrokerContract.SERVICE_PACKAGE, serviceClassName)
         return BrokerServiceLaunchPolicy.startThenBind(
             startService = {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    context.startForegroundService(intent)
-                } else {
-                    context.startService(intent)
-                }
+                context.startService(intent)
             },
             bindService = {
                 context.bindService(intent, connection, Context.BIND_AUTO_CREATE)
