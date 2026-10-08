@@ -16,12 +16,34 @@ class Host4SystemStatusData {
     required this.wifiEnabled,
     required this.batteryLevel,
     required this.batteryCharging,
+    this.showBatteryPercent = false,
+    this.use24Hour = true,
   });
 
   final String timeLabel;
   final bool wifiEnabled;
   final int batteryLevel;
   final bool batteryCharging;
+  final bool showBatteryPercent;
+  final bool use24Hour;
+
+  Host4SystemStatusData copyWith({
+    String? timeLabel,
+    bool? wifiEnabled,
+    int? batteryLevel,
+    bool? batteryCharging,
+    bool? showBatteryPercent,
+    bool? use24Hour,
+  }) {
+    return Host4SystemStatusData(
+      timeLabel: timeLabel ?? this.timeLabel,
+      wifiEnabled: wifiEnabled ?? this.wifiEnabled,
+      batteryLevel: batteryLevel ?? this.batteryLevel,
+      batteryCharging: batteryCharging ?? this.batteryCharging,
+      showBatteryPercent: showBatteryPercent ?? this.showBatteryPercent,
+      use24Hour: use24Hour ?? this.use24Hour,
+    );
+  }
 }
 
 // ─── Source Interface ─────────────────────────────────────────────────────────
@@ -49,6 +71,9 @@ abstract class Host4SystemStatusSource {
   /// 当前是否正在充电。
   bool get currentCharging;
 
+  /// 是否在电池图标旁显示百分比。
+  bool get currentShowBatteryPercent;
+
   /// 时间变化流，每分钟 emit 一次新的时间字符串。
   Stream<String> get timeStream;
 
@@ -60,6 +85,9 @@ abstract class Host4SystemStatusSource {
 
   /// 充电状态变化流。
   Stream<bool> get chargingStream;
+
+  /// 电池百分比显示开关变化流。
+  Stream<bool> get showBatteryPercentStream;
 
   /// 释放内部资源。由 [Host4SystemStatus] 在 dispose 时调用。
   void dispose();
@@ -86,6 +114,9 @@ class Host4StaticSystemStatusSource implements Host4SystemStatusSource {
   bool get currentCharging => data.batteryCharging;
 
   @override
+  bool get currentShowBatteryPercent => data.showBatteryPercent;
+
+  @override
   Stream<String> get timeStream => const Stream.empty();
 
   @override
@@ -96,6 +127,9 @@ class Host4StaticSystemStatusSource implements Host4SystemStatusSource {
 
   @override
   Stream<bool> get chargingStream => const Stream.empty();
+
+  @override
+  Stream<bool> get showBatteryPercentStream => const Stream.empty();
 
   @override
   void dispose() {}
@@ -119,6 +153,7 @@ class Host4ValueListenableSystemStatusSource
   final _wifiController = StreamController<bool>.broadcast();
   final _batteryController = StreamController<int>.broadcast();
   final _chargingController = StreamController<bool>.broadcast();
+  final _showBatteryPercentController = StreamController<bool>.broadcast();
 
   void _onStatusChanged() {
     final next = listenable.value;
@@ -133,6 +168,9 @@ class Host4ValueListenableSystemStatusSource
     }
     if (next.batteryCharging != _previous.batteryCharging) {
       _chargingController.add(next.batteryCharging);
+    }
+    if (next.showBatteryPercent != _previous.showBatteryPercent) {
+      _showBatteryPercentController.add(next.showBatteryPercent);
     }
     _previous = next;
   }
@@ -150,6 +188,9 @@ class Host4ValueListenableSystemStatusSource
   bool get currentCharging => listenable.value.batteryCharging;
 
   @override
+  bool get currentShowBatteryPercent => listenable.value.showBatteryPercent;
+
+  @override
   Stream<String> get timeStream => _timeController.stream;
 
   @override
@@ -162,12 +203,17 @@ class Host4ValueListenableSystemStatusSource
   Stream<bool> get chargingStream => _chargingController.stream;
 
   @override
+  Stream<bool> get showBatteryPercentStream =>
+      _showBatteryPercentController.stream;
+
+  @override
   void dispose() {
     listenable.removeListener(_onStatusChanged);
     _timeController.close();
     _wifiController.close();
     _batteryController.close();
     _chargingController.close();
+    _showBatteryPercentController.close();
   }
 }
 
@@ -204,6 +250,7 @@ class _Host4SystemStatusState extends State<Host4SystemStatus> {
   late String _time;
   late bool _wifi;
   late int _batteryLevel;
+  late bool _showBatteryPercent;
 
   final List<StreamSubscription<dynamic>> _subs = [];
 
@@ -226,6 +273,7 @@ class _Host4SystemStatusState extends State<Host4SystemStatus> {
     _time = s.currentTime;
     _wifi = s.currentWifi;
     _batteryLevel = s.currentBatteryLevel;
+    _showBatteryPercent = s.currentShowBatteryPercent;
     _subs.add(
       s.timeStream.listen((v) {
         if (mounted) setState(() => _time = v);
@@ -239,6 +287,11 @@ class _Host4SystemStatusState extends State<Host4SystemStatus> {
     _subs.add(
       s.batteryLevelStream.listen((v) {
         if (mounted) setState(() => _batteryLevel = v);
+      }),
+    );
+    _subs.add(
+      s.showBatteryPercentStream.listen((v) {
+        if (mounted) setState(() => _showBatteryPercent = v);
       }),
     );
   }
@@ -280,6 +333,14 @@ class _Host4SystemStatusState extends State<Host4SystemStatus> {
           level: _batteryLevel,
           color: color,
         ),
+        if (_showBatteryPercent) ...[
+          SizedBox(width: 4),
+          Text(
+            '$_batteryLevel%',
+            key: _statusKey('battery_percent'),
+            style: theme.typography.label.toTextStyle(color),
+          ),
+        ],
       ],
     );
   }

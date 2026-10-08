@@ -43,6 +43,9 @@ class Host4DefaultSystemStatusSource implements Host4SystemStatusSource {
   @override
   bool get currentCharging => _charging;
 
+  @override
+  bool get currentShowBatteryPercent => false;
+
   // ── Streams ─────────────────────────────────────────────────────────────────
 
   @override
@@ -53,6 +56,9 @@ class Host4DefaultSystemStatusSource implements Host4SystemStatusSource {
   Stream<int> get batteryLevelStream => _batteryLevelCtrl.stream;
   @override
   Stream<bool> get chargingStream => _chargingCtrl.stream;
+
+  @override
+  Stream<bool> get showBatteryPercentStream => const Stream.empty();
 
   // ── 初始化 ──────────────────────────────────────────────────────────────────
 
@@ -105,10 +111,7 @@ class Host4DefaultSystemStatusSource implements Host4SystemStatusSource {
 
   void _initBattery() {
     // 先读一次，拿到后 emit 到流
-    Future.wait([
-      _battery.batteryLevel,
-      _battery.batteryState,
-    ]).then((results) {
+    Future.wait([_battery.batteryLevel, _battery.batteryState]).then((results) {
       final level = results[0] as int;
       final charging = _isCharging(results[1] as BatteryState);
       if (level != _batteryLevel) {
