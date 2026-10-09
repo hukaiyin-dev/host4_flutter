@@ -1,4 +1,4 @@
-enum NativeTransportKind { ble, mfi, usb }
+enum NativeTransportKind { ble, mfi, usb, uart }
 
 enum NativeMfiAccessoryEventType { connected, disconnected, failed }
 
@@ -112,6 +112,7 @@ enum NativeTransportEventType {
   connected,
   ready,
   disconnected,
+  recovering,
   error,
 }
 

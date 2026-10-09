@@ -14,4 +14,15 @@ void main() {
     expect(descriptor.kind, TransportKind.ble);
     expect(descriptor.metadata['rssi'], -42);
   });
+
+  test('uart descriptor is a first-class transport kind', () {
+    const descriptor = DeviceDescriptor(
+      id: '__uart__',
+      name: 'UART Device',
+      kind: TransportKind.uart,
+    );
+
+    expect(descriptor.kind, TransportKind.uart);
+    expect(TransportKind.values, contains(TransportKind.uart));
+  });
 }

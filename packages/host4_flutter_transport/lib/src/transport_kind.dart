@@ -1,1 +1,1 @@
-enum TransportKind { ble, mfi, usb }
+enum TransportKind { ble, mfi, usb, uart }

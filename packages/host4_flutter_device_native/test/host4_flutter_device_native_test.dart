@@ -40,6 +40,13 @@ class MockHost4FlutterDeviceNativePlatform
   }
 
   @override
+  Future<String> connectUart({
+    Map<String, Object?> options = const {},
+  }) async {
+    return 'transport-uart-1';
+  }
+
+  @override
   Future<String> connectSystemConnectedBle({
     required List<String> serviceIds,
     List<String> deviceNames = const [],

@@ -109,13 +109,13 @@ class GmacroSession implements ProtocolSession {
     }
   }
 
-  /// Android BLE / USB：native 侧通过 escalation 推送 DP 按键与校准数据。
+  /// Android BLE / USB / UART：native 侧通过 escalation 推送 DP 按键与校准数据。
   bool get _shouldMergeNativeEscalationEvents {
     if (kIsWeb || defaultTargetPlatform != TargetPlatform.android) {
       return false;
     }
     return switch (transport.device.kind) {
-      TransportKind.ble || TransportKind.usb => true,
+      TransportKind.ble || TransportKind.usb || TransportKind.uart => true,
       TransportKind.mfi => false,
     };
   }
@@ -205,13 +205,17 @@ class GmacroSession implements ProtocolSession {
     String method, {
     Map<String, Object?> arguments = const <String, Object?>{},
   }) {
-    return _native
-        .invokeGmacroMethod(
-          protocolSessionId: id,
-          method: method,
-          arguments: arguments,
-        )
-        .timeout(const Duration(seconds: 3));
+    final invocation = _native.invokeGmacroMethod(
+      protocolSessionId: id,
+      method: method,
+      arguments: arguments,
+    );
+    // UART starts its three-second timeout after the queued request is written.
+    // A second Dart timeout here can win the race and hide native code=-3.
+    if (transport.device.kind == TransportKind.uart) {
+      return invocation;
+    }
+    return invocation.timeout(const Duration(seconds: 3));
   }
 
   ProtocolEvent _mapProtocolEvent(NativeProtocolEvent event) {

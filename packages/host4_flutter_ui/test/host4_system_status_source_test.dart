@@ -28,11 +28,13 @@ void main() {
     final wifi = <bool>[];
     final batteries = <int>[];
     final charging = <bool>[];
+    final percents = <bool>[];
     final subscriptions = [
       source.timeStream.listen(times.add),
       source.wifiStream.listen(wifi.add),
       source.batteryLevelStream.listen(batteries.add),
       source.chargingStream.listen(charging.add),
+      source.showBatteryPercentStream.listen(percents.add),
     ];
     addTearDown(() async {
       for (final subscription in subscriptions) {
@@ -45,6 +47,7 @@ void main() {
       wifiEnabled: true,
       batteryLevel: 80,
       batteryCharging: true,
+      showBatteryPercent: true,
     );
     await Future<void>.delayed(Duration.zero);
 
@@ -52,9 +55,11 @@ void main() {
     expect(source.currentWifi, isTrue);
     expect(source.currentBatteryLevel, 80);
     expect(source.currentCharging, isTrue);
+    expect(source.currentShowBatteryPercent, isTrue);
     expect(times, ['14:52']);
     expect(wifi, isEmpty);
     expect(batteries, [80]);
     expect(charging, [true]);
+    expect(percents, [true]);
   });
 }

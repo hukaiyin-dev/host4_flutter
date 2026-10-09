@@ -3,6 +3,14 @@ package com.host4.host4_flutter_device_native
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
+import com.host4.host4_flutter_device_native.broker.AidlGmacroBackend
+import com.host4.host4_flutter_device_native.broker.BrokerTransportMapper
+import com.host4.host4_flutter_device_native.broker.ContextDeviceBrokerConnector
+import com.host4.host4_flutter_device_native.broker.DeviceBrokerClient
+import com.host4.host4_flutter_device_native.broker.DeviceBrokerContract
+import com.host4.host4_flutter_device_native.broker.DeviceBrokerEventSink
+import com.host4.host4_flutter_device_native.broker.MainHandlerBrokerScheduler
+import com.host4.host4_flutter_device_native.broker.TempFileOtaFirmwareSource
 import com.host4.platform.listener.BluetoothStateListener
 import com.host4.platform.listener.MessageCallBack
 import com.host4.platform.listener.OnEscalationListener
@@ -44,7 +52,7 @@ class Host4FlutterDeviceNativePlugin :
     private lateinit var bleScanHandler: BleScanStreamHandler
     private lateinit var usbScanHandler: UsbScanStreamHandler
 
-    private val mainHandler = Handler(Looper.getMainLooper())
+    private val mainHandler by lazy { Handler(Looper.getMainLooper()) }
 
     private var activity: Activity? = null
     private var activityBinding: ActivityPluginBinding? = null
@@ -55,6 +63,11 @@ class Host4FlutterDeviceNativePlugin :
 
     @Volatile
     private var activeUsbTransport: TransportSessionRecord? = null
+
+    @Volatile
+    private var activeUartTransport: TransportSessionRecord? = null
+
+    private var deviceBrokerClient: DeviceBrokerClient? = null
 
     private val transportSessions = ConcurrentHashMap<String, TransportSessionRecord>()
 
@@ -107,6 +120,7 @@ class Host4FlutterDeviceNativePlugin :
             "connectBle" -> handleConnectBle(call, result)
             "connectSystemConnectedBle" -> handleConnectSystemConnectedBle(call, result)
             "connectUsb" -> handleConnectUsb(call, result)
+            "connectUart" -> handleConnectUart(result)
             "reconnectUsb" -> handleReconnectUsb(result)
             "releaseUsb" -> handleReleaseUsb(result)
             "disconnectTransport" -> handleDisconnectTransport(call, result)
@@ -202,6 +216,7 @@ class Host4FlutterDeviceNativePlugin :
         bleScanHandler.stopScan()
         usbScanHandler.stopScan()
         handleReleaseUsbInternal()
+        closeDeviceBrokerClient()
         protocolSessions.clear()
         transportSessions.values.forEach { it.eventChannel.setStreamHandler(null) }
         transportSessions.clear()
@@ -366,6 +381,93 @@ class Host4FlutterDeviceNativePlugin :
         }
     }
 
+    private fun handleConnectUart(result: Result) {
+        val sessionId = UUID.randomUUID().toString()
+        val eventHandler = QueuedEventStreamHandler()
+        val eventChannel = EventChannel(
+            binaryMessenger,
+            "host4_flutter_device_native/transport_events/$sessionId",
+        )
+        eventChannel.setStreamHandler(eventHandler)
+
+        val escalationEventHandler = QueuedEventStreamHandler()
+        val escalationEventChannel = EventChannel(
+            binaryMessenger,
+            escalationEventChannelName(sessionId),
+        )
+        escalationEventChannel.setStreamHandler(escalationEventHandler)
+
+        val record = TransportSessionRecord(
+            sessionId = sessionId,
+            transportKind = Host4FlutterTransportKinds.UART,
+            deviceKey = DeviceBrokerContract.UART_DEVICE_ID,
+            eventChannel = eventChannel,
+            eventHandler = eventHandler,
+            escalationEventChannel = escalationEventChannel,
+            escalationEventHandler = escalationEventHandler,
+        )
+        transportSessions[sessionId] = record
+        activeUartTransport = record
+        eventHandler.emit(mapOf("type" to "connecting"))
+        result.success(sessionId)
+        brokerClient().connect()
+    }
+
+    private fun brokerClient(): DeviceBrokerClient {
+        val existing = deviceBrokerClient
+        if (existing != null && !existing.closed) {
+            return existing
+        }
+        val created = DeviceBrokerClient(
+            connector = ContextDeviceBrokerConnector(applicationContext),
+            scheduler = MainHandlerBrokerScheduler(mainHandler),
+            firmwareSource = TempFileOtaFirmwareSource(applicationContext.cacheDir),
+        )
+        created.events = uartBrokerEvents
+        deviceBrokerClient = created
+        return created
+    }
+
+    private fun closeDeviceBrokerClient() {
+        deviceBrokerClient?.close()
+        deviceBrokerClient = null
+        activeUartTransport = null
+    }
+
+    private val uartBrokerEvents = object : DeviceBrokerEventSink {
+        override fun onStateChanged(state: String, extras: Map<String, Any?>) {
+            val record = activeUartTransport ?: return
+            when (state) {
+                DeviceBrokerContract.STATE_READY -> {
+                    record.lastTransportStatus = Constants.COMPLETE_CONNECT
+                    protocolSessions.values
+                        .filter { it.transportKind == Host4FlutterTransportKinds.UART }
+                        .forEach { it.eventHandler.emit(mapOf("type" to "ready")) }
+                }
+                DeviceBrokerContract.STATE_DISCONNECTED,
+                DeviceBrokerContract.STATE_ERROR,
+                -> record.lastTransportStatus = Constants.CONNECTING
+            }
+            record.eventHandler.emit(BrokerTransportMapper.toTransportEvent(state, extras))
+        }
+
+        override fun onProtocolEvent(event: Map<String, Any?>) {
+            protocolSessions.values
+                .filter { it.transportKind == Host4FlutterTransportKinds.UART }
+                .forEach { it.eventHandler.emit(event) }
+        }
+
+        override fun onRealtimeEvent(event: Map<String, Any?>) {
+            activeUartTransport?.escalationEventHandler?.emit(event)
+        }
+
+        override fun onOtaEvent(event: Map<String, Any?>) {
+            protocolSessions.values
+                .filter { it.transportKind == Host4FlutterTransportKinds.UART }
+                .forEach { it.otaEventHandler?.emit(event) }
+        }
+    }
+
     /** 重新搜索并连接 USB 设备（拔出重插后使用） */
     private fun handleReconnectUsb(result: Result) {
         if (activeUsbTransport == null) {
@@ -461,6 +563,17 @@ class Host4FlutterDeviceNativePlugin :
                     activeUsbTransport = null
                 }
             }
+            Host4FlutterTransportKinds.UART -> {
+                if (activeUartTransport?.sessionId == transportSessionId) {
+                    activeUartTransport = null
+                }
+                val hasUart = transportSessions.values.any {
+                    it.transportKind == Host4FlutterTransportKinds.UART
+                }
+                if (!hasUart) {
+                    closeDeviceBrokerClient()
+                }
+            }
             else -> platformSdk.disconnectBle(record.deviceKey)
         }
         removeProtocolSessionsForTransport(transportSessionId)
@@ -540,13 +653,17 @@ class Host4FlutterDeviceNativePlugin :
         @Suppress("UNCHECKED_CAST")
         val invokeArguments = (payload["arguments"] as? Map<String, Any?>) ?: emptyMap()
 
-        GmacroMethodInvoker.invoke(
-            deviceKey = protocolRecord.deviceKey,
-            transportKind = protocolRecord.transportKind,
-            method = method,
-            arguments = invokeArguments,
-            result = result,
-        )
+        val backend = if (protocolRecord.transportKind == Host4FlutterTransportKinds.UART) {
+            AidlGmacroBackend(brokerClient())
+        } else {
+            DirectPlatformBackend(
+                deviceKey = protocolRecord.deviceKey,
+                transportKind = protocolRecord.transportKind,
+            )
+        }
+        GmacroCommandDispatcher(backend).invoke(method, invokeArguments) { gmacroResult ->
+            mainHandler.post { gmacroResult.deliverTo(result) }
+        }
     }
 
     private fun handleCloseProtocol(call: MethodCall, result: Result) {
@@ -596,6 +713,13 @@ class Host4FlutterDeviceNativePlugin :
                 Host4FlutterTransportKinds.USB -> {
                     // USB 场景：由 v2 SDK 根据当前激活传输路由到 USB 通道。
                     platformSdk.otaUpgrade(firmwareData)
+                }
+                Host4FlutterTransportKinds.UART -> {
+                    val client = brokerClient()
+                    if (!client.isConnected) {
+                        error("Device broker is not connected.")
+                    }
+                    client.startOta(firmwareData) { }
                 }
                 else -> {
                     // BLE 场景：显式指定 MAC，避免多设备时升级到错误设备。
@@ -658,7 +782,7 @@ class Host4FlutterDeviceNativePlugin :
 
         if (protocolRecord.transportKind == Host4FlutterTransportKinds.USB) {
             platformSdk.registerUpgradeListener(callback)
-        } else {
+        } else if (protocolRecord.transportKind != Host4FlutterTransportKinds.UART) {
             platformSdk.registerUpgradeListener(protocolRecord.deviceKey, callback)
         }
     }

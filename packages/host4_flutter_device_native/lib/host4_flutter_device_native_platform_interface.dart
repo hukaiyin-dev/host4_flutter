@@ -66,6 +66,12 @@ abstract class Host4FlutterDeviceNativePlatform extends PlatformInterface {
     throw UnimplementedError('connectUsb() has not been implemented.');
   }
 
+  Future<String> connectUart({
+    Map<String, Object?> options = const {},
+  }) {
+    throw UnimplementedError('connectUart() has not been implemented.');
+  }
+
   Future<void> reconnectUsb() {
     throw UnimplementedError('reconnectUsb() has not been implemented.');
   }

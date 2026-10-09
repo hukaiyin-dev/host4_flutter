@@ -170,6 +170,13 @@ class _GmacroSessionPageState extends State<GmacroSessionPage> {
             : 'BLE transport disconnected: ${cause.message}';
         _log.warn(message);
         _addLog('transport', message);
+      case TransportRecovering(:final cause):
+        _setTransportStatus('recovering');
+        final String message = cause == null
+            ? 'BLE transport recovering'
+            : 'BLE transport recovering: ${cause.message}';
+        _log.warn(message);
+        _addLog('transport', message);
       case TransportError(:final failure):
         _setTransportStatus('error');
         _log.error('Transport error: ${failure.code} - ${failure.message}');
