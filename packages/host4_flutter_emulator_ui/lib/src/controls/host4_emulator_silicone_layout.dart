@@ -28,8 +28,21 @@ class Host4EmulatorSiliconeMetrics {
 
   static Host4EmulatorSiliconeMetrics of(BuildContext context) {
     final DisplayMetricsData? data = DisplayMetrics.maybeOf(context);
+    final double screenWidthInches = data?.physicalSize.width ?? 0;
+    final double logicalScreenWidth = MediaQuery.sizeOf(context).width;
+    if (screenWidthInches.isFinite &&
+        screenWidthInches > 0 &&
+        logicalScreenWidth.isFinite &&
+        logicalScreenWidth > 0) {
+      // Display Zoom changes the logical screen width without changing its
+      // physical width. Use both widths from the same screen to preserve mm.
+      return Host4EmulatorSiliconeMetrics(
+        logicalPixelsPerMillimeter:
+            logicalScreenWidth / (screenWidthInches * 25.4),
+      );
+    }
     final double lpPerInch = data?.inchesToLogicalPixelRatio ?? 0;
-    if (lpPerInch > 0) {
+    if (lpPerInch.isFinite && lpPerInch > 0) {
       return Host4EmulatorSiliconeMetrics(
         logicalPixelsPerMillimeter: lpPerInch / 25.4,
       );
