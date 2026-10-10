@@ -74,7 +74,7 @@ android {
 dependencies {
     // Pantas DeviceBrokerService is the UART owner and therefore needs the same
     // platformlib types that back the public broker dispatcher API.
-    api("com.host4.platform:platformlib:1.1.24")
+    api("com.host4.platform:platformlib:1.1.26")
     implementation("androidx.appcompat:appcompat:1.7.0")
     implementation("io.reactivex.rxjava2:rxandroid:2.1.1")
     implementation("io.reactivex.rxjava2:rxjava:2.2.21")
