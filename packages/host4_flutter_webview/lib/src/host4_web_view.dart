@@ -36,6 +36,7 @@ class Host4WebView extends StatefulWidget {
     this.title,
     this.enableZoom = false,
     this.userAgent,
+    this.allowAutoplayAudio = false,
     this.allowRoutePopGesture = false,
     this.onControllerReady,
     this.onPageStarted,
@@ -56,6 +57,7 @@ class Host4WebView extends StatefulWidget {
     this.title,
     this.enableZoom = false,
     this.userAgent,
+    this.allowAutoplayAudio = false,
     this.allowRoutePopGesture = false,
     this.onControllerReady,
     this.onPageStarted,
@@ -73,6 +75,11 @@ class Host4WebView extends StatefulWidget {
   /// Use package asset paths such as
   /// `packages/my_package/assets/page/index.html`.
   final String? initialAssetPath;
+
+  /// Whether audio/video may start without a user gesture on iOS.
+  ///
+  /// Disabled by default so existing web pages keep their current behavior.
+  final bool allowAutoplayAudio;
 
   /// Optional JS bridge adapter. When provided, `JsBridge` / `NativeBridge`
   /// JavaScript channels are registered and a generic `JsBridge.method(arg)`
@@ -235,6 +242,12 @@ class _Host4WebViewState extends State<Host4WebView> {
     if (WebViewPlatform.instance is WebKitWebViewPlatform) {
       params = WebKitWebViewControllerCreationParams(
         allowsInlineMediaPlayback: true,
+        mediaTypesRequiringUserAction: widget.allowAutoplayAudio
+            ? const <PlaybackMediaTypes>{}
+            : const <PlaybackMediaTypes>{
+                PlaybackMediaTypes.audio,
+                PlaybackMediaTypes.video,
+              },
       );
     } else {
       params = const PlatformWebViewControllerCreationParams();
