@@ -67,6 +67,23 @@ class MethodChannelHost4FlutterDeviceNative
   }
 
   @override
+  Future<List<NativeDiscoveredDevice>> getSystemConnectedBleDevices({
+    required List<String> serviceIds,
+  }) async {
+    final devices = await methodChannel.invokeListMethod<Object?>(
+      'getSystemConnectedBleDevices',
+      <String, Object?>{'serviceIds': serviceIds},
+    );
+    return (devices ?? const <Object?>[])
+        .map(
+          (device) => NativeDiscoveredDevice.fromMap(
+            Map<String, Object?>.from(device! as Map),
+          ),
+        )
+        .toList(growable: false);
+  }
+
+  @override
   Stream<NativeDiscoveredDevice> scanUsb({
     Map<String, Object?> hints = const {},
   }) {
@@ -121,9 +138,7 @@ class MethodChannelHost4FlutterDeviceNative
   }
 
   @override
-  Future<String> connectUart({
-    Map<String, Object?> options = const {},
-  }) async {
+  Future<String> connectUart({Map<String, Object?> options = const {}}) async {
     final sessionId = await methodChannel.invokeMethod<String>(
       'connectUart',
       <String, Object?>{'options': options},

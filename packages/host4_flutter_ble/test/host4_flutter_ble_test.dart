@@ -17,9 +17,46 @@ void main() {
     expect(session.id, 'transport-1');
     expect(session.device.id, 'ble-device-1');
   });
+
+  test('systemConnectedDevices returns every matching BLE device', () async {
+    final ble = Host4Ble(native: _FakeDeviceNative());
+
+    final devices = await ble.systemConnectedDevices(const <String>[
+      'FF00',
+      'FF10',
+    ]);
+
+    expect(devices, hasLength(2));
+    expect(devices.first.id, 'system-device-1');
+    expect(devices.first.name, 'Controller A');
+    expect(devices.first.kind, TransportKind.ble);
+    expect(devices.first.metadata['systemConnected'], isTrue);
+    expect(devices.last.id, 'system-device-2');
+  });
 }
 
 class _FakeDeviceNative extends Host4FlutterDeviceNative {
+  @override
+  Future<List<NativeDiscoveredDevice>> getSystemConnectedBleDevices({
+    required List<String> serviceIds,
+  }) async {
+    expect(serviceIds, <String>['FF00', 'FF10']);
+    return const <NativeDiscoveredDevice>[
+      NativeDiscoveredDevice(
+        deviceId: 'system-device-1',
+        name: 'Controller A',
+        kind: NativeTransportKind.ble,
+        metadata: <String, Object?>{'systemConnected': true},
+      ),
+      NativeDiscoveredDevice(
+        deviceId: 'system-device-2',
+        name: 'Controller B',
+        kind: NativeTransportKind.ble,
+        metadata: <String, Object?>{'systemConnected': true},
+      ),
+    ];
+  }
+
   @override
   Future<String> connectBle({
     required String deviceId,

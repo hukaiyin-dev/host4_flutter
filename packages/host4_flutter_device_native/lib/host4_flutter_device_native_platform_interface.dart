@@ -42,6 +42,14 @@ abstract class Host4FlutterDeviceNativePlatform extends PlatformInterface {
     throw UnimplementedError('stopBleScan() has not been implemented.');
   }
 
+  Future<List<NativeDiscoveredDevice>> getSystemConnectedBleDevices({
+    required List<String> serviceIds,
+  }) {
+    throw UnimplementedError(
+      'getSystemConnectedBleDevices() has not been implemented.',
+    );
+  }
+
   Stream<NativeDiscoveredDevice> scanUsb({
     Map<String, Object?> hints = const {},
   }) {
@@ -66,9 +74,7 @@ abstract class Host4FlutterDeviceNativePlatform extends PlatformInterface {
     throw UnimplementedError('connectUsb() has not been implemented.');
   }
 
-  Future<String> connectUart({
-    Map<String, Object?> options = const {},
-  }) {
+  Future<String> connectUart({Map<String, Object?> options = const {}}) {
     throw UnimplementedError('connectUart() has not been implemented.');
   }
 

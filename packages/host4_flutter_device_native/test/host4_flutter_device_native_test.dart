@@ -40,9 +40,7 @@ class MockHost4FlutterDeviceNativePlatform
   }
 
   @override
-  Future<String> connectUart({
-    Map<String, Object?> options = const {},
-  }) async {
+  Future<String> connectUart({Map<String, Object?> options = const {}}) async {
     return 'transport-uart-1';
   }
 
@@ -110,6 +108,13 @@ class MockHost4FlutterDeviceNativePlatform
     Map<String, Object?> hints = const {},
   }) {
     return const Stream<NativeDiscoveredDevice>.empty();
+  }
+
+  @override
+  Future<List<NativeDiscoveredDevice>> getSystemConnectedBleDevices({
+    required List<String> serviceIds,
+  }) async {
+    return const <NativeDiscoveredDevice>[];
   }
 
   @override

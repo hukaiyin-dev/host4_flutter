@@ -23,6 +23,15 @@ class Host4FlutterDeviceNative {
     return Host4FlutterDeviceNativePlatform.instance.stopBleScan();
   }
 
+  /// Returns every BLE peripheral currently connected to iOS whose GATT
+  /// services match at least one of [serviceIds].
+  Future<List<NativeDiscoveredDevice>> getSystemConnectedBleDevices({
+    required List<String> serviceIds,
+  }) {
+    return Host4FlutterDeviceNativePlatform.instance
+        .getSystemConnectedBleDevices(serviceIds: serviceIds);
+  }
+
   Stream<NativeDiscoveredDevice> scanUsb({
     Map<String, Object?> hints = const {},
   }) {
@@ -54,9 +63,7 @@ class Host4FlutterDeviceNative {
   }
 
   /// Android only: binds the in-app DeviceBroker and opens a UART transport session.
-  Future<String> connectUart({
-    Map<String, Object?> options = const {},
-  }) {
+  Future<String> connectUart({Map<String, Object?> options = const {}}) {
     return Host4FlutterDeviceNativePlatform.instance.connectUart(
       options: options,
     );
