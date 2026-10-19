@@ -315,6 +315,102 @@ private final class BleScanStreamHandler: NSObject, FlutterStreamHandler {
   }
 }
 
+private struct PendingSystemConnectedBleQuery {
+  let serviceIds: [String]
+  let result: FlutterResult
+}
+
+/// Queries BLE peripherals that iOS already keeps connected to the system.
+///
+/// Scanning alone cannot reliably return these peripherals because a connected
+/// accessory may stop advertising. Keep this central manager separate from the
+/// scan runtime and merge both result sources in Flutter.
+private final class SystemConnectedBleDeviceQuery: NSObject, CBCentralManagerDelegate {
+  private lazy var centralManager = CBCentralManager(
+    delegate: self,
+    queue: .main,
+    options: [CBCentralManagerOptionShowPowerAlertKey: false]
+  )
+  private var pendingQueries: [PendingSystemConnectedBleQuery] = []
+
+  func query(serviceIds: [String], result: @escaping FlutterResult) {
+    guard !serviceIds.isEmpty else {
+      result(
+        FlutterError(
+          code: "invalid-arguments",
+          message: "serviceIds must contain at least one BLE service UUID.",
+          details: nil
+        )
+      )
+      return
+    }
+
+    switch centralManager.state {
+    case .poweredOn:
+      result(retrieve(serviceIds: serviceIds))
+    case .unknown, .resetting:
+      pendingQueries.append(
+        PendingSystemConnectedBleQuery(serviceIds: serviceIds, result: result)
+      )
+    case .poweredOff:
+      result(bluetoothUnavailableError(code: "bluetooth-powered-off"))
+    case .unauthorized:
+      result(bluetoothUnavailableError(code: "bluetooth-unauthorized"))
+    case .unsupported:
+      result(bluetoothUnavailableError(code: "bluetooth-unsupported"))
+    @unknown default:
+      result(bluetoothUnavailableError(code: "bluetooth-unavailable"))
+    }
+  }
+
+  func centralManagerDidUpdateState(_ central: CBCentralManager) {
+    guard !pendingQueries.isEmpty else { return }
+    let queries = pendingQueries
+    pendingQueries.removeAll()
+
+    for query in queries {
+      switch central.state {
+      case .poweredOn:
+        query.result(retrieve(serviceIds: query.serviceIds))
+      case .unknown, .resetting:
+        pendingQueries.append(query)
+      case .poweredOff:
+        query.result(bluetoothUnavailableError(code: "bluetooth-powered-off"))
+      case .unauthorized:
+        query.result(bluetoothUnavailableError(code: "bluetooth-unauthorized"))
+      case .unsupported:
+        query.result(bluetoothUnavailableError(code: "bluetooth-unsupported"))
+      @unknown default:
+        query.result(bluetoothUnavailableError(code: "bluetooth-unavailable"))
+      }
+    }
+  }
+
+  private func retrieve(serviceIds: [String]) -> [[String: Any]] {
+    let services = serviceIds.map(CBUUID.init(string:))
+    return centralManager.retrieveConnectedPeripherals(withServices: services).map {
+      peripheral in
+      [
+        "deviceId": peripheral.identifier.uuidString,
+        "name": peripheral.name ?? "",
+        "kind": "ble",
+        "metadata": [
+          "systemConnected": true,
+          "serviceIds": serviceIds,
+        ],
+      ]
+    }
+  }
+
+  private func bluetoothUnavailableError(code: String) -> FlutterError {
+    FlutterError(
+      code: code,
+      message: "Bluetooth is unavailable while querying system-connected BLE devices.",
+      details: nil
+    )
+  }
+}
+
 private final class TransportSessionRecord {
   enum Source {
     case ble
@@ -387,6 +483,7 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
   private let methodChannel: FlutterMethodChannel
   private let messenger: FlutterBinaryMessenger
   private let bleScanHandler = BleScanStreamHandler()
+  private let systemConnectedBleDeviceQuery = SystemConnectedBleDeviceQuery()
   private let mfiAccessoryEventHandler = MfiAccessoryEventHandler()
   private var transportSessions: [String: TransportSessionRecord] = [:]
   private var gmacroProtocolSessions: [String: GMacroProtocolRecord] = [:]
@@ -432,6 +529,8 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
     case "stopBleScan":
       bleScanHandler.stop()
       result(nil)
+    case "getSystemConnectedBleDevices":
+      handleGetSystemConnectedBleDevices(call, result: result)
     case "connectBle":
       handleConnectBle(call, result: result)
     case "connectSystemConnectedBle":
@@ -453,6 +552,25 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
     default:
       result(FlutterMethodNotImplemented)
     }
+  }
+
+  private func handleGetSystemConnectedBleDevices(
+    _ call: FlutterMethodCall,
+    result: @escaping FlutterResult
+  ) {
+    guard
+      let arguments = call.arguments as? [String: Any],
+      let serviceIds = arguments["serviceIds"] as? [String]
+    else {
+      result(
+        flutterError(
+          code: "invalid-arguments",
+          message: "serviceIds is required."
+        )
+      )
+      return
+    }
+    systemConnectedBleDeviceQuery.query(serviceIds: serviceIds, result: result)
   }
 
   private func handleStartOta(

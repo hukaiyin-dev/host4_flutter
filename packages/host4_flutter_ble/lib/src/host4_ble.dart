@@ -9,6 +9,24 @@ class Host4Ble {
 
   DeviceDiscovery discovery() => Host4BleDiscovery(_native);
 
+  Future<List<DeviceDescriptor>> systemConnectedDevices(
+    List<String> serviceIds,
+  ) async {
+    final devices = await _native.getSystemConnectedBleDevices(
+      serviceIds: serviceIds,
+    );
+    return devices
+        .map(
+          (device) => DeviceDescriptor(
+            id: device.deviceId,
+            name: device.name,
+            kind: TransportKind.ble,
+            metadata: device.metadata,
+          ),
+        )
+        .toList(growable: false);
+  }
+
   Future<TransportSession> connect(
     DeviceDescriptor device, {
     Map<String, Object?> options = const <String, Object?>{},

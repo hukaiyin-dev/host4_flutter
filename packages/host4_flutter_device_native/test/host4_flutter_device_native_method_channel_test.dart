@@ -34,4 +34,44 @@ void main() {
 
     expect(await platform.connectUart(), 'uart-session-1');
   });
+
+  test('getSystemConnectedBleDevices returns every native device', () async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
+          expect(methodCall.method, 'getSystemConnectedBleDevices');
+          expect(methodCall.arguments, <String, Object?>{
+            'serviceIds': <String>['FF00', 'FF10'],
+          });
+          return <Object?>[
+            <String, Object?>{
+              'deviceId': 'device-a',
+              'name': 'Controller A',
+              'kind': 'ble',
+              'metadata': <String, Object?>{
+                'systemConnected': true,
+                'serviceIds': <String>['FF00', 'FF10'],
+              },
+            },
+            <String, Object?>{
+              'deviceId': 'device-b',
+              'name': 'Controller B',
+              'kind': 'ble',
+              'metadata': <String, Object?>{
+                'systemConnected': true,
+                'serviceIds': <String>['FF00', 'FF10'],
+              },
+            },
+          ];
+        });
+
+    final devices = await platform.getSystemConnectedBleDevices(
+      serviceIds: const <String>['FF00', 'FF10'],
+    );
+
+    expect(devices, hasLength(2));
+    expect(devices.first.deviceId, 'device-a');
+    expect(devices.first.name, 'Controller A');
+    expect(devices.first.metadata['systemConnected'], isTrue);
+    expect(devices.last.deviceId, 'device-b');
+  });
 }
