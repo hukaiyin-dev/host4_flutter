@@ -29,6 +29,8 @@ class Host4EmulatorControlsLayer extends StatelessWidget {
     this.onPadPositionChanged,
     this.onPadDragEnd,
     this.onGameViewportTopChanged,
+    this.collapsed,
+    this.onCollapsedChanged,
     super.key,
   });
 
@@ -40,6 +42,8 @@ class Host4EmulatorControlsLayer extends StatelessWidget {
   final Host4EmulatorSiliconeLayoutVariant siliconeLayoutVariant;
   final ValueChanged<double>? onGameViewportTopChanged;
   final bool editing;
+  final bool? collapsed;
+  final ValueChanged<bool>? onCollapsedChanged;
   final Map<String, double> padPositions;
   final void Function(String key, double position)? onPadPositionChanged;
   final VoidCallback? onPadDragEnd;
@@ -62,6 +66,8 @@ class Host4EmulatorControlsLayer extends StatelessWidget {
           return DisplayMetricsWidget(
             child: _SiliconeControls(
               editing: editing,
+              collapsed: collapsed,
+              onCollapsedChanged: onCollapsedChanged,
               padPositions: padPositions,
               onPadPositionChanged: onPadPositionChanged,
               onPadDragEnd: onPadDragEnd,
@@ -76,6 +82,8 @@ class Host4EmulatorControlsLayer extends StatelessWidget {
         return Host4EmulatorLandscapeControls(
           profile: profile,
           variant: siliconeLayoutVariant,
+          collapsed: collapsed,
+          onCollapsedChanged: onCollapsedChanged,
           onInput: onInput,
           onMenuTap: onMenuTap,
         );
@@ -340,6 +348,8 @@ class _ModernControls extends StatelessWidget {
 class _SiliconeControls extends StatefulWidget {
   const _SiliconeControls({
     required this.editing,
+    required this.collapsed,
+    required this.onCollapsedChanged,
     required this.padPositions,
     required this.onPadPositionChanged,
     required this.onPadDragEnd,
@@ -361,6 +371,8 @@ class _SiliconeControls extends StatefulWidget {
   final ValueChanged<double>? onGameViewportTopChanged;
 
   final bool editing;
+  final bool? collapsed;
+  final ValueChanged<bool>? onCollapsedChanged;
   final Map<String, double> padPositions;
   final void Function(String key, double position)? onPadPositionChanged;
   final VoidCallback? onPadDragEnd;
@@ -368,6 +380,16 @@ class _SiliconeControls extends StatefulWidget {
 
 class _SiliconeControlsState extends State<_SiliconeControls> {
   bool _collapsed = false;
+  bool get _isCollapsed => widget.collapsed ?? _collapsed;
+
+  void _toggleCollapsed() {
+    final next = !_isCollapsed;
+    if (widget.onCollapsedChanged != null) {
+      widget.onCollapsedChanged!(next);
+    } else {
+      setState(() => _collapsed = next);
+    }
+  }
   double _dragStart = 0;
   bool _systemButtonsAtTop = false;
   double _viewportTop = 0;
@@ -493,12 +515,15 @@ class _SiliconeControlsState extends State<_SiliconeControls> {
           });
         }
 
-        if (_collapsed && !widget.editing) {
+        if (_isCollapsed && !widget.editing) {
           return SizedBox.fromSize(
             size: size,
             child: Stack(
               clipBehavior: Clip.none,
-              children: <Widget>[_hideToggle(layout, landscape)],
+              children: <Widget>[
+                _menuButton(layout, size, landscape),
+                _hideToggle(layout, landscape),
+              ],
             ),
           );
         }
@@ -629,8 +654,8 @@ class _SiliconeControlsState extends State<_SiliconeControls> {
         hitSize: control.hitRect.size,
         visualSize: control.visualSize,
         asset: 'ic_expand.svg',
-        iconQuarterTurns: _collapsed ? 2 : 0,
-        onTap: () => setState(() => _collapsed = !_collapsed),
+        iconQuarterTurns: _isCollapsed ? 2 : 0,
+        onTap: _toggleCollapsed,
       ),
     );
   }
