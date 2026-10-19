@@ -37,6 +37,7 @@ class Host4WebView extends StatefulWidget {
     this.enableZoom = false,
     this.userAgent,
     this.allowRoutePopGesture = false,
+    this.allowAutoplayAudio = false,
     this.onControllerReady,
     this.onPageStarted,
     this.onPageFinished,
@@ -57,6 +58,7 @@ class Host4WebView extends StatefulWidget {
     this.enableZoom = false,
     this.userAgent,
     this.allowRoutePopGesture = false,
+    this.allowAutoplayAudio = false,
     this.onControllerReady,
     this.onPageStarted,
     this.onPageFinished,
@@ -109,6 +111,10 @@ class Host4WebView extends StatefulWidget {
   /// web history. Enable it for full-screen pages such as login where native
   /// edge-swipe should leave the page.
   final bool allowRoutePopGesture;
+
+  /// Allows a page to start audio playback without a user gesture.
+  /// Disabled by default so existing WebViews retain their current behavior.
+  final bool allowAutoplayAudio;
 
   /// Called once the [Host4WebController] is ready, after the current widget
   /// build has completed.
@@ -194,6 +200,12 @@ class _Host4WebViewState extends State<Host4WebView> {
       );
     }
 
+    if (widget.allowAutoplayAudio &&
+        _controller.platform is AndroidWebViewController) {
+      await (_controller.platform as AndroidWebViewController)
+          .setMediaPlaybackRequiresUserGesture(false);
+    }
+
     if (widget.bridge != null) {
       await _controller.addJavaScriptChannel(
         'JsBridge',
@@ -235,6 +247,12 @@ class _Host4WebViewState extends State<Host4WebView> {
     if (WebViewPlatform.instance is WebKitWebViewPlatform) {
       params = WebKitWebViewControllerCreationParams(
         allowsInlineMediaPlayback: true,
+        mediaTypesRequiringUserAction: widget.allowAutoplayAudio
+            ? const <PlaybackMediaTypes>{PlaybackMediaTypes.video}
+            : const <PlaybackMediaTypes>{
+                PlaybackMediaTypes.audio,
+                PlaybackMediaTypes.video,
+              },
       );
     } else {
       params = const PlatformWebViewControllerCreationParams();

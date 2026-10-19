@@ -124,6 +124,7 @@ void main() {
       MaterialApp(
         home: Host4WebView.asset(
           initialAssetPath: 'assets/index.html',
+          allowAutoplayAudio: true,
           showProgressBar: false,
           copy: const Host4WebViewCopy(
             loadFailed: 'Asset failed',
