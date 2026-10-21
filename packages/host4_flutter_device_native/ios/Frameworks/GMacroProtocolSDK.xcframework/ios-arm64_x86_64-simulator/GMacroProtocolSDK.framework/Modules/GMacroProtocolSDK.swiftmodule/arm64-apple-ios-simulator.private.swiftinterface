@@ -343,6 +343,9 @@ extension GMacroProtocolSDK.GMacroProtocolSession {
   final public func fetchGameMacroDefaultInfo(profile: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
   #endif
   #if compiler(>=5.3) && $NonescapableTypes
+  final public func fetchGameMacroDefaultInfo16(profile: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  #endif
+  #if compiler(>=5.3) && $NonescapableTypes
   final public func resetDevice(_ response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
   #endif
   #if compiler(>=5.3) && $NonescapableTypes
@@ -409,6 +412,9 @@ extension GMacroProtocolSDK.GMacroProtocolSession {
 extension GMacroProtocolSDK.GMacroProtocolSession {
   #if compiler(>=5.3) && $NonescapableTypes
   final public func updateKeyTurbo(_ values: [(GMacroProtocolSDK.GamepadKey, GMacroProtocolSDK.TurboMode, Swift.Int)], response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  #endif
+  #if compiler(>=5.3) && $NonescapableTypes
+  final public func updateKeyTurbo16(_ values: [(GMacroProtocolSDK.GamepadKey, GMacroProtocolSDK.TurboMode, Swift.Int)], response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
   #endif
   #if compiler(>=5.3) && $NonescapableTypes
   final public func querySupportedTurboKeys(profile: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)

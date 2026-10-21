@@ -33,9 +33,34 @@ void main() {
     expect(devices.first.metadata['systemConnected'], isTrue);
     expect(devices.last.id, 'system-device-2');
   });
+
+  test(
+    'connectSystemConnectedDevice targets and retains the selected device',
+    () async {
+      final native = _FakeDeviceNative();
+      final ble = Host4Ble(native: native);
+      const selected = DeviceDescriptor(
+        id: 'system-device-2',
+        name: 'GameMacro',
+        kind: TransportKind.ble,
+        metadata: <String, Object?>{'systemConnected': true},
+      );
+
+      final session = await ble.connectSystemConnectedDevice(
+        selected,
+        serviceIds: const <String>['FF00', 'FF10'],
+      );
+
+      expect(native.connectedSystemDeviceId, 'system-device-2');
+      expect(session.id, 'system-transport-2');
+      expect(session.device.id, 'system-device-2');
+    },
+  );
 }
 
 class _FakeDeviceNative extends Host4FlutterDeviceNative {
+  String? connectedSystemDeviceId;
+
   @override
   Future<List<NativeDiscoveredDevice>> getSystemConnectedBleDevices({
     required List<String> serviceIds,
@@ -63,5 +88,16 @@ class _FakeDeviceNative extends Host4FlutterDeviceNative {
     Map<String, Object?> options = const {},
   }) async {
     return 'transport-1';
+  }
+
+  @override
+  Future<String> connectSystemConnectedBle({
+    required List<String> serviceIds,
+    List<String> deviceNames = const [],
+    String? deviceId,
+    Map<String, Object?> options = const {},
+  }) async {
+    connectedSystemDeviceId = deviceId;
+    return 'system-transport-2';
   }
 }

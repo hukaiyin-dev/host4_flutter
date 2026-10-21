@@ -23,10 +23,16 @@ extension GMacroProtocolSession {
         dataHelper.turboDatas(keyTurbos: keyTurbos, response: response)
     }
 
+    /// 0x37 0x80：设置 16 位连发速率，旧 0x37 接口保持不变。
+    public func updateKeyTurbo16(_ values: [(GamepadKey, TurboMode, Int)],
+                                 response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
+        let keyTurbos = values.map { KeyTurbo(key: $0.0, turbo: $0.1, speed: $0.2) }
+        dataHelper.turboDatas16(keyTurbos: keyTurbos, response: response)
+    }
+
     /// 查询支持连发的按键
     public func querySupportedTurboKeys(profile: Int,
                                         response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
         dataHelper.querySupportedTurboKeys(profile: profile, response: response)
     }
 }
-

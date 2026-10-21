@@ -8,6 +8,54 @@ import 'package:host4_flutter_device_native/host4_flutter_device_native.dart';
 import 'package:host4_flutter_transport/host4_flutter_transport.dart';
 
 void main() {
+  test('16-bit turbo APIs preserve speed above 255 and old methods', () async {
+    final native = _FakeDeviceNative();
+    final session = GmacroSession(
+      id: 'protocol-1',
+      transport: _FakeTransportSession(),
+      native: native,
+    );
+
+    await session.setTurboDatas16(
+      keyTurbos: const [
+        KeyTurboPayload(
+          key: GamepadKey.a,
+          turbo: TurboMode.fullAuto,
+          speed: 300,
+        ),
+      ],
+    );
+    expect(native.invocations.single['method'], GmacroMethods.setTurboDatas16);
+    expect((native.invocations.single['arguments'] as Map)['keyTurbos'], [
+      {'key': GamepadKey.a.value, 'turbo': 1, 'speed': 300},
+    ]);
+
+    native.nextInvoke = Future.value(<String, Object?>{
+      'rapidList': <Map<String, Object?>>[
+        {'key': GamepadKey.a.value, 'mode': 1, 'speed': 300},
+      ],
+    });
+    final info = await session.fetchGameMacroDefaultInfo16(profile: 2);
+    expect(info.rapidList.single.speed, 300);
+    expect(
+      native.invocations.last['method'],
+      GmacroMethods.fetchGameMacroDefaultInfo16,
+    );
+    expect(native.invocations.last['arguments'], {'profile': 2});
+    expect(
+      () => session.setTurboDatas16(
+        keyTurbos: const [
+          KeyTurboPayload(
+            key: GamepadKey.a,
+            turbo: TurboMode.fullAuto,
+            speed: 65536,
+          ),
+        ],
+      ),
+      throwsRangeError,
+    );
+  });
+
   tearDown(() {
     debugDefaultTargetPlatformOverride = null;
   });

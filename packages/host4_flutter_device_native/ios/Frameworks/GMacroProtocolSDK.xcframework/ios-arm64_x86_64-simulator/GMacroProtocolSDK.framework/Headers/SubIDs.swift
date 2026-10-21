@@ -41,12 +41,15 @@ enum DeviceVersionSubID: UInt8 {
 /// 获取设备版本信息 77
 enum DeviceInfoSubID: UInt8 {
     case gameMacroDefault   = 0x04 // Game Macro 默认值（完整设备配置）
+    case gameMacroDefault16 = 0x0C // Game Macro 默认值（16 位连发速率）
     case mobpad             = 0x08 // 魔派设备信息
     
    var description: String {
         switch self {
         case .gameMacroDefault:
             return "Game Macro 默认值"
+        case .gameMacroDefault16:
+            return "Game Macro 默认值（16 位连发速率）"
         case .mobpad:
             return "魔派设备信息"
         }

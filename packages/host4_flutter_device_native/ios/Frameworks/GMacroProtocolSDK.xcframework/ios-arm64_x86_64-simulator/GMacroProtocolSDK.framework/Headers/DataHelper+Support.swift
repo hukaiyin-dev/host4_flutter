@@ -34,7 +34,7 @@ extension DataHelper {
         _ = snData // 如未使用可删掉 snData 变量
 
         var subID: UInt8? = nil
-        if protocolID.hasSubID {
+        if protocolID.hasSubID || (protocolID == .setTurbo && data.count >= 4 && data[2] == 0x80) {
             guard data.count >= 4 else { // [len][pid][subID][sn] 最短
                 response(.failure(NSError(
                     domain: "InvalidPacket",

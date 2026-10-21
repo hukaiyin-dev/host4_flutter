@@ -31,6 +31,11 @@ extension GMacroProtocolSession {
     public func fetchGameMacroDefaultInfo(profile: Int, response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
         dataHelper.fetchGameMacroDefault(profile: profile, response: response)
     }
+
+    /// 0x77 0x0C：查询包含 16 位连发速率的完整设备配置。
+    public func fetchGameMacroDefaultInfo16(profile: Int, response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
+        dataHelper.fetchGameMacroDefault16(profile: profile, response: response)
+    }
     
     /// 恢复出厂设置
     public func resetDevice(_ response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {

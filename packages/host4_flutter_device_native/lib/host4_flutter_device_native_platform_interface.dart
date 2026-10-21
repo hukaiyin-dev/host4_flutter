@@ -89,6 +89,7 @@ abstract class Host4FlutterDeviceNativePlatform extends PlatformInterface {
   Future<String> connectSystemConnectedBle({
     required List<String> serviceIds,
     List<String> deviceNames = const [],
+    String? deviceId,
     Map<String, Object?> options = const {},
   }) {
     throw UnimplementedError(

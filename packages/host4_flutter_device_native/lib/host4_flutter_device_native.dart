@@ -82,11 +82,13 @@ class Host4FlutterDeviceNative {
   Future<String> connectSystemConnectedBle({
     required List<String> serviceIds,
     List<String> deviceNames = const [],
+    String? deviceId,
     Map<String, Object?> options = const {},
   }) {
     return Host4FlutterDeviceNativePlatform.instance.connectSystemConnectedBle(
       serviceIds: serviceIds,
       deviceNames: deviceNames,
+      deviceId: deviceId,
       options: options,
     );
   }

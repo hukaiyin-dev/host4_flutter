@@ -38,6 +38,7 @@ class Host4WebView extends StatefulWidget {
     this.userAgent,
     this.allowRoutePopGesture = false,
     this.allowAutoplayAudio = false,
+    this.clearCacheBeforeLoad = false,
     this.onControllerReady,
     this.onPageStarted,
     this.onPageFinished,
@@ -59,6 +60,7 @@ class Host4WebView extends StatefulWidget {
     this.userAgent,
     this.allowRoutePopGesture = false,
     this.allowAutoplayAudio = false,
+    this.clearCacheBeforeLoad = false,
     this.onControllerReady,
     this.onPageStarted,
     this.onPageFinished,
@@ -66,6 +68,9 @@ class Host4WebView extends StatefulWidget {
     this.onWebResourceError,
     this.copy,
   }) : initialUrl = 'about:blank';
+
+  /// Whether to clear cached web resources before the initial URL request.
+  final bool clearCacheBeforeLoad;
 
   /// The URL to load on launch.
   final String initialUrl;
@@ -231,6 +236,13 @@ class _Host4WebViewState extends State<Host4WebView> {
         debugPrint('[Host4WebView] loadFlutterAsset path=$assetPath');
         await _controller.loadFlutterAsset(assetPath);
       } else {
+        if (widget.clearCacheBeforeLoad) {
+          try {
+            await _controller.clearCache();
+          } catch (error) {
+            debugPrint('[Host4WebView] clearCache failed: $error');
+          }
+        }
         debugPrint(
           '[Host4WebView] loadRequest uri=$_initialUri '
           'scheme=${_initialUri.scheme} hasScheme=${_initialUri.hasScheme}',

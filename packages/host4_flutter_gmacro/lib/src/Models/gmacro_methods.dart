@@ -3,6 +3,7 @@ abstract final class GmacroMethods {
   static const fetchDeviceVersion = 'fetchDeviceVersion';
   static const fetchAppWakeKeyType = 'fetchAppWakeKeyType';
   static const fetchGameMacroDefaultInfo = 'fetchGameMacroDefaultInfo';
+  static const fetchGameMacroDefaultInfo16 = 'fetchGameMacroDefaultInfo16';
   static const fetchMobapadDeviceInfo = 'fetchMobapadDeviceInfo';
   static const fetchPrintingType = 'fetchPrintingType';
   static const resetDevice = 'resetDevice';
@@ -126,6 +127,7 @@ abstract final class GmacroMethods {
 
   // Turbo
   static const setTurboDatas = 'setTurboDatas';
+  static const setTurboDatas16 = 'setTurboDatas16';
   static const querySupportedTurboKeys = 'querySupportedTurboKeys';
 
   // Other
