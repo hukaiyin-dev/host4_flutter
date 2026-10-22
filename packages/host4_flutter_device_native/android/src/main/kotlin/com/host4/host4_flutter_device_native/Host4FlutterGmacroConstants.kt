@@ -3,6 +3,7 @@ internal object Host4FlutterGmacroConstants {
     const val fetchDeviceVersion = "fetchDeviceVersion"
     const val fetchAppWakeKeyType = "fetchAppWakeKeyType"
     const val fetchGameMacroDefaultInfo = "fetchGameMacroDefaultInfo"
+    const val fetchGameMacroDefaultInfo16 = "fetchGameMacroDefaultInfo16"
     const val fetchMobapadDeviceInfo = "fetchMobapadDeviceInfo"
     const val fetchPrintingType = "fetchPrintingType"
     const val resetDevice = "resetDevice"
@@ -124,6 +125,7 @@ internal object Host4FlutterGmacroConstants {
 
     // Turbo
     const val setTurboDatas = "setTurboDatas"
+    const val setTurboDatas16 = "setTurboDatas16"
     const val querySupportedTurboKeys = "querySupportedTurboKeys"
 
     // Other
