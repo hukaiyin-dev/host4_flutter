@@ -48,6 +48,47 @@ void main() {
     );
   }
 
+  testWidgets('clears remote page cache before its first request', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Host4WebView(
+          initialUrl: 'https://example.com/login',
+          clearCacheBeforeLoad: true,
+        ),
+      ),
+    );
+
+    expect(platform.controller.events, <String>['clearCache', 'loadRequest']);
+  });
+
+  testWidgets('does not clear local game cache by default', (tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Host4WebView.asset(initialAssetPath: 'games/index.html'),
+      ),
+    );
+
+    expect(platform.controller.events, <String>['loadFlutterAsset']);
+  });
+
+  testWidgets('still loads the remote page if cache clearing fails', (
+    tester,
+  ) async {
+    platform.cacheClearFailure = StateError('cache unavailable');
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Host4WebView(
+          initialUrl: 'https://example.com/login',
+          clearCacheBeforeLoad: true,
+        ),
+      ),
+    );
+
+    expect(platform.controller.events, <String>['clearCache', 'loadRequest']);
+  });
+
   testWidgets(
     'keeps the native view mounted across failed and successful retries',
     (WidgetTester tester) async {
@@ -124,6 +165,7 @@ void main() {
       MaterialApp(
         home: Host4WebView.asset(
           initialAssetPath: 'assets/index.html',
+          allowAutoplayAudio: true,
           showProgressBar: false,
           copy: const Host4WebViewCopy(
             loadFailed: 'Asset failed',
@@ -256,13 +298,15 @@ class _FakeWebViewPlatform extends WebViewPlatform {
   late final _FakeWebViewController controller;
   int widgetCreationCount = 0;
   Future<void>? navigationSetupGate;
+  Object? cacheClearFailure;
 
   @override
   PlatformWebViewController createPlatformWebViewController(
     PlatformWebViewControllerCreationParams params,
   ) {
     controller = _FakeWebViewController(params)
-      ..navigationSetupGate = navigationSetupGate;
+      ..navigationSetupGate = navigationSetupGate
+      ..cacheClearFailure = cacheClearFailure;
     return controller;
   }
 
@@ -293,8 +337,10 @@ class _FakeWebViewController extends PlatformWebViewController {
   int loadAssetCount = 0;
   String? lastAssetPath;
   final loadedAssets = <String>[];
+  final events = <String>[];
   Uri? lastRequestedUri;
   Object? loadRequestFailure;
+  Object? cacheClearFailure;
 
   @override
   Future<void> setJavaScriptMode(JavaScriptMode javaScriptMode) async {}
@@ -317,6 +363,7 @@ class _FakeWebViewController extends PlatformWebViewController {
 
   @override
   Future<void> loadRequest(LoadRequestParams params) async {
+    events.add('loadRequest');
     loadRequestCount++;
     lastRequestedUri = params.uri;
     final failure = loadRequestFailure;
@@ -327,6 +374,7 @@ class _FakeWebViewController extends PlatformWebViewController {
 
   @override
   Future<void> loadFlutterAsset(String key) async {
+    events.add('loadFlutterAsset');
     loadAssetCount++;
     lastAssetPath = key;
     loadedAssets.add(key);
@@ -335,6 +383,15 @@ class _FakeWebViewController extends PlatformWebViewController {
   @override
   Future<void> reload() async {
     reloadCount++;
+  }
+
+  @override
+  Future<void> clearCache() async {
+    events.add('clearCache');
+    final failure = cacheClearFailure;
+    if (failure != null) {
+      throw failure;
+    }
   }
 
   @override

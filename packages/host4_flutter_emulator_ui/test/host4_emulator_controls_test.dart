@@ -4,6 +4,37 @@ import 'package:host4_flutter_emulator_ui/host4_flutter_emulator_ui.dart';
 import 'package:display_metrics/display_metrics.dart';
 
 void main() {
+  testWidgets('externally collapsed controls retain menu and toggle', (tester) async {
+    tester.view.physicalSize = const Size(844, 390);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    var collapsed = true;
+    var menuTaps = 0;
+    Future<void> show() => tester.pumpWidget(MaterialApp(
+      home: Host4EmulatorControlsLayer(
+        profile: Host4EmulatorControlProfile.nes,
+        layoutStyle: Host4EmulatorControlLayoutStyle.silicone,
+        collapsed: collapsed,
+        onCollapsedChanged: (value) => collapsed = value,
+        onInput: (_) {},
+        onMenuTap: () => menuTaps++,
+      ),
+    ));
+
+    await show();
+    final toggle = find.byKey(const ValueKey('landscape.controls.hide_toggle'));
+    final menu = find.byKey(const ValueKey('landscape.controls.btn_set'));
+    expect(toggle, findsOneWidget);
+    expect(menu, findsOneWidget);
+    expect(find.byKey(const ValueKey('landscape.controls.btn_a')), findsNothing);
+    await tester.tap(menu);
+    expect(menuTaps, 1);
+    await tester.tap(toggle);
+    expect(collapsed, isFalse);
+    await show();
+    expect(find.byKey(const ValueKey('landscape.controls.btn_a')), findsOneWidget);
+  });
   testWidgets('landscape menu and collapse retain visible circular backgrounds', (tester) async {
     tester.view.physicalSize = const Size(844, 390);
     tester.view.devicePixelRatio = 1;
@@ -26,13 +57,14 @@ void main() {
       await tester.tap(menu);
       await tester.tap(hide);
       await tester.pumpAndSettle();
-      expect(menu, findsNothing);
+      expect(menu, findsOneWidget);
       expect(hide, findsOneWidget);
+      await tester.tap(menu);
       await tester.tap(hide);
       await tester.pumpAndSettle();
       expect(menu, findsOneWidget);
     }
-    expect(menus, 3);
+    expect(menus, 6);
   });
   testWidgets('landscape capsules keep outlines and gain editing backgrounds', (tester) async {
     tester.view.physicalSize = const Size(844, 390);
@@ -536,8 +568,11 @@ void main() {
       find.byKey(const ValueKey<String>('game.controls.btn_a')),
       findsNothing,
     );
-    expect(menu, findsNothing);
+    expect(menu, findsOneWidget);
     expect(hide, findsOneWidget);
+    await tester.tap(menu);
+    await tester.pump();
+    expect(menuTapCount, 2);
 
     await tester.tap(hide);
     await tester.pump();

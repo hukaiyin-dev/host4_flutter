@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import BluetoothKit
 
 extension DataHelper {
     
@@ -123,6 +124,18 @@ extension DataHelper {
                    data: all,
                    finish: finish,
                    response: response)
+    }
+
+    /// 0x77 0x0C：查询 16 位连发速率的完整设备配置。
+    func fetchGameMacroDefault16(profile: Int,
+                                 finish: (() -> Void)? = nil,
+                                 response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
+        guard (0...0xFF).contains(profile) else {
+            response(.failure(BluetoothError.outOfRange))
+            return
+        }
+        let all = dataFrom(protocolID: .deviceInfo, payload: Data([0x0C, UInt8(profile)]))
+        write(protocolID: .deviceInfo, data: all, finish: finish, response: response)
     }
     
     func resetDevice(finish:(()->())? = nil, response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
@@ -298,25 +311,28 @@ extension DataHelper {
 extension DataHelper {
     
     func analyzeDeviceInfo(_ data: Data, _ subID: UInt8, _ sn: UInt8) -> [String: Any] {
+        let rawSubID = subID
         let subID = DeviceInfoSubID(rawValue: subID)
         switch subID {
         case .gameMacroDefault:
             return analyzeGameMacroDeviceInfo(data)
+        case .gameMacroDefault16:
+            return analyzeGameMacroDeviceInfo(data, speedByteCount: 2)
         case .mobpad:
             return analyzeMobpadDeviceInfo(data)
         case .none:
-            print("未处理的 DeviceInfoSubID 0x\(String(format: "%02X", subID!.rawValue))")
+            print("未处理的 DeviceInfoSubID 0x\(String(format: "%02X", rawSubID))")
             return [:]
         }
     }
     
-    func analyzeGameMacroDeviceInfo(_ data: Data) -> [String: Any] {
+    func analyzeGameMacroDeviceInfo(_ data: Data, speedByteCount: Int = 1) -> [String: Any] {
         print("分析 Game Macro 默认值数据 \(data.count) \(data.nsDescription())")
         var parser = DataParser(data)
         var dic: [String: Any] = [:]
 
         // 1️⃣ 连发参数
-        let rapidList = parseRapidFire(&parser)
+        let rapidList = parseRapidFire(&parser, speedByteCount: speedByteCount)
         dic["rapidList"] = rapidList
 
         // 2️⃣ 左扳机: length(1) + start(1) + end(1) + macroOn(1) + macroThreshold(1) + pointCount(1) + X1,Y1...
@@ -626,9 +642,9 @@ extension DataHelper {
 
 extension DataHelper {
     /// 连发参数解析
-    private func parseRapidFire(_ parser: inout DataParser) -> [[String: Any]] {
+    func parseRapidFire(_ parser: inout DataParser, speedByteCount: Int = 1) -> [[String: Any]] {
         let rapidLength = parser.next(1).toInt()
-        let keyCount = rapidLength / 3
+        let keyCount = rapidLength / (2 + speedByteCount)
         var rapidList: [[String: Any]] = []
         for _ in 0..<keyCount {
             // 按键
@@ -636,7 +652,7 @@ extension DataHelper {
             // 连发模式
             let auto = parser.next(1).toInt()
             // 速率
-            let speed = parser.next(1).toInt()
+            let speed = parser.next(speedByteCount).toInt()
             rapidList.append([
                 "key": GamepadKey.from(oneByteKeyCode: key) ?? .none,
                 "turbo": TurboMode(rawValue: UInt8(auto)) ?? .disabled,

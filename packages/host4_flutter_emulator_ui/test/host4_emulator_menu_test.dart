@@ -342,6 +342,44 @@ void main() {
     expect(find.byKey(const ValueKey<String>('menu.layout')), findsNothing);
     expect(find.text('切换布局'), findsNothing);
   });
+
+  testWidgets('hidden layout actions compact the landscape menu', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(844, 390);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('zh'),
+        localizationsDelegates: EmulatorUiLocalizations.localizationsDelegates,
+        supportedLocales: EmulatorUiLocalizations.supportedLocales,
+        home: Host4EmulatorMenuOverlay(
+          actions: _FakeActions(),
+          onOpenSaveManager: () {},
+          showLayoutAction: false,
+          showKeyLocatorAction: false,
+        ),
+      ),
+    );
+
+    expect(find.byKey(const ValueKey<String>('menu.layout')), findsNothing);
+    expect(
+      find.byKey(const ValueKey<String>('menu.key_locator')),
+      findsNothing,
+    );
+    final speed = find.byKey(const ValueKey<String>('menu.speed'));
+    final exit = find.byKey(const ValueKey<String>('menu.exit'));
+    final continueGame = find.byKey(const ValueKey<String>('menu.continue'));
+    expect(tester.getTopLeft(exit).dy, tester.getTopLeft(speed).dy);
+    expect(tester.getTopLeft(continueGame).dy, tester.getTopLeft(speed).dy);
+    expect(tester.getTopLeft(speed).dx, lessThan(tester.getTopLeft(exit).dx));
+    expect(
+      tester.getTopLeft(exit).dx,
+      lessThan(tester.getTopLeft(continueGame).dx),
+    );
+  });
 }
 
 class _SaveSource implements Host4EmulatorSaveDataSource {
