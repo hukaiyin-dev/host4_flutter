@@ -10,7 +10,7 @@
 		</data>
 		<key>Headers/DataHelper+Device.swift</key>
 		<data>
-		6jljThed/G1swMhXdwgDxk0I0s4=
+		j+33MYr5IpBfBgr0Vlsi0i4OGZo=
 		</data>
 		<key>Headers/DataHelper+Extension.swift</key>
 		<data>
@@ -34,7 +34,7 @@
 		</data>
 		<key>Headers/DataHelper+Parse.swift</key>
 		<data>
-		FrD+OzI74sjg8JZqGNXOFietG7g=
+		KzgtlZ6+dsLLf4kuTV519eEneAw=
 		</data>
 		<key>Headers/DataHelper+Rocker.swift</key>
 		<data>
@@ -46,7 +46,7 @@
 		</data>
 		<key>Headers/DataHelper+Support.swift</key>
 		<data>
-		pn5BJP0YmgGOdCtA5fwgLcc79g0=
+		EyHjJazj2aY4SmqK7gfdjR7CBAM=
 		</data>
 		<key>Headers/DataHelper+SupportKey.swift</key>
 		<data>
@@ -58,7 +58,7 @@
 		</data>
 		<key>Headers/DataHelper+Turbo.swift</key>
 		<data>
-		dq8T6JZPjNM8Pjm5AtZNDLJ26Yo=
+		1Fzq8hGc93PKDY7WTStqw8emqjc=
 		</data>
 		<key>Headers/DataHelper+Vibration.swift</key>
 		<data>
@@ -78,7 +78,7 @@
 		</data>
 		<key>Headers/GMacroProtocolHelper+Device.swift</key>
 		<data>
-		dN4jOHw2ZAiJdnGD+mlXuhs1xY8=
+		t+J+cUP6FAZ0nqHKfE0EQcubkkE=
 		</data>
 		<key>Headers/GMacroProtocolHelper+Gyro.swift</key>
 		<data>
@@ -110,7 +110,7 @@
 		</data>
 		<key>Headers/GMacroProtocolHelper+Turbo.swift</key>
 		<data>
-		3KatDloIPZ+QDVuodi21Ru3hmDo=
+		NUASTRKsdtp0Z/pXinncpBkqqaQ=
 		</data>
 		<key>Headers/GMacroProtocolHelper+Vibration.swift</key>
 		<data>
@@ -182,7 +182,7 @@
 		</data>
 		<key>Headers/SubIDs.swift</key>
 		<data>
-		Ba9q+ma3G+6GMRrMos+mg5hlVl8=
+		2JzzzwHO25d8cXqTEowMAee3+3k=
 		</data>
 		<key>Headers/SupportEnums.swift</key>
 		<data>
@@ -202,43 +202,43 @@
 		</data>
 		<key>Modules/GMacroProtocolSDK.swiftmodule/arm64-apple-ios-simulator.abi.json</key>
 		<data>
-		PDW1ixlIVSgpW9nczJAVzhhI9SM=
+		u4QBaRIPjAw4RGP0sOsAaqibXII=
 		</data>
 		<key>Modules/GMacroProtocolSDK.swiftmodule/arm64-apple-ios-simulator.private.swiftinterface</key>
 		<data>
-		XyBq7DXte8NCU5L9mtHLrRKyGo4=
+		Tt7t7TeQDxBvDoAzK65UMYwnBBs=
 		</data>
 		<key>Modules/GMacroProtocolSDK.swiftmodule/arm64-apple-ios-simulator.swiftdoc</key>
 		<data>
-		K0XgfBDkH36xEQuQoUpKlibRL30=
+		FiXh7MqQPq1nxneZrqHc9+Yr/Ps=
 		</data>
 		<key>Modules/GMacroProtocolSDK.swiftmodule/arm64-apple-ios-simulator.swiftinterface</key>
 		<data>
-		XyBq7DXte8NCU5L9mtHLrRKyGo4=
+		Tt7t7TeQDxBvDoAzK65UMYwnBBs=
 		</data>
 		<key>Modules/GMacroProtocolSDK.swiftmodule/arm64-apple-ios-simulator.swiftmodule</key>
 		<data>
-		JjbfFMnhl5liRyNHUMfpFD+j76Q=
+		lVvad+CPoj/IUMnKT4rfs+Ew7A0=
 		</data>
 		<key>Modules/GMacroProtocolSDK.swiftmodule/x86_64-apple-ios-simulator.abi.json</key>
 		<data>
-		PDW1ixlIVSgpW9nczJAVzhhI9SM=
+		u4QBaRIPjAw4RGP0sOsAaqibXII=
 		</data>
 		<key>Modules/GMacroProtocolSDK.swiftmodule/x86_64-apple-ios-simulator.private.swiftinterface</key>
 		<data>
-		nKeAbtcmZx0GT1gqoPayvn+91SQ=
+		59uPY7MCPidPRPpSmK2hop8wSqw=
 		</data>
 		<key>Modules/GMacroProtocolSDK.swiftmodule/x86_64-apple-ios-simulator.swiftdoc</key>
 		<data>
-		yrpFFWmtIhLivCE7nnrJLTp7slY=
+		UmTqpXgbhB0ok0yfVJVGLZYCd54=
 		</data>
 		<key>Modules/GMacroProtocolSDK.swiftmodule/x86_64-apple-ios-simulator.swiftinterface</key>
 		<data>
-		nKeAbtcmZx0GT1gqoPayvn+91SQ=
+		59uPY7MCPidPRPpSmK2hop8wSqw=
 		</data>
 		<key>Modules/GMacroProtocolSDK.swiftmodule/x86_64-apple-ios-simulator.swiftmodule</key>
 		<data>
-		he8w6aoSwBvtjYO9Eu9F4panYAg=
+		/9aZGtWmRhlRnqkkhDx38j4s2pk=
 		</data>
 	</dict>
 	<key>files2</key>
@@ -258,11 +258,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			6jljThed/G1swMhXdwgDxk0I0s4=
+			j+33MYr5IpBfBgr0Vlsi0i4OGZo=
 			</data>
 			<key>hash2</key>
 			<data>
-			P3Jii8Eip1rcuXSfNoBNo0jXDbQHTibAd2tWwgQynSE=
+			gAOjV2QhpgSchrZlb4UB/zgalI/Dkl5SWdXGsrxmIcg=
 			</data>
 		</dict>
 		<key>Headers/DataHelper+Extension.swift</key>
@@ -324,11 +324,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			FrD+OzI74sjg8JZqGNXOFietG7g=
+			KzgtlZ6+dsLLf4kuTV519eEneAw=
 			</data>
 			<key>hash2</key>
 			<data>
-			hjt+6KN0TFFPzvDHfD3ZIcL6nKeEC3XrPPkRwjC7vkQ=
+			80qNhfTOdqv6BoB6CpEMqnOZcr/0yGcC5Mt5mKa2nOA=
 			</data>
 		</dict>
 		<key>Headers/DataHelper+Rocker.swift</key>
@@ -357,11 +357,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			pn5BJP0YmgGOdCtA5fwgLcc79g0=
+			EyHjJazj2aY4SmqK7gfdjR7CBAM=
 			</data>
 			<key>hash2</key>
 			<data>
-			fjkRIfjLZTKaQm5qSgKWMQtFlrkvhjILq+rP1JXEvlY=
+			+hS/ta/l1hDqnjBc11R0HzDw+HaWc/mj/QFnIDC+RLo=
 			</data>
 		</dict>
 		<key>Headers/DataHelper+SupportKey.swift</key>
@@ -390,11 +390,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			dq8T6JZPjNM8Pjm5AtZNDLJ26Yo=
+			1Fzq8hGc93PKDY7WTStqw8emqjc=
 			</data>
 			<key>hash2</key>
 			<data>
-			+UNDSbo3lZSPDjAZpDkXYMbDfBUpddVeHnupvE9nK6o=
+			NYDMIB9CALqd/i683bfpcjaCuc0ELkcOn6td5IsNtKo=
 			</data>
 		</dict>
 		<key>Headers/DataHelper+Vibration.swift</key>
@@ -445,11 +445,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			dN4jOHw2ZAiJdnGD+mlXuhs1xY8=
+			t+J+cUP6FAZ0nqHKfE0EQcubkkE=
 			</data>
 			<key>hash2</key>
 			<data>
-			yeuOdYqCoNLgu+4wAvEaSAa1zJCome7NYIdYKaLwCdE=
+			oHJdM06tAqngYZuvE4+0sdgiijDs/nR/DsUYsnKSybw=
 			</data>
 		</dict>
 		<key>Headers/GMacroProtocolHelper+Gyro.swift</key>
@@ -533,11 +533,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			3KatDloIPZ+QDVuodi21Ru3hmDo=
+			NUASTRKsdtp0Z/pXinncpBkqqaQ=
 			</data>
 			<key>hash2</key>
 			<data>
-			G8ofQWykxkPx73cS8EDSd2F+v+ohEAUmZiZlvCTkYcs=
+			wKIGLv7FWT2HhsLU8e/y+J67cHvO78v61p/ZQvCPdZI=
 			</data>
 		</dict>
 		<key>Headers/GMacroProtocolHelper+Vibration.swift</key>
@@ -731,11 +731,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			Ba9q+ma3G+6GMRrMos+mg5hlVl8=
+			2JzzzwHO25d8cXqTEowMAee3+3k=
 			</data>
 			<key>hash2</key>
 			<data>
-			DyBQ8je3IZ3ieG8JiN5vjcuOFqindbLLNQf0qtGupdo=
+			N5cG4G9NN5YhtfZ23B+Pr62ZVMCWonMhZQsdrXA5vV0=
 			</data>
 		</dict>
 		<key>Headers/SupportEnums.swift</key>
@@ -775,110 +775,110 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			PDW1ixlIVSgpW9nczJAVzhhI9SM=
+			u4QBaRIPjAw4RGP0sOsAaqibXII=
 			</data>
 			<key>hash2</key>
 			<data>
-			NOfMuyfglTT/h526kDML41D6t2XzMycXl/WYNYMc91E=
+			H2GZO0lyhNr7XGXaV6REmnBBgCn/okVJU6tlnpoo6n0=
 			</data>
 		</dict>
 		<key>Modules/GMacroProtocolSDK.swiftmodule/arm64-apple-ios-simulator.private.swiftinterface</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			XyBq7DXte8NCU5L9mtHLrRKyGo4=
+			Tt7t7TeQDxBvDoAzK65UMYwnBBs=
 			</data>
 			<key>hash2</key>
 			<data>
-			OtgMXWurtJIulQTKOyFKMQwWhVQ7YHMOJpxnp/ZxTZw=
+			QgSyhfo33JH+uZ+FYtFdRzGPNhf/Cd2EosAPmkn5TUY=
 			</data>
 		</dict>
 		<key>Modules/GMacroProtocolSDK.swiftmodule/arm64-apple-ios-simulator.swiftdoc</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			K0XgfBDkH36xEQuQoUpKlibRL30=
+			FiXh7MqQPq1nxneZrqHc9+Yr/Ps=
 			</data>
 			<key>hash2</key>
 			<data>
-			nFk+W8b7hVIpqkGg80FkMb00M+lIjV5WHiBIgUXenpk=
+			kIikaHoEL7LqOXmiBriqRu5pUdFVuVO8m19i9nBpgxg=
 			</data>
 		</dict>
 		<key>Modules/GMacroProtocolSDK.swiftmodule/arm64-apple-ios-simulator.swiftinterface</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			XyBq7DXte8NCU5L9mtHLrRKyGo4=
+			Tt7t7TeQDxBvDoAzK65UMYwnBBs=
 			</data>
 			<key>hash2</key>
 			<data>
-			OtgMXWurtJIulQTKOyFKMQwWhVQ7YHMOJpxnp/ZxTZw=
+			QgSyhfo33JH+uZ+FYtFdRzGPNhf/Cd2EosAPmkn5TUY=
 			</data>
 		</dict>
 		<key>Modules/GMacroProtocolSDK.swiftmodule/arm64-apple-ios-simulator.swiftmodule</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			JjbfFMnhl5liRyNHUMfpFD+j76Q=
+			lVvad+CPoj/IUMnKT4rfs+Ew7A0=
 			</data>
 			<key>hash2</key>
 			<data>
-			ZLpBRRU7nxV0Ap4xcFpdHUtJ5LpBtaEpskXzPv/qwuU=
+			fDJwwY1rEUN8yPTCQMK7C7dIku/j0P9PIKhS6kha5SI=
 			</data>
 		</dict>
 		<key>Modules/GMacroProtocolSDK.swiftmodule/x86_64-apple-ios-simulator.abi.json</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			PDW1ixlIVSgpW9nczJAVzhhI9SM=
+			u4QBaRIPjAw4RGP0sOsAaqibXII=
 			</data>
 			<key>hash2</key>
 			<data>
-			NOfMuyfglTT/h526kDML41D6t2XzMycXl/WYNYMc91E=
+			H2GZO0lyhNr7XGXaV6REmnBBgCn/okVJU6tlnpoo6n0=
 			</data>
 		</dict>
 		<key>Modules/GMacroProtocolSDK.swiftmodule/x86_64-apple-ios-simulator.private.swiftinterface</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			nKeAbtcmZx0GT1gqoPayvn+91SQ=
+			59uPY7MCPidPRPpSmK2hop8wSqw=
 			</data>
 			<key>hash2</key>
 			<data>
-			Tfix6NKZRjfannbhOvBnycUwT+UEfQuy30BJoy1Reqc=
+			ExoTvxCRp03w0Itd5eKdipcYgH+sIEjVmhzIk3S2qfU=
 			</data>
 		</dict>
 		<key>Modules/GMacroProtocolSDK.swiftmodule/x86_64-apple-ios-simulator.swiftdoc</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			yrpFFWmtIhLivCE7nnrJLTp7slY=
+			UmTqpXgbhB0ok0yfVJVGLZYCd54=
 			</data>
 			<key>hash2</key>
 			<data>
-			LEYPmUPtgc7MpRLsJ6HY4/nXb/OPStm3AI8QvRYPb2E=
+			MwizLR0uG0NROLQglgqDquDOzj6upY467i+KmM87HbM=
 			</data>
 		</dict>
 		<key>Modules/GMacroProtocolSDK.swiftmodule/x86_64-apple-ios-simulator.swiftinterface</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			nKeAbtcmZx0GT1gqoPayvn+91SQ=
+			59uPY7MCPidPRPpSmK2hop8wSqw=
 			</data>
 			<key>hash2</key>
 			<data>
-			Tfix6NKZRjfannbhOvBnycUwT+UEfQuy30BJoy1Reqc=
+			ExoTvxCRp03w0Itd5eKdipcYgH+sIEjVmhzIk3S2qfU=
 			</data>
 		</dict>
 		<key>Modules/GMacroProtocolSDK.swiftmodule/x86_64-apple-ios-simulator.swiftmodule</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			he8w6aoSwBvtjYO9Eu9F4panYAg=
+			/9aZGtWmRhlRnqkkhDx38j4s2pk=
 			</data>
 			<key>hash2</key>
 			<data>
-			+5c3XA6PERQqsFGb7A4BNig8CLfHnEZLtsMi8QGjZa4=
+			nny/18MOIUQQNHthaDmPOO7l+FxqFm4FNdo7Wo1vf8s=
 			</data>
 		</dict>
 	</dict>
