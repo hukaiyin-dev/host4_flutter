@@ -1,9 +1,14 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:host4_flutter_ble/host4_flutter_ble.dart';
 import 'package:host4_flutter_device_native/host4_flutter_device_native.dart';
 import 'package:host4_flutter_transport/host4_flutter_transport.dart';
 
 void main() {
+  tearDown(() {
+    debugDefaultTargetPlatformOverride = null;
+  });
+
   test('connect returns a transport session wrapper', () async {
     final ble = Host4Ble(native: _FakeDeviceNative());
     const device = DeviceDescriptor(
@@ -56,6 +61,22 @@ void main() {
       expect(session.device.id, 'system-device-2');
     },
   );
+
+  test('iOS legacy system-connected entry retains the actual device ID', () async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    final native = _FakeDeviceNative();
+    final ble = Host4Ble(native: native);
+
+    final session = await ble.connectSystemConnected(
+      const <String>['FF00', 'FF10'],
+      deviceNames: const <String>['GameMacro'],
+    );
+
+    expect(native.connectedSystemDeviceId, 'system-device-2');
+    expect(session.id, 'system-transport-2');
+    expect(session.device.id, 'system-device-2');
+    expect(session.device.name, 'GameMacro B');
+  });
 }
 
 class _FakeDeviceNative extends Host4FlutterDeviceNative {
@@ -75,7 +96,7 @@ class _FakeDeviceNative extends Host4FlutterDeviceNative {
       ),
       NativeDiscoveredDevice(
         deviceId: 'system-device-2',
-        name: 'Controller B',
+        name: 'GameMacro B',
         kind: NativeTransportKind.ble,
         metadata: <String, Object?>{'systemConnected': true},
       ),
