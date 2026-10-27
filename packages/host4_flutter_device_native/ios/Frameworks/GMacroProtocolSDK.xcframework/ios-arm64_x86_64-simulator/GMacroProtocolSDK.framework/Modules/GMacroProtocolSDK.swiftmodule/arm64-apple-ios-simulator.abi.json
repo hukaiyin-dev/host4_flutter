@@ -28485,7 +28485,7 @@
           {
             "kind": "Constructor",
             "name": "init",
-            "printedName": "init(sessionId:transport:)",
+            "printedName": "init(sessionId:transport:lengthPrefixedStream:)",
             "children": [
               {
                 "kind": "TypeNominal",
@@ -28504,14 +28504,30 @@
                 "name": "ByteStreamTransport",
                 "printedName": "any BluetoothKit.ByteStreamTransport",
                 "usr": "s:12BluetoothKit19ByteStreamTransportP"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "Swift.Bool?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Bool",
+                    "printedName": "Swift.Bool",
+                    "usr": "s:Sb"
+                  }
+                ],
+                "hasDefaultArg": true,
+                "usr": "s:Sq"
               }
             ],
             "declKind": "Constructor",
-            "usr": "s:17GMacroProtocolSDK0aB7SessionC9sessionId9transportACSS_12BluetoothKit19ByteStreamTransport_ptcfc",
-            "mangledName": "$s17GMacroProtocolSDK0aB7SessionC9sessionId9transportACSS_12BluetoothKit19ByteStreamTransport_ptcfc",
+            "usr": "s:17GMacroProtocolSDK0aB7SessionC9sessionId9transport20lengthPrefixedStreamACSS_12BluetoothKit04ByteJ9Transport_pSbSgtcfc",
+            "mangledName": "$s17GMacroProtocolSDK0aB7SessionC9sessionId9transport20lengthPrefixedStreamACSS_12BluetoothKit04ByteJ9Transport_pSbSgtcfc",
             "moduleName": "GMacroProtocolSDK",
             "declAttributes": [
-              "AccessControl"
+              "AccessControl",
+              "RawDocComment"
             ],
             "init_kind": "Designated"
           },
@@ -43358,98 +43374,98 @@
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Protocol\/GMacroProtocolSession.swift",
       "kind": "IntegerLiteral",
-      "offset": 1983,
+      "offset": 3107,
       "length": 2,
       "value": "20"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Protocol\/GMacroProtocolSession.swift",
       "kind": "IntegerLiteral",
-      "offset": 6374,
+      "offset": 8240,
       "length": 6,
       "value": "0x5000"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Protocol\/GMacroProtocolSession.swift",
       "kind": "IntegerLiteral",
-      "offset": 6401,
+      "offset": 8267,
       "length": 6,
       "value": "0x5100"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Protocol\/GMacroProtocolSession.swift",
       "kind": "IntegerLiteral",
-      "offset": 6431,
+      "offset": 8297,
       "length": 6,
       "value": "0x5200"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Protocol\/GMacroProtocolSession.swift",
       "kind": "IntegerLiteral",
-      "offset": 6458,
+      "offset": 8324,
       "length": 6,
       "value": "0x5300"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Protocol\/GMacroProtocolSession.swift",
       "kind": "IntegerLiteral",
-      "offset": 6625,
+      "offset": 8491,
       "length": 3,
       "value": "100"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Protocol\/GMacroProtocolSession.swift",
       "kind": "IntegerLiteral",
-      "offset": 6654,
+      "offset": 8520,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Protocol\/GMacroProtocolSession.swift",
       "kind": "IntegerLiteral",
-      "offset": 6685,
+      "offset": 8551,
       "length": 1,
       "value": "1"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Protocol\/GMacroProtocolSession.swift",
       "kind": "IntegerLiteral",
-      "offset": 6719,
+      "offset": 8585,
       "length": 1,
       "value": "2"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Protocol\/GMacroProtocolSession.swift",
       "kind": "IntegerLiteral",
-      "offset": 6752,
+      "offset": 8618,
       "length": 1,
       "value": "3"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Protocol\/GMacroProtocolSession.swift",
       "kind": "IntegerLiteral",
-      "offset": 6837,
+      "offset": 8703,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Protocol\/GMacroProtocolSession.swift",
       "kind": "IntegerLiteral",
-      "offset": 6867,
+      "offset": 8733,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Protocol\/GMacroProtocolSession.swift",
       "kind": "IntegerLiteral",
-      "offset": 6899,
+      "offset": 8765,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Protocol\/GMacroProtocolSession.swift",
       "kind": "IntegerLiteral",
-      "offset": 7088,
+      "offset": 8954,
       "length": 1,
       "value": "0"
     },

@@ -9283,21 +9283,35 @@
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/BluetoothKit\/BluetoothKit\/BluetoothKit\/Adapter\/NativeAdapterRuntime.swift",
       "kind": "Dictionary",
-      "offset": 418,
-      "length": 3,
-      "value": "[]"
-    },
-    {
-      "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/BluetoothKit\/BluetoothKit\/BluetoothKit\/Adapter\/NativeAdapterRuntime.swift",
-      "kind": "Dictionary",
-      "offset": 591,
+      "offset": 272,
       "length": 3,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/BluetoothKit\/BluetoothKit\/BluetoothKit\/Adapter\/NativeAdapterRuntime.swift",
       "kind": "StringLiteral",
-      "offset": 648,
+      "offset": 321,
+      "length": 38,
+      "value": "\"com.host4.adapter.ble-session-claims\""
+    },
+    {
+      "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/BluetoothKit\/BluetoothKit\/BluetoothKit\/Adapter\/NativeAdapterRuntime.swift",
+      "kind": "Dictionary",
+      "offset": 1253,
+      "length": 3,
+      "value": "[]"
+    },
+    {
+      "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/BluetoothKit\/BluetoothKit\/BluetoothKit\/Adapter\/NativeAdapterRuntime.swift",
+      "kind": "Dictionary",
+      "offset": 1426,
+      "length": 3,
+      "value": "[]"
+    },
+    {
+      "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/BluetoothKit\/BluetoothKit\/BluetoothKit\/Adapter\/NativeAdapterRuntime.swift",
+      "kind": "StringLiteral",
+      "offset": 1483,
       "length": 28,
       "value": "\"com.host4.adapter.sessions\""
     },
