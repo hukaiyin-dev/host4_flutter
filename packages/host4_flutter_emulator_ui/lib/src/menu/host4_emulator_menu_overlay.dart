@@ -60,9 +60,9 @@ class _MenuLayoutSpec {
 
   static const landscape = _MenuLayoutSpec(
     baseWidth: 844,
-    panelWidth: 424,
+    panelWidth: 472,
     panelTop: 49,
-    buttonHeight: 65,
+    buttonHeight: 84,
     columns: 3,
     gap: 8,
   );
@@ -525,6 +525,21 @@ class _MenuButton extends StatelessWidget {
                   : enabled
                   ? _OverlayColors.icon
                   : _OverlayColors.muted;
+              final compact = buttonHeight <= 84;
+              final icon = SizedBox(
+                width: (compact ? 24 : 34) * scale,
+                height: (compact ? 24 : 34) * scale,
+                child: Center(
+                  child: SvgPicture.asset(
+                    item.asset,
+                    package: 'host4_flutter_emulator_ui',
+                    width: 24 * scale,
+                    height: 24 * scale,
+                    fit: BoxFit.contain,
+                    colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
+                  ),
+                ),
+              );
               return Semantics(
                 key: ValueKey<String>(item.identifier),
                 container: true,
@@ -562,38 +577,18 @@ class _MenuButton extends StatelessWidget {
                             borderRadius: BorderRadius.circular(cardRadius),
                           ),
                           child: Padding(
-                            padding: EdgeInsets.all(8 * scale),
-                            child: Row(
-                              children: <Widget>[
-                                SizedBox(
-                                  width: 34 * scale,
-                                  height: 34 * scale,
-                                  child: Center(
-                                    child: SvgPicture.asset(
-                                      item.asset,
-                                      package: 'host4_flutter_emulator_ui',
-                                      width: 24 * scale,
-                                      height: 24 * scale,
-                                      fit: BoxFit.contain,
-                                      colorFilter: ColorFilter.mode(
-                                        iconColor,
-                                        BlendMode.srcIn,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(width: 4 * scale),
-                                Expanded(
-                                  child: _MenuButtonText(
-                                    item: item,
-                                    action: action,
-                                    speed: speed,
-                                    scale: scale,
-                                    titleColor: titleColor,
-                                    subtitleColor: subtitleColor,
-                                  ),
-                                ),
-                              ],
+                            padding: EdgeInsets.symmetric(
+                              horizontal: (compact ? 6 : 8) * scale,
+                              vertical: (compact ? 4 : 8) * scale,
+                            ),
+                            child: _MenuButtonText(
+                              item: item,
+                              action: action,
+                              speed: speed,
+                              scale: scale,
+                              titleColor: titleColor,
+                              subtitleColor: subtitleColor,
+                              leadingIcon: icon,
                             ),
                           ),
                         ),
@@ -618,6 +613,7 @@ class _MenuButtonText extends StatelessWidget {
     required this.scale,
     required this.titleColor,
     required this.subtitleColor,
+    this.leadingIcon,
   });
 
   final _MenuItemModel item;
@@ -626,6 +622,7 @@ class _MenuButtonText extends StatelessWidget {
   final double scale;
   final Color titleColor;
   final Color subtitleColor;
+  final Widget? leadingIcon;
 
   @override
   Widget build(BuildContext context) {
@@ -641,8 +638,18 @@ class _MenuButtonText extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
-        title,
+        if (leadingIcon == null)
+          title
+        else
+          Row(
+            children: <Widget>[
+              leadingIcon!,
+              SizedBox(width: 2 * scale),
+              Expanded(child: title),
+            ],
+          ),
         if (subtitle != null)
           Flexible(
             child: Semantics(
@@ -655,7 +662,7 @@ class _MenuButtonText extends StatelessWidget {
                   : null,
               child: Text(
                 subtitle,
-                maxLines: 2,
+                maxLines: 3,
                 overflow: TextOverflow.ellipsis,
                 style: _OverlayText.caption(scale, color: subtitleColor),
               ),
