@@ -117,6 +117,7 @@ class Host4FlutterDeviceNativePlugin :
                 usbScanHandler.stopScan()
                 result.success(null)
             }
+            "getSystemConnectedBleDevices" -> handleGetSystemConnectedBleDevices(result)
             "connectBle" -> handleConnectBle(call, result)
             "connectSystemConnectedBle" -> handleConnectSystemConnectedBle(call, result)
             "connectUsb" -> handleConnectUsb(call, result)
@@ -234,12 +235,37 @@ class Host4FlutterDeviceNativePlugin :
         startBleTransportSession(BleMacUtils.normalizeMac(deviceId), result)
     }
 
+    private fun handleGetSystemConnectedBleDevices(result: Result) {
+        if (!BlePermissionHelper.hasAllPermissions(applicationContext)) {
+            result.error(
+                "ble-permission-denied",
+                "System-connected BLE lookup requires Bluetooth permissions on Android.",
+                null,
+            )
+            return
+        }
+        try {
+            val devices = SystemConnectedBleResolver.connectedDevices(applicationContext, platformSdk)
+            result.success(devices.map { device ->
+                mapOf(
+                    "deviceId" to BleMacUtils.normalizeMac(device.address),
+                    "name" to (device.name ?: ""),
+                    "kind" to "ble",
+                    "metadata" to mapOf("systemConnected" to true),
+                )
+            })
+        } catch (error: Exception) {
+            result.error("ble-connected-query-failed", error.message, null)
+        }
+    }
+
     private fun handleConnectSystemConnectedBle(call: MethodCall, result: Result) {
         val arguments = call.arguments as? Map<*, *>
         val serviceIds = (arguments?.get("serviceIds") as? List<*>)?.mapNotNull { it as? String }
             ?: emptyList()
         val deviceNames = (arguments?.get("deviceNames") as? List<*>)?.mapNotNull { it as? String }
             ?: emptyList()
+        val deviceId = (arguments?.get("deviceId") as? String)?.takeIf { it.isNotBlank() }
 
         if (serviceIds.isEmpty()) {
             result.error("invalid-arguments", "serviceIds is required.", null)
@@ -255,16 +281,23 @@ class Host4FlutterDeviceNativePlugin :
             return
         }
 
-        val mac = SystemConnectedBleResolver.resolveMac(
-            context = applicationContext,
-            platformSdk = platformSdk,
-            deviceNames = deviceNames,
-        )
+        val mac = if (deviceId != null) {
+            val requestedMac = BleMacUtils.normalizeMac(deviceId)
+            SystemConnectedBleResolver.connectedDevices(applicationContext, platformSdk)
+                .firstOrNull { BleMacUtils.normalizeMac(it.address) == requestedMac }
+                ?.address
+        } else {
+            SystemConnectedBleResolver.resolveMac(
+                context = applicationContext,
+                platformSdk = platformSdk,
+                deviceNames = deviceNames,
+            )
+        }
         if (mac.isNullOrEmpty()) {
             result.error(
                 "ble-connect-failed",
-                "No system-connected or bonded BLE device matched " +
-                    "deviceNames=$deviceNames serviceIds=$serviceIds.",
+                "No system-connected BLE device matched " +
+                    "deviceId=$deviceId deviceNames=$deviceNames serviceIds=$serviceIds.",
                 null,
             )
             return

@@ -13,6 +13,24 @@ import com.host4.platform.v2.ble.BleMacUtils
  * `retrieveSystemConnectedPeripheral` + bonded-device fallback.
  */
 internal object SystemConnectedBleResolver {
+    fun connectedDevices(context: Context, platformSdk: FullPlatformSdk): List<BluetoothDevice> {
+        val adapter = BluetoothAdapter.getDefaultAdapter() ?: return emptyList()
+        val bluetoothManager =
+            context.getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager
+        val byMac = linkedMapOf<String, BluetoothDevice>()
+        bluetoothManager?.getConnectedDevices(BluetoothProfile.GATT)?.forEach { device ->
+            byMac[BleMacUtils.normalizeMac(device.address)] = device
+        }
+        @Suppress("UNCHECKED_CAST")
+        val sdkConnectedMacs =
+            platformSdk.getConnectedBleDevices() as? List<String> ?: emptyList()
+        for (mac in sdkConnectedMacs) {
+            val device = runCatching { adapter.getRemoteDevice(mac) }.getOrNull() ?: continue
+            byMac.putIfAbsent(BleMacUtils.normalizeMac(device.address), device)
+        }
+        return byMac.values.toList()
+    }
+
     fun resolveMac(
         context: Context,
         platformSdk: FullPlatformSdk,
