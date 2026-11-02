@@ -29,6 +29,7 @@ class _GmacroBleScanPageState extends State<GmacroBleScanPage> {
 
   bool _isScanning = false;
   bool _isConnecting = false;
+  bool _isLoadingConnected = false;
   bool _hideUnnamed = true;
   StreamSubscription<DeviceDescriptor>? _scanSub;
   static const List<String> _systemConnectServiceIds = ['FF00', 'FF10'];
@@ -89,14 +90,23 @@ class _GmacroBleScanPageState extends State<GmacroBleScanPage> {
     if (mounted) setState(() => _isScanning = false);
   }
 
-  Future<void> _connect(DeviceDescriptor device) async {
+  Future<void> _connect(
+    DeviceDescriptor device, {
+    bool systemConnected = false,
+  }) async {
     if (_isConnecting) return;
     setState(() => _isConnecting = true);
 
     // await _stopScan();
 
     try {
-      final transport = await _ble.connect(device);
+      final transport = systemConnected
+          ? await _ble.connectSystemConnectedDevice(
+              device,
+              serviceIds: _systemConnectServiceIds,
+              options: const {'protocolType': 'gmacro'},
+            )
+          : await _ble.connect(device);
       if (!mounted) return;
       // replace 当前页，返回时直接回到 Entry
       await Navigator.of(context).pushReplacement(
@@ -163,6 +173,53 @@ class _GmacroBleScanPageState extends State<GmacroBleScanPage> {
       if (mounted) {
         setState(() => _isConnecting = false);
       }
+    }
+  }
+
+  Future<void> _selectSystemConnectedDevice() async {
+    if (_isConnecting || _isLoadingConnected) return;
+    setState(() => _isLoadingConnected = true);
+    try {
+      if (!kIsWeb && Platform.isAndroid) {
+        final granted = await _deviceNative.ensureBleScanPermissions();
+        if (!granted) {
+          if (mounted) _showSnack('需要蓝牙权限才能读取已连接设备。');
+          return;
+        }
+      }
+      final devices = await _ble.systemConnectedDevices(
+        _systemConnectServiceIds,
+      );
+      if (!mounted) return;
+      if (devices.isEmpty) {
+        _showSnack('没有已连接的 BLE 设备');
+        return;
+      }
+      final selected = await showModalBottomSheet<DeviceDescriptor>(
+        context: context,
+        isScrollControlled: true,
+        builder: (sheetContext) => SafeArea(
+          child: ListView(
+            shrinkWrap: true,
+            children: [
+              const ListTile(title: Text('选择已连接设备')),
+              for (final device in devices)
+                ListTile(
+                  title: Text(device.name.isEmpty ? '未命名设备' : device.name),
+                  subtitle: Text(device.id),
+                  onTap: () => Navigator.of(sheetContext).pop(device),
+                ),
+            ],
+          ),
+        ),
+      );
+      if (mounted && selected != null) {
+        await _connect(selected, systemConnected: true);
+      }
+    } catch (error) {
+      if (mounted) _showSnack('读取已连接设备失败: $error');
+    } finally {
+      if (mounted) setState(() => _isLoadingConnected = false);
     }
   }
 
@@ -238,6 +295,20 @@ class _GmacroBleScanPageState extends State<GmacroBleScanPage> {
                     label: const Text('连接已有设备'),
                   ),
                 ),
+                if (!kIsWeb &&
+                    defaultTargetPlatform == TargetPlatform.android) ...[
+                  SizedBox(height: theme.spacing.sm),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: _isConnecting || _isLoadingConnected
+                          ? null
+                          : _selectSystemConnectedDevice,
+                      icon: const Icon(Icons.bluetooth_rounded, size: 18),
+                      label: const Text('选择系统已连接设备'),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
