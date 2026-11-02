@@ -2,6 +2,14 @@ allprojects {
     repositories {
         google()
         mavenCentral()
+        maven {
+            url = uri("http://192.168.110.241:1415/repository/maven-releases/")
+            isAllowInsecureProtocol = true
+            content {
+                includeGroup("com.host4.platform")
+            }
+        }
+        maven { url = uri("https://jitpack.io") }
     }
 }
 

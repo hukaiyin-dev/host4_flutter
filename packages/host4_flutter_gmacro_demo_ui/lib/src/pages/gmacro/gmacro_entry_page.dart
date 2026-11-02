@@ -9,6 +9,7 @@ import '../../widgets/sub_page_scaffold.dart';
 import 'gmacro_ble_scan_page.dart';
 import 'gmacro_placeholder_values.dart';
 import 'gmacro_session_page.dart';
+import 'gmacro_multi_device_page.dart';
 import 'gmacro_usb_scan_page.dart';
 
 class GmacroEntryPage extends StatefulWidget {
@@ -125,6 +126,20 @@ class _GmacroEntryPageState extends State<GmacroEntryPage> {
       child: ListView(
         padding: EdgeInsets.all(theme.spacing.page),
         children: [
+          if (!isMfiPlatform) ...[
+            _TransportTile(
+              label: '多设备通信',
+              description: '同时连接 USB 和多台 BLE，分别查询设备版本与查看输入',
+              icon: Icons.devices_rounded,
+              color: theme.colors.brandPrimary,
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => const GmacroMultiDevicePage(),
+                ),
+              ),
+            ),
+            SizedBox(height: theme.spacing.md),
+          ],
           _TransportTile(
             label: 'BLE 连接',
             description: '通过蓝牙低功耗扫描并连接设备，测试 GMacro 主链路',
