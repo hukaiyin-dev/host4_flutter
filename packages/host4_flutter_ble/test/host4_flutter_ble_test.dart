@@ -62,8 +62,27 @@ void main() {
     },
   );
 
-  test('iOS legacy system-connected entry retains the actual device ID', () async {
-    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+  test(
+    'iOS legacy system-connected entry retains the actual device ID',
+    () async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+      final native = _FakeDeviceNative();
+      final ble = Host4Ble(native: native);
+
+      final session = await ble.connectSystemConnected(
+        const <String>['FF00', 'FF10'],
+        deviceNames: const <String>['GameMacro'],
+      );
+
+      expect(native.connectedSystemDeviceId, 'system-device-2');
+      expect(session.id, 'system-transport-2');
+      expect(session.device.id, 'system-device-2');
+      expect(session.device.name, 'GameMacro B');
+    },
+  );
+
+  test('Android system-connected entry retains the actual device ID', () async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.android;
     final native = _FakeDeviceNative();
     final ble = Host4Ble(native: native);
 
@@ -73,9 +92,7 @@ void main() {
     );
 
     expect(native.connectedSystemDeviceId, 'system-device-2');
-    expect(session.id, 'system-transport-2');
     expect(session.device.id, 'system-device-2');
-    expect(session.device.name, 'GameMacro B');
   });
 }
 

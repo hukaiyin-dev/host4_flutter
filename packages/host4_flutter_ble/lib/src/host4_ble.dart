@@ -49,9 +49,10 @@ class Host4Ble {
     Map<String, Object?> options = const <String, Object?>{},
   }) async {
     // The legacy name-based native API returns only a transport session ID.
-    // Resolve the actual peripheral first on iOS so callers never receive a
-    // fabricated device ID when several system-connected devices are present.
-    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
+    // Resolve the actual peripheral so concurrent sessions keep distinct IDs.
+    if (!kIsWeb &&
+        (defaultTargetPlatform == TargetPlatform.iOS ||
+            defaultTargetPlatform == TargetPlatform.android)) {
       final devices = await systemConnectedDevices(serviceIds);
       for (final device in devices) {
         if (deviceNames.isEmpty ||

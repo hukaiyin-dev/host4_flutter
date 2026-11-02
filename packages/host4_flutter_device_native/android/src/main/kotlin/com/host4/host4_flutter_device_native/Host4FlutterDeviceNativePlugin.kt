@@ -118,6 +118,7 @@ class Host4FlutterDeviceNativePlugin :
                 result.success(null)
             }
             "connectBle" -> handleConnectBle(call, result)
+            "getSystemConnectedBleDevices" -> handleGetSystemConnectedBleDevices(result)
             "connectSystemConnectedBle" -> handleConnectSystemConnectedBle(call, result)
             "connectUsb" -> handleConnectUsb(call, result)
             "connectUart" -> handleConnectUart(result)
@@ -234,12 +235,28 @@ class Host4FlutterDeviceNativePlugin :
         startBleTransportSession(BleMacUtils.normalizeMac(deviceId), result)
     }
 
+    private fun handleGetSystemConnectedBleDevices(result: Result) {
+        if (!BlePermissionHelper.hasAllPermissions(applicationContext)) {
+            result.error("ble-permission-denied", "Bluetooth permissions are required.", null)
+            return
+        }
+        result.success(SystemConnectedBleResolver.listDevices(applicationContext, platformSdk).map { device ->
+            mapOf(
+                "deviceId" to BleMacUtils.normalizeMac(device.address),
+                "name" to (device.name ?: ""),
+                "kind" to "ble",
+                "metadata" to mapOf("systemConnected" to true),
+            )
+        })
+    }
+
     private fun handleConnectSystemConnectedBle(call: MethodCall, result: Result) {
         val arguments = call.arguments as? Map<*, *>
         val serviceIds = (arguments?.get("serviceIds") as? List<*>)?.mapNotNull { it as? String }
             ?: emptyList()
         val deviceNames = (arguments?.get("deviceNames") as? List<*>)?.mapNotNull { it as? String }
             ?: emptyList()
+        val deviceId = (arguments?.get("deviceId") as? String)?.takeIf { it.isNotBlank() }
 
         if (serviceIds.isEmpty()) {
             result.error("invalid-arguments", "serviceIds is required.", null)
@@ -255,11 +272,12 @@ class Host4FlutterDeviceNativePlugin :
             return
         }
 
-        val mac = SystemConnectedBleResolver.resolveMac(
-            context = applicationContext,
-            platformSdk = platformSdk,
-            deviceNames = deviceNames,
-        )
+        val mac = deviceId?.let(BleMacUtils::normalizeMac)
+            ?: SystemConnectedBleResolver.resolveMac(
+                context = applicationContext,
+                platformSdk = platformSdk,
+                deviceNames = deviceNames,
+            )
         if (mac.isNullOrEmpty()) {
             result.error(
                 "ble-connect-failed",
@@ -519,7 +537,7 @@ class Host4FlutterDeviceNativePlugin :
      * [UsbDeviceSessionHandle.registerAllEscalationListener].
      */
     private fun registerBleAllEscalationListener(mac: String) {
-        platformSdk.registerAllEscalationListener(bleEscalationListenerFor(mac))
+        platformSdk.registerAllEscalationListener(mac, bleEscalationListenerFor(mac))
     }
 
     private fun bleEscalationListenerFor(mac: String): OnEscalationListener<EscalationRsp> {
@@ -618,10 +636,6 @@ class Host4FlutterDeviceNativePlugin :
             otaEventHandler = otaEventHandler,
         )
 
-        if (transportRecord.transportKind == Host4FlutterTransportKinds.BLE) {
-            platformSdk.setActiveBleDevice(transportRecord.deviceKey)
-        }
-
         val isTransportReady = when (transportRecord.transportKind) {
             Host4FlutterTransportKinds.USB ->
                 transportRecord.lastTransportStatus == ReliableUsbCommManager.CONNECT_COMPLETED
@@ -711,8 +725,7 @@ class Host4FlutterDeviceNativePlugin :
             registerOtaUpgradeListener(protocolRecord)
             when (protocolRecord.transportKind) {
                 Host4FlutterTransportKinds.USB -> {
-                    // USB 场景：由 v2 SDK 根据当前激活传输路由到 USB 通道。
-                    platformSdk.otaUpgrade(firmwareData)
+                    platformSdk.usb().otaUpgrade(firmwareData)
                 }
                 Host4FlutterTransportKinds.UART -> {
                     val client = brokerClient()
@@ -722,8 +735,6 @@ class Host4FlutterDeviceNativePlugin :
                     client.startOta(firmwareData) { }
                 }
                 else -> {
-                    // BLE 场景：显式指定 MAC，避免多设备时升级到错误设备。
-                    platformSdk.setActiveBleDevice(protocolRecord.deviceKey)
                     platformSdk.otaUpgrade(protocolRecord.deviceKey, firmwareData)
                 }
             }
@@ -781,7 +792,7 @@ class Host4FlutterDeviceNativePlugin :
         }
 
         if (protocolRecord.transportKind == Host4FlutterTransportKinds.USB) {
-            platformSdk.registerUpgradeListener(callback)
+            platformSdk.usb().registerUpgradeListener(callback)
         } else if (protocolRecord.transportKind != Host4FlutterTransportKinds.UART) {
             platformSdk.registerUpgradeListener(protocolRecord.deviceKey, callback)
         }
