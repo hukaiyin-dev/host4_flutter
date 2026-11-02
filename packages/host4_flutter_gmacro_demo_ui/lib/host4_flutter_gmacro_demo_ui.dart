@@ -3,6 +3,7 @@ export 'src/pages/gmacro/gmacro_api_test_page.dart';
 export 'src/pages/gmacro/gmacro_ble_scan_page.dart';
 export 'src/pages/gmacro/gmacro_entry_page.dart';
 export 'src/pages/gmacro/gmacro_multi_device_session_manager.dart';
+export 'src/pages/gmacro/gmacro_multi_device_input_debug_page.dart';
 export 'src/pages/gmacro/gmacro_multi_device_page.dart';
 export 'src/pages/gmacro/gmacro_input_debug_page.dart';
 export 'src/pages/gmacro/gmacro_placeholder_values.dart';

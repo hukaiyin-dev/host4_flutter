@@ -10,7 +10,9 @@ import 'package:host4_flutter_transport/host4_flutter_transport.dart';
 import 'package:host4_flutter_usb/host4_flutter_usb.dart';
 
 import 'gmacro_multi_device_session_manager.dart';
+import 'gmacro_multi_device_input_debug_page.dart';
 import 'gmacro_api_test_page.dart';
+import '../../widgets/sub_page_scaffold.dart';
 
 /// Manual USB + multi-BLE communication test for the mobile demo.
 class GmacroMultiDevicePage extends StatefulWidget {
@@ -185,9 +187,9 @@ class _GmacroMultiDevicePageState extends State<GmacroMultiDevicePage> {
     final connections = _manager.connections;
     final devices = _devices.values.toList()
       ..sort((a, b) => a.name.compareTo(b.name));
-    return Scaffold(
-      appBar: AppBar(title: const Text('GMacro 多设备通信')),
-      body: ListView(
+    return SubPageScaffold(
+      title: 'GMacro 多设备通信',
+      child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           const Text('USB 可与多台 BLE 同时连接。点选已连接设备后，查询仅发送到该设备。'),
@@ -285,6 +287,15 @@ class _GmacroMultiDevicePageState extends State<GmacroMultiDevicePage> {
                     ),
                   ),
             child: const Text('测试选中设备的完整 API'),
+          ),
+          OutlinedButton(
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) =>
+                    GmacroMultiDeviceInputDebugPage(manager: _manager),
+              ),
+            ),
+            child: const Text('查看多设备按键数据'),
           ),
           const SizedBox(height: 8),
           SelectableText(_result),
