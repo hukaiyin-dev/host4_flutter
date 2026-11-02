@@ -10,6 +10,7 @@ import 'package:host4_flutter_usb/host4_flutter_usb.dart';
 
 import '../../widgets/sub_page_scaffold.dart';
 import 'gmacro_session_page.dart';
+import 'gmacro_usb_device_picker.dart';
 
 /// USB connect page: relies on SDK [ReliableUsbCommManager] for permission,
 /// attach/detach broadcasts, and auto reconnect after replug.
@@ -28,17 +29,7 @@ class _GmacroUsbScanPageState extends State<GmacroUsbScanPage> {
   TransportSession? _session;
 
   bool _isConnected = false;
-  String _status = '正在初始化 USB…';
-
-  @override
-  void initState() {
-    super.initState();
-    if (!kIsWeb && Platform.isAndroid) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        unawaited(_startUsbSession());
-      });
-    }
-  }
+  String _status = '请选择要连接的 USB 手柄';
 
   @override
   void dispose() {
@@ -47,8 +38,15 @@ class _GmacroUsbScanPageState extends State<GmacroUsbScanPage> {
     super.dispose();
   }
 
-  Future<void> _startUsbSession() async {
-    _log.info('Starting USB session (SDK init + connect)...');
+  Future<void> _selectUsbDevice() async {
+    final device = await showGmacroUsbDevicePicker(context, usb: _usb);
+    if (!mounted || device == null) return;
+    if (_session != null) await _usb.release();
+    await _startUsbSession(device);
+  }
+
+  Future<void> _startUsbSession(DeviceDescriptor device) async {
+    _log.info('Starting USB session for ${device.id} (SDK init + connect)...');
     setState(() {
       _isConnected = false;
       _status = '正在连接 USB 设备…\n若弹出权限对话框，请选择「允许」';
@@ -59,7 +57,7 @@ class _GmacroUsbScanPageState extends State<GmacroUsbScanPage> {
     _session = null;
 
     try {
-      final session = await _usb.connectAuto();
+      final session = await _usb.connect(device);
       _session = session;
 
       // Listen before the next frame: native init() is posted after sessionId returns.
@@ -159,7 +157,7 @@ class _GmacroUsbScanPageState extends State<GmacroUsbScanPage> {
 
     return SubPageScaffold(
       title: 'USB 连接',
-      subtitle: '插入后自动连接，拔出后可重新插入',
+      subtitle: '选择目标 USB 设备，拔出后可重新连接',
       child: Padding(
         padding: EdgeInsets.all(theme.spacing.page),
         child: Column(
@@ -195,6 +193,15 @@ class _GmacroUsbScanPageState extends State<GmacroUsbScanPage> {
                 onPressed: _isConnected ? _openSessionPage : null,
                 icon: const Icon(Icons.play_arrow_rounded, size: 18),
                 label: const Text('进入 GMacro 测试'),
+              ),
+            ),
+            SizedBox(height: theme.spacing.sm),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: isBusy ? null : _selectUsbDevice,
+                icon: const Icon(Icons.usb_rounded, size: 18),
+                label: const Text('选择 USB 设备'),
               ),
             ),
             SizedBox(height: theme.spacing.sm),

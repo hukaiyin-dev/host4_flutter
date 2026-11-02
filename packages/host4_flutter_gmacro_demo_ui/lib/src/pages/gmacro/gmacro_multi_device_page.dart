@@ -13,6 +13,7 @@ import 'gmacro_multi_device_session_manager.dart';
 import 'gmacro_multi_device_input_debug_page.dart';
 import 'gmacro_api_test_page.dart';
 import '../../widgets/sub_page_scaffold.dart';
+import 'gmacro_usb_device_picker.dart';
 
 /// Manual USB + multi-BLE communication test for the mobile demo.
 class GmacroMultiDevicePage extends StatefulWidget {
@@ -35,6 +36,9 @@ class _GmacroMultiDevicePageState extends State<GmacroMultiDevicePage> {
   StreamSubscription<DeviceDescriptor>? _scanSub;
   bool _scanning = false;
   bool _busy = false;
+  bool get _hasUsbConnection => _manager.connections.any(
+    (connection) => connection.transport.device.kind == TransportKind.usb,
+  );
   String _result = '选择一台已就绪设备，查询版本以验证命令路由。';
 
   @override
@@ -113,10 +117,13 @@ class _GmacroMultiDevicePageState extends State<GmacroMultiDevicePage> {
   }
 
   Future<void> _connectUsb() async {
-    if (_busy || _manager.contains(TransportKind.usb, 'usb-auto')) return;
+    if (_busy || _hasUsbConnection) return;
     setState(() => _busy = true);
     try {
-      final transport = await _usb.connectAuto(
+      final device = await showGmacroUsbDevicePicker(context, usb: _usb);
+      if (!mounted || device == null) return;
+      final transport = await _usb.connect(
+        device,
         options: const {'protocolType': 'gmacro'},
       );
       if (!mounted) {
@@ -196,12 +203,9 @@ class _GmacroMultiDevicePageState extends State<GmacroMultiDevicePage> {
           const SizedBox(height: 12),
           if (!kIsWeb && Platform.isAndroid)
             FilledButton.icon(
-              onPressed:
-                  _busy || _manager.contains(TransportKind.usb, 'usb-auto')
-                  ? null
-                  : _connectUsb,
+              onPressed: _busy || _hasUsbConnection ? null : _connectUsb,
               icon: const Icon(Icons.usb),
-              label: const Text('连接 USB'),
+              label: const Text('选择并连接 USB'),
             ),
           Wrap(
             spacing: 8,

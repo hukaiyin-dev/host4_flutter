@@ -12,8 +12,8 @@ internal object UsbDeviceIds {
         if (parts.size != 2) {
             return null
         }
-        val vendorId = parts[0].toIntOrNull(10) ?: return null
-        val productId = parts[1].toIntOrNull(10) ?: return null
+        val vendorId = parts[0].toIntOrNull(16) ?: return null
+        val productId = parts[1].toIntOrNull(16) ?: return null
         return vendorId to productId
     }
 

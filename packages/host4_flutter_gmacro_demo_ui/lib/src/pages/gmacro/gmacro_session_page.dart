@@ -11,6 +11,7 @@ import '../../widgets/demo_ui.dart';
 
 import '../../widgets/sub_page_scaffold.dart';
 import 'gmacro_api_test_page.dart';
+import 'gmacro_connection_cleanup.dart';
 
 enum _OtaFirmwareSource { bundled, picker }
 
@@ -41,8 +42,9 @@ GmacroBundledOtaFirmware gmacroBundledOtaFirmwareForTransportKind(
 ) {
   return switch (kind) {
     TransportKind.mfi => _mfiBundledOtaFirmware,
-    TransportKind.ble || TransportKind.usb || TransportKind.uart =>
-      _bleBundledOtaFirmware,
+    TransportKind.ble ||
+    TransportKind.usb ||
+    TransportKind.uart => _bleBundledOtaFirmware,
   };
 }
 
@@ -108,8 +110,14 @@ class _GmacroSessionPageState extends State<GmacroSessionPage> {
     _otaSub?.cancel();
     _nativeLogSub?.cancel();
     unawaited(_inputHub.dispose());
-    _session?.close();
-    widget.transport.disconnect();
+    unawaited(
+      closeGmacroConnection(
+        closeProtocol: _session?.close,
+        disconnectTransport: widget.transport.device.kind == TransportKind.usb
+            ? null
+            : widget.transport.disconnect,
+      ),
+    );
     super.dispose();
   }
 

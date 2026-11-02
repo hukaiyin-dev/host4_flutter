@@ -154,7 +154,7 @@ class _GmacroEntryPageState extends State<GmacroEntryPage> {
             label: isMfiPlatform ? 'MFi 连接' : 'USB 连接',
             description: isMfiPlatform
                 ? '通过 MFi 有线连接设备，需完成 iAP2 握手后测试 GMacro'
-                : 'USB 有线连接（Android），自动连接已插入设备后测试 GMacro',
+                : 'USB 有线连接（Android），选择目标设备后测试 GMacro',
             icon: isMfiPlatform ? Icons.cable_rounded : Icons.usb_rounded,
             color: theme.colors.brandSecondary,
             badge: isMfiPlatform
