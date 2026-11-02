@@ -14,21 +14,27 @@ import com.host4.platform.v2.ble.BleMacUtils
  */
 internal object SystemConnectedBleResolver {
     fun connectedDevices(context: Context, platformSdk: FullPlatformSdk): List<BluetoothDevice> {
+        if (!BlePermissionHelper.hasAllPermissions(context)) return emptyList()
         val adapter = BluetoothAdapter.getDefaultAdapter() ?: return emptyList()
-        val bluetoothManager =
-            context.getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager
-        val byMac = linkedMapOf<String, BluetoothDevice>()
-        bluetoothManager?.getConnectedDevices(BluetoothProfile.GATT)?.forEach { device ->
-            byMac[BleMacUtils.normalizeMac(device.address)] = device
+        return try {
+            val bluetoothManager =
+                context.getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager
+            val byMac = linkedMapOf<String, BluetoothDevice>()
+            bluetoothManager?.getConnectedDevices(BluetoothProfile.GATT)?.forEach { device ->
+                byMac[BleMacUtils.normalizeMac(device.address)] = device
+            }
+            @Suppress("UNCHECKED_CAST")
+            val sdkConnectedMacs =
+                platformSdk.getConnectedBleDevices() as? List<String> ?: emptyList()
+            for (mac in sdkConnectedMacs) {
+                val device = runCatching { adapter.getRemoteDevice(mac) }.getOrNull() ?: continue
+                byMac.putIfAbsent(BleMacUtils.normalizeMac(device.address), device)
+            }
+            byMac.values.toList()
+        } catch (_: SecurityException) {
+            // Permission may be revoked after the initial check.
+            emptyList()
         }
-        @Suppress("UNCHECKED_CAST")
-        val sdkConnectedMacs =
-            platformSdk.getConnectedBleDevices() as? List<String> ?: emptyList()
-        for (mac in sdkConnectedMacs) {
-            val device = runCatching { adapter.getRemoteDevice(mac) }.getOrNull() ?: continue
-            byMac.putIfAbsent(BleMacUtils.normalizeMac(device.address), device)
-        }
-        return byMac.values.toList()
     }
 
     fun resolveMac(
@@ -36,6 +42,7 @@ internal object SystemConnectedBleResolver {
         platformSdk: FullPlatformSdk,
         deviceNames: List<String>,
     ): String? {
+        if (!BlePermissionHelper.hasAllPermissions(context)) return null
         val adapter = BluetoothAdapter.getDefaultAdapter() ?: return null
         val normalizedNames = deviceNames.map { it.trim() }.filter { it.isNotEmpty() }
 
@@ -43,35 +50,44 @@ internal object SystemConnectedBleResolver {
             if (normalizedNames.isEmpty()) {
                 return true
             }
-            val deviceName = name ?: return false
+            val deviceName = try {
+                name
+            } catch (_: SecurityException) {
+                null
+            } ?: return false
             return normalizedNames.any { candidate ->
                 deviceName.equals(candidate, ignoreCase = true) ||
                     deviceName.contains(candidate, ignoreCase = true)
             }
         }
 
-        val bluetoothManager =
-            context.getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager
-        bluetoothManager
-            ?.getConnectedDevices(BluetoothProfile.GATT)
-            ?.firstOrNull { it.matchesName() }
-            ?.address
-            ?.let { return BleMacUtils.normalizeMac(it) }
+        try {
+            val bluetoothManager =
+                context.getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager
+            bluetoothManager
+                ?.getConnectedDevices(BluetoothProfile.GATT)
+                ?.firstOrNull { it.matchesName() }
+                ?.address
+                ?.let { return BleMacUtils.normalizeMac(it) }
 
-        @Suppress("UNCHECKED_CAST")
-        val sdkConnectedMacs =
-            platformSdk.getConnectedBleDevices() as? List<String> ?: emptyList()
-        for (mac in sdkConnectedMacs) {
-            val device = runCatching { adapter.getRemoteDevice(mac) }.getOrNull() ?: continue
-            if (device.matchesName()) {
-                return BleMacUtils.normalizeMac(mac)
+            @Suppress("UNCHECKED_CAST")
+            val sdkConnectedMacs =
+                platformSdk.getConnectedBleDevices() as? List<String> ?: emptyList()
+            for (mac in sdkConnectedMacs) {
+                val device = runCatching { adapter.getRemoteDevice(mac) }.getOrNull() ?: continue
+                if (device.matchesName()) {
+                    return BleMacUtils.normalizeMac(mac)
+                }
             }
-        }
 
-        adapter.bondedDevices
-            ?.firstOrNull { it.matchesName() }
-            ?.address
-            ?.let { return BleMacUtils.normalizeMac(it) }
+            adapter.bondedDevices
+                ?.firstOrNull { it.matchesName() }
+                ?.address
+                ?.let { return BleMacUtils.normalizeMac(it) }
+        } catch (_: SecurityException) {
+            // Permission may be revoked while resolving a device.
+            return null
+        }
 
         return null
     }
