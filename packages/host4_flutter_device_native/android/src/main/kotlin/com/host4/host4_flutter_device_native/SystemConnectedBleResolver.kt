@@ -13,23 +13,22 @@ import com.host4.platform.v2.ble.BleMacUtils
  * `retrieveSystemConnectedPeripheral` + bonded-device fallback.
  */
 internal object SystemConnectedBleResolver {
-    fun listDevices(context: Context, platformSdk: FullPlatformSdk): List<BluetoothDevice> {
+    fun connectedDevices(context: Context, platformSdk: FullPlatformSdk): List<BluetoothDevice> {
         val adapter = BluetoothAdapter.getDefaultAdapter() ?: return emptyList()
-        val devices = linkedMapOf<String, BluetoothDevice>()
         val bluetoothManager =
             context.getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager
+        val byMac = linkedMapOf<String, BluetoothDevice>()
         bluetoothManager?.getConnectedDevices(BluetoothProfile.GATT)?.forEach { device ->
-            devices[BleMacUtils.normalizeMac(device.address)] = device
+            byMac[BleMacUtils.normalizeMac(device.address)] = device
         }
-        platformSdk.getConnectedBleDevices().forEach { mac ->
-            runCatching { adapter.getRemoteDevice(mac) }.getOrNull()?.let { device ->
-                devices[BleMacUtils.normalizeMac(device.address)] = device
-            }
+        @Suppress("UNCHECKED_CAST")
+        val sdkConnectedMacs =
+            platformSdk.getConnectedBleDevices() as? List<String> ?: emptyList()
+        for (mac in sdkConnectedMacs) {
+            val device = runCatching { adapter.getRemoteDevice(mac) }.getOrNull() ?: continue
+            byMac.putIfAbsent(BleMacUtils.normalizeMac(device.address), device)
         }
-        adapter.bondedDevices?.forEach { device ->
-            devices.putIfAbsent(BleMacUtils.normalizeMac(device.address), device)
-        }
-        return devices.values.toList()
+        return byMac.values.toList()
     }
 
     fun resolveMac(
@@ -37,6 +36,7 @@ internal object SystemConnectedBleResolver {
         platformSdk: FullPlatformSdk,
         deviceNames: List<String>,
     ): String? {
+        val adapter = BluetoothAdapter.getDefaultAdapter() ?: return null
         val normalizedNames = deviceNames.map { it.trim() }.filter { it.isNotEmpty() }
 
         fun BluetoothDevice.matchesName(): Boolean {
@@ -50,8 +50,26 @@ internal object SystemConnectedBleResolver {
             }
         }
 
-        listDevices(context, platformSdk)
-            .firstOrNull { it.matchesName() }
+        val bluetoothManager =
+            context.getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager
+        bluetoothManager
+            ?.getConnectedDevices(BluetoothProfile.GATT)
+            ?.firstOrNull { it.matchesName() }
+            ?.address
+            ?.let { return BleMacUtils.normalizeMac(it) }
+
+        @Suppress("UNCHECKED_CAST")
+        val sdkConnectedMacs =
+            platformSdk.getConnectedBleDevices() as? List<String> ?: emptyList()
+        for (mac in sdkConnectedMacs) {
+            val device = runCatching { adapter.getRemoteDevice(mac) }.getOrNull() ?: continue
+            if (device.matchesName()) {
+                return BleMacUtils.normalizeMac(mac)
+            }
+        }
+
+        adapter.bondedDevices
+            ?.firstOrNull { it.matchesName() }
             ?.address
             ?.let { return BleMacUtils.normalizeMac(it) }
 
