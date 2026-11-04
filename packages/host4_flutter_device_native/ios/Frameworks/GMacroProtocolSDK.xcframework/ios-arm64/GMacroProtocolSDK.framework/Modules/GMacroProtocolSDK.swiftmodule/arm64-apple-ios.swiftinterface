@@ -1189,6 +1189,7 @@ public enum GMacroProtocolEvent : @unchecked Swift.Sendable {
   public typealias OTAWriteClosure = (_ data: Foundation.Data, _ completion: (() -> Swift.Void)?) -> Swift.Void
   final public var otaCommandWriter: GMacroProtocolSDK.GMacroProtocolSession.OTAWriteClosure?
   final public var otaDataWriter: GMacroProtocolSDK.GMacroProtocolSession.OTAWriteClosure?
+  final public func sendHeartbeat() throws
   #if compiler(>=5.3) && $NonescapableTypes
   public init(sessionId: Swift.String, transport: any BluetoothKit.ByteStreamTransport, lengthPrefixedStream: Swift.Bool? = nil)
   #endif

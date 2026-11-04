@@ -96,6 +96,7 @@ enum GMacroProtocolID: UInt8 {
     case endRecordValue     = 0x49 // 结束上报录制的宏子按键
     
     case deviceVersion      = 0x84 // 获取设备版本信息
+    case heartbeat          = 0x88 // APP 心跳（只下发，无设备应答）
     case deviceInfo         = 0x77 // 获取设备版本信息（支持subid）
     
     case currentMacro       = 0x79 // 查询宏定义当前配置（分包发送）（支持subid）
@@ -158,6 +159,7 @@ extension GMacroProtocolID {
     static func hasSubID(_ pid: GMacroProtocolID) -> Bool {
         switch pid {
         case .deviceVersion,      // 0x84
+             .heartbeat,          // 0x88
              .deviceInfo,         // 0x77
              .rocker3D,           // 0x3F
              .trigger3D,          // 0x85

@@ -1087,6 +1087,10 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
           }
         }
 
+      case Host4FlutterChannelConstants.sendHeartbeat:
+        try session.sendHeartbeat()
+        result([String: Any]())
+
       case Host4FlutterChannelConstants.fetchDeviceVersion:
         invoke(result) { callback in
           session.fetchDeviceVersion { res in

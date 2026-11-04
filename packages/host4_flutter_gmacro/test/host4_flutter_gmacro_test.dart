@@ -8,6 +8,22 @@ import 'package:host4_flutter_device_native/host4_flutter_device_native.dart';
 import 'package:host4_flutter_transport/host4_flutter_transport.dart';
 
 void main() {
+  test(
+    'heartbeat sends once through its own protocol session without a reply',
+    () async {
+      final native = _FakeDeviceNative();
+      final session = GmacroSession(
+        id: 'heartbeat-session',
+        transport: _FakeTransportSession(),
+        native: native,
+      );
+      await session.sendHeartbeat();
+      expect(native.invocations.single['method'], 'sendHeartbeat');
+      expect(native.invokedSessionIds.single, 'heartbeat-session');
+      await session.close();
+    },
+  );
+
   test('16-bit turbo APIs preserve speed above 255 and old methods', () async {
     final native = _FakeDeviceNative();
     final session = GmacroSession(
@@ -319,6 +335,7 @@ void main() {
 }
 
 class _FakeDeviceNative extends Host4FlutterDeviceNative {
+  final List<String> invokedSessionIds = <String>[];
   final List<Map<String, Object?>> invocations = <Map<String, Object?>>[];
   Future<Map<String, Object?>>? nextInvoke;
   final StreamController<Map<String, Object?>> escalationEvents =
@@ -350,6 +367,7 @@ class _FakeDeviceNative extends Host4FlutterDeviceNative {
     required String method,
     Map<String, Object?> arguments = const {},
   }) async {
+    invokedSessionIds.add(protocolSessionId);
     invocations.add(<String, Object?>{
       'method': method,
       'arguments': Map<String, Object?>.from(arguments),
