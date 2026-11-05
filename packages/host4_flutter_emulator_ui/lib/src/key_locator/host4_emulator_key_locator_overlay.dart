@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
@@ -48,47 +49,49 @@ class _Host4EmulatorKeyLocatorOverlayState
           final designSize = landscape
               ? const Size(844, 390)
               : const Size(390, 844);
+          final heightScale = constraints.maxHeight / designSize.height;
+          final imageSize = landscape
+              ? const Size(432, 148)
+              : const Size(336, 211);
+          final imageScale = math.min(
+            heightScale,
+            (constraints.maxWidth - 32) / imageSize.width,
+          );
           return Semantics(
             container: true,
             explicitChildNodes: true,
-            child: FittedBox(
-              fit: BoxFit.fill,
-              child: SizedBox.fromSize(
-                size: designSize,
-                child: Stack(
-                  children: <Widget>[
-                    Positioned(
-                      top: landscape ? 48 : 73,
-                      left: 0,
-                      right: 0,
-                      child: _LocatorHeader(landscape: landscape),
-                    ),
-                    Positioned(
-                      top: landscape ? 120 : 138,
-                      left: 0,
-                      right: 0,
-                      child: Center(
-                        child: Image.asset(
-                          landscape
-                              ? 'assets/key_locator/instruction_landscape.png'
-                              : 'assets/key_locator/instruction_portrait.png',
-                          package: 'host4_flutter_emulator_ui',
-                          width: landscape ? 432 : 336,
-                          height: landscape ? 148 : 211,
-                          fit: BoxFit.contain,
-                          filterQuality: FilterQuality.high,
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      top: landscape ? 276 : 363,
-                      left: 0,
-                      right: 0,
-                      child: _LocatorFooter(landscape: landscape),
-                    ),
-                  ],
+            child: Stack(
+              children: <Widget>[
+                Positioned(
+                  top: (landscape ? 48 : 73) * heightScale,
+                  left: 0,
+                  right: 0,
+                  child: _LocatorHeader(landscape: landscape),
                 ),
-              ),
+                Positioned(
+                  top: (landscape ? 120 : 138) * heightScale,
+                  left: 0,
+                  right: 0,
+                  child: Center(
+                    child: Image.asset(
+                      landscape
+                          ? 'assets/key_locator/instruction_landscape.png'
+                          : 'assets/key_locator/instruction_portrait.png',
+                      package: 'host4_flutter_emulator_ui',
+                      width: imageSize.width * imageScale,
+                      height: imageSize.height * imageScale,
+                      fit: BoxFit.contain,
+                      filterQuality: FilterQuality.high,
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: (landscape ? 276 : 363) * heightScale,
+                  left: 0,
+                  right: 0,
+                  child: _LocatorFooter(landscape: landscape),
+                ),
+              ],
             ),
           );
         },

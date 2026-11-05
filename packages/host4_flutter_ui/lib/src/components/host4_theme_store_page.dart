@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -178,21 +179,6 @@ class Host4ThemeStorePageState extends State<Host4ThemeStorePage> {
                                 onSearch: widget.onSearch,
                                 onApplyTheme: _applyTheme,
                               );
-                              if (!_isThemeStoreTabletLike(viewport)) {
-                                return SizedBox.expand(
-                                  child: FittedBox(
-                                    fit: BoxFit.fill,
-                                    child: SizedBox(
-                                      key: const ValueKey<String>(
-                                        'host4_theme_store_page',
-                                      ),
-                                      width: _ThemeStoreScene.designWidth,
-                                      height: _ThemeStoreScene.designHeight,
-                                      child: scene,
-                                    ),
-                                  ),
-                                );
-                              }
                               return _ThemeStoreTabletViewport(
                                 key: const ValueKey<String>(
                                   'host4_theme_store_page',
@@ -358,19 +344,19 @@ class Host4ThemeStorePageState extends State<Host4ThemeStorePage> {
   }
 }
 
-bool _isThemeStoreTabletLike(Size viewport) {
-  if (viewport.isEmpty) {
-    return false;
-  }
-  final shortest = viewport.shortestSide;
-  final longest = viewport.longestSide;
-  return shortest >= 560 || (shortest >= 520 && longest >= 900);
-}
-
-double _themeStoreUniformScale(Size viewport) {
-  final widthScale = viewport.width / _ThemeStoreScene.designWidth;
-  final heightScale = viewport.height / _ThemeStoreScene.designHeight;
-  final scale = widthScale < heightScale ? widthScale : heightScale;
+double _themeStoreUniformScale(Size viewport, EdgeInsets safeInsets) {
+  final canvasWidthScale = viewport.width / _ThemeStoreScene.designWidth;
+  final heightScale =
+      (viewport.height - safeInsets.vertical) / _ThemeStoreScene.designHeight;
+  final gridWidthScale = math.min(
+    (viewport.width - safeInsets.right - 8) /
+        (_ThemeStoreScene.gridLeft + _ThemeStoreScene.gridWidth),
+    (viewport.width - safeInsets.horizontal - 16) / _ThemeStoreScene.gridWidth,
+  );
+  final scale = math.min(
+    heightScale,
+    math.max(canvasWidthScale, math.min(1.0, gridWidthScale)),
+  );
   if (!scale.isFinite || scale <= 0) {
     return 1;
   }
@@ -413,8 +399,14 @@ class _ThemeStoreTabletViewport extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scale = _themeStoreUniformScale(viewport);
+    final view = View.of(context);
+    final safeInsets = EdgeInsets.fromViewPadding(
+      view.viewPadding,
+      view.devicePixelRatio,
+    );
+    final scale = _themeStoreUniformScale(viewport, safeInsets);
     final gridHeight = _themeStoreGridHeight(scene.manager.catalog.length);
+    final topBarHeight = _ThemeStoreScene.topBarHeight + safeInsets.top / scale;
 
     return Stack(
       children: [
@@ -427,18 +419,26 @@ class _ThemeStoreTabletViewport extends StatelessWidget {
         Positioned(
           left: 0,
           top: 0,
-          width: _ThemeStoreScene.designWidth * scale,
-          height: _ThemeStoreScene.topBarHeight * scale,
+          width: viewport.width,
+          height: topBarHeight * scale,
           child: _ThemeStoreScaledBox(
             scale: scale,
-            width: _ThemeStoreScene.designWidth,
-            height: _ThemeStoreScene.topBarHeight,
-            child: scene.buildTopBar(context),
+            width: viewport.width / scale,
+            height: topBarHeight,
+            child: scene.buildTopBar(
+              context,
+              safeAreaTop: safeInsets.top / scale,
+              safeAreaLeft: safeInsets.left / scale,
+              safeAreaRight: safeInsets.right / scale,
+            ),
           ),
         ),
         Positioned(
-          left: _ThemeStoreScene.gridLeft * scale,
-          top: _ThemeStoreScene.gridTop * scale,
+          left: math.max(
+            _ThemeStoreScene.gridLeft * scale,
+            safeInsets.left + 8,
+          ),
+          top: _ThemeStoreScene.gridTop * scale + safeInsets.top,
           width: _ThemeStoreScene.gridWidth * scale,
           child: _ThemeStoreScaledBox(
             scale: scale,
@@ -449,8 +449,14 @@ class _ThemeStoreTabletViewport extends StatelessWidget {
         ),
         if (scene.showControllerHints)
           Positioned(
-            right: _ThemeStoreScene.hintsRight * scale,
-            bottom: _ThemeStoreScene.hintsBottom * scale,
+            right: math.max(
+              _ThemeStoreScene.hintsRight * scale,
+              safeInsets.right + 8,
+            ),
+            bottom: math.max(
+              _ThemeStoreScene.hintsBottom * scale,
+              safeInsets.bottom + 8,
+            ),
             child: _ThemeStoreScaledIntrinsicBox(
               scale: scale,
               alignment: Alignment.bottomRight,
@@ -468,14 +474,12 @@ class _ThemeStoreScaledBox extends StatelessWidget {
     required this.width,
     required this.height,
     required this.child,
-    this.alignment = Alignment.topLeft,
   });
 
   final double scale;
   final double width;
   final double height;
   final Widget child;
-  final Alignment alignment;
 
   @override
   Widget build(BuildContext context) {
@@ -483,14 +487,14 @@ class _ThemeStoreScaledBox extends StatelessWidget {
       width: width * scale,
       height: height * scale,
       child: OverflowBox(
-        alignment: alignment,
+        alignment: Alignment.topLeft,
         minWidth: 0,
         minHeight: 0,
         maxWidth: width,
         maxHeight: height,
         child: Transform.scale(
           scale: scale,
-          alignment: alignment,
+          alignment: Alignment.topLeft,
           child: SizedBox(width: width, height: height, child: child),
         ),
       ),
@@ -586,10 +590,17 @@ class _ThemeStoreScene extends StatelessWidget {
     );
   }
 
-  Widget buildTopBar(BuildContext context) {
+  Widget buildTopBar(
+    BuildContext context, {
+    double safeAreaTop = 0,
+    double safeAreaLeft = 0,
+    double safeAreaRight = 0,
+  }) {
     return Host4TopBar(
       key: const ValueKey<String>('host4_theme_store_top_bar'),
-      safeAreaTop: 0,
+      safeAreaTop: safeAreaTop,
+      safeAreaLeft: safeAreaLeft,
+      safeAreaRight: safeAreaRight,
       title: title,
       titleKey: const ValueKey<String>('host4_theme_store_title'),
       trailing: showSearchButton

@@ -22,6 +22,7 @@ class Host4TopBar extends StatefulWidget {
   const Host4TopBar({
     required this.safeAreaTop,
     this.safeAreaLeft = 0,
+    this.safeAreaRight = 0,
     this.title,
     this.parent,
     this.titleKey,
@@ -38,6 +39,9 @@ class Host4TopBar extends StatefulWidget {
 
   /// 左侧安全区宽度，单位 dp。默认 0。
   final double safeAreaLeft;
+
+  /// 右侧安全区宽度，单位 dp。默认 0。
+  final double safeAreaRight;
 
   /// 面包屑前缀；为 null 时退化为纯标题模式。
   final String? parent;
@@ -115,7 +119,7 @@ class _Host4TopBarState extends State<Host4TopBar> {
               child: Padding(
                 padding: EdgeInsets.only(
                   left: topBarTokens.paddingHorizontal + widget.safeAreaLeft,
-                  right: topBarTokens.paddingHorizontal,
+                  right: topBarTokens.paddingHorizontal + widget.safeAreaRight,
                 ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -187,7 +191,7 @@ class _Host4TopBarState extends State<Host4TopBar> {
               child: Padding(
                 padding: EdgeInsets.only(
                   left: topBarTokens.paddingHorizontal + widget.safeAreaLeft,
-                  right: topBarTokens.paddingHorizontal,
+                  right: topBarTokens.paddingHorizontal + widget.safeAreaRight,
                 ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,

@@ -176,6 +176,7 @@ class _ActiveSiliconeMenuButton extends StatelessWidget {
         final landscape = size.width >= size.height;
         final metrics = Host4EmulatorSiliconeMetrics.of(context);
         final padding = MediaQuery.paddingOf(context);
+        final viewPadding = MediaQuery.viewPaddingOf(context);
         final layout = landscape
             ? Host4EmulatorSiliconeLayoutResolver.landscape(
                 screenSize: size,
@@ -184,8 +185,8 @@ class _ActiveSiliconeMenuButton extends StatelessWidget {
             : Host4EmulatorSiliconeLayoutResolver.portrait(
                 screenSize: size,
                 metrics: metrics,
-                topInset: padding.top,
-                bottomInset: padding.bottom,
+                topInset: math.max(padding.top, viewPadding.top),
+                bottomInset: math.max(padding.bottom, viewPadding.bottom),
                 padPosition: padPositions['portrait.single'],
                 systemButtonsAtTop: systemButtonsAtTop,
                 hasShoulderButtons: true,
@@ -460,6 +461,7 @@ class _SiliconeControlsState extends State<_SiliconeControls> {
         final landscape = size.width >= size.height;
         final metrics = Host4EmulatorSiliconeMetrics.of(context);
         final padding = MediaQuery.paddingOf(context);
+        final viewPadding = MediaQuery.viewPaddingOf(context);
 
         final Host4EmulatorSiliconeResolvedLayout layout;
         final List<Host4EmulatorSiliconePadBinding> bindings;
@@ -475,8 +477,8 @@ class _SiliconeControlsState extends State<_SiliconeControls> {
           layout = Host4EmulatorSiliconeLayoutResolver.portrait(
             screenSize: size,
             metrics: metrics,
-            topInset: padding.top,
-            bottomInset: padding.bottom,
+            topInset: math.max(padding.top, viewPadding.top),
+            bottomInset: math.max(padding.bottom, viewPadding.bottom),
             padPosition: widget.padPositions['portrait.single'],
             systemButtonsAtTop: _systemButtonsAtTop,
             hasShoulderButtons: true,

@@ -204,15 +204,17 @@ class Host4EmulatorSiliconeLayoutResolver {
     final double upperShoulderCenter = math.max(
         viewport.bottom + shoulderH / 2,
         defaultTop - gap - shoulderH / 2);
+    final double bottomSafeEdge = screenSize.height - bottomInset - 8;
+    final double maxPadTopWithShouldersBelow =
+        bottomSafeEdge - padSize.height - gap - shoulderH;
     final bool shouldersBelow = hasShoulderButtons &&
+        maxPadTopWithShouldersBelow >= minimumTop &&
         top < upperShoulderCenter + shoulderH / 2 + gap;
     if (shouldersBelow) {
-      top = top.clamp(minimumTop, math.max(minimumTop,
-          maximumTop - gap - shoulderH)).toDouble();
+      top = top.clamp(minimumTop, maxPadTopWithShouldersBelow).toDouble();
     }
     final double shoulderCenter = shouldersBelow
-        ? math.max(defaultTop + padSize.height / 2,
-            top + padSize.height + gap + shoulderH / 2)
+        ? top + padSize.height + gap + shoulderH / 2
         : top - gap - shoulderH / 2;
     final double buttonTop = topInset + gap;
 
@@ -268,6 +270,7 @@ class Host4EmulatorSiliconeLayoutResolver {
       padBounds,
       shoulderCenterY: shoulderCenter,
       systemButtonTop: buttonTop,
+      topInset: topInset,
     );
 
     return Host4EmulatorSiliconeResolvedLayout(
@@ -613,6 +616,7 @@ class Host4EmulatorSiliconeLayoutResolver {
     Rect padBounds, {
     required double shoulderCenterY,
     required double systemButtonTop,
+    required double topInset,
   }) {
     final double scale = screenSize.width / _portraitBaseWidth;
     final double shoulderW = padBounds.width * _portraitShoulderWidthRatio;
@@ -620,6 +624,10 @@ class Host4EmulatorSiliconeLayoutResolver {
     final double bottomButtonSize = _portraitBottomButtonSize * scale;
     final double bottomButtonTop = systemButtonTop;
     final double bottomButtonCenterY = bottomButtonTop + bottomButtonSize / 2;
+    final double rightButtonMargin = math.max(
+      _portraitBottomButtonSideMargin * scale,
+      math.max(topInset + bottomButtonSize, bottomButtonSize * 1.7),
+    );
     _addRectControl(
       controls,
       semanticsIdentifier: 'game.controls.btn_l',
@@ -663,9 +671,7 @@ class Host4EmulatorSiliconeLayoutResolver {
       controls,
       semanticsIdentifier: 'game.controls.btn_hide_toggle',
       center: Offset(
-        screenSize.width -
-            _portraitBottomButtonSideMargin * scale -
-            bottomButtonSize / 2,
+        screenSize.width - rightButtonMargin - bottomButtonSize / 2,
         bottomButtonCenterY,
       ),
       size: Size.square(bottomButtonSize),
