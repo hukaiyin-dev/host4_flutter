@@ -22,7 +22,16 @@ void main() {
     });
 
     test('accepts the complete RetroPad face-button contract', () {
-      for (final input in <String>['a', 'b', 'x', 'y', 'l', 'r']) {
+      for (final input in <String>[
+        'a',
+        'b',
+        'x',
+        'y',
+        'l',
+        'r',
+        'l2',
+        'r2',
+      ]) {
         expect(
           Host4EmulatorInputEvent(
             input: input,

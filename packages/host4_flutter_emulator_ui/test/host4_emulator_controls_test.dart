@@ -262,6 +262,83 @@ void main() {
     expect(find.byKey(const ValueKey<String>('controls.r')), findsNothing);
   });
 
+  testWidgets('landscape L1/L2 and R1/R2 emit distinct emulator inputs', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(844, 390);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final events = <Host4EmulatorInputEvent>[];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SizedBox(
+          width: 844,
+          height: 390,
+          child: Host4EmulatorControlsLayer(
+            profile: Host4EmulatorControlProfile.gba,
+            layoutStyle: Host4EmulatorControlLayoutStyle.silicone,
+            siliconeLayoutVariant:
+                Host4EmulatorSiliconeLayoutVariant.modernSymmetric,
+            onInput: events.add,
+            onMenuTap: () {},
+          ),
+        ),
+      ),
+    );
+
+    for (final expected in <(String, String)>[
+      ('controls.l', 'l'),
+      ('landscape.controls.btn_l2', 'l2'),
+      ('controls.r', 'r'),
+      ('landscape.controls.btn_r2', 'r2'),
+    ]) {
+      await tester.tap(find.byKey(ValueKey<String>(expected.$1)));
+      await tester.pump();
+      expect(events.last.input, expected.$2);
+      expect(events.last.isValid, isTrue);
+    }
+  });
+
+  testWidgets('default silicone landscape L2 and R2 emit trigger inputs', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(844, 390);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final events = <Host4EmulatorInputEvent>[];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SizedBox(
+          width: 844,
+          height: 390,
+          child: Host4EmulatorControlsLayer(
+            profile: Host4EmulatorControlProfile.gba,
+            layoutStyle: Host4EmulatorControlLayoutStyle.silicone,
+            onInput: events.add,
+            onMenuTap: () {},
+          ),
+        ),
+      ),
+    );
+
+    for (final expected in <(String, String)>[
+      ('landscape.controls.btn_l2', 'l2'),
+      ('landscape.controls.btn_r2', 'r2'),
+    ]) {
+      await tester.tap(find.byKey(ValueKey<String>(expected.$1)));
+      await tester.pump();
+      expect(
+        events
+            .sublist(events.length - 2)
+            .map((event) => '${event.input}:${event.phase}'),
+        <String>['${expected.$2}:down', '${expected.$2}:up'],
+      );
+      expect(events.last.isValid, isTrue);
+    }
+  });
+
   testWidgets('silicone layout owns its display metrics provider', (
     tester,
   ) async {

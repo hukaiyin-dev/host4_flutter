@@ -561,8 +561,8 @@ class _SiliconeControlsState extends State<_SiliconeControls> {
 
   List<Widget> _landscapeShoulders(Host4EmulatorSiliconeResolvedLayout layout) {
     return <Widget>[
-      _shoulderButton(layout, 'landscape.controls.btn_l2', 'l', 'L2'),
-      _shoulderButton(layout, 'landscape.controls.btn_r2', 'r', 'R2'),
+      _shoulderButton(layout, 'landscape.controls.btn_l2', 'l2', 'L2'),
+      _shoulderButton(layout, 'landscape.controls.btn_r2', 'r2', 'R2'),
     ];
   }
 

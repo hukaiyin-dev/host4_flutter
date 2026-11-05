@@ -233,9 +233,9 @@ class _Host4EmulatorLandscapeControlsState
     double scale,
   ) {
     const specs = <_ShoulderSpec>[
-      _ShoulderSpec('l2', 'l', 110, 29, 'landscape_shoulder_l2.svg'),
+      _ShoulderSpec('l2', 'l2', 110, 29, 'landscape_shoulder_l2.svg'),
       _ShoulderSpec('l1', 'l', 144.88, 63.65, 'landscape_shoulder_l1.svg'),
-      _ShoulderSpec('r2', 'r', 646.88, 29, 'landscape_shoulder_r2.svg'),
+      _ShoulderSpec('r2', 'r2', 646.88, 29, 'landscape_shoulder_r2.svg'),
       _ShoulderSpec('r1', 'r', 612, 63.65, 'landscape_shoulder_r1.svg'),
     ];
     return <Widget>[

@@ -24,6 +24,8 @@ class Host4EmulatorInputEvent {
     'y',
     'l',
     'r',
+    'l2',
+    'r2',
     'start',
     'select',
   };
