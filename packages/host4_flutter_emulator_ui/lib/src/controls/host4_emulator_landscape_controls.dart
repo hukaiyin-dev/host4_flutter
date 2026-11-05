@@ -17,6 +17,8 @@ class Host4EmulatorLandscapeControls extends StatefulWidget {
     required this.variant,
     required this.onInput,
     required this.onMenuTap,
+    this.collapsed,
+    this.onCollapsedChanged,
     super.key,
   });
 
@@ -24,6 +26,8 @@ class Host4EmulatorLandscapeControls extends StatefulWidget {
   final Host4EmulatorSiliconeLayoutVariant variant;
   final ValueChanged<Host4EmulatorInputEvent> onInput;
   final VoidCallback onMenuTap;
+  final bool? collapsed;
+  final ValueChanged<bool>? onCollapsedChanged;
 
   @override
   State<Host4EmulatorLandscapeControls> createState() =>
@@ -33,6 +37,16 @@ class Host4EmulatorLandscapeControls extends StatefulWidget {
 class _Host4EmulatorLandscapeControlsState
     extends State<Host4EmulatorLandscapeControls> {
   bool _collapsed = false;
+  bool get _isCollapsed => widget.collapsed ?? _collapsed;
+
+  void _toggleCollapsed() {
+    final next = !_isCollapsed;
+    if (widget.onCollapsedChanged != null) {
+      widget.onCollapsedChanged!(next);
+    } else {
+      setState(() => _collapsed = next);
+    }
+  }
   bool _retroUsesStick = true;
 
   @override
@@ -72,11 +86,22 @@ class _Host4EmulatorLandscapeControlsState
           child: Host4EmulatorAuxiliaryButton(
             asset: 'ic_expand.svg',
             size: Size.square(42 * scale),
-            onTap: () => setState(() => _collapsed = !_collapsed),
+            onTap: _toggleCollapsed,
           ),
         );
-        if (_collapsed) {
-          return Stack(clipBehavior: Clip.none, children: <Widget>[hide]);
+        final menu = positioned(
+          identifier: 'controls.menu',
+          left: 401,
+          top: 336,
+          baseSize: const Size.square(42),
+          child: Host4EmulatorAuxiliaryButton(
+            asset: 'logo_group.svg',
+            size: Size.square(42 * scale),
+            onTap: widget.onMenuTap,
+          ),
+        );
+        if (_isCollapsed) {
+          return Stack(clipBehavior: Clip.none, children: <Widget>[menu, hide]);
         }
 
         return Stack(
@@ -122,17 +147,7 @@ class _Host4EmulatorLandscapeControlsState
                       setState(() => _retroUsesStick = !_retroUsesStick),
                 ),
               ),
-            positioned(
-              identifier: 'controls.menu',
-              left: 401,
-              top: 336,
-              baseSize: const Size.square(42),
-              child: Host4EmulatorAuxiliaryButton(
-                asset: 'logo_group.svg',
-                size: Size.square(42 * scale),
-                onTap: widget.onMenuTap,
-              ),
-            ),
+            menu,
             hide,
           ],
         );

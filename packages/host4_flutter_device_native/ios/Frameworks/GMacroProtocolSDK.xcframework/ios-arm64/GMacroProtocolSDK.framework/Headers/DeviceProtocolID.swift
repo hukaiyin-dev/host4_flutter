@@ -172,8 +172,7 @@ extension GMacroProtocolID {
              .vibration,          // 0x67
              .beginCalibration,   // 0x55
              .stopCalibration,    // 0x56
-             .gpDeviceKeysState,  // 0x74
-             .motion:             // 0x5B
+             .gpDeviceKeysState:  // 0x74
             return true
         default:
             return false

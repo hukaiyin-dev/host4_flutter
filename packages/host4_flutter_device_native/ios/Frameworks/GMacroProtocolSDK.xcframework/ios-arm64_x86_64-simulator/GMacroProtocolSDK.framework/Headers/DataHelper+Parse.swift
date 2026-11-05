@@ -47,7 +47,8 @@ extension DataHelper {
         //2026.5.58 新增：部分协议需要 subID 来区分不同的命令响应，因此在解析时尝试提取 subID 以构建更准确的 responseKey
         // 提取 subID
         var subID: UInt8? = nil
-        if pId.hasSubID {
+        let turbo16Response = pId == .setTurbo && payload.first == 0x80
+        if pId.hasSubID || turbo16Response {
             if let first = payload.first {
                 subID = first // first 本身就是 UInt8
             } else {
@@ -181,7 +182,7 @@ extension DataHelper {
                 return
             }
 
-            if pId.hasSubID {
+            if pId.hasSubID || turbo16Response {
                 // ✅ 对有 subID 的协议：必须精确匹配 (protocolID, subID, sn)
                 if let callback = self.pendingResponses[responseKey] {
                     switch responseResult {
@@ -448,6 +449,9 @@ extension DataHelper {
         case .keyMap:
             return analyzeResult(payload: payload)
         case .setTurbo:
+            if payload.first == 0x80 {
+                return analyzeResultWithSubId(payload: payload, isSubID: true, isDev: false)
+            }
             return analyzeResult(payload: payload)
         case .motion:
             return analyzeResult(payload: payload)

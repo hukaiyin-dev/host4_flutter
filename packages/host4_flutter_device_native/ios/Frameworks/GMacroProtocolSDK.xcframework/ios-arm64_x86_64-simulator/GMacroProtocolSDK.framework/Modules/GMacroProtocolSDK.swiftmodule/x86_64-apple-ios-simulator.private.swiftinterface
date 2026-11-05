@@ -343,6 +343,9 @@ extension GMacroProtocolSDK.GMacroProtocolSession {
   final public func fetchGameMacroDefaultInfo(profile: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
   #endif
   #if compiler(>=5.3) && $NonescapableTypes
+  final public func fetchGameMacroDefaultInfo16(profile: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  #endif
+  #if compiler(>=5.3) && $NonescapableTypes
   final public func resetDevice(_ response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
   #endif
   #if compiler(>=5.3) && $NonescapableTypes
@@ -409,6 +412,9 @@ extension GMacroProtocolSDK.GMacroProtocolSession {
 extension GMacroProtocolSDK.GMacroProtocolSession {
   #if compiler(>=5.3) && $NonescapableTypes
   final public func updateKeyTurbo(_ values: [(GMacroProtocolSDK.GamepadKey, GMacroProtocolSDK.TurboMode, Swift.Int)], response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  #endif
+  #if compiler(>=5.3) && $NonescapableTypes
+  final public func updateKeyTurbo16(_ values: [(GMacroProtocolSDK.GamepadKey, GMacroProtocolSDK.TurboMode, Swift.Int)], response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
   #endif
   #if compiler(>=5.3) && $NonescapableTypes
   final public func querySupportedTurboKeys(profile: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
@@ -1183,7 +1189,9 @@ public enum GMacroProtocolEvent : @unchecked Swift.Sendable {
   public typealias OTAWriteClosure = (_ data: Foundation.Data, _ completion: (() -> Swift.Void)?) -> Swift.Void
   final public var otaCommandWriter: GMacroProtocolSDK.GMacroProtocolSession.OTAWriteClosure?
   final public var otaDataWriter: GMacroProtocolSDK.GMacroProtocolSession.OTAWriteClosure?
-  public init(sessionId: Swift.String, transport: any BluetoothKit.ByteStreamTransport)
+  #if compiler(>=5.3) && $NonescapableTypes
+  public init(sessionId: Swift.String, transport: any BluetoothKit.ByteStreamTransport, lengthPrefixedStream: Swift.Bool? = nil)
+  #endif
   final public func close()
   @objc deinit
 }

@@ -47,6 +47,17 @@ internal object GmacroMethodInvoker {
                         GmacroCallbackBridge.fetchGameMacroDefaultInfo(onResult),
                     )
                 }
+
+                // 0x77 0c 查询模式配置
+                Host4FlutterGmacroConstants.fetchGameMacroDefaultInfo16 -> {
+                    val profile = GmacroArgParser.intArg(arguments, "profile")
+                    commands.queryMacroHandle16(
+                        profile,
+                        GmacroCallbackBridge.fetchGameMacroDefaultInfo(onResult),
+                    )
+                }
+
+
                 //0x77 08
                 Host4FlutterGmacroConstants.fetchMobapadDeviceInfo -> {
                     val profile = GmacroArgParser.intArg(arguments, "profile")
@@ -353,7 +364,7 @@ internal object GmacroMethodInvoker {
 
                 //查询陀螺仪二级灵敏度 0x6A 0x1F
                 Host4FlutterGmacroConstants.fetchGyroSensitivity2 ->{
-                    //TODO 查询陀螺仪二级灵敏度
+                    commands.queryMotionSecondarySensitivity(GmacroCallbackBridge.message(onResult))
                 }
 
                 Host4FlutterGmacroConstants.setGyroXYInvert -> commands.setMotionXYReversal(
@@ -364,7 +375,7 @@ internal object GmacroMethodInvoker {
 
                 //查询陀螺仪 XY 轴反转信息 0x6A 0x10
                 Host4FlutterGmacroConstants.fetchGyroXYInvert ->{
-                    //TODO 查询陀螺仪 XY 轴反转信息
+                    commands.queryMotionXYReversal(GmacroCallbackBridge.message(onResult))
                 }
 
                 Host4FlutterGmacroConstants.setGyroDeadZone -> commands.setMotionDeadZoneCompensate(
@@ -596,6 +607,19 @@ internal object GmacroMethodInvoker {
                     val first = turbos.firstOrNull()
                         ?: throw IllegalArgumentException("keyTurbos must not be empty.")
                     commands.setMacroBurstRate(
+                        GmacroArgParser.intArg(first, "key"),
+                        GmacroArgParser.intArg(first, "turbo"),
+                        GmacroArgParser.intArg(first, "speed"),
+                        GmacroCallbackBridge.message(onResult),
+                    )
+                }
+
+                //设置连发
+                Host4FlutterGmacroConstants.setTurboDatas16 -> {
+                    val turbos = GmacroArgParser.mapList(arguments, "keyTurbos")
+                    val first = turbos.firstOrNull()
+                        ?: throw IllegalArgumentException("keyTurbos must not be empty.")
+                    commands.setMacroBurstRate16(
                         GmacroArgParser.intArg(first, "key"),
                         GmacroArgParser.intArg(first, "turbo"),
                         GmacroArgParser.intArg(first, "speed"),

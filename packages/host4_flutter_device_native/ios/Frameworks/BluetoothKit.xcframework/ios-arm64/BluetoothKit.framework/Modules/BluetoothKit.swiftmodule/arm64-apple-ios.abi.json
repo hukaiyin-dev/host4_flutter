@@ -1628,6 +1628,105 @@
           },
           {
             "kind": "Function",
+            "name": "connectSystemConnectedDevice",
+            "printedName": "connectSystemConnectedDevice(deviceIdString:serviceUUIDs:onState:onLog:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "Swift.String?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  }
+                ],
+                "usr": "s:Sq"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "String",
+                "printedName": "Swift.String",
+                "usr": "s:SS"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Array",
+                "printedName": "[Swift.String]",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  }
+                ],
+                "usr": "s:Sa"
+              },
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "(Swift.Int) -> ()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Int",
+                    "printedName": "Swift.Int",
+                    "usr": "s:Si"
+                  }
+                ]
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "((Swift.String) -> ())?",
+                "children": [
+                  {
+                    "kind": "TypeFunc",
+                    "name": "Function",
+                    "printedName": "(Swift.String) -> ()",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Void",
+                        "printedName": "()"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "String",
+                        "printedName": "Swift.String",
+                        "usr": "s:SS"
+                      }
+                    ]
+                  }
+                ],
+                "hasDefaultArg": true,
+                "usr": "s:Sq"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@M@BluetoothKit@objc(cs)NativeAdapterRuntime(im)connectSystemConnectedDeviceWithDeviceIdString:serviceUUIDs:onState:onLog:",
+            "mangledName": "$s12BluetoothKit20NativeAdapterRuntimeC28connectSystemConnectedDevice14deviceIdString12serviceUUIDs7onState0O3LogSSSgSS_SaySSGySicySScSgtF",
+            "moduleName": "BluetoothKit",
+            "objc_name": "connectSystemConnectedDeviceWithDeviceIdString:serviceUUIDs:onState:onLog:",
+            "declAttributes": [
+              "Final",
+              "AccessControl",
+              "DiscardableResult",
+              "ObjC",
+              "RawDocComment"
+            ],
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
             "name": "disconnect",
             "printedName": "disconnect(transportSessionId:)",
             "children": [
@@ -2481,6 +2580,57 @@
             "declKind": "Func",
             "usr": "s:12BluetoothKit0A14CentralRuntimeC33retrieveSystemConnectedPeripheral11deviceNames12serviceUUIDsSo12CBPeripheralCSgSaySSG_AJtF",
             "mangledName": "$s12BluetoothKit0A14CentralRuntimeC33retrieveSystemConnectedPeripheral11deviceNames12serviceUUIDsSo12CBPeripheralCSgSaySSG_AJtF",
+            "moduleName": "BluetoothKit",
+            "declAttributes": [
+              "Final",
+              "AccessControl",
+              "RawDocComment"
+            ],
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "retrieveSystemConnectedPeripheral",
+            "printedName": "retrieveSystemConnectedPeripheral(deviceId:serviceUUIDs:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "CoreBluetooth.CBPeripheral?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "CBPeripheral",
+                    "printedName": "CoreBluetooth.CBPeripheral",
+                    "usr": "c:objc(cs)CBPeripheral"
+                  }
+                ],
+                "usr": "s:Sq"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "UUID",
+                "printedName": "Foundation.UUID",
+                "usr": "s:10Foundation4UUIDV"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Array",
+                "printedName": "[Swift.String]",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  }
+                ],
+                "usr": "s:Sa"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "s:12BluetoothKit0A14CentralRuntimeC33retrieveSystemConnectedPeripheral8deviceId12serviceUUIDsSo12CBPeripheralCSg10Foundation4UUIDV_SaySSGtF",
+            "mangledName": "$s12BluetoothKit0A14CentralRuntimeC33retrieveSystemConnectedPeripheral8deviceId12serviceUUIDsSo12CBPeripheralCSg10Foundation4UUIDV_SaySSGtF",
             "moduleName": "BluetoothKit",
             "declAttributes": [
               "Final",
@@ -9168,21 +9318,21 @@
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/BluetoothKit\/BluetoothKit\/BluetoothKit\/BluetoothCore\/BluetoothCentralRuntime.swift",
       "kind": "StringLiteral",
-      "offset": 5965,
+      "offset": 6454,
       "length": 32,
       "value": "\"com.host4.bluetooth.didConnect\""
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/BluetoothKit\/BluetoothKit\/BluetoothKit\/BluetoothCore\/BluetoothCentralRuntime.swift",
       "kind": "StringLiteral",
-      "offset": 6062,
+      "offset": 6551,
       "length": 38,
       "value": "\"com.host4.bluetooth.didFailToConnect\""
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/BluetoothKit\/BluetoothKit\/BluetoothKit\/BluetoothCore\/BluetoothCentralRuntime.swift",
       "kind": "StringLiteral",
-      "offset": 6162,
+      "offset": 6651,
       "length": 35,
       "value": "\"com.host4.bluetooth.didDisconnect\""
     },

@@ -166,15 +166,20 @@ class MethodChannelHost4FlutterDeviceNative
   Future<String> connectSystemConnectedBle({
     required List<String> serviceIds,
     List<String> deviceNames = const [],
+    String? deviceId,
     Map<String, Object?> options = const {},
   }) async {
+    final arguments = <String, Object?>{
+      'serviceIds': serviceIds,
+      'deviceNames': deviceNames,
+      'options': options,
+    };
+    if (deviceId != null) {
+      arguments['deviceId'] = deviceId;
+    }
     final sessionId = await methodChannel.invokeMethod<String>(
       'connectSystemConnectedBle',
-      <String, Object?>{
-        'serviceIds': serviceIds,
-        'deviceNames': deviceNames,
-        'options': options,
-      },
+      arguments,
     );
     if (sessionId == null || sessionId.isEmpty) {
       throw PlatformException(

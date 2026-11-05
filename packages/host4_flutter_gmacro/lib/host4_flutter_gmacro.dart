@@ -29,6 +29,7 @@ export 'src/gmacro_session+gyro.dart';
 export 'src/host4_gmacro.dart';
 
 export 'src/Input/gmacro_input_hub.dart';
+export 'src/Input/gmacro_multi_input_hub.dart';
 export 'src/Input/gmacro_input_service.dart';
 export 'src/Input/gmacro_input_state.dart';
 

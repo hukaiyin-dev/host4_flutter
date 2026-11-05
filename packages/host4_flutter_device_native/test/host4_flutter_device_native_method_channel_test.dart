@@ -74,4 +74,25 @@ void main() {
     expect(devices.first.metadata['systemConnected'], isTrue);
     expect(devices.last.deviceId, 'device-b');
   });
+
+  test('connectSystemConnectedBle forwards selected device ID', () async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (MethodCall call) async {
+          expect(call.method, 'connectSystemConnectedBle');
+          expect(call.arguments, <String, Object?>{
+            'serviceIds': <String>['FF00', 'FF10'],
+            'deviceNames': <String>[],
+            'deviceId': 'device-b',
+            'options': <String, Object?>{},
+          });
+          return 'transport-b';
+        });
+
+    final sessionId = await platform.connectSystemConnectedBle(
+      serviceIds: const <String>['FF00', 'FF10'],
+      deviceId: 'device-b',
+    );
+
+    expect(sessionId, 'transport-b');
+  });
 }

@@ -48,6 +48,7 @@ class MockHost4FlutterDeviceNativePlatform
   Future<String> connectSystemConnectedBle({
     required List<String> serviceIds,
     List<String> deviceNames = const [],
+    String? deviceId,
     Map<String, Object?> options = const {},
   }) async {
     return 'transport-system-1';

@@ -138,6 +138,10 @@ extension Swift.Array where Element : Swift.Equatable {
   @discardableResult
   @objc final public func connectSystemConnectedDevice(deviceNames: [Swift.String], serviceUUIDs: [Swift.String], onState: @escaping (_ stateRawValue: Swift.Int) -> Swift.Void, onLog: ((_ message: Swift.String) -> Swift.Void)? = nil) -> Swift.String?
   #endif
+  #if compiler(>=5.3) && $NonescapableTypes
+  @discardableResult
+  @objc final public func connectSystemConnectedDevice(deviceIdString: Swift.String, serviceUUIDs: [Swift.String], onState: @escaping (_ stateRawValue: Swift.Int) -> Swift.Void, onLog: ((_ message: Swift.String) -> Swift.Void)? = nil) -> Swift.String?
+  #endif
   @objc final public func disconnect(transportSessionId: Swift.String)
   @discardableResult
   final public func registerTransport(_ transport: any BluetoothKit.ByteStreamTransport) -> Swift.String
@@ -165,6 +169,9 @@ extension Swift.Array where Element : Swift.Equatable {
   final public func makeTransportSession(peripheral: CoreBluetooth.CBPeripheral) -> BluetoothKit.BluetoothTransportSession
   #if compiler(>=5.3) && $NonescapableTypes
   final public func retrieveSystemConnectedPeripheral(deviceNames: [Swift.String], serviceUUIDs: [Swift.String]) -> CoreBluetooth.CBPeripheral?
+  #endif
+  #if compiler(>=5.3) && $NonescapableTypes
+  final public func retrieveSystemConnectedPeripheral(deviceId: Foundation.UUID, serviceUUIDs: [Swift.String]) -> CoreBluetooth.CBPeripheral?
   #endif
   @objc deinit
 }

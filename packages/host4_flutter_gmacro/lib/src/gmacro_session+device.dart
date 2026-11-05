@@ -3,6 +3,17 @@ import 'Models/gmacro_methods.dart';
 import 'gmacro_session.dart';
 
 extension GmacroSessionDevice on GmacroSession {
+  /// 0x77 0x0C：查询包含 16 位连发速率的完整设备配置。
+  Future<GmacroDefaultInfo> fetchGameMacroDefaultInfo16({
+    required int profile,
+  }) async {
+    final raw = await invoke(
+      GmacroMethods.fetchGameMacroDefaultInfo16,
+      arguments: {'profile': profile},
+    );
+    return GmacroDefaultInfo.fromMap(raw);
+  }
+
   /// 查询设备版本
   Future<Map<String, Object?>> fetchDeviceVersion() =>
       invoke(GmacroMethods.fetchDeviceVersion);

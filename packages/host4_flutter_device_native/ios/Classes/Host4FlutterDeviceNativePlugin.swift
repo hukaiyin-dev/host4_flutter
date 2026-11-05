@@ -663,19 +663,32 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
     }
 
     let deviceNames = arguments["deviceNames"] as? [String] ?? []
-    nativeLog("[SystemConnected] connect requested, serviceIds=\(serviceIds), deviceNames=\(deviceNames)")
+    let deviceId = arguments["deviceId"] as? String
+    nativeLog("[SystemConnected] connect requested, deviceId=\(String(describing: deviceId)), serviceIds=\(serviceIds), deviceNames=\(deviceNames)")
 
     let eventHandler = QueuedEventStreamHandler()
-    let sessionId = NativeAdapterRuntime.shared.connectSystemConnectedDevice(
-      deviceNames: deviceNames,
-      serviceUUIDs: serviceIds,
-      onState: { [weak self, weak eventHandler] (stateRawValue: Int) in
-        nativeLog("[SystemConnected] stateRawValue=\(stateRawValue)")
-        guard let self, let eventHandler else { return }
-        eventHandler.emit(self.transportEventMap(fromBleState: stateRawValue))
-      },
-      onLog: { message in nativeLog(message) }
-    )
+    let onState: (Int) -> Void = { [weak self, weak eventHandler] stateRawValue in
+      nativeLog("[SystemConnected] stateRawValue=\(stateRawValue)")
+      guard let self, let eventHandler else { return }
+      eventHandler.emit(self.transportEventMap(fromBleState: stateRawValue))
+    }
+    let onLog: (String) -> Void = { message in nativeLog(message) }
+    let sessionId: String?
+    if let deviceId, !deviceId.isEmpty {
+      sessionId = NativeAdapterRuntime.shared.connectSystemConnectedDevice(
+        deviceIdString: deviceId,
+        serviceUUIDs: serviceIds,
+        onState: onState,
+        onLog: onLog
+      )
+    } else {
+      sessionId = NativeAdapterRuntime.shared.connectSystemConnectedDevice(
+        deviceNames: deviceNames,
+        serviceUUIDs: serviceIds,
+        onState: onState,
+        onLog: onLog
+      )
+    }
 
     nativeLog("[SystemConnected] sessionId=\(String(describing: sessionId))")
 
@@ -1106,6 +1119,18 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
           session.fetchGameMacroDefaultInfo(profile: profile) { res in
             switch res {
             case .success(var payload):
+              callback(.success(gmacroConvertDeviceInfoEnums(payload)))
+            case .failure(let error):
+              callback(.failure(error))
+            }
+          }
+        }
+      case Host4FlutterChannelConstants.fetchGameMacroDefaultInfo16:
+        let profile = try intArg("profile", from: arguments)
+        invoke(result) { callback in
+          session.fetchGameMacroDefaultInfo16(profile: profile) { res in
+            switch res {
+            case .success(let payload):
               callback(.success(gmacroConvertDeviceInfoEnums(payload)))
             case .failure(let error):
               callback(.failure(error))
@@ -1630,6 +1655,11 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
         let values = try turboTuplesArg("keyTurbos", from: arguments)
         invoke(result) { callback in
           session.updateKeyTurbo(values, response: callback)
+        }
+      case Host4FlutterChannelConstants.setTurboDatas16:
+        let values = try turboTuplesArg("keyTurbos", from: arguments)
+        invoke(result) { callback in
+          session.updateKeyTurbo16(values, response: callback)
         }
       case Host4FlutterChannelConstants.startOta:
         let firmwareData = (arguments["data"] as? FlutterStandardTypedData)?.data ?? Data()

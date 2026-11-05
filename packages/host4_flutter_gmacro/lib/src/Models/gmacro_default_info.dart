@@ -1,4 +1,5 @@
-/// 0x77 04 fetchGameMacroDefaultInfo 响应数据模型
+/// 0x77 04 / 0x77 0C 完整设备配置响应模型。
+/// 0x77 0C 的连发速率为 16 位，仍保存在 [GmacroRapidFireItem.speed] 中。
 ///
 /// 对应 iOS SDK `analyzeGameMacroDeviceInfo` 解析结果。
 /// 枚举字段已在 iOS Plugin 层转为 Int rawValue。

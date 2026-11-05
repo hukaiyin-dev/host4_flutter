@@ -6,9 +6,29 @@
 //
 
 import Foundation
+import BluetoothKit
 
 // MARK: - 连发
 extension DataHelper {
+    /// 设置 16 位连发速率 0x37 0x80。
+    func turboDatas16(keyTurbos: [KeyTurbo],
+                      finish: (() -> Void)? = nil,
+                      response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
+        guard keyTurbos.allSatisfy({ (0...0xFFFF).contains($0.speed) }) else {
+            response(.failure(BluetoothError.outOfRange))
+            return
+        }
+        let protocolID = GMacroProtocolID.setTurbo
+        let datas = keyTurbos.map { item -> Data in
+            var payload = Data([0x80])
+            payload.append(Data.from(item.key.gamepadOneByteKeyCode, count: 1))
+            payload.append(Data.from(Int(item.turbo.rawValue), count: 1))
+            payload.append(Data.from(item.speed, count: 2))
+            return dataFrom(protocolID: protocolID, payload: payload)
+        }
+        write(protocolID: protocolID, datas: datas, finish: finish, response: response)
+    }
+
     /// 设置连发速率 0x37
     func turboDatas(keyTurbos: [KeyTurbo],
                     finish: (() -> Void)? = nil,
@@ -51,4 +71,3 @@ extension DataHelper {
         self.write(protocolID: protocolID, data: all, finish: finish, response: response)
     }
 }
-

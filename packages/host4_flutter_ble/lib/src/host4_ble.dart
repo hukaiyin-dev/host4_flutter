@@ -66,6 +66,31 @@ class Host4Ble {
       native: _native,
     );
   }
+
+  /// Connects the exact system-connected BLE device selected from [systemConnectedDevices].
+  Future<TransportSession> connectSystemConnectedDevice(
+    DeviceDescriptor device, {
+    required List<String> serviceIds,
+    Map<String, Object?> options = const <String, Object?>{},
+  }) async {
+    if (device.kind != TransportKind.ble || device.id.isEmpty) {
+      throw ArgumentError.value(
+        device,
+        'device',
+        'A BLE device ID is required.',
+      );
+    }
+    final sessionId = await _native.connectSystemConnectedBle(
+      serviceIds: serviceIds,
+      deviceId: device.id,
+      options: options,
+    );
+    return Host4BleTransportSession(
+      id: sessionId,
+      device: device,
+      native: _native,
+    );
+  }
 }
 
 class Host4BleDiscovery implements DeviceDiscovery {

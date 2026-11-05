@@ -83,6 +83,7 @@ class Host4EmulatorMenuOverlay extends StatefulWidget {
     this.onOpenLayoutPicker,
     this.onOpenKeyLocator,
     this.showLayoutAction = true,
+    this.showKeyLocatorAction = true,
     this.enableSaveActions = true,
     this.enableSpeedAction = true,
     super.key,
@@ -94,6 +95,7 @@ class Host4EmulatorMenuOverlay extends StatefulWidget {
   final VoidCallback? onOpenLayoutPicker;
   final VoidCallback? onOpenKeyLocator;
   final bool showLayoutAction;
+  final bool showKeyLocatorAction;
   final bool enableSaveActions;
   final bool enableSpeedAction;
 
@@ -143,6 +145,39 @@ class _Host4EmulatorMenuOverlayState extends State<Host4EmulatorMenuOverlay> {
         _MenuAction.exit,
       ],
       <_MenuAction?>[_MenuAction.continueGame, null, null],
+    ],
+  );
+
+  static const _landscapeWithoutKeyLocatorSpec = _MenuSpec(
+    layout: _MenuLayoutSpec.landscape,
+    rows: <List<_MenuAction?>>[
+      <_MenuAction?>[
+        _MenuAction.quickLoad,
+        _MenuAction.saveManager,
+        _MenuAction.quickSave,
+      ],
+      <_MenuAction?>[
+        _MenuAction.speed,
+        _MenuAction.exit,
+        _MenuAction.continueGame,
+      ],
+      <_MenuAction?>[_MenuAction.layout, null, null],
+    ],
+  );
+
+  static const _landscapeWithoutLayoutOrKeyLocatorSpec = _MenuSpec(
+    layout: _MenuLayoutSpec.landscape,
+    rows: <List<_MenuAction?>>[
+      <_MenuAction?>[
+        _MenuAction.quickLoad,
+        _MenuAction.saveManager,
+        _MenuAction.quickSave,
+      ],
+      <_MenuAction?>[
+        _MenuAction.speed,
+        _MenuAction.exit,
+        _MenuAction.continueGame,
+      ],
     ],
   );
 
@@ -307,11 +342,17 @@ class _Host4EmulatorMenuOverlayState extends State<Host4EmulatorMenuOverlay> {
       child: LayoutBuilder(
         builder: (context, constraints) {
           final landscape = constraints.maxWidth > constraints.maxHeight;
-          final spec = landscape
-              ? widget.showLayoutAction
-                    ? _landscapeSpec
-                    : _landscapeWithoutLayoutSpec
-              : _portraitSpec;
+          final spec = !landscape
+              ? _portraitSpec
+              : switch ((
+                  widget.showLayoutAction,
+                  widget.showKeyLocatorAction,
+                )) {
+                  (true, true) => _landscapeSpec,
+                  (false, true) => _landscapeWithoutLayoutSpec,
+                  (true, false) => _landscapeWithoutKeyLocatorSpec,
+                  (false, false) => _landscapeWithoutLayoutOrKeyLocatorSpec,
+                };
           final scale = (constraints.maxWidth / spec.layout.baseWidth).clamp(
             0.0,
             2.0,
