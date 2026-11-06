@@ -718,6 +718,54 @@ void main() {
     );
   });
 
+  testWidgets('Gamepatch action button stays held when sliding inside its hit target', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(844, 390);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final events = <Host4EmulatorInputEvent>[];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SizedBox(
+          width: 844,
+          height: 390,
+          child: Host4EmulatorControlsLayer(
+            profile: Host4EmulatorControlProfile.gba,
+            layoutStyle: Host4EmulatorControlLayoutStyle.silicone,
+            onInput: events.add,
+            onMenuTap: () {},
+          ),
+        ),
+      ),
+    );
+
+    final button = find.byKey(
+      const ValueKey<String>('landscape.controls.btn_a'),
+    );
+    final start = tester.getCenter(button);
+    final destination = start + const Offset(-24, 0);
+    expect(tester.getRect(button).contains(destination), isTrue);
+
+    final gesture = await tester.startGesture(start);
+    await tester.pump();
+    await gesture.moveTo(destination);
+    await tester.pump();
+
+    expect(
+      events.map((event) => '${event.input}:${event.phase}'),
+      <String>['a:down'],
+    );
+
+    await gesture.up();
+    await tester.pump();
+    expect(
+      events.map((event) => '${event.input}:${event.phase}'),
+      <String>['a:down', 'a:up'],
+    );
+  });
+
   testWidgets('active silicone SET button is independently tappable', (
     tester,
   ) async {

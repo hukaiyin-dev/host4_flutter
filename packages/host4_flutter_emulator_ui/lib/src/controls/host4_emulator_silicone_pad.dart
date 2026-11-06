@@ -326,11 +326,11 @@ class _PressableInputState extends State<_PressableInput> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return Listener(
       behavior: HitTestBehavior.opaque,
-      onTapDown: (_) => _down(),
-      onTapUp: (_) => _up(),
-      onTapCancel: _up,
+      onPointerDown: (_) => _down(),
+      onPointerUp: (_) => _up(),
+      onPointerCancel: (_) => _up(),
       child: AnimatedOpacity(
         duration: const Duration(milliseconds: 60),
         opacity: _pressed ? 0.85 : 1.0,
