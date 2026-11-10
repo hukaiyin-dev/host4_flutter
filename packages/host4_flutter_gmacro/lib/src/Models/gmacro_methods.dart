@@ -129,6 +129,9 @@ abstract final class GmacroMethods {
   // Turbo
   static const setTurboDatas = 'setTurboDatas';
   static const setTurboDatas16 = 'setTurboDatas16';
+  static const updateKeyTurboTiming = 'updateKeyTurboTiming';
+  static const queryKeyTurbo16 = 'queryKeyTurbo16';
+  static const queryAllKeyTurbo16 = 'queryAllKeyTurbo16';
   static const querySupportedTurboKeys = 'querySupportedTurboKeys';
 
   // Other
