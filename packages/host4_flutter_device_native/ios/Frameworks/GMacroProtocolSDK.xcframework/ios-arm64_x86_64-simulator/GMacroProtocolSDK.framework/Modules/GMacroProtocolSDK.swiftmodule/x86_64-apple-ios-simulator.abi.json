@@ -26562,9 +26562,95 @@
             ]
           },
           {
+            "kind": "Var",
+            "name": "pressDuration",
+            "printedName": "pressDuration",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Int",
+                "printedName": "Swift.Int",
+                "usr": "s:Si"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "s:17GMacroProtocolSDK8KeyTurboV13pressDurationSivp",
+            "mangledName": "$s17GMacroProtocolSDK8KeyTurboV13pressDurationSivp",
+            "moduleName": "GMacroProtocolSDK",
+            "declAttributes": [
+              "HasInitialValue",
+              "HasStorage",
+              "AccessControl"
+            ],
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Int",
+                    "printedName": "Swift.Int",
+                    "usr": "s:Si"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:17GMacroProtocolSDK8KeyTurboV13pressDurationSivg",
+                "mangledName": "$s17GMacroProtocolSDK8KeyTurboV13pressDurationSivg",
+                "moduleName": "GMacroProtocolSDK",
+                "implicit": true,
+                "accessorKind": "get"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Set",
+                "printedName": "Set()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Int",
+                    "printedName": "Swift.Int",
+                    "usr": "s:Si"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:17GMacroProtocolSDK8KeyTurboV13pressDurationSivs",
+                "mangledName": "$s17GMacroProtocolSDK8KeyTurboV13pressDurationSivs",
+                "moduleName": "GMacroProtocolSDK",
+                "implicit": true,
+                "accessorKind": "set"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Modify",
+                "printedName": "Modify()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:17GMacroProtocolSDK8KeyTurboV13pressDurationSivM",
+                "mangledName": "$s17GMacroProtocolSDK8KeyTurboV13pressDurationSivM",
+                "moduleName": "GMacroProtocolSDK",
+                "implicit": true,
+                "accessorKind": "_modify"
+              }
+            ]
+          },
+          {
             "kind": "Constructor",
             "name": "init",
-            "printedName": "init(key:turbo:speed:)",
+            "printedName": "init(key:turbo:speed:pressDuration:)",
             "children": [
               {
                 "kind": "TypeNominal",
@@ -26590,11 +26676,18 @@
                 "printedName": "Swift.Int",
                 "hasDefaultArg": true,
                 "usr": "s:Si"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Int",
+                "printedName": "Swift.Int",
+                "hasDefaultArg": true,
+                "usr": "s:Si"
               }
             ],
             "declKind": "Constructor",
-            "usr": "s:17GMacroProtocolSDK8KeyTurboV3key5turbo5speedAcA07GamepadD0O_AA0E4ModeOSitcfc",
-            "mangledName": "$s17GMacroProtocolSDK8KeyTurboV3key5turbo5speedAcA07GamepadD0O_AA0E4ModeOSitcfc",
+            "usr": "s:17GMacroProtocolSDK8KeyTurboV3key5turbo5speed13pressDurationAcA07GamepadD0O_AA0E4ModeOS2itcfc",
+            "mangledName": "$s17GMacroProtocolSDK8KeyTurboV3key5turbo5speed13pressDurationAcA07GamepadD0O_AA0E4ModeOS2itcfc",
             "moduleName": "GMacroProtocolSDK",
             "declAttributes": [
               "AccessControl"
@@ -31292,7 +31385,7 @@
           {
             "kind": "Function",
             "name": "updateKeyTurbo16",
-            "printedName": "updateKeyTurbo16(_:response:)",
+            "printedName": "updateKeyTurbo16(_:pressDuration:device:response:)",
             "children": [
               {
                 "kind": "TypeNominal",
@@ -31331,6 +31424,20 @@
                   }
                 ],
                 "usr": "s:Sa"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Int",
+                "printedName": "Swift.Int",
+                "hasDefaultArg": true,
+                "usr": "s:Si"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Int",
+                "printedName": "Swift.Int",
+                "hasDefaultArg": true,
+                "usr": "s:Si"
               },
               {
                 "kind": "TypeFunc",
@@ -31379,8 +31486,278 @@
               }
             ],
             "declKind": "Func",
-            "usr": "s:17GMacroProtocolSDK0aB7SessionC16updateKeyTurbo16_8responseySayAA07GamepadF0O_AA9TurboModeOSitG_ys6ResultOySDySSypGs5Error_pGYbctF",
-            "mangledName": "$s17GMacroProtocolSDK0aB7SessionC16updateKeyTurbo16_8responseySayAA07GamepadF0O_AA9TurboModeOSitG_ys6ResultOySDySSypGs5Error_pGYbctF",
+            "usr": "s:17GMacroProtocolSDK0aB7SessionC16updateKeyTurbo16_13pressDuration6device8responseySayAA07GamepadF0O_AA9TurboModeOSitG_S2iys6ResultOySDySSypGs5Error_pGYbctF",
+            "mangledName": "$s17GMacroProtocolSDK0aB7SessionC16updateKeyTurbo16_13pressDuration6device8responseySayAA07GamepadF0O_AA9TurboModeOSitG_S2iys6ResultOySDySSypGs5Error_pGYbctF",
+            "moduleName": "GMacroProtocolSDK",
+            "declAttributes": [
+              "Final",
+              "AccessControl",
+              "RawDocComment"
+            ],
+            "isFromExtension": true,
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "updateKeyTurboTiming",
+            "printedName": "updateKeyTurboTiming(_:device:response:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Array",
+                "printedName": "[(key: GMacroProtocolSDK.GamepadKey, turbo: GMacroProtocolSDK.TurboMode, pressDuration: Swift.Int, interval: Swift.Int)]",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Tuple",
+                    "printedName": "(key: GMacroProtocolSDK.GamepadKey, turbo: GMacroProtocolSDK.TurboMode, pressDuration: Swift.Int, interval: Swift.Int)",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "GamepadKey",
+                        "printedName": "GMacroProtocolSDK.GamepadKey",
+                        "usr": "c:@M@GMacroProtocolSDK@E@GamepadKey"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "TurboMode",
+                        "printedName": "GMacroProtocolSDK.TurboMode",
+                        "usr": "c:@M@GMacroProtocolSDK@E@TurboMode"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Int",
+                        "printedName": "Swift.Int",
+                        "usr": "s:Si"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Int",
+                        "printedName": "Swift.Int",
+                        "usr": "s:Si"
+                      }
+                    ]
+                  }
+                ],
+                "usr": "s:Sa"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Int",
+                "printedName": "Swift.Int",
+                "hasDefaultArg": true,
+                "usr": "s:Si"
+              },
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "(Swift.Result<[Swift.String : Any], any Swift.Error>) -> ()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Result",
+                    "printedName": "Swift.Result<[Swift.String : Any], any Swift.Error>",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Dictionary",
+                        "printedName": "[Swift.String : Any]",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "String",
+                            "printedName": "Swift.String",
+                            "usr": "s:SS"
+                          },
+                          {
+                            "kind": "TypeNominal",
+                            "name": "ProtocolComposition",
+                            "printedName": "Any"
+                          }
+                        ],
+                        "usr": "s:SD"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Error",
+                        "printedName": "any Swift.Error",
+                        "usr": "s:s5ErrorP"
+                      }
+                    ],
+                    "usr": "s:s6ResultO"
+                  }
+                ]
+              }
+            ],
+            "declKind": "Func",
+            "usr": "s:17GMacroProtocolSDK0aB7SessionC20updateKeyTurboTiming_6device8responseySayAA07GamepadF0O3key_AA0G4ModeO5turboSi13pressDurationSi8intervaltG_Siys6ResultOySDySSypGs5Error_pGYbctF",
+            "mangledName": "$s17GMacroProtocolSDK0aB7SessionC20updateKeyTurboTiming_6device8responseySayAA07GamepadF0O3key_AA0G4ModeO5turboSi13pressDurationSi8intervaltG_Siys6ResultOySDySSypGs5Error_pGYbctF",
+            "moduleName": "GMacroProtocolSDK",
+            "declAttributes": [
+              "Final",
+              "AccessControl",
+              "RawDocComment"
+            ],
+            "isFromExtension": true,
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "queryKeyTurbo16",
+            "printedName": "queryKeyTurbo16(_:device:response:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "GamepadKey",
+                "printedName": "GMacroProtocolSDK.GamepadKey",
+                "usr": "c:@M@GMacroProtocolSDK@E@GamepadKey"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Int",
+                "printedName": "Swift.Int",
+                "hasDefaultArg": true,
+                "usr": "s:Si"
+              },
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "(Swift.Result<[Swift.String : Any], any Swift.Error>) -> ()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Result",
+                    "printedName": "Swift.Result<[Swift.String : Any], any Swift.Error>",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Dictionary",
+                        "printedName": "[Swift.String : Any]",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "String",
+                            "printedName": "Swift.String",
+                            "usr": "s:SS"
+                          },
+                          {
+                            "kind": "TypeNominal",
+                            "name": "ProtocolComposition",
+                            "printedName": "Any"
+                          }
+                        ],
+                        "usr": "s:SD"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Error",
+                        "printedName": "any Swift.Error",
+                        "usr": "s:s5ErrorP"
+                      }
+                    ],
+                    "usr": "s:s6ResultO"
+                  }
+                ]
+              }
+            ],
+            "declKind": "Func",
+            "usr": "s:17GMacroProtocolSDK0aB7SessionC15queryKeyTurbo16_6device8responseyAA07GamepadF0O_Siys6ResultOySDySSypGs5Error_pGYbctF",
+            "mangledName": "$s17GMacroProtocolSDK0aB7SessionC15queryKeyTurbo16_6device8responseyAA07GamepadF0O_Siys6ResultOySDySSypGs5Error_pGYbctF",
+            "moduleName": "GMacroProtocolSDK",
+            "declAttributes": [
+              "Final",
+              "AccessControl",
+              "RawDocComment"
+            ],
+            "isFromExtension": true,
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "queryAllKeyTurbo16",
+            "printedName": "queryAllKeyTurbo16(device:response:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Int",
+                "printedName": "Swift.Int",
+                "hasDefaultArg": true,
+                "usr": "s:Si"
+              },
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "(Swift.Result<[Swift.String : Any], any Swift.Error>) -> ()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Result",
+                    "printedName": "Swift.Result<[Swift.String : Any], any Swift.Error>",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Dictionary",
+                        "printedName": "[Swift.String : Any]",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "String",
+                            "printedName": "Swift.String",
+                            "usr": "s:SS"
+                          },
+                          {
+                            "kind": "TypeNominal",
+                            "name": "ProtocolComposition",
+                            "printedName": "Any"
+                          }
+                        ],
+                        "usr": "s:SD"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Error",
+                        "printedName": "any Swift.Error",
+                        "usr": "s:s5ErrorP"
+                      }
+                    ],
+                    "usr": "s:s6ResultO"
+                  }
+                ]
+              }
+            ],
+            "declKind": "Func",
+            "usr": "s:17GMacroProtocolSDK0aB7SessionC18queryAllKeyTurbo166device8responseySi_ys6ResultOySDySSypGs5Error_pGYbctF",
+            "mangledName": "$s17GMacroProtocolSDK0aB7SessionC18queryAllKeyTurbo166device8responseySi_ys6ResultOySDySSypGs5Error_pGYbctF",
             "moduleName": "GMacroProtocolSDK",
             "declAttributes": [
               "Final",
@@ -40917,6 +41294,41 @@
       "value": "0xF8"
     },
     {
+      "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Protocol\/GMacroProtocolHelper+Turbo.swift",
+      "kind": "IntegerLiteral",
+      "offset": 912,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Protocol\/GMacroProtocolHelper+Turbo.swift",
+      "kind": "IntegerLiteral",
+      "offset": 962,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Protocol\/GMacroProtocolHelper+Turbo.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1545,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Protocol\/GMacroProtocolHelper+Turbo.swift",
+      "kind": "IntegerLiteral",
+      "offset": 2035,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Protocol\/GMacroProtocolHelper+Turbo.swift",
+      "kind": "IntegerLiteral",
+      "offset": 2366,
+      "length": 1,
+      "value": "0"
+    },
+    {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/DeviceKey\/MediaKey.swift",
       "kind": "IntegerLiteral",
       "offset": 175,
@@ -41365,9 +41777,30 @@
       "value": "0x08"
     },
     {
+      "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/DataHelper\/Protocol\/DataHelper+Turbo.swift",
+      "kind": "IntegerLiteral",
+      "offset": 300,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/DataHelper\/Protocol\/DataHelper+Turbo.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1490,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/DataHelper\/Protocol\/DataHelper+Turbo.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1973,
+      "length": 1,
+      "value": "0"
+    },
+    {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/DataHelper\/DataHelper+Parse.swift",
       "kind": "IntegerLiteral",
-      "offset": 27197,
+      "offset": 28652,
       "length": 1,
       "value": "0"
     },
@@ -41465,16 +41898,30 @@
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/DataHelper\/Protocol\/DataHelper+Device.swift",
       "kind": "IntegerLiteral",
-      "offset": 12393,
+      "offset": 12438,
       "length": 1,
       "value": "1"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/DataHelper\/Protocol\/DataHelper+Device.swift",
       "kind": "IntegerLiteral",
-      "offset": 24953,
+      "offset": 12471,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/DataHelper\/Protocol\/DataHelper+Device.swift",
+      "kind": "IntegerLiteral",
+      "offset": 25079,
       "length": 1,
       "value": "1"
+    },
+    {
+      "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/DataHelper\/Protocol\/DataHelper+Device.swift",
+      "kind": "IntegerLiteral",
+      "offset": 25112,
+      "length": 1,
+      "value": "0"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Parameter\/SupportEnums.swift",
@@ -41871,9 +42318,23 @@
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/KeyTurbo.swift",
       "kind": "IntegerLiteral",
-      "offset": 305,
+      "offset": 272,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/KeyTurbo.swift",
+      "kind": "IntegerLiteral",
+      "offset": 343,
       "length": 2,
       "value": "10"
+    },
+    {
+      "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/KeyTurbo.swift",
+      "kind": "IntegerLiteral",
+      "offset": 368,
+      "length": 1,
+      "value": "1"
     },
     {
       "filePath": "\/Users\/jingpan\/Desktop\/i-oscommon-modules 2\/Bluetooth\/Protocols\/GMacroBluetoothSDK\/GMacroProtocolSDK\/Private\/DeviceProtocolID.swift",

@@ -32,7 +32,7 @@ extension GMacroProtocolSession {
         dataHelper.fetchGameMacroDefault(profile: profile, response: response)
     }
 
-    /// 0x77 0x0C：查询包含 16 位连发速率的完整设备配置。
+    /// 0x77 0x0C：查询包含 16 位连发间隔和按压时间的完整设备配置。
     public func fetchGameMacroDefaultInfo16(profile: Int, response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
         dataHelper.fetchGameMacroDefault16(profile: profile, response: response)
     }

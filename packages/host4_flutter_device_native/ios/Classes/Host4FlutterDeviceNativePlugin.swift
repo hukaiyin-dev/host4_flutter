@@ -1662,8 +1662,27 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
         }
       case Host4FlutterChannelConstants.setTurboDatas16:
         let values = try turboTuplesArg("keyTurbos", from: arguments)
+        let pressDuration = try arguments["pressDuration"].map { _ in try intArg("pressDuration", from: arguments) } ?? 1
+        let device = try arguments["device"].map { _ in try intArg("device", from: arguments) } ?? 0
         invoke(result) { callback in
-          session.updateKeyTurbo16(values, response: callback)
+          session.updateKeyTurbo16(values, pressDuration: pressDuration, device: device, response: callback)
+        }
+      case Host4FlutterChannelConstants.updateKeyTurboTiming:
+        let values = try turboTimingTuplesArg("keyTurbos", from: arguments)
+        let device = try arguments["device"].map { _ in try intArg("device", from: arguments) } ?? 0
+        invoke(result) { callback in
+          session.updateKeyTurboTiming(values, device: device, response: callback)
+        }
+      case Host4FlutterChannelConstants.queryKeyTurbo16:
+        let key: GamepadKey = try enumArg("key", from: arguments)
+        let device = try arguments["device"].map { _ in try intArg("device", from: arguments) } ?? 0
+        invoke(result) { callback in
+          session.queryKeyTurbo16(key, device: device, response: callback)
+        }
+      case Host4FlutterChannelConstants.queryAllKeyTurbo16:
+        let device = try arguments["device"].map { _ in try intArg("device", from: arguments) } ?? 0
+        invoke(result) { callback in
+          session.queryAllKeyTurbo16(device: device, response: callback)
         }
       case Host4FlutterChannelConstants.startOta:
         let firmwareData = (arguments["data"] as? FlutterStandardTypedData)?.data ?? Data()
@@ -2215,6 +2234,19 @@ public final class Host4FlutterDeviceNativePlugin: NSObject, FlutterPlugin {
       default:
         throw BridgeArgumentError.invalidEnum(key: "type")
       }
+    }
+  }
+
+  private func turboTimingTuplesArg(
+    _ key: String,
+    from arguments: [String: Any]
+  ) throws -> [(key: GamepadKey, turbo: TurboMode, pressDuration: Int, interval: Int)] {
+    try dictArrayArg(key, from: arguments).map { item in
+      let gamepadKey: GamepadKey = try enumArg("key", from: item)
+      let turbo: TurboMode = try enumArg("turbo", from: item)
+      let pressDuration = try item["pressDuration"].map { _ in try intArg("pressDuration", from: item) } ?? 0
+      let interval = try intArg("interval", from: item)
+      return (gamepadKey, turbo, pressDuration, interval)
     }
   }
 

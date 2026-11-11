@@ -23,16 +23,28 @@ class KeyTurboPayload {
     required this.key,
     required this.turbo,
     required this.speed,
+    this.pressDuration = 0,
   });
 
   final GamepadKey key;
   final TurboMode turbo;
   final int speed;
 
+  /// Per-key press duration in 10 ms ticks. Missing device values default to 0.
+  final int pressDuration;
+
   Map<String, Object?> toMap() => {
     'key': key.value,
     'turbo': turbo.value,
     'speed': speed,
+  };
+
+  /// 0x37 0x80 timing form; legacy toMap() remains unchanged.
+  Map<String, Object?> toTimingMap() => {
+    'key': key.value,
+    'turbo': turbo.value,
+    'pressDuration': pressDuration,
+    'interval': speed,
   };
 
   factory KeyTurboPayload.fromMap(Map<dynamic, dynamic> map) {
@@ -46,7 +58,8 @@ class KeyTurboPayload {
     return KeyTurboPayload(
       key: key,
       turbo: turbo,
-      speed: gmacroToInt(map['speed']),
+      speed: gmacroToInt(map['speed'] ?? map['interval']),
+      pressDuration: gmacroToInt(map['pressDuration']),
     );
   }
 

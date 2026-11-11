@@ -414,7 +414,16 @@ extension GMacroProtocolSDK.GMacroProtocolSession {
   final public func updateKeyTurbo(_ values: [(GMacroProtocolSDK.GamepadKey, GMacroProtocolSDK.TurboMode, Swift.Int)], response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
   #endif
   #if compiler(>=5.3) && $NonescapableTypes
-  final public func updateKeyTurbo16(_ values: [(GMacroProtocolSDK.GamepadKey, GMacroProtocolSDK.TurboMode, Swift.Int)], response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  final public func updateKeyTurbo16(_ values: [(GMacroProtocolSDK.GamepadKey, GMacroProtocolSDK.TurboMode, Swift.Int)], pressDuration: Swift.Int = 1, device: Swift.Int = 0, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  #endif
+  #if compiler(>=5.3) && $NonescapableTypes
+  final public func updateKeyTurboTiming(_ values: [(key: GMacroProtocolSDK.GamepadKey, turbo: GMacroProtocolSDK.TurboMode, pressDuration: Swift.Int, interval: Swift.Int)], device: Swift.Int = 0, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  #endif
+  #if compiler(>=5.3) && $NonescapableTypes
+  final public func queryKeyTurbo16(_ key: GMacroProtocolSDK.GamepadKey, device: Swift.Int = 0, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
+  #endif
+  #if compiler(>=5.3) && $NonescapableTypes
+  final public func queryAllKeyTurbo16(device: Swift.Int = 0, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
   #endif
   #if compiler(>=5.3) && $NonescapableTypes
   final public func querySupportedTurboKeys(profile: Swift.Int, response: @escaping @Sendable (Swift.Result<[Swift.String : Any], any Swift.Error>) -> Swift.Void)
@@ -1163,7 +1172,8 @@ public struct KeyTurbo {
   public var key: GMacroProtocolSDK.GamepadKey
   public var turbo: GMacroProtocolSDK.TurboMode
   public var speed: Swift.Int
-  public init(key: GMacroProtocolSDK.GamepadKey, turbo: GMacroProtocolSDK.TurboMode, speed: Swift.Int = 10)
+  public var pressDuration: Swift.Int
+  public init(key: GMacroProtocolSDK.GamepadKey, turbo: GMacroProtocolSDK.TurboMode, speed: Swift.Int = 10, pressDuration: Swift.Int = 1)
 }
 extension GMacroProtocolSDK.GMacroProtocolSession {
   final public func startMFIOTA(data: Foundation.Data, dev: Swift.UInt8 = 0x01)
