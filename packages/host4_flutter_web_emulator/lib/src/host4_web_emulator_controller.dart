@@ -67,6 +67,7 @@ class Host4WebEmulatorController {
   }) async {
     await _request(
       action: 'launch',
+      timeout: config.launchTimeout,
       successType: 'launched',
       script: (requestId) => Host4WebEmulatorJavaScript.launch(
         config,
@@ -225,6 +226,7 @@ class Host4WebEmulatorController {
   Future<Host4WebEmulatorBridgeMessage> _request({
     required String action,
     required String successType,
+    Duration? timeout,
     required String Function(String requestId) script,
   }) async {
     if (_disposed) {
@@ -249,8 +251,9 @@ class Host4WebEmulatorController {
           'javascript dispatched action=$action requestId=$requestId',
         );
       }
+      final responseTimeout = timeout ?? requestTimeout;
       final message = await completer.future.timeout(
-        requestTimeout,
+        responseTimeout,
         onTimeout: () {
           if (shouldLog) {
             print(
@@ -259,7 +262,7 @@ class Host4WebEmulatorController {
             );
           }
           throw Host4WebEmulatorException(
-            '$action timed out after ${requestTimeout.inSeconds}s.',
+            '$action timed out after ${responseTimeout.inSeconds}s.',
           );
         },
       );

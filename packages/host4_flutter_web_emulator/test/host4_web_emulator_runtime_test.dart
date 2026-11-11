@@ -354,6 +354,34 @@ void main() {
     expect((await second).stateBase64, 'SECOND');
   });
 
+  test('cold launch can outlast the normal command timeout', () async {
+    final controller = Host4WebEmulatorController.forJavaScriptExecutor(
+      (_) async {},
+      requestTimeout: Duration.zero,
+      requestIdFactory: () => 'cold-launch',
+    );
+    final launched = controller.launch(
+      Host4WebEmulatorLaunchConfig(
+        system: Host4WebEmulatorSystem.snes,
+        romName: 'game.sfc',
+        romBase64: 'AA==',
+        launchTimeout: const Duration(seconds: 5),
+      ),
+    );
+    await Future<void>.delayed(const Duration(milliseconds: 10));
+    controller.handleBridgeMessage('launched', <String, Object?>{
+      'type': 'launched',
+      'requestId': 'cold-launch',
+      'ok': true,
+    });
+    await launched;
+    await expectLater(
+      controller.pause(),
+      throwsA(isA<Host4WebEmulatorException>()),
+    );
+    controller.dispose();
+  });
+
   test('controller times out a request without a bridge reply', () async {
     final controller = Host4WebEmulatorController.forJavaScriptExecutor(
       (_) async {},
