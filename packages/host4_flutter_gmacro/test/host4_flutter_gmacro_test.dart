@@ -181,7 +181,7 @@ void main() {
   });
 
   test(
-    'Android rejects unsupported custom global duration and device before sending',
+    'Android forwards turbo16 duration and device and rejects zero interval',
     () async {
       debugDefaultTargetPlatformOverride = TargetPlatform.android;
       final native = _FakeDeviceNative();
@@ -197,32 +197,34 @@ void main() {
           speed: 100,
         ),
       ];
-      expect(
-        () => session.setTurboDatas16(keyTurbos: items, pressDuration: 0),
-        throwsUnsupportedError,
+      await session.setTurboDatas16(
+        keyTurbos: items,
+        pressDuration: 0,
+        device: 2,
       );
-      expect(
-        () => session.setTurboDatas16(keyTurbos: items, device: 2),
-        throwsUnsupportedError,
-      );
-      expect(native.invocations, isEmpty);
-      await session.setTurboDatas16(keyTurbos: items);
       expect(
         native.invocations.single['method'],
         GmacroMethods.setTurboDatas16,
       );
-      await session.setTurboDatas16(
-        keyTurbos: const [
-          KeyTurboPayload(
-            key: GamepadKey.a,
-            turbo: TurboMode.disabled,
-            speed: 0,
-          ),
+      expect(native.invocations.single['arguments'], {
+        'keyTurbos': [
+          {'key': GamepadKey.a.value, 'turbo': 1, 'speed': 100},
         ],
+        'pressDuration': 0,
+        'device': 2,
+      });
+      expect(
+        () => session.setTurboDatas16(
+          keyTurbos: const [
+            KeyTurboPayload(
+              key: GamepadKey.a,
+              turbo: TurboMode.disabled,
+              speed: 0,
+            ),
+          ],
+        ),
+        throwsRangeError,
       );
-      expect((native.invocations.last['arguments'] as Map)['keyTurbos'], [
-        {'key': 160, 'turbo': 2, 'speed': 0},
-      ]);
     },
   );
 

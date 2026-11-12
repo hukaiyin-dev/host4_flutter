@@ -1,6 +1,8 @@
 package com.host4.host4_flutter_device_native
 
 import Host4FlutterGmacroConstants
+import com.host4.platform.kr.response.BaseRsp
+import com.host4.platform.listener.OnMessageCallback
 
 internal object GmacroMethodInvoker {
     private const val MODE_NORMAL = 0x04
@@ -53,7 +55,7 @@ internal object GmacroMethodInvoker {
                     val profile = GmacroArgParser.intArg(arguments, "profile")
                     commands.queryMacroHandle16(
                         profile,
-                        GmacroCallbackBridge.fetchGameMacroDefaultInfo(onResult),
+                        GmacroCallbackBridge.fetchGameMacroDefaultInfo16(onResult),
                     )
                 }
 
@@ -617,14 +619,56 @@ internal object GmacroMethodInvoker {
                 //设置连发
                 Host4FlutterGmacroConstants.setTurboDatas16 -> {
                     val turbos = GmacroArgParser.mapList(arguments, "keyTurbos")
-                    val first = turbos.firstOrNull()
-                        ?: throw IllegalArgumentException("keyTurbos must not be empty.")
-                    commands.setMacroBurstRate16(
-                        GmacroArgParser.intArg(first, "key"),
-                        GmacroArgParser.intArg(first, "turbo"),
-                        GmacroArgParser.intArg(first, "speed"),
-                        GmacroCallbackBridge.message(onResult),
+                    val pressDuration = GmacroArgParser.intArg(arguments, "pressDuration", 1)
+                    val device = GmacroArgParser.intArg(arguments, "device", 0)
+                    GmacroTurbo16Batch.send(
+                        turbos,
+                        pressDuration,
+                        device,
+                        sendOne = { key, turbo, duration, speed, deviceValue, callback ->
+                            commands.setMacroBurstRate16(
+                                key,
+                                turbo,
+                                duration,
+                                speed,
+                                deviceValue,
+                                OnMessageCallback<BaseRsp> { code, rsp ->
+                                    callback(GmacroResult.fromProtocol(code, GmacroResponseSerializer.toMap(rsp)))
+                                },
+                            )
+                        },
+                        onResult = onResult,
                     )
+                }
+
+                Host4FlutterGmacroConstants.updateKeyTurboTiming -> {
+                    val turbos = GmacroArgParser.mapList(arguments, "keyTurbos")
+                    val device = GmacroArgParser.intArg(arguments, "device", 0)
+                    GmacroTurbo16Batch.send(
+                        turbos,
+                        pressDuration = null,
+                        device = device,
+                        sendOne = { key, turbo, duration, interval, deviceValue, callback ->
+                            commands.setMacroBurstRate16(
+                                key, turbo, duration, interval, deviceValue,
+                                OnMessageCallback<BaseRsp> { code, rsp ->
+                                    callback(GmacroResult.fromProtocol(code, GmacroResponseSerializer.toMap(rsp)))
+                                },
+                            )
+                        },
+                        onResult = onResult,
+                    )
+                }
+
+                Host4FlutterGmacroConstants.queryKeyTurbo16 -> {
+                    val key = GmacroArgParser.intArg(arguments, "key")
+                    val device = GmacroArgParser.intArg(arguments, "device", 0)
+                    commands.queryKeyTurbo16(key, device, GmacroCallbackBridge.queryKeyTurbo16(onResult))
+                }
+
+                Host4FlutterGmacroConstants.queryAllKeyTurbo16 -> {
+                    val device = GmacroArgParser.intArg(arguments, "device", 0)
+                    commands.queryAllKeyTurbo16(device, GmacroCallbackBridge.queryAllKeyTurbo16(onResult))
                 }
 
                 //查询支持连发的按键

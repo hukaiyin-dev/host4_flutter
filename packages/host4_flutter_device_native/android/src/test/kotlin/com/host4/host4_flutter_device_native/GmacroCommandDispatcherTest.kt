@@ -2,14 +2,20 @@ package com.host4.host4_flutter_device_native
 
 import com.host4.platform.kr.model.LightEffect
 import com.host4.platform.kr.model.MacroMapping
+import com.host4.platform.kr.model.MacroExchangeRocker
+import com.host4.platform.kr.model.MacroKinect
+import com.host4.platform.kr.model.MacroRocker2
+import com.host4.platform.kr.model.TorrentHair
 import com.host4.platform.kr.response.AlignGyroscopeRsp
 import com.host4.platform.kr.response.AlignRockerOrTriggerRsp
 import com.host4.platform.kr.response.LinerTriggerRsp
 import com.host4.platform.kr.response.MacroMappingKeyRsp
 import com.host4.platform.kr.response.MacroProfileRsp
+import com.host4.platform.kr.response.MacroHandleConfigRsp
 import com.host4.platform.kr.response.QueryCurrentLightEffectRsp
 import com.host4.platform.kr.response.QueryHandleInfoRsp
 import com.host4.platform.kr.response.VibrateOpenRsp
+import com.host4.platform.kr.response.Turbo16Rsp
 import com.host4.platform.util.Constants
 import io.flutter.plugin.common.MethodChannel
 import org.mockito.Mockito
@@ -18,6 +24,53 @@ import kotlin.test.assertEquals
 import kotlin.test.assertIs
 
 internal class GmacroCommandDispatcherTest {
+    @Test
+    fun defaultInfo16IncludesPerKeyPressDuration() {
+        val rsp = MacroHandleConfigRsp().apply {
+            torrents = listOf(TorrentHair().apply {
+                code = 0xA0
+                mode = 1
+                speed = 300
+                pressDuration = 600
+            })
+            macroRocker = MacroRocker2().apply {
+                exchangeRocker = MacroExchangeRocker().apply { setCrossRight(true) }
+            }
+            macroKinect = MacroKinect().apply { setMotionSwitch(true) }
+        }
+        val info16 = successMap {
+            GmacroCallbackBridge.fetchGameMacroDefaultInfo16(it).message(Constants.SUCCESS, rsp)
+        }
+        val rapid16 = info16["rapidList"] as List<*>
+        assertEquals(
+            mapOf("key" to 0xA0, "mode" to 1, "speed" to 300, "pressDuration" to 600),
+            rapid16.single(),
+        )
+        assertEquals(2, info16["stickSwap"])
+        assertEquals(1, (info16["motion"] as Map<*, *>)["switch"])
+        val rapidLegacy = successMap {
+            GmacroCallbackBridge.fetchGameMacroDefaultInfo(it).message(Constants.SUCCESS, rsp)
+        }["rapidList"] as List<*>
+        assertEquals(mapOf("key" to 0xA0, "mode" to 1, "speed" to 300), rapidLegacy.single())
+    }
+
+    @Test
+    fun turbo16QueriesReturnIosPayloadShape() {
+        val first = Turbo16Rsp.Config(0xA0, 1, 300, 600)
+        val second = Turbo16Rsp.Config(0xA1, 0, 0, 12000)
+        assertEquals(
+            mapOf("device" to 2, "config" to mapOf(
+                "key" to 0xA0, "turbo" to 1, "pressDuration" to 300, "interval" to 600)),
+            successMap { GmacroCallbackBridge.queryKeyTurbo16(it).message(Constants.SUCCESS, Turbo16Rsp(2, first)) },
+        )
+        assertEquals(
+            mapOf("device" to 2, "configs" to listOf(
+                mapOf("key" to 0xA0, "turbo" to 1, "pressDuration" to 300, "interval" to 600),
+                mapOf("key" to 0xA1, "turbo" to 0, "pressDuration" to 0, "interval" to 12000))),
+            successMap { GmacroCallbackBridge.queryAllKeyTurbo16(it).message(Constants.SUCCESS, Turbo16Rsp(2, listOf(first, second))) },
+        )
+    }
+
     @Test
     fun deviceVersion_successCodes_preserveDartFieldNames() {
         val rsp = QueryHandleInfoRsp().apply {

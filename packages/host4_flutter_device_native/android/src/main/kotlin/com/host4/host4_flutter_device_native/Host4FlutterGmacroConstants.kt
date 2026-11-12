@@ -126,6 +126,9 @@ internal object Host4FlutterGmacroConstants {
     // Turbo
     const val setTurboDatas = "setTurboDatas"
     const val setTurboDatas16 = "setTurboDatas16"
+    const val updateKeyTurboTiming = "updateKeyTurboTiming"
+    const val queryKeyTurbo16 = "queryKeyTurbo16"
+    const val queryAllKeyTurbo16 = "queryAllKeyTurbo16"
     const val querySupportedTurboKeys = "querySupportedTurboKeys"
 
     // Other
