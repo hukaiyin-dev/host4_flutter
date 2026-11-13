@@ -65,6 +65,19 @@ class _GmacroSessionPageState extends State<GmacroSessionPage> {
   // bool _isAttaching = true;
   bool _isAttaching = false;
   bool _isBusy = false;
+  bool _transportReady = false;
+  int _transportEpoch = 0;
+
+  bool get _waitForTransportReady =>
+      widget.transport.device.kind == TransportKind.mfi ||
+      _isSystemConnectedTransport;
+
+  bool get _canInvoke =>
+      _transportReady &&
+      _session != null &&
+      !_isAttaching &&
+      !_isBusy &&
+      !_isOtaRunning;
 
   bool get _isSystemConnectedTransport =>
       widget.transport.device.id == 'system-connected';
@@ -85,6 +98,7 @@ class _GmacroSessionPageState extends State<GmacroSessionPage> {
   @override
   void initState() {
     super.initState();
+    _transportReady = !_waitForTransportReady;
     _subscribeTransport();
     _subscribeNativeLog();
 
@@ -96,8 +110,8 @@ class _GmacroSessionPageState extends State<GmacroSessionPage> {
     // } else {
     //   _attach();
     // }
-    if (_isSystemConnectedTransport) {
-      _addLog('⏳ System-connected: 等待 TransportReady 后自动挂载协议…');
+    if (_waitForTransportReady) {
+      _addLog('⏳ 等待 TransportReady 后自动挂载协议…');
     } else {
       _attach();
     }
@@ -147,8 +161,22 @@ class _GmacroSessionPageState extends State<GmacroSessionPage> {
       };
       _addLog(label, isError: event is TransportError);
 
-      if (_isSystemConnectedTransport && event is TransportReady) {
-        _attach();
+      setState(() => _transportReady = event is TransportReady);
+      if (event is TransportReady) {
+        unawaited(_attach());
+      } else if (event is TransportDisconnected || event is TransportError) {
+        _transportEpoch++;
+        final session = _session;
+        setState(() {
+          _session = null;
+          _isAttaching = false;
+          _isBusy = false;
+          _isOtaRunning = false;
+          _isOtaCompleted = false;
+        });
+        unawaited(_protocolSub?.cancel());
+        unawaited(_otaSub?.cancel());
+        unawaited(session?.close());
       }
     });
   }
@@ -171,7 +199,8 @@ class _GmacroSessionPageState extends State<GmacroSessionPage> {
   //   }
   // }
   Future<void> _attach() async {
-    if (_isAttaching || _session != null) return;
+    if (!_transportReady || _isAttaching || _session != null) return;
+    final epoch = _transportEpoch;
 
     if (mounted) {
       setState(() => _isAttaching = true);
@@ -181,7 +210,10 @@ class _GmacroSessionPageState extends State<GmacroSessionPage> {
     try {
       final session = await _gmacro.attach(widget.transport);
 
-      if (!mounted) return;
+      if (!mounted || epoch != _transportEpoch) {
+        await session.close();
+        return;
+      }
 
       setState(() {
         _session = session;
@@ -195,7 +227,7 @@ class _GmacroSessionPageState extends State<GmacroSessionPage> {
       _subscribeProtocol(session);
       _subscribeOta(session);
     } catch (e) {
-      if (!mounted) return;
+      if (!mounted || epoch != _transportEpoch) return;
 
       setState(() => _isAttaching = false);
       _addLog('❌ attach failed: $e', isError: true);
@@ -332,6 +364,7 @@ class _GmacroSessionPageState extends State<GmacroSessionPage> {
   }
 
   Future<void> _fetchDeviceVersion() async {
+    if (!_canInvoke) return;
     final session = _session;
     if (session == null) return;
     _addLog('▶ invoke: fetchDeviceVersion');
@@ -344,6 +377,7 @@ class _GmacroSessionPageState extends State<GmacroSessionPage> {
   }
 
   Future<void> _startOta() async {
+    if (!_canInvoke) return;
     final session = _session;
     if (session == null) return;
 
@@ -408,6 +442,7 @@ class _GmacroSessionPageState extends State<GmacroSessionPage> {
       return;
     }
 
+    if (!_canInvoke || !identical(session, _session)) return;
     _addLog('▶ invoke: startOta（$firmwareName，${bytes.length} bytes）');
     setState(() {
       _isOtaRunning = true;
@@ -426,6 +461,7 @@ class _GmacroSessionPageState extends State<GmacroSessionPage> {
   }
 
   void _openApiTestPage() {
+    if (!_canInvoke) return;
     Navigator.of(context).push(
       MaterialPageRoute(builder: (_) => GmacroApiTestPage(session: _session)),
     );
@@ -451,6 +487,7 @@ class _GmacroSessionPageState extends State<GmacroSessionPage> {
         children: [
           // 状态栏
           _StatusBar(
+            transportReady: _transportReady,
             isAttaching: _isAttaching,
             isBusy: _isBusy,
             isOtaRunning: _isOtaRunning,
@@ -494,9 +531,7 @@ class _GmacroSessionPageState extends State<GmacroSessionPage> {
                   children: [
                     Expanded(
                       child: OutlinedButton.icon(
-                        onPressed: (_session == null || _isBusy)
-                            ? null
-                            : _fetchDeviceVersion,
+                        onPressed: !_canInvoke ? null : _fetchDeviceVersion,
                         icon: const Icon(Icons.info_outline_rounded, size: 16),
                         label: const Text('Fetch Version'),
                       ),
@@ -504,9 +539,7 @@ class _GmacroSessionPageState extends State<GmacroSessionPage> {
                     SizedBox(width: theme.spacing.sm),
                     Expanded(
                       child: OutlinedButton.icon(
-                        onPressed: (_session == null || _isBusy)
-                            ? null
-                            : _startOta,
+                        onPressed: !_canInvoke ? null : _startOta,
                         icon: const Icon(
                           Icons.system_update_alt_rounded,
                           size: 16,
@@ -520,7 +553,7 @@ class _GmacroSessionPageState extends State<GmacroSessionPage> {
                 SizedBox(
                   width: double.infinity,
                   child: OutlinedButton.icon(
-                    onPressed: _openApiTestPage,
+                    onPressed: _canInvoke ? _openApiTestPage : null,
                     icon: const Icon(Icons.science_outlined, size: 16),
                     label: const Text('打开 API 测试页'),
                   ),
@@ -575,6 +608,7 @@ class _GmacroSessionPageState extends State<GmacroSessionPage> {
 
 class _StatusBar extends StatelessWidget {
   const _StatusBar({
+    required this.transportReady,
     required this.isAttaching,
     required this.isBusy,
     required this.isOtaRunning,
@@ -584,6 +618,7 @@ class _StatusBar extends StatelessWidget {
   });
 
   final bool isAttaching;
+  final bool transportReady;
   final bool isBusy;
   final bool isOtaRunning;
   final bool isOtaCompleted;
@@ -596,7 +631,10 @@ class _StatusBar extends StatelessWidget {
 
     Color dotColor;
     String label;
-    if (isAttaching) {
+    if (!transportReady) {
+      dotColor = theme.colors.warning;
+      label = '等待传输就绪…';
+    } else if (isAttaching) {
       dotColor = theme.colors.warning;
       label = '挂载协议中…';
     } else if (isOtaRunning) {

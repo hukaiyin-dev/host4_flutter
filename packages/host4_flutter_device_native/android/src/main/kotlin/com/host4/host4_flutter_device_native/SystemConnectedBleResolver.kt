@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothProfile
 import android.content.Context
+import android.util.Log
 import com.host4.platform.v2.api.FullPlatformSdk
 import com.host4.platform.v2.ble.BleMacUtils
 
@@ -14,24 +15,34 @@ import com.host4.platform.v2.ble.BleMacUtils
  */
 internal object SystemConnectedBleResolver {
     fun connectedDevices(context: Context, platformSdk: FullPlatformSdk): List<BluetoothDevice> {
-        if (!BlePermissionHelper.hasAllPermissions(context)) return emptyList()
+        if (!BlePermissionHelper.hasAllPermissions(context)) {
+            Log.w("Host4BleConnected", "lookup skipped: BLE permissions missing")
+            return emptyList()
+        }
         val adapter = BluetoothAdapter.getDefaultAdapter() ?: return emptyList()
         return try {
             val bluetoothManager =
                 context.getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager
             val byMac = linkedMapOf<String, BluetoothDevice>()
-            bluetoothManager?.getConnectedDevices(BluetoothProfile.GATT)?.forEach { device ->
+            val gattDevices = bluetoothManager?.getConnectedDevices(BluetoothProfile.GATT).orEmpty()
+            gattDevices.forEach { device ->
                 byMac[BleMacUtils.normalizeMac(device.address)] = device
             }
             @Suppress("UNCHECKED_CAST")
             val sdkConnectedMacs =
                 platformSdk.getConnectedBleDevices() as? List<String> ?: emptyList()
+            Log.d("Host4BleConnected", "lookup GATT=${gattDevices.size} SDK_BLE=${sdkConnectedMacs.size}")
             for (mac in sdkConnectedMacs) {
                 val device = runCatching { adapter.getRemoteDevice(mac) }.getOrNull() ?: continue
                 byMac.putIfAbsent(BleMacUtils.normalizeMac(device.address), device)
             }
-            byMac.values.toList()
-        } catch (_: SecurityException) {
+            byMac.values.toList().also { devices ->
+                devices.forEach { device ->
+                    Log.d("Host4BleConnected", "candidate id=${device.address} name=${device.name} type=${device.type}")
+                }
+            }
+        } catch (error: SecurityException) {
+            Log.w("Host4BleConnected", "lookup failed: Bluetooth permission unavailable", error)
             // Permission may be revoked after the initial check.
             emptyList()
         }
