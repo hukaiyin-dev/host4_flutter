@@ -19,18 +19,20 @@ class GmacroRapidFireItem {
   final int key;   // GamepadKey rawValue
   final int mode;  // TurboMode rawValue
   final int speed;
-  const GmacroRapidFireItem({required this.key, required this.mode, required this.speed});
+  final int pressDuration;
+  const GmacroRapidFireItem({required this.key, required this.mode, required this.speed, this.pressDuration = 0});
 
   factory GmacroRapidFireItem.fromMap(Map map) => GmacroRapidFireItem(
     key:   gmacroToInt(map['key']),
     mode:  gmacroToInt(map['mode']),
     speed: gmacroToInt(map['speed']),
+    pressDuration: gmacroToInt(map['pressDuration']),
   );
 
-  Map<String, Object?> toMap() => {'key': key, 'mode': mode, 'speed': speed};
+  Map<String, Object?> toMap() => {'key': key, 'mode': mode, 'speed': speed, 'pressDuration': pressDuration};
 
   @override
-  String toString() => 'RapidFire(key: $key, mode: $mode, speed: $speed)';
+  String toString() => 'RapidFire(key: $key, mode: $mode, speed: $speed, pressDuration: $pressDuration)';
 }
 
 // ─── 扳机 ───

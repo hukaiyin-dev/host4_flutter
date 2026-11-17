@@ -8,6 +8,22 @@ import 'package:host4_flutter_device_native/host4_flutter_device_native.dart';
 import 'package:host4_flutter_transport/host4_flutter_transport.dart';
 
 void main() {
+  test(
+    'heartbeat sends once through its own protocol session without a reply',
+    () async {
+      final native = _FakeDeviceNative();
+      final session = GmacroSession(
+        id: 'heartbeat-session',
+        transport: _FakeTransportSession(),
+        native: native,
+      );
+      await session.sendHeartbeat();
+      expect(native.invocations.single['method'], 'sendHeartbeat');
+      expect(native.invokedSessionIds.single, 'heartbeat-session');
+      await session.close();
+    },
+  );
+
   test('16-bit turbo APIs preserve speed above 255 and old methods', () async {
     final native = _FakeDeviceNative();
     final session = GmacroSession(
@@ -55,6 +71,194 @@ void main() {
       throwsRangeError,
     );
   });
+
+  test(
+    'rapid info preserves press duration and defaults missing values to zero',
+    () {
+      final info = GmacroDefaultInfo.fromMap({
+        'rapidList': [
+          {'key': 160, 'mode': 1, 'speed': 12000, 'pressDuration': 300},
+          {'key': 161, 'mode': 2, 'speed': 100},
+        ],
+      });
+      expect(info.rapidList.first.pressDuration, 300);
+      expect(info.rapidList.first.toMap()['pressDuration'], 300);
+      expect(info.rapidList.last.pressDuration, 0);
+    },
+  );
+
+  test(
+    'timing writes keep each duration, interval and device without scaling',
+    () async {
+      final native = _FakeDeviceNative();
+      final session = GmacroSession(
+        id: 'timing',
+        transport: _FakeTransportSession(),
+        native: native,
+      );
+      await session.updateKeyTurboTiming(
+        keyTurbos: const [
+          KeyTurboPayload(
+            key: GamepadKey.a,
+            turbo: TurboMode.fullAuto,
+            speed: 12000,
+            pressDuration: 300,
+          ),
+          KeyTurboPayload(
+            key: GamepadKey.b,
+            turbo: TurboMode.disabled,
+            speed: 100,
+          ),
+        ],
+        device: 2,
+      );
+      expect(native.invocations.single['method'], 'updateKeyTurboTiming');
+      expect(native.invocations.single['arguments'], {
+        'device': 2,
+        'keyTurbos': [
+          {'key': 160, 'turbo': 1, 'pressDuration': 300, 'interval': 12000},
+          {'key': 161, 'turbo': 2, 'pressDuration': 0, 'interval': 100},
+        ],
+      });
+      for (final duration in [-1, 65536]) {
+        expect(
+          () => session.updateKeyTurboTiming(
+            keyTurbos: [
+              KeyTurboPayload(
+                key: GamepadKey.a,
+                turbo: TurboMode.fullAuto,
+                speed: 100,
+                pressDuration: duration,
+              ),
+            ],
+          ),
+          throwsRangeError,
+        );
+      }
+      expect(
+        () => session.updateKeyTurboTiming(
+          keyTurbos: const [
+            KeyTurboPayload(
+              key: GamepadKey.a,
+              turbo: TurboMode.fullAuto,
+              speed: 0,
+            ),
+          ],
+        ),
+        throwsRangeError,
+      );
+      expect(() => session.queryAllKeyTurbo16(device: 256), throwsRangeError);
+      expect(native.invocations.length, 1);
+    },
+  );
+
+  test('turbo16 legacy form forwards global duration and device', () async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    final native = _FakeDeviceNative();
+    final session = GmacroSession(
+      id: 'timing',
+      transport: _FakeTransportSession(),
+      native: native,
+    );
+    await session.setTurboDatas16(
+      keyTurbos: const [
+        KeyTurboPayload(
+          key: GamepadKey.a,
+          turbo: TurboMode.fullAuto,
+          speed: 600,
+        ),
+      ],
+      pressDuration: 0,
+      device: 3,
+    );
+    expect(native.invocations.single['arguments'], {
+      'keyTurbos': [
+        {'key': 160, 'turbo': 1, 'speed': 600},
+      ],
+      'pressDuration': 0,
+      'device': 3,
+    });
+  });
+
+  test(
+    'Android forwards turbo16 duration and device and rejects zero interval',
+    () async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.android;
+      final native = _FakeDeviceNative();
+      final session = GmacroSession(
+        id: 'timing',
+        transport: _FakeTransportSession(),
+        native: native,
+      );
+      const items = [
+        KeyTurboPayload(
+          key: GamepadKey.a,
+          turbo: TurboMode.fullAuto,
+          speed: 100,
+        ),
+      ];
+      await session.setTurboDatas16(
+        keyTurbos: items,
+        pressDuration: 0,
+        device: 2,
+      );
+      expect(
+        native.invocations.single['method'],
+        GmacroMethods.setTurboDatas16,
+      );
+      expect(native.invocations.single['arguments'], {
+        'keyTurbos': [
+          {'key': GamepadKey.a.value, 'turbo': 1, 'speed': 100},
+        ],
+        'pressDuration': 0,
+        'device': 2,
+      });
+      expect(
+        () => session.setTurboDatas16(
+          keyTurbos: const [
+            KeyTurboPayload(
+              key: GamepadKey.a,
+              turbo: TurboMode.disabled,
+              speed: 0,
+            ),
+          ],
+        ),
+        throwsRangeError,
+      );
+    },
+  );
+
+  test(
+    'turbo queries preserve raw single and assembled all-key responses',
+    () async {
+      final native = _FakeDeviceNative();
+      final session = GmacroSession(
+        id: 'timing',
+        transport: _FakeTransportSession(),
+        native: native,
+      );
+      native.nextInvoke = Future.value({
+        'device': 2,
+        'config': {'key': 160, 'turbo': 1, 'pressDuration': 0, 'interval': 600},
+      });
+      final single = await session.queryKeyTurbo16(GamepadKey.a, device: 2);
+      expect((single['config'] as Map)['pressDuration'], 0);
+      expect(native.invocations.last['method'], 'queryKeyTurbo16');
+      expect(native.invocations.last['arguments'], {'key': 160, 'device': 2});
+      native.nextInvoke = Future.value({
+        'device': 2,
+        'configs': [
+          {'key': 160, 'turbo': 1, 'pressDuration': 300, 'interval': 600},
+          {'key': 161, 'turbo': 0, 'pressDuration': 0, 'interval': 12000},
+        ],
+      });
+      final all = await session.queryAllKeyTurbo16(device: 2);
+      expect((all['configs'] as List).length, 2);
+      expect(((all['configs'] as List).last as Map)['interval'], 12000);
+      expect(native.invocations.last['method'], 'queryAllKeyTurbo16');
+      expect(native.invocations.last['arguments'], {'device': 2});
+    },
+  );
 
   tearDown(() {
     debugDefaultTargetPlatformOverride = null;
@@ -319,6 +523,7 @@ void main() {
 }
 
 class _FakeDeviceNative extends Host4FlutterDeviceNative {
+  final List<String> invokedSessionIds = <String>[];
   final List<Map<String, Object?>> invocations = <Map<String, Object?>>[];
   Future<Map<String, Object?>>? nextInvoke;
   final StreamController<Map<String, Object?>> escalationEvents =
@@ -350,6 +555,7 @@ class _FakeDeviceNative extends Host4FlutterDeviceNative {
     required String method,
     Map<String, Object?> arguments = const {},
   }) async {
+    invokedSessionIds.add(protocolSessionId);
     invocations.add(<String, Object?>{
       'method': method,
       'arguments': Map<String, Object?>.from(arguments),

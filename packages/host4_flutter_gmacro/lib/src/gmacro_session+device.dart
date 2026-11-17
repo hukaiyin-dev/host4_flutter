@@ -3,6 +3,13 @@ import 'Models/gmacro_methods.dart';
 import 'gmacro_session.dart';
 
 extension GmacroSessionDevice on GmacroSession {
+  /// 发送一次 0x88 01 心跳，不等待设备应答。
+  /// 当前仅 iOS 实现；调用方负责按 1 Hz 调用，本接口不启动定时器。
+  /// Future 完成仅表示传输层接受发送，不表示设备已接收。
+  Future<void> sendHeartbeat() async {
+    await invoke(GmacroMethods.sendHeartbeat);
+  }
+
   /// 0x77 0x0C：查询包含 16 位连发速率的完整设备配置。
   Future<GmacroDefaultInfo> fetchGameMacroDefaultInfo16({
     required int profile,

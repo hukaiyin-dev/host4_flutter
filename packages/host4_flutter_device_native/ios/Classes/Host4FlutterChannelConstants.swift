@@ -1,6 +1,7 @@
 struct Host4FlutterChannelConstants {
   // Device
   static let fetchDeviceVersion = "fetchDeviceVersion"
+  static let sendHeartbeat = "sendHeartbeat"
   static let fetchAppWakeKeyType = "fetchAppWakeKeyType"
   static let fetchGameMacroDefaultInfo = "fetchGameMacroDefaultInfo"
   static let fetchGameMacroDefaultInfo16 = "fetchGameMacroDefaultInfo16"
@@ -122,6 +123,9 @@ struct Host4FlutterChannelConstants {
   // Turbo
   static let setTurboDatas = "setTurboDatas"
   static let setTurboDatas16 = "setTurboDatas16"
+  static let updateKeyTurboTiming = "updateKeyTurboTiming"
+  static let queryKeyTurbo16 = "queryKeyTurbo16"
+  static let queryAllKeyTurbo16 = "queryAllKeyTurbo16"
   static let querySupportedTurboKeys = "querySupportedTurboKeys"
 
   // OTA

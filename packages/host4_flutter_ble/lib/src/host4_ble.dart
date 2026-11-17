@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:host4_flutter_device_native/host4_flutter_device_native.dart';
 import 'package:host4_flutter_transport/host4_flutter_transport.dart';
 
@@ -47,6 +48,25 @@ class Host4Ble {
     List<String> deviceNames = const [],
     Map<String, Object?> options = const <String, Object?>{},
   }) async {
+    // The legacy name-based native API returns only a transport session ID.
+    // Resolve the actual peripheral so concurrent sessions keep distinct IDs.
+    if (!kIsWeb &&
+        (defaultTargetPlatform == TargetPlatform.iOS ||
+            defaultTargetPlatform == TargetPlatform.android)) {
+      final devices = await systemConnectedDevices(serviceIds);
+      for (final device in devices) {
+        if (deviceNames.isEmpty ||
+            deviceNames.any((name) => device.name.contains(name))) {
+          return connectSystemConnectedDevice(
+            device,
+            serviceIds: serviceIds,
+            options: options,
+          );
+        }
+      }
+      throw StateError('No system-connected BLE device matched $deviceNames.');
+    }
+
     final sessionId = await _native.connectSystemConnectedBle(
       serviceIds: serviceIds,
       deviceNames: deviceNames,

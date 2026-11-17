@@ -8,6 +8,7 @@ class Host4WebEmulatorLaunchConfig {
     this.romFileUrl,
     this.romBase64,
     this.sramBase64,
+    this.launchTimeout,
   }) {
     if (romFileUrl == null && romBase64 == null) {
       throw ArgumentError('Either romFileUrl or romBase64 is required.');
@@ -19,6 +20,9 @@ class Host4WebEmulatorLaunchConfig {
   final String? romBase64;
   final String? sramBase64;
   final String romName;
+
+  /// 仅用于首次加载核心，其他模拟器操作继续使用控制器的默认超时。
+  final Duration? launchTimeout;
 
   Map<String, Object?> toJson({ResolvedCoreData? resolvedCoreData}) {
     final core = system.core;

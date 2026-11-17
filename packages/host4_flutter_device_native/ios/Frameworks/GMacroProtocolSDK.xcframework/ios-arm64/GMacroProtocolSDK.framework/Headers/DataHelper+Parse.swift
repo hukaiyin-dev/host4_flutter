@@ -47,10 +47,10 @@ extension DataHelper {
         //2026.5.58 新增：部分协议需要 subID 来区分不同的命令响应，因此在解析时尝试提取 subID 以构建更准确的 responseKey
         // 提取 subID
         var subID: UInt8? = nil
-        let turbo16Response = pId == .setTurbo && payload.first == 0x80
+        let turbo16Response = pId == .setTurbo && payload.first.map { (0x80...0x83).contains($0) } == true
         if pId.hasSubID || turbo16Response {
             if let first = payload.first {
-                subID = first // first 本身就是 UInt8
+                subID = pId == .setTurbo && first == 0x83 ? 0x82 : first
             } else {
                 print("⚠️ pid=0x\(String(format: "%02X", pId.rawValue)) 声明 hasSubID，但 payload 为空，sn=\(sn)")
             }
@@ -128,11 +128,35 @@ extension DataHelper {
 //        }
         
         //2026.5.28 新增：严格区分有 subID 和无 subID 的协议的匹配策略：
-        callbackQueue.async { [unowned self] in
+        callbackQueue.async(flags: .barrier) { [unowned self] in
             dispatchPrecondition(condition: .onQueue(self.callbackQueue))
             
             let (responseResult, isComplete) = parse(protocolID: pId, all: data, payload: payload, sn: snData)
             var didCallback = false
+
+            // A malformed response must only fail its exact request. Never let
+            // a duplicate/bad frame consume another SN through legacy fallback.
+            if case .failure(let error) = responseResult,
+               (error as NSError).domain == "GMacroProtocolSDK.ResponseValidation" {
+                var errorKey: ResponseKey? = responseKey
+                if self.pendingResponses[responseKey] == nil {
+                    errorKey = nil
+                    // Only an absent subID may use PID + SN to identify one
+                    // unique request. A present subID must match exactly, so
+                    // duplicate packets cannot consume another subID's request.
+                    if pId.hasSubID && subID == nil {
+                        let candidates = self.pendingResponses.keys.filter {
+                            $0.protocolID == pId && $0.sn == sn
+                        }
+                        errorKey = candidates.count == 1 ? candidates[0] : nil
+                    }
+                }
+                if let key = errorKey,
+                   let callback = self.pendingResponses.removeValue(forKey: key) {
+                    callback(.failure(error))
+                }
+                return
+            }
             
             // 🔑 核心逻辑：严格按 hasSubID 区分匹配策略
             print("📌 当前 pendingResponses keys:")
@@ -255,6 +279,11 @@ extension DataHelper {
     /// all是接收到的所有data
     /// payload是去掉开始的长度，ID，以及末尾的SN的data
     func parse(protocolID: GMacroProtocolID, all: Data, payload: Data, sn: Data) -> (response: Result<[String: Any], Error>, isComplete: Bool) {
+        // Validate the confirmed affected formats before any reader can turn
+        // a missing field into a default result/configuration value.
+        if let error = invalidTargetedResponseLength(protocolID, packet: all, payload: payload) {
+            return (.failure(error), true)
+        }
         var responseDic: [String: Any] = [:]
         
         var isComplete = true
@@ -450,7 +479,33 @@ extension DataHelper {
             return analyzeResult(payload: payload)
         case .setTurbo:
             if payload.first == 0x80 {
-                return analyzeResultWithSubId(payload: payload, isSubID: true, isDev: false)
+                guard payload.count == 2 || payload.count == 3 else {
+                    return (.failure(invalidSubIDPacketError(protocolID, packet: all)), true)
+                }
+                return analyzeResultWithSubId(payload: payload, isSubID: true, isDev: payload.count == 3)
+            }
+            if payload.first == 0x81 {
+                guard let value = analyzeKeyTurbo16(payload) else {
+                    return (.failure(invalidSubIDPacketError(protocolID, packet: all)), true)
+                }
+                return (.success(value), true)
+            }
+            if payload.first == 0x83 {
+                guard payload.count >= 5,
+                      payload[2] > 0, payload[3] > 0, payload[3] <= payload[2],
+                      Int(payload[4]) == (payload.count - 5) / 6,
+                      (payload.count - 5) % 6 == 0 else {
+                    return (.failure(invalidSubIDPacketError(protocolID, packet: all)), true)
+                }
+                if let (completeData, _, _) = handleSubIDFragmentedData(all, sn, skip: 1) {
+                    guard let value = analyzeAllKeyTurbo16(completeData) else {
+                        return (.failure(invalidSubIDPacketError(protocolID, packet: all)), true)
+                    }
+                    var result = value
+                    result["device"] = Int(payload[1])
+                    return (.success(result), true)
+                }
+                return (.success([:]), false)
             }
             return analyzeResult(payload: payload)
         case .motion:
@@ -732,6 +787,33 @@ extension DataHelper {
 }
 
 private extension DataHelper {
+    func invalidTargetedResponseLength(_ protocolID: GMacroProtocolID,
+                                       packet: Data,
+                                       payload: Data) -> NSError? {
+        let minimumPayloadLength: Int
+        switch protocolID {
+        case .reset, .setLightConfig:
+            minimumPayloadLength = 3 // subID, device, result
+        case .handleProfile:
+            minimumPayloadLength = 2 // subID, result
+        case .getLightConfig:
+            minimumPayloadLength = 9 // subID, device, seven light fields
+        default:
+            return nil
+        }
+        guard payload.count < minimumPayloadLength else { return nil }
+
+        let expectedLength = minimumPayloadLength + 3 // length, protocol ID, SN
+        let message = String(format: "响应数据长度异常（协议 0x%02X，至少需要 %d 字节，实际 %d 字节）",
+                             protocolID.rawValue, expectedLength, packet.count)
+        print("❌ \(message)")
+        return NSError(domain: "GMacroProtocolSDK.ResponseValidation", code: 1,
+                       userInfo: [NSLocalizedDescriptionKey: message,
+                                  "protocolID": Int(protocolID.rawValue),
+                                  "expectedMinimumLength": expectedLength,
+                                  "actualLength": packet.count])
+    }
+
     func extractSubID(from packet: Data, protocolID: GMacroProtocolID) -> UInt8? {
         guard protocolID.hasSubID else { return nil }
         guard packet.count > 2 else { return nil } // [len][pid][subID]...

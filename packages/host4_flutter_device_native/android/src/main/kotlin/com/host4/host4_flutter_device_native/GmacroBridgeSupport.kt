@@ -14,6 +14,7 @@ import com.host4.platform.kr.response.QueryHandleInfoRsp
 import com.host4.platform.kr.response.QueryUsbResetRsp
 import com.host4.platform.kr.response.VibrateOpenRsp
 import com.host4.platform.kr.response.WorkStyleRsp
+import com.host4.platform.kr.response.Turbo16Rsp
 import com.host4.platform.listener.OnMessageCallback
 import com.host4.platform.v2.api.FullPlatformSdk
 import com.host4.platform.v2.api.PlatformSdkFactory
@@ -68,6 +69,35 @@ internal object GmacroCallbackBridge {
         }
         return callback as OnMessageCallback<T>
     }
+
+    private fun turbo16Config(config: Turbo16Rsp.Config): Map<String, Int> = mapOf(
+        "key" to config.key,
+        "turbo" to config.turbo,
+        "pressDuration" to config.pressDuration,
+        "interval" to config.interval,
+    )
+
+    fun queryKeyTurbo16(onResult: (GmacroResult) -> Unit): OnMessageCallback<Turbo16Rsp> =
+        OnMessageCallback { code, rsp ->
+            if (GmacroResult.isProtocolSuccess(code) && rsp?.config == null) {
+                onResult(GmacroResult.Error(GmacroResult.FAILED_CODE, "Missing turbo16 config."))
+            } else {
+                onResult(protocolResult(code, rsp) { response ->
+                    mapOf("device" to response.device, "config" to turbo16Config(response.config))
+                })
+            }
+        }
+
+    fun queryAllKeyTurbo16(onResult: (GmacroResult) -> Unit): OnMessageCallback<Turbo16Rsp> =
+        OnMessageCallback { code, rsp ->
+            if (GmacroResult.isProtocolSuccess(code) && rsp?.configs == null) {
+                onResult(GmacroResult.Error(GmacroResult.FAILED_CODE, "Missing turbo16 configs."))
+            } else {
+                onResult(protocolResult(code, rsp) { response ->
+                    mapOf("device" to response.device, "configs" to response.configs.map(::turbo16Config))
+                })
+            }
+        }
 
     /**
      * 查询设备版本（0x80），与 iOS fetchDeviceVersion 返回字段对齐。
@@ -212,6 +242,12 @@ internal object GmacroCallbackBridge {
         }
     }
 
+    fun fetchGameMacroDefaultInfo16(onResult: (GmacroResult) -> Unit): OnMessageCallback<MacroHandleConfigRsp> {
+        return OnMessageCallback { code, rsp ->
+            onResult(protocolResult(code, rsp, GmacroDefaultInfoMapper::toMap16))
+        }
+    }
+
     /**
      * 查询左右扳机线性输出
      */
@@ -241,9 +277,23 @@ internal object GmacroCallbackBridge {
 }
 
 private object GmacroDefaultInfoMapper {
+    fun toMap16(rsp: MacroHandleConfigRsp): Map<String, Any?> {
+        val result = toMap(rsp).toMutableMap()
+        result["rapidList"] = rsp.torrents.orEmpty().map {
+            mapOf(
+                "key" to it.code,
+                "mode" to it.mode,
+                "speed" to it.speed,
+                "pressDuration" to it.pressDuration,
+            )
+        }
+        return result
+    }
+
     fun toMap(rsp: MacroHandleConfigRsp): Map<String, Any?> {
         val trigger = rsp.macroTrigger
         val rocker = rsp.macroRocker
+        val exchange = rocker?.exchangeRocker
         val vibration = rsp.macroVibrate
         val motion = rsp.macroKinect
 
@@ -254,6 +304,12 @@ private object GmacroDefaultInfoMapper {
                     "mode" to it.mode,
                     "speed" to it.speed,
                 )
+            },
+            "stickSwap" to when {
+                exchange?.isCrossLeft == true -> 1
+                exchange?.isCrossRight == true -> 2
+                exchange?.isRocker == true -> 3
+                else -> 0
             },
             "leftTrigger" to mapOf(
                 "start" to (trigger?.startLeft ?: 0),
@@ -323,7 +379,7 @@ private object GmacroDefaultInfoMapper {
             "motion" to mapOf(
                 "sensitivity" to (motion?.motionSensitivity ?: 0),
                 "yReverse" to if (motion?.isMotionYaxisSwitch == true) 1 else 0,
-                "motionSwitch" to if (motion?.isMotionSwitch == true) 1 else 0,
+                "switch" to if (motion?.isMotionSwitch == true) 1 else 0,
                 "mappingSwitch" to if (motion?.isMotionMapperSwitch == true) 1 else 0,
                 "triggerMode" to (motion?.motionMethod ?: 0),
                 "triggerKey" to (motion?.motionKey ?: 0),

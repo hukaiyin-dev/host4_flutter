@@ -126,7 +126,7 @@ extension DataHelper {
                    response: response)
     }
 
-    /// 0x77 0x0C：查询 16 位连发速率的完整设备配置。
+    /// 0x77 0x0C：查询含 16 位连发间隔和按压时间的完整设备配置。
     func fetchGameMacroDefault16(profile: Int,
                                  finish: (() -> Void)? = nil,
                                  response: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
@@ -317,7 +317,7 @@ extension DataHelper {
         case .gameMacroDefault:
             return analyzeGameMacroDeviceInfo(data)
         case .gameMacroDefault16:
-            return analyzeGameMacroDeviceInfo(data, speedByteCount: 2)
+            return analyzeGameMacroDeviceInfo(data, speedByteCount: 2, pressDurationByteCount: 2)
         case .mobpad:
             return analyzeMobpadDeviceInfo(data)
         case .none:
@@ -326,13 +326,13 @@ extension DataHelper {
         }
     }
     
-    func analyzeGameMacroDeviceInfo(_ data: Data, speedByteCount: Int = 1) -> [String: Any] {
+    func analyzeGameMacroDeviceInfo(_ data: Data, speedByteCount: Int = 1, pressDurationByteCount: Int = 0) -> [String: Any] {
         print("分析 Game Macro 默认值数据 \(data.count) \(data.nsDescription())")
         var parser = DataParser(data)
         var dic: [String: Any] = [:]
 
         // 1️⃣ 连发参数
-        let rapidList = parseRapidFire(&parser, speedByteCount: speedByteCount)
+        let rapidList = parseRapidFire(&parser, speedByteCount: speedByteCount, pressDurationByteCount: pressDurationByteCount)
         dic["rapidList"] = rapidList
 
         // 2️⃣ 左扳机: length(1) + start(1) + end(1) + macroOn(1) + macroThreshold(1) + pointCount(1) + X1,Y1...
@@ -642,9 +642,9 @@ extension DataHelper {
 
 extension DataHelper {
     /// 连发参数解析
-    func parseRapidFire(_ parser: inout DataParser, speedByteCount: Int = 1) -> [[String: Any]] {
+    func parseRapidFire(_ parser: inout DataParser, speedByteCount: Int = 1, pressDurationByteCount: Int = 0) -> [[String: Any]] {
         let rapidLength = parser.next(1).toInt()
-        let keyCount = rapidLength / (2 + speedByteCount)
+        let keyCount = rapidLength / (2 + speedByteCount + pressDurationByteCount)
         var rapidList: [[String: Any]] = []
         for _ in 0..<keyCount {
             // 按键
@@ -653,11 +653,15 @@ extension DataHelper {
             let auto = parser.next(1).toInt()
             // 速率
             let speed = parser.next(speedByteCount).toInt()
-            rapidList.append([
+            var entry: [String: Any] = [
                 "key": GamepadKey.from(oneByteKeyCode: key) ?? .none,
                 "turbo": TurboMode(rawValue: UInt8(auto)) ?? .disabled,
                 "speed": speed
-            ])
+            ]
+            if pressDurationByteCount > 0 {
+                entry["pressDuration"] = parser.next(pressDurationByteCount).toInt()
+            }
+            rapidList.append(entry)
         }
         return rapidList
     }
