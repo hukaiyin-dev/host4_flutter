@@ -66,6 +66,41 @@ void main() {
     }
     expect(menus, 6);
   });
+  testWidgets('collapsed non-silicone landscape controls point the expand icon up', (tester) async {
+    tester.view.physicalSize = const Size(844, 390);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    for (final variant in Host4EmulatorSiliconeLayoutVariant.values.where(
+      (variant) => variant != Host4EmulatorSiliconeLayoutVariant.silicone,
+    )) {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Host4EmulatorControlsLayer(
+            key: ValueKey(variant),
+            profile: Host4EmulatorControlProfile.nes,
+            layoutStyle: Host4EmulatorControlLayoutStyle.silicone,
+            siliconeLayoutVariant: variant,
+            collapsed: true,
+            onInput: (_) {},
+            onMenuTap: () {},
+          ),
+        ),
+      );
+
+      final hideToggle = find.byKey(
+        const ValueKey<String>('landscape.controls.hide_toggle'),
+      );
+      final rotatedIcon = find.descendant(
+        of: hideToggle,
+        matching: find.byWidgetPredicate(
+          (widget) => widget is RotatedBox && widget.quarterTurns == 2,
+        ),
+      );
+      expect(rotatedIcon, findsOneWidget);
+    }
+  });
   testWidgets('landscape capsules keep outlines and gain editing backgrounds', (tester) async {
     tester.view.physicalSize = const Size(844, 390);
     tester.view.devicePixelRatio = 1;
