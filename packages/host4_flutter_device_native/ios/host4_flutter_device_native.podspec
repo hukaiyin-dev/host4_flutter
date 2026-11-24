@@ -17,7 +17,7 @@ Flutter plugin shell for host4 native device communication.
   s.source           = { :path => '.' }
   s.source_files = disable_native_sdks ? 'Classes/Host4FlutterDeviceNativePlugin.swift' : 'Classes/**/*'
   s.dependency 'Flutter'
-  s.platform = :ios, '13.0'
+  s.platform = :ios, '15.0'
   unless disable_native_sdks
     s.vendored_frameworks = [
       'Frameworks/BluetoothKit.xcframework',
