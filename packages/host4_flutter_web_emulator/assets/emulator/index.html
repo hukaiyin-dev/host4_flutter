@@ -15,10 +15,24 @@
         background: #000;
       }
 
-      canvas {
+      #emulator {
         width: 100% !important;
         height: 100% !important;
         object-fit: contain;
+      }
+
+      #host4-live-preview {
+        position: fixed;
+        right: 16px;
+        bottom: 16px;
+        z-index: 2147483647;
+        width: min(30vw, 220px);
+        height: auto;
+        pointer-events: none;
+        background: #000;
+        border: 1px solid rgba(255, 255, 255, 0.8);
+        border-radius: 4px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
       }
     </style>
   </head>
@@ -36,13 +50,1521 @@
         var diagnosticSequence = 0;
         var diagnosticStartedAt = Date.now();
         var foregroundAudioPending = false;
+        var outputProbeTimer = null;
+        var externalWebglPreviewTimer = null;
+        var semanticScreenshotPreviewTimer = null;
+        var inWebViewCanvasMirrorCancel = null;
+        var webRtcPreview = null;
+        var currentOutputProbeCore = null;
+        var currentOutputProbeUsesLocalCore = false;
         var isAppleMobile = typeof navigator !== 'undefined' &&
           (/iPad|iPhone|iPod/.test(navigator.userAgent) ||
             (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1));
 
+        // The Wasm import map captures this function while the core starts.
+        // Instrument its definition in the Core source rather than replacing
+        // it after launch. Audio is captured from the standard WebAudio queue;
+        // video is first observed at the uniform Emscripten texture-upload
+        // boundary. Neither hook changes the original WebGL/WebAudio call.
+        function instrumentOutputProbe(source, enabled) {
+          if (!enabled || source.indexOf('host4-output-probe-v1') !== -1) {
+            return { source: source, installed: false };
+          }
+          var anchor = 'function _RWebAudioQueueBuffer(num_frames,left,right){';
+          if (source.indexOf(anchor) === -1) {
+            return { source: source, installed: false };
+          }
+          var instrumentation = '\n/*host4-output-probe-v1*/\n' +
+            'var host4OutputProbe=Module.host4OutputProbe;' +
+            'if(!host4OutputProbe){host4OutputProbe={audioCallbacks:0,audioFrames:0};Module.host4OutputProbe=host4OutputProbe;}' +
+            'host4OutputProbe.audioCallbacks+=1;' +
+            'host4OutputProbe.audioFrames+=num_frames;' +
+            'host4OutputProbe.audioLastFrames=num_frames;' +
+            'if(RWA&&RWA.context){host4OutputProbe.audioSampleRate=RWA.context.sampleRate;}' +
+            'try{' +
+            'var pcmRate=host4OutputProbe.audioSampleRate||48000;' +
+            'var pcmCapacity=host4OutputProbe.pcmCapacityFrames||Math.max(1,Math.round(pcmRate));' +
+            'if(!host4OutputProbe.pcmBuffer){host4OutputProbe.pcmBuffer=new Float32Array(pcmCapacity*2);host4OutputProbe.pcmCapacityFrames=pcmCapacity;host4OutputProbe.pcmWriteFrame=0;host4OutputProbe.pcmCapturedFrames=0;host4OutputProbe.pcmBufferedFrames=0;}' +
+            'var pcmLeft=HEAPF32.subarray(left>>2,(left>>2)+num_frames);' +
+            'var pcmRight=HEAPF32.subarray(right>>2,(right>>2)+num_frames);' +
+            'for(var pcmIndex=0;pcmIndex<num_frames;pcmIndex+=1){var pcmFrame=(host4OutputProbe.pcmWriteFrame+pcmIndex)%pcmCapacity;host4OutputProbe.pcmBuffer[pcmFrame*2]=pcmLeft[pcmIndex];host4OutputProbe.pcmBuffer[pcmFrame*2+1]=pcmRight[pcmIndex];}' +
+            'host4OutputProbe.pcmWriteFrame=(host4OutputProbe.pcmWriteFrame+num_frames)%pcmCapacity;' +
+            'host4OutputProbe.pcmCapturedFrames+=num_frames;' +
+            'host4OutputProbe.pcmBufferedFrames=Math.min(pcmCapacity,host4OutputProbe.pcmBufferedFrames+num_frames);' +
+            'host4OutputProbe.mediaTimestampUs=Math.round(host4OutputProbe.pcmCapturedFrames*1000000/pcmRate);' +
+            'host4OutputProbe.pcmCaptureAvailable=true;' +
+            '}catch(_){host4OutputProbe.pcmCaptureAvailable=false;}\n';
+          source = source.replace(anchor, anchor + instrumentation);
+          var textureInstrumentation =
+            'var host4OutputProbe=Module.host4OutputProbe;' +
+            'if(!host4OutputProbe){host4OutputProbe={audioCallbacks:0,audioFrames:0};Module.host4OutputProbe=host4OutputProbe;}' +
+            'host4OutputProbe.textureUploadCalls=(host4OutputProbe.textureUploadCalls||0)+1;' +
+            'if(pixels&&width&&height){host4OutputProbe.textureUploadPixelCalls=(host4OutputProbe.textureUploadPixelCalls||0)+1;host4OutputProbe.textureUploadWidth=width;host4OutputProbe.textureUploadHeight=height;host4OutputProbe.textureUploadFormat=format;host4OutputProbe.textureUploadType=type;host4OutputProbe.textureUploadPointer=pixels;if(format===6408&&type===5121){try{var videoNow=typeof performance!=="undefined"?performance.now():Date.now();var videoCaptureIntervalMs=host4OutputProbe.videoCaptureIntervalMs||100;if(!host4OutputProbe.videoLastCaptureAt||videoNow-host4OutputProbe.videoLastCaptureAt>=videoCaptureIntervalMs){var videoByteLength=width*height*4;if(!host4OutputProbe.videoFrame||host4OutputProbe.videoFrame.byteLength!==videoByteLength){host4OutputProbe.videoFrame=new Uint8Array(videoByteLength);}var videoCopyStarted=videoNow;host4OutputProbe.videoFrame.set(HEAPU8.subarray(pixels,pixels+videoByteLength));host4OutputProbe.videoLastCaptureAt=videoNow;host4OutputProbe.videoCapturedFrames=(host4OutputProbe.videoCapturedFrames||0)+1;host4OutputProbe.videoByteLength=videoByteLength;host4OutputProbe.videoCopyDurationMs=(typeof performance!=="undefined"?performance.now():Date.now())-videoCopyStarted;host4OutputProbe.videoCaptureAvailable=true;}}catch(_){host4OutputProbe.videoCaptureAvailable=false;}}}';
+          var imageAnchor = 'var _glTexImage2D=(target,level,internalFormat,width,height,border,format,type,pixels)=>{';
+          var subImageAnchor = 'var _glTexSubImage2D=(target,level,xoffset,yoffset,width,height,format,type,pixels)=>{';
+          if (source.indexOf(imageAnchor) !== -1) {
+            source = source.replace(imageAnchor, imageAnchor + textureInstrumentation);
+          }
+          if (source.indexOf(subImageAnchor) !== -1) {
+            source = source.replace(subImageAnchor, subImageAnchor + textureInstrumentation);
+          }
+          return { source: source, installed: true };
+        }
+
+        function stopOutputProbe() {
+          if (outputProbeTimer !== null) {
+            clearInterval(outputProbeTimer);
+            outputProbeTimer = null;
+          }
+          if (externalWebglPreviewTimer !== null) {
+            clearInterval(externalWebglPreviewTimer);
+            externalWebglPreviewTimer = null;
+          }
+          if (semanticScreenshotPreviewTimer !== null) {
+            clearInterval(semanticScreenshotPreviewTimer);
+            semanticScreenshotPreviewTimer = null;
+          }
+          if (inWebViewCanvasMirrorCancel !== null) {
+            inWebViewCanvasMirrorCancel();
+            inWebViewCanvasMirrorCancel = null;
+          }
+        }
+
+        // Local-only WebRTC spike.  The publisher deliberately captures the
+        // canvas populated by `retro_video_refresh`, not the page's WebGL
+        // canvas and not a Flutter/WebView screenshot.  This keeps the
+        // transport source identical to the verified preview source.
+        function currentOutputProbe() {
+          try {
+            var runtime = current && typeof current.getEmscripten === 'function'
+              ? current.getEmscripten() : null;
+            return runtime && runtime.Module ? runtime.Module.host4OutputProbe : null;
+          } catch (_) {
+            return null;
+          }
+        }
+
+        function stopWebRtcPreview() {
+          var state = webRtcPreview;
+          webRtcPreview = null;
+          if (!state) return;
+          try { if (state.statsTimer) clearInterval(state.statsTimer); } catch (_) {}
+          try { if (state.captureTimer) clearInterval(state.captureTimer); } catch (_) {}
+          try { if (state.captureSchedulerTimer) clearInterval(state.captureSchedulerTimer); } catch (_) {}
+          try { if (state.signalReconnectTimer) clearTimeout(state.signalReconnectTimer); } catch (_) {}
+            try {
+              var probe = currentOutputProbe();
+              if (probe && probe.webRtcCaptureTrack === state.captureTrack) {
+                probe.webRtcCaptureTrack = null;
+              }
+              if (probe) {
+                probe.webRtcEnabled = false;
+                probe.webRtcLatencyProbe = false;
+                probe.webRtcCaptureIntervalMs = null;
+                probe.webRtcCaptureTimerActive = false;
+                probe.webRtcCaptureMode = null;
+                probe.webRtcDataFrameSender = null;
+              }
+            } catch (_) {}
+          try { if (state.socket) state.socket.close(); } catch (_) {}
+          try { if (state.stream) state.stream.getTracks().forEach(function (track) { track.stop(); }); } catch (_) {}
+          try { if (state.peer) state.peer.close(); } catch (_) {}
+          if (state.video && state.video.parentNode) state.video.parentNode.removeChild(state.video);
+        }
+
+        function reportWebRtc(reason, detail) {
+          post('diagnostic', Object.assign({
+            reason: reason,
+            transport: 'local_webrtc_core_frame_poc'
+          }, detail || {}));
+        }
+
+        var webRtcInputButtons = {
+          up: true, down: true, left: true, right: true,
+          a: true, b: true, x: true, y: true,
+          l: true, r: true, l2: true, r2: true,
+          select: true, start: true
+        };
+        var webRtcInputActions = { down: true, up: true, press: true };
+        function isValidWebRtcInput(event) {
+          return !!event && typeof event === 'object' &&
+            webRtcInputButtons[event.button] === true &&
+            webRtcInputActions[event.action] === true &&
+            Number.isInteger(event.player) && event.player >= 1 && event.player <= 4;
+        }
+
+        function startWebRtcPreview(config) {
+          var role = config.webRtcPreviewRole;
+          if (role !== 'publisher' && role !== 'viewer') return false;
+          stopWebRtcPreview();
+          if (typeof WebSocket === 'undefined' ||
+              typeof RTCPeerConnection === 'undefined') {
+            reportWebRtc('webrtc_unavailable', {
+              role: role,
+              webSocket: typeof WebSocket !== 'undefined',
+              peerConnection: typeof RTCPeerConnection !== 'undefined'
+            });
+            return false;
+          }
+          var signalUrl = config.webRtcSignalUrl;
+          if (!signalUrl) {
+            reportWebRtc('webrtc_signal_url_missing', { role: role });
+            return false;
+          }
+          var state = {
+            role: role,
+            room: config.webRtcRoomId || 'host4-local-poc',
+            transport: config.webRtcTransport === 'data' ? 'data' : 'media',
+            peer: new RTCPeerConnection({ iceServers: [] }),
+            socket: null,
+            signalReconnectTimer: null,
+            signalReconnectAttempt: 0,
+            stream: null,
+            captureTrack: null,
+            captureTimer: null,
+            // WKWebView can queue canvas.captureStream(60) frames before they
+            // ever reach RTP. Keep only one manually requested image in
+            // flight, so a slow encoder skips stale core frames instead of
+            // replaying them to the remote player.
+            captureSender: null,
+            captureSchedulerTimer: null,
+            captureStatsPending: false,
+            captureInFlight: false,
+            captureLastEncodedFrames: 0,
+            captureRequestedAt: 0,
+            video: null,
+            statsTimer: null,
+            latencyProbe: config.webRtcLatencyProbeEnabled === true,
+            // Zero is the release latest-frame path: request a new canvas
+            // image only after the previous image has progressed through the
+            // encoder. Positive values retain the explicit pacing A/B mode.
+            captureIntervalMs: Number.isFinite(Number(config.webRtcCaptureIntervalMs))
+              ? Math.max(0, Number(config.webRtcCaptureIntervalMs)) : 16,
+            controlProfile: typeof config.webRtcControlProfile === 'string'
+              ? config.webRtcControlProfile : null,
+            controlLayoutStyle: typeof config.webRtcControlLayoutStyle === 'string'
+              ? config.webRtcControlLayoutStyle : null,
+            siliconeLayoutVariant: typeof config.webRtcSiliconeLayoutVariant === 'string'
+              ? config.webRtcSiliconeLayoutVariant : null,
+            maskEnabled: config.webRtcMaskEnabled === true,
+            maskPath: typeof config.webRtcMaskPath === 'string'
+              ? config.webRtcMaskPath : null,
+            controlsCollapsed: config.webRtcControlsCollapsed === true,
+            visualLatencySamples: [],
+            visualLatencyCanvas: null,
+            offered: false,
+            makingOffer: false,
+            stopped: false
+          };
+          webRtcPreview = state;
+          function dispatchRemoteInput(event) {
+            if (!isValidWebRtcInput(event)) {
+              reportWebRtc('remote_input_rejected', { role: role });
+              return;
+            }
+            try {
+              window.Host4WebEmulator.keyEvent(event);
+              reportWebRtc('remote_input_dispatched', {
+                role: role,
+                button: event.button,
+                action: event.action,
+                player: event.player
+              });
+            } catch (error) {
+              reportWebRtc('remote_input_failed', { role: role, error: String(error) });
+            }
+          }
+          function createPublisherInputChannel() {
+            if (role !== 'publisher' || !state.peer) return;
+            var channel = state.peer.createDataChannel(
+              'host4-remote-input', { ordered: true }
+            );
+            // `onopen` is local state: it can occur a few milliseconds before
+            // the viewer has installed its `onmessage` handler. Repeat this
+            // tiny, idempotent control envelope during connection setup so a
+            // viewer always converges on the host's actual control shell.
+            function sendPublisherMetadata(channel) {
+              if (!state.controlProfile || channel.readyState !== 'open') return;
+              channel.send(JSON.stringify({
+                type: 'metadata',
+                controlProfile: state.controlProfile,
+                controlLayoutStyle: state.controlLayoutStyle,
+                siliconeLayoutVariant: state.siliconeLayoutVariant,
+                maskEnabled: state.maskEnabled,
+                maskPath: state.maskPath,
+                controlsCollapsed: state.controlsCollapsed
+              }));
+            }
+            channel.onopen = function () {
+              sendPublisherMetadata(channel);
+              window.setTimeout(function () {
+                sendPublisherMetadata(channel);
+              }, 50);
+              window.setTimeout(function () {
+                sendPublisherMetadata(channel);
+              }, 250);
+              window.setTimeout(function () {
+                sendPublisherMetadata(channel);
+              }, 1000);
+            };
+            channel.onmessage = function (event) {
+              var payload;
+              try { payload = JSON.parse(String(event.data)); } catch (_) {
+                reportWebRtc('remote_input_rejected', { role: role });
+                return;
+              }
+              if (!payload || payload.type !== 'input') {
+                reportWebRtc('remote_input_rejected', { role: role });
+                return;
+              }
+              dispatchRemoteInput(payload.event);
+            };
+            state.inputChannel = channel;
+          }
+          reportWebRtc('webrtc_transport_selected', {
+            role: role,
+            transportMode: state.transport
+          });
+          if (role === 'publisher') {
+            createPublisherInputChannel();
+            var publisherProbe = currentOutputProbe();
+            if (publisherProbe) {
+              publisherProbe.webRtcEnabled = true;
+              publisherProbe.webRtcLatencyProbe = state.latencyProbe;
+              publisherProbe.webRtcCaptureIntervalMs = state.captureIntervalMs;
+            }
+          }
+          function active() { return webRtcPreview === state && !state.stopped; }
+          function createPublisherDataChannel() {
+            if (role !== 'publisher' || state.transport !== 'data' || !state.peer) return;
+            state.frameChannel = state.peer.createDataChannel(
+              'host4-core-frames',
+              { ordered: false, maxRetransmits: 0 }
+            );
+          }
+          if (state.transport === 'data' && role === 'publisher') {
+            createPublisherDataChannel();
+          }
+          function reportVideoStats() {
+            if (!active()) return;
+            var samples = state.visualLatencySamples.slice().sort(function (a, b) { return a - b; });
+            function percentile(fraction) {
+              if (!samples.length) return null;
+              return samples[Math.min(samples.length - 1, Math.floor((samples.length - 1) * fraction))];
+            }
+            if (state.transport === 'data') {
+              reportWebRtc('webrtc_data_stats', {
+                role: role,
+                framesSent: Number(state.dataFramesSent) || 0,
+                framesReceived: Number(state.dataFramesReceived) || 0,
+                visualLatencySamples: samples.length,
+                visualLatencyP50Ms: percentile(0.5),
+                visualLatencyP95Ms: percentile(0.95)
+              });
+              return;
+            }
+            if (!state.peer || typeof state.peer.getStats !== 'function') return;
+            state.peer.getStats().then(function (reports) {
+              var videoReport = null;
+              reports.forEach(function (report) {
+                var isVideo = report && (report.kind === 'video' || report.mediaType === 'video');
+                if (!isVideo || videoReport) return;
+                if (role === 'viewer' && report.type === 'inbound-rtp') videoReport = report;
+                if (role === 'publisher' && report.type === 'outbound-rtp') videoReport = report;
+              });
+              if (!videoReport || !active()) return;
+              reportWebRtc('webrtc_video_stats', {
+                role: role,
+                framesPerSecond: Number(videoReport.framesPerSecond) || 0,
+                framesDecoded: Number(videoReport.framesDecoded) || 0,
+                framesReceived: Number(videoReport.framesReceived) || 0,
+                framesSent: Number(videoReport.framesSent) || 0,
+                framesEncoded: Number(videoReport.framesEncoded) || 0,
+                framesDropped: Number(videoReport.framesDropped) || 0,
+                totalEncodeTime: Number(videoReport.totalEncodeTime) || 0,
+                totalPacketSendDelay: Number(videoReport.totalPacketSendDelay) || 0,
+                jitterBufferDelay: Number(videoReport.jitterBufferDelay) || 0,
+                jitterBufferEmittedCount: Number(videoReport.jitterBufferEmittedCount) || 0,
+                visualLatencySamples: samples.length,
+                visualLatencyP50Ms: percentile(0.5),
+                visualLatencyP95Ms: percentile(0.95)
+              });
+            }).catch(function () {});
+          }
+          state.statsTimer = setInterval(reportVideoStats, 1000);
+          function startVisualLatencyProbe(video) {
+            if (!state.latencyProbe ||
+                typeof video.requestVideoFrameCallback !== 'function' ||
+                !active()) return;
+            // Keep magic and timestamp in one source row. Some native renderers
+            // rotate/crop the top-left edge; a two-row marker can put the
+            // timestamp outside the visible texture while leaving its magic
+            // preamble visible.
+            var markerWidth = 256;
+            var markerHeight = 4;
+            var canvas = document.createElement('canvas');
+            canvas.width = markerWidth;
+            canvas.height = markerHeight;
+            var context = canvas.getContext('2d', { willReadFrequently: true });
+            if (!context) return;
+            state.visualLatencyCanvas = canvas;
+            function sample() {
+              if (!active() || state.video !== video) return;
+              try {
+                context.drawImage(
+                  video, 0, 0, markerWidth, markerHeight,
+                  0, 0, markerWidth, markerHeight
+                );
+                var pixels = context.getImageData(0, 0, markerWidth, markerHeight).data;
+                var markerMagic = 0;
+                var markerTimestamp = 0;
+                for (var bit = 0; bit < 32; bit += 1) {
+                  var x = bit * 4 + 2;
+                  var magicOffset = (2 * markerWidth + x) * 4;
+                  var timestampOffset = (2 * markerWidth + 128 + x) * 4;
+                  var magicLuminance = pixels[magicOffset] + pixels[magicOffset + 1] + pixels[magicOffset + 2];
+                  var timestampLuminance = pixels[timestampOffset] + pixels[timestampOffset + 1] + pixels[timestampOffset + 2];
+                  markerMagic = (markerMagic << 1) | (magicLuminance > 384 ? 1 : 0);
+                  markerTimestamp = (markerTimestamp << 1) | (timestampLuminance > 384 ? 1 : 0);
+                }
+                markerMagic = markerMagic >>> 0;
+                markerTimestamp = markerTimestamp >>> 0;
+                // A dedicated 32-bit row makes the optical marker
+                // distinguishable from arbitrary game pixels after scaling.
+                if (markerMagic === 0xA55A3CC3) {
+                  var sentMillis = markerTimestamp & 0xFFFF;
+                  var latency = ((Date.now() & 0xFFFF) - sentMillis + 0x10000) & 0xFFFF;
+                  // A stale/invalid marker is not an end-to-end measurement.
+                  if (latency <= 10000) {
+                    state.visualLatencySamples.push(latency);
+                    if (state.visualLatencySamples.length > 180) state.visualLatencySamples.shift();
+                  }
+                }
+              } catch (_) {}
+              if (active() && state.video === video) video.requestVideoFrameCallback(sample);
+            }
+            video.requestVideoFrameCallback(sample);
+          }
+          function signal(message) {
+            if (active() && state.socket && state.socket.readyState === WebSocket.OPEN) {
+              state.socket.send(JSON.stringify(Object.assign({ room: state.room }, message)));
+            }
+          }
+          function sendLatestDataFrame(canvas) {
+            var channel = state.frameChannel;
+            if (!channel || channel.readyState !== 'open' || channel.bufferedAmount > 131072) return;
+            if (state.frameEncoding) {
+              state.frameDirty = true;
+              return;
+            }
+            state.frameEncoding = true;
+            canvas.toBlob(function (blob) {
+              if (!blob) {
+                state.frameEncoding = false;
+                return;
+              }
+              blob.arrayBuffer().then(function (bytes) {
+                if (active() && channel.readyState === 'open' && channel.bufferedAmount <= 131072) {
+                  // Keep the latency measurement out of the encoded image.
+                  // The old visual marker was subject to JPEG artefacts, so it
+                  // could not reliably be decoded even though frames were
+                  // arriving. The eight-byte envelope is private to our data
+                  // channel and is stripped before JPEG decoding by the
+                  // viewer: four magic bytes followed by the send timestamp.
+                  var packet = new Uint8Array(bytes.byteLength + 8);
+                  packet[0] = 0x48; // H
+                  packet[1] = 0x34; // 4
+                  packet[2] = 0x46; // F
+                  packet[3] = 0x52; // R
+                  new DataView(packet.buffer).setUint32(4, Date.now() >>> 0, false);
+                  packet.set(new Uint8Array(bytes), 8);
+                  channel.send(packet.buffer);
+                  state.dataFramesSent = (state.dataFramesSent || 0) + 1;
+                }
+              }).catch(function () {}).then(function () {
+                state.frameEncoding = false;
+                if (state.frameDirty && active()) {
+                  state.frameDirty = false;
+                  sendLatestDataFrame(canvas);
+                }
+              });
+            // Core frames are tiny pixel-art surfaces (for example NES is
+            // 256x224). PNG preserves their sharp palette edges and text;
+            // unlike the prior JPEG 0.72 experiment it introduces no visible
+            // compression blur on the receiving game page.
+            }, 'image/png');
+          }
+          if (role === 'publisher' && state.transport === 'data') {
+            var dataProbe = currentOutputProbe();
+            if (dataProbe) dataProbe.webRtcDataFrameSender = sendLatestDataFrame;
+          }
+          function installPeerHandlers(peer) {
+            peer.onicecandidate = function (event) {
+              if (event.candidate) signal({ type: 'signal', payload: { candidate: event.candidate } });
+            };
+            peer.onconnectionstatechange = function () {
+              reportWebRtc('webrtc_connection_state', {
+                role: role,
+                state: peer.connectionState
+              });
+              // A temporary ICE failure can recover on the existing data
+              // channel, so `ondatachannel` and its first-frame callback do
+              // not run again. If this viewer had already drawn live frames,
+              // explicitly restore Flutter's frame-ready state on reconnect.
+              if (role === 'viewer' &&
+                  state.transport === 'data' &&
+                  peer.connectionState === 'connected' &&
+                  state.dataFramesReceived > 0) {
+                reportWebRtc('webrtc_data_frame', { role: role, recovered: true });
+              }
+            };
+            peer.ontrack = function (event) {
+            if (role !== 'viewer' || !active()) return;
+            // Prefer the newest decodable frame. WebKit may not implement
+            // this hint; feature-test it rather than relying on it.
+            state.peer.getReceivers().forEach(function (receiver) {
+              if (receiver && receiver.track && receiver.track.kind === 'video' &&
+                  'playoutDelayHint' in receiver) {
+                try { receiver.playoutDelayHint = 0; } catch (_) {}
+              }
+            });
+            var video = state.video;
+            if (!video) {
+              video = document.createElement('video');
+              video.id = 'host4-webrtc-viewer';
+              video.autoplay = true;
+              video.muted = true;
+              video.playsInline = true;
+              video.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;object-fit:contain;background:#000;z-index:2147483647';
+              document.body.appendChild(video);
+              state.video = video;
+            }
+            video.srcObject = event.streams[0];
+            var play = video.play();
+            if (play && typeof play.catch === 'function') play.catch(function (error) {
+              reportWebRtc('webrtc_viewer_play_error', { error: String(error) });
+            });
+            reportWebRtc('webrtc_remote_track', { role: role });
+            startVisualLatencyProbe(video);
+            };
+            peer.ondatachannel = function (event) {
+              if (role !== 'viewer' || !active()) return;
+              if (event.channel.label === 'host4-remote-input') {
+                state.inputChannel = event.channel;
+                event.channel.onopen = function () {
+                  reportWebRtc('remote_input_channel_open', { role: role });
+                };
+                event.channel.onmessage = function (event) {
+                  var metadata;
+                  try { metadata = JSON.parse(String(event.data)); } catch (_) { return; }
+                  if (!metadata || metadata.type !== 'metadata' ||
+                      typeof metadata.controlProfile !== 'string') return;
+                  reportWebRtc('webrtc_remote_metadata', {
+                    role: role,
+                    controlProfile: metadata.controlProfile,
+                    controlLayoutStyle: metadata.controlLayoutStyle,
+                    siliconeLayoutVariant: metadata.siliconeLayoutVariant,
+                    maskEnabled: metadata.maskEnabled,
+                    maskPath: metadata.maskPath,
+                    controlsCollapsed: metadata.controlsCollapsed
+                  });
+                };
+                return;
+              }
+              if (event.channel.label !== 'host4-core-frames') return;
+              // A host restart replaces the channel while this viewer page is
+              // still alive. Re-announce the first rendered frame so Flutter
+              // can dismiss a recoverable connection-error overlay.
+              state.dataFirstFrameReported = false;
+              var canvas = document.createElement('canvas');
+              canvas.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;object-fit:contain;background:#000;z-index:2147483647';
+              document.body.appendChild(canvas);
+              event.channel.binaryType = 'arraybuffer';
+              function decodeLatestDataFrame() {
+                if (!active() || state.dataFrameDecoding || !state.pendingDataFrame) return;
+                var frameData = state.pendingDataFrame;
+                state.pendingDataFrame = null;
+                state.dataFrameDecoding = true;
+                var packet = new Uint8Array(frameData);
+                var sentAt = null;
+                if (packet.byteLength >= 8 &&
+                    packet[0] === 0x48 && packet[1] === 0x34 &&
+                    packet[2] === 0x46 && packet[3] === 0x52) {
+                  sentAt = new DataView(packet.buffer, packet.byteOffset + 4, 4).getUint32(0, false);
+                  packet = packet.subarray(8);
+                }
+                createImageBitmap(new Blob([packet], { type: 'image/png' })).then(function (bitmap) {
+                  if (!active()) {
+                    bitmap.close();
+                    return;
+                  }
+                  canvas.width = bitmap.width; canvas.height = bitmap.height;
+                  var context = canvas.getContext('2d', { willReadFrequently: true });
+                  context.drawImage(bitmap, 0, 0);
+                  bitmap.close();
+                  state.dataFramesReceived = (state.dataFramesReceived || 0) + 1;
+                  if (sentAt !== null) {
+                    // Simulator pairs share a clock; on real devices this is
+                    // diagnostic-only unless their clocks are synchronized.
+                    var dataLatency = (Date.now() - sentAt) >>> 0;
+                    if (dataLatency <= 10000) {
+                      state.visualLatencySamples.push(dataLatency);
+                      if (state.visualLatencySamples.length > 180) state.visualLatencySamples.shift();
+                    }
+                  }
+                  if (state.latencyProbe && canvas.width >= 256 && canvas.height >= 4) {
+                    try {
+                      var pixels = context.getImageData(0, 0, 256, 4).data;
+                      var markerMagic = 0;
+                      var markerTimestamp = 0;
+                      for (var bit = 0; bit < 32; bit += 1) {
+                        var x = bit * 4 + 2;
+                        var magicOffset = (2 * 256 + x) * 4;
+                        var timestampOffset = (2 * 256 + 128 + x) * 4;
+                        var magicLuminance = pixels[magicOffset] + pixels[magicOffset + 1] + pixels[magicOffset + 2];
+                        var timestampLuminance = pixels[timestampOffset] + pixels[timestampOffset + 1] + pixels[timestampOffset + 2];
+                        markerMagic = (markerMagic << 1) | (magicLuminance > 384 ? 1 : 0);
+                        markerTimestamp = (markerTimestamp << 1) | (timestampLuminance > 384 ? 1 : 0);
+                      }
+                      markerMagic = markerMagic >>> 0;
+                      markerTimestamp = markerTimestamp >>> 0;
+                      if (markerMagic === 0xA55A3CC3) {
+                        var sentMillis = markerTimestamp & 0xFFFF;
+                        var latency = ((Date.now() & 0xFFFF) - sentMillis + 0x10000) & 0xFFFF;
+                        if (latency <= 10000) {
+                          state.visualLatencySamples.push(latency);
+                          if (state.visualLatencySamples.length > 180) state.visualLatencySamples.shift();
+                        }
+                      }
+                    } catch (_) {}
+                  }
+                  if (!state.dataFirstFrameReported) {
+                    state.dataFirstFrameReported = true;
+                    reportWebRtc('webrtc_data_frame', { role: role });
+                  }
+                }).catch(function () {}).then(function () {
+                  state.dataFrameDecoding = false;
+                  // Newer packets replace the pending one while this image was
+                  // decoding, so a slow decoder never builds a playback queue.
+                  decodeLatestDataFrame();
+                });
+              }
+              event.channel.onmessage = function (frame) {
+                state.pendingDataFrame = frame.data;
+                decodeLatestDataFrame();
+              };
+            };
+          }
+          installPeerHandlers(state.peer);
+          function signalPublisherOffer(reason) {
+            if (!active() || role !== 'publisher' ||
+                (!state.stream && state.transport !== 'data') || state.makingOffer) return;
+            state.makingOffer = true;
+            state.peer.createOffer().then(function (offer) {
+              if (!active()) return null;
+              return state.peer.setLocalDescription(offer).then(function () {
+                state.offered = true;
+                signal({ type: 'signal', payload: { description: state.peer.localDescription } });
+                reportWebRtc('webrtc_offer_sent', { role: role, reason: reason });
+              });
+            }).catch(function (error) {
+              reportWebRtc('webrtc_offer_error', { role: role, reason: reason, error: String(error) });
+            }).then(function () {
+              state.makingOffer = false;
+            });
+          }
+          function startPublisherTrack() {
+            if (!active() || state.stream) return;
+            var probeCanvas = window.__host4OutputProbeCanvas;
+            if (!probeCanvas || typeof probeCanvas.captureStream !== 'function' ||
+                !probeCanvas.width || !probeCanvas.height) {
+              setTimeout(startPublisherTrack, 50);
+              return;
+            }
+            if (state.transport === 'data') {
+              signalPublisherOffer('initial_data_channel_ready');
+              return;
+            }
+            try {
+              // Do not let `captureStream(60)` create WebKit's autonomous
+              // canvas-frame FIFO. On iOS that queue can reach hundreds of
+              // milliseconds even while RTP reports no loss. A zero-rate
+              // capture track is driven only after a fresh libretro callback,
+              // which makes the source a latest-frame producer.
+              state.stream = probeCanvas.captureStream(0);
+              state.captureTrack = state.stream.getVideoTracks()[0] || null;
+              var captureMode = 'core-refresh-manual';
+              if (!state.captureTrack || typeof state.captureTrack.requestFrame !== 'function') {
+                state.stream.getTracks().forEach(function (track) { track.stop(); });
+                state.stream = probeCanvas.captureStream(60);
+                state.captureTrack = state.stream.getVideoTracks()[0] || null;
+                captureMode = 'auto-fallback-no-request-frame';
+              } else if (state.captureIntervalMs > 0) {
+                captureMode = 'core-paced-debug';
+              }
+              var probe = currentOutputProbe();
+              if (probe) {
+                probe.webRtcCaptureTrack = state.captureTrack;
+                probe.webRtcCaptureMode = captureMode;
+                // `renderCoreVideoPreview` requests a bounded fresh capture
+                // after a newly-written Core frame. Do not run a timer here:
+                // WebKit may queue duplicate requests, turning a small
+                // encoder backlog into visible stale playback.
+                probe.webRtcCaptureTimerActive = false;
+              }
+              state.stream.getTracks().forEach(function (track) {
+                var sender = state.peer.addTrack(track, state.stream);
+                if (track.kind === 'video') state.captureSender = sender;
+                // Keep cadence aligned to the core's ~60fps callback instead
+                // of asking WebKit to encode duplicate canvas frames.
+                if (!sender || typeof sender.getParameters !== 'function') return;
+                try {
+                  var parameters = sender.getParameters();
+                  parameters.encodings = parameters.encodings && parameters.encodings.length
+                    ? parameters.encodings : [{}];
+                  parameters.encodings[0].maxFramerate = 60;
+                  parameters.encodings[0].maxBitrate = 2000000;
+                  parameters.degradationPreference = 'maintain-framerate';
+                  var configured = sender.setParameters(parameters);
+                  if (configured && typeof configured.catch === 'function') configured.catch(function () {});
+                } catch (_) {}
+              });
+              if (state.captureIntervalMs < 0 && state.captureTrack &&
+                  state.captureSender &&
+                  typeof state.captureTrack.requestFrame === 'function' &&
+                  typeof state.captureSender.getStats === 'function') {
+                function encodedFrameCount(reports) {
+                  var encoded = 0;
+                  reports.forEach(function (report) {
+                    // sender.getStats() in WKWebView can omit kind/mediaType
+                    // even though peer.getStats() exposes it. This publisher
+                    // has one media sender (video), so accepting its outbound
+                    // report is both safe and necessary to release the next
+                    // freshest frame at encoder cadence.
+                    if (report && report.type === 'outbound-rtp') {
+                      encoded = Math.max(encoded, Number(report.framesEncoded) || 0);
+                    }
+                  });
+                  return encoded;
+                }
+                function requestLatestCanvasFrame() {
+                  if (!active() || state.captureStatsPending) return;
+                  var probe = currentOutputProbe();
+                  if (!probe || !probe.webRtcFrameDirty) return;
+                  var now = Date.now();
+                  // Do not let a non-encoding peer freeze the source before
+                  // it connects. During a healthy session framesEncoded above
+                  // releases the next request; this is only a disconnect
+                  // escape hatch and must never pace normal playback.
+                  if (state.captureInFlight && now - state.captureRequestedAt < 250) return;
+                  state.captureStatsPending = true;
+                  state.captureSender.getStats().then(function (reports) {
+                    if (!active()) return;
+                    var encoded = encodedFrameCount(reports);
+                    if (encoded > state.captureLastEncodedFrames) {
+                      state.captureLastEncodedFrames = encoded;
+                      state.captureInFlight = false;
+                    }
+                    var latestProbe = currentOutputProbe();
+                    var currentNow = Date.now();
+                    if (state.captureInFlight &&
+                        currentNow - state.captureRequestedAt >= 250) {
+                      state.captureInFlight = false;
+                    }
+                    if (!state.captureInFlight && latestProbe &&
+                        latestProbe.webRtcFrameDirty) {
+                      state.captureTrack.requestFrame();
+                      state.captureInFlight = true;
+                      state.captureRequestedAt = currentNow;
+                      latestProbe.webRtcLastRequestedAt = currentNow;
+                      latestProbe.webRtcFrameDirty = false;
+                    }
+                  }).catch(function () {
+                    // If stats are transiently unavailable, continue with one
+                    // bounded request instead of reverting to auto-capture.
+                    if (!active()) return;
+                    var latestProbe = currentOutputProbe();
+                    if (latestProbe && latestProbe.webRtcFrameDirty &&
+                        (!state.captureInFlight ||
+                         Date.now() - state.captureRequestedAt >= 250)) {
+                      state.captureTrack.requestFrame();
+                      state.captureInFlight = true;
+                      state.captureRequestedAt = Date.now();
+                      latestProbe.webRtcLastRequestedAt = state.captureRequestedAt;
+                      latestProbe.webRtcFrameDirty = false;
+                    }
+                  }).then(function () {
+                    state.captureStatsPending = false;
+                  });
+                }
+                state.captureSchedulerTimer = setInterval(requestLatestCanvasFrame, 4);
+                requestLatestCanvasFrame();
+              }
+              signalPublisherOffer('initial_peer_ready');
+            } catch (error) {
+              reportWebRtc('webrtc_capture_stream_error', { error: String(error) });
+            }
+          }
+          function resetPublisherTransport() {
+            if (!active() || role !== 'publisher') return;
+            // A canvas capture track can retain encoded frames after its peer
+            // disappears. A late join must get a fresh track *and* a fresh
+            // RTCPeerConnection, otherwise WebKit replays that stale queue.
+            if (state.captureTimer) clearInterval(state.captureTimer);
+            state.captureTimer = null;
+            if (state.captureSchedulerTimer) clearInterval(state.captureSchedulerTimer);
+            state.captureSchedulerTimer = null;
+            var probe = currentOutputProbe();
+            if (probe) {
+              probe.webRtcCaptureTrack = null;
+              probe.webRtcCaptureTimerActive = false;
+              probe.webRtcCaptureMode = null;
+            }
+            try {
+              if (state.stream) state.stream.getTracks().forEach(function (track) { track.stop(); });
+            } catch (_) {}
+            state.stream = null;
+            state.captureTrack = null;
+            state.captureSender = null;
+            state.captureInFlight = false;
+            state.captureStatsPending = false;
+            state.captureLastEncodedFrames = 0;
+            state.offered = false;
+            state.makingOffer = false;
+            var previousPeer = state.peer;
+            state.peer = new RTCPeerConnection({ iceServers: [] });
+            installPeerHandlers(state.peer);
+            createPublisherInputChannel();
+            createPublisherDataChannel();
+            try { if (previousPeer) previousPeer.close(); } catch (_) {}
+            reportWebRtc('webrtc_publisher_transport_reset', { role: role });
+          }
+          async function receiveSignal(payload) {
+            if (!active() || !payload) return;
+            try {
+              if (payload.description) {
+                await state.peer.setRemoteDescription(payload.description);
+                if (payload.description.type === 'offer' && role === 'viewer') {
+                  var answer = await state.peer.createAnswer();
+                  await state.peer.setLocalDescription(answer);
+                  signal({ type: 'signal', payload: { description: state.peer.localDescription } });
+                  reportWebRtc('webrtc_answer_sent', { role: role });
+                }
+              } else if (payload.candidate) {
+                await state.peer.addIceCandidate(payload.candidate);
+              }
+            } catch (error) {
+              reportWebRtc('webrtc_signal_error', { role: role, error: String(error) });
+            }
+          }
+          // A receiver may be opened before the host presses Share.  In that
+          // valid order the host's local signalling listener does not exist
+          // yet, so reconnect the viewer with bounded exponential backoff
+          // instead of leaving the otherwise-correct game shell black.
+          function scheduleViewerSignalReconnect(reason) {
+            if (!active() || role !== 'viewer' || state.signalReconnectTimer) return;
+            var attempt = Math.min(state.signalReconnectAttempt || 0, 6);
+            var delayMs = Math.min(3000, 200 * Math.pow(2, attempt));
+            state.signalReconnectAttempt = attempt + 1;
+            reportWebRtc('webrtc_signal_reconnect_scheduled', {
+              role: role,
+              reason: reason,
+              attempt: state.signalReconnectAttempt,
+              delayMs: delayMs
+            });
+            state.signalReconnectTimer = window.setTimeout(function () {
+              state.signalReconnectTimer = null;
+              if (active() && role === 'viewer') connectSignalSocket();
+            }, delayMs);
+          }
+          function connectSignalSocket() {
+            if (!active()) return;
+            try {
+              var socket = new WebSocket(signalUrl);
+              state.socket = socket;
+              socket.onopen = function () {
+                if (!active() || state.socket !== socket) return;
+                state.signalReconnectAttempt = 0;
+              signal({ type: 'join', role: role });
+              reportWebRtc('webrtc_signal_connected', { role: role, room: state.room });
+            };
+              socket.onmessage = function (event) {
+                if (!active() || state.socket !== socket) return;
+              var message;
+              try { message = JSON.parse(event.data); } catch (_) { return; }
+              if (message.type === 'peer-ready' && role === 'publisher') {
+                if (state.stream || state.transport === 'data') {
+                  resetPublisherTransport();
+                  startPublisherTrack();
+                } else {
+                  startPublisherTrack();
+                }
+              }
+              if (message.type === 'signal') receiveSignal(message.payload);
+            };
+              socket.onerror = function () {
+                if (!active() || state.socket !== socket) return;
+                reportWebRtc('webrtc_signal_error', { role: role });
+              };
+              socket.onclose = function () {
+                if (!active() || state.socket !== socket) return;
+                reportWebRtc('webrtc_signal_closed', { role: role });
+                scheduleViewerSignalReconnect('socket_closed');
+              };
+            } catch (error) {
+              reportWebRtc('webrtc_signal_connect_error', { role: role, error: String(error) });
+              scheduleViewerSignalReconnect('socket_constructor_error');
+            }
+          }
+          connectSignalSocket();
+          return true;
+        }
+
+        // Keep the preview in the same WebView compositor as the game canvas.
+        // This deliberately has no Blob/PNG conversion and never crosses the
+        // JavaScript-to-Flutter bridge. It is a runtime DOM overlay only; RA
+        // and the loaded Core bytes remain untouched.
+        function startInWebViewCanvasMirrorPreview(owner) {
+          // Nostalgist reuses the supplied canvas but changes its id to
+          // "canvas" during launch. Prefer that live element, falling back
+          // to the pre-launch id only for defensive startup ordering.
+          var source = document.getElementById('canvas') ||
+            document.getElementById('emulator');
+          if (!source) return false;
+          var existing = document.getElementById('host4-live-preview');
+          if (existing) existing.remove();
+          var mirror = document.createElement('canvas');
+          mirror.id = 'host4-live-preview';
+          mirror.setAttribute('aria-hidden', 'true');
+          document.body.appendChild(mirror);
+          var context = mirror.getContext('2d', {
+            alpha: false,
+            desynchronized: true
+          });
+          if (!context) {
+            mirror.remove();
+            return false;
+          }
+          var cancelled = false;
+          var rafId = null;
+          function present() {
+            if (cancelled || current !== owner) return;
+            var width = source.width || source.clientWidth;
+            var height = source.height || source.clientHeight;
+            if (width > 0 && height > 0) {
+              if (mirror.width !== width || mirror.height !== height) {
+                mirror.width = width;
+                mirror.height = height;
+              }
+              try {
+                context.drawImage(source, 0, 0, width, height);
+              } catch (_) {
+                // A transient canvas resize must not stop the game loop.
+              }
+            }
+            rafId = requestAnimationFrame(present);
+          }
+          inWebViewCanvasMirrorCancel = function () {
+            cancelled = true;
+            if (rafId !== null) cancelAnimationFrame(rafId);
+            mirror.remove();
+          };
+          rafId = requestAnimationFrame(present);
+          return true;
+        }
+
+        // Emscripten normally creates the game context with a discardable
+        // drawing buffer. That makes a later canvas-to-canvas presentation
+        // nondeterministic. Apply this only to the supplied game canvas and
+        // only before Nostalgist/Core creates its first WebGL context.
+        function installPreservedDrawingBufferForCanvas() {
+          var canvas = document.getElementById('emulator');
+          if (!canvas || canvas.__host4PreservedDrawingBufferInstalled) {
+            return function () {};
+          }
+          canvas.__host4PreservedDrawingBufferInstalled = true;
+          var originalGetContext = canvas.getContext.bind(canvas);
+          canvas.getContext = function (type, attributes) {
+            if (type === 'webgl' || type === 'experimental-webgl' ||
+                type === 'webgl2') {
+              attributes = Object.assign({}, attributes || {}, {
+                preserveDrawingBuffer: true
+              });
+            }
+            return originalGetContext(type, attributes);
+          };
+          return function () {
+            canvas.getContext = originalGetContext;
+          };
+        }
+
+        // Ask Nostalgist/RetroArch for a game screenshot at a deliberately
+        // low cadence. This is not a WebView snapshot and does not inspect or
+        // rewrite WebGL/Core code: the PNG is produced by RetroArch's public
+        // screenshot command for the current game output.
+        function startSemanticScreenshotPreview(owner) {
+          var inFlight = false;
+          semanticScreenshotPreviewTimer = setInterval(async function () {
+            if (current !== owner || inFlight) return;
+            inFlight = true;
+            var startedAt = typeof performance !== 'undefined'
+              ? performance.now() : Date.now();
+            try {
+              var blob = await owner.screenshot();
+              var imageBase64 = await blobToBase64(blob);
+              if (!imageBase64 || current !== owner) return;
+              var finishedAt = typeof performance !== 'undefined'
+                ? performance.now() : Date.now();
+              window.Host4WebEmulatorPost('outputPreview', {
+                reason: 'semantic_ra_screenshot',
+                imageBase64: imageBase64,
+                captureDurationMs: finishedAt - startedAt
+              });
+              post('diagnostic', {
+                reason: 'semantic_ra_screenshot',
+                captureDurationMs: finishedAt - startedAt,
+                byteLength: imageBase64.length
+              });
+            } catch (error) {
+              post('diagnostic', {
+                reason: 'semantic_ra_screenshot_error',
+                error: String(error)
+              });
+            } finally {
+              inFlight = false;
+            }
+          }, 1000);
+        }
+
+        // This hook deliberately runs only against the public WebGL context
+        // exposed by Nostalgist after an unmodified RA core has started. It
+        // neither transforms Core JS nor adds a Wasm import. A texture upload
+        // becomes a candidate only when that exact texture is later used to
+        // draw into the default framebuffer (the visible game canvas).
+        function installExternalWebglPreview(owner) {
+          var runtime = owner && typeof owner.getEmscripten === 'function'
+            ? owner.getEmscripten() : null;
+          var module = runtime && runtime.Module;
+          var gl = module && module.ctx;
+          if (!module || !gl || gl.__host4ExternalWebglPreviewInstalled) {
+            return false;
+          }
+          var state = {
+            candidates: new Map(),
+            capturedFrames: 0,
+            lastCaptureAt: 0,
+            available: false,
+            drawCalls: 0,
+            defaultFramebufferDrawCalls: 0,
+            candidateDrawCalls: 0,
+            source: 'external_webgl_presented_texture',
+            activeTextureUnit: 0,
+            textureUnits: new Map(),
+            uploadSequence: 0
+          };
+          module.host4ExternalWebglPreview = state;
+          gl.__host4ExternalWebglPreviewInstalled = true;
+
+          function rememberUpload(args, widthIndex, heightIndex, pixelsIndex) {
+            try {
+              var width = Number(args[widthIndex]) || 0;
+              var height = Number(args[heightIndex]) || 0;
+              var pixels = args[pixelsIndex];
+              var texture = gl.getParameter(gl.TEXTURE_BINDING_2D);
+              if (!texture || !pixels || !pixels.byteLength ||
+                  width <= 0 || height <= 0 ||
+                  pixels.byteLength < width * height * 4) return;
+              var candidate = {
+                width: width,
+                height: height,
+                pixels: new Uint8Array(pixels.buffer, pixels.byteOffset,
+                  width * height * 4),
+                uploadedAt: typeof performance !== 'undefined'
+                    ? performance.now() : Date.now(),
+                uploadSequence: ++state.uploadSequence
+              };
+              state.candidates.set(texture, candidate);
+            } catch (_) {}
+          }
+
+          function emitCandidate(candidate, reason) {
+            try {
+              if (!candidate) return;
+              var now = typeof performance !== 'undefined' ? performance.now() : Date.now();
+              if (now - state.lastCaptureAt < 100) return;
+              var source = state.sourceCanvas || document.createElement('canvas');
+              state.sourceCanvas = source;
+              if (source.width !== candidate.width || source.height !== candidate.height) {
+                source.width = candidate.width;
+                source.height = candidate.height;
+              }
+              // libretro's XRGB frames may carry an unspecified (often zero)
+              // alpha byte. WebGL treats that byte as unused, whereas a 2D
+              // canvas interprets it as transparency. Normalise only the
+              // preview copy so Flutter can display the observed RGB data.
+              var displayPixels = new Uint8ClampedArray(candidate.pixels);
+              for (var pixelIndex = 3; pixelIndex < displayPixels.length;
+                   pixelIndex += 4) {
+                if (displayPixels[pixelIndex] === 0) {
+                  displayPixels[pixelIndex] = 255;
+                }
+              }
+              source.getContext('2d').putImageData(new ImageData(
+                displayPixels, candidate.width, candidate.height), 0, 0);
+              var transport = state.transportCanvas || document.createElement('canvas');
+              state.transportCanvas = transport;
+              var transportWidth = Math.min(64, candidate.width);
+              var transportHeight = Math.max(1, Math.round(
+                candidate.height * transportWidth / candidate.width));
+              if (transport.width !== transportWidth || transport.height !== transportHeight) {
+                transport.width = transportWidth;
+                transport.height = transportHeight;
+              }
+              var context = transport.getContext('2d');
+              context.imageSmoothingEnabled = false;
+              context.clearRect(0, 0, transportWidth, transportHeight);
+              context.drawImage(source, 0, 0, transportWidth, transportHeight);
+              window.Host4WebEmulatorPost('outputPreview', {
+                reason: reason,
+                imageBase64: transport.toDataURL('image/png').split(',')[1],
+                width: transportWidth,
+                height: transportHeight,
+                capturedFrames: ++state.capturedFrames
+              });
+              state.lastCaptureAt = now;
+              state.available = true;
+            } catch (error) {
+              state.error = String(error);
+            }
+          }
+
+          function selectPresentedCandidate() {
+            var program = gl.getParameter(gl.CURRENT_PROGRAM);
+            if (!program) return null;
+            var candidates = [];
+            var uniformCount = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS) || 0;
+            for (var index = 0; index < uniformCount; index += 1) {
+              var info = gl.getActiveUniform(program, index);
+              if (!info ||
+                  (info.type !== gl.SAMPLER_2D &&
+                   info.type !== gl.SAMPLER_CUBE &&
+                   info.type !== gl.SAMPLER_2D_SHADOW &&
+                   info.type !== gl.SAMPLER_2D_ARRAY &&
+                   info.type !== gl.SAMPLER_2D_ARRAY_SHADOW)) {
+                continue;
+              }
+              var location = gl.getUniformLocation(program, info.name);
+              var units = location ? gl.getUniform(program, location) : null;
+              if (units == null) continue;
+              if (!Array.isArray(units) && !(units instanceof Int32Array)) {
+                units = [units];
+              }
+              for (var unitIndex = 0; unitIndex < units.length; unitIndex += 1) {
+                var texture = state.textureUnits.get(Number(units[unitIndex]));
+                var candidate = state.candidates.get(texture);
+                if (candidate && candidates.indexOf(candidate) < 0) {
+                  candidates.push(candidate);
+                }
+              }
+            }
+            candidates.sort(function (a, b) {
+              return b.uploadSequence - a.uploadSequence;
+            });
+            return candidates[0] || null;
+          }
+
+          function emitFinalTexture() {
+            try {
+              state.drawCalls += 1;
+              if (gl.getParameter(gl.FRAMEBUFFER_BINDING) !== null) return;
+              state.defaultFramebufferDrawCalls += 1;
+              var viewport = gl.getParameter(gl.VIEWPORT);
+              state.lastViewport = viewport && Array.prototype.slice.call(viewport);
+              var candidate = selectPresentedCandidate();
+              if (!candidate) return;
+              state.candidateDrawCalls += 1;
+              emitCandidate(candidate, 'external_webgl_presented_texture');
+            } catch (error) {
+              state.error = String(error);
+            }
+          }
+
+          var texImage2D = gl.texImage2D;
+          gl.texImage2D = function () {
+            rememberUpload(arguments, 3, 4, 8);
+            return texImage2D.apply(gl, arguments);
+          };
+          var texSubImage2D = gl.texSubImage2D;
+          gl.texSubImage2D = function () {
+            rememberUpload(arguments, 4, 5, 8);
+            return texSubImage2D.apply(gl, arguments);
+          };
+          var activeTexture = gl.activeTexture;
+          gl.activeTexture = function (textureUnit) {
+            state.activeTextureUnit = Number(textureUnit) - gl.TEXTURE0;
+            return activeTexture.apply(gl, arguments);
+          };
+          var bindTexture = gl.bindTexture;
+          gl.bindTexture = function (target, texture) {
+            if (target === gl.TEXTURE_2D) {
+              state.textureUnits.set(state.activeTextureUnit, texture);
+            }
+            return bindTexture.apply(gl, arguments);
+          };
+          var drawArrays = gl.drawArrays;
+          gl.drawArrays = function () {
+            emitFinalTexture();
+            return drawArrays.apply(gl, arguments);
+          };
+          var drawElements = gl.drawElements;
+          gl.drawElements = function () {
+            emitFinalTexture();
+            return drawElements.apply(gl, arguments);
+          };
+          externalWebglPreviewTimer = setInterval(function () {
+            if (current !== owner) return;
+            post('diagnostic', {
+              reason: 'external_webgl_preview_snapshot',
+              externalWebglPreview: {
+                available: state.available,
+                capturedFrames: state.capturedFrames,
+                candidateTextures: state.candidates.size,
+                drawCalls: state.drawCalls,
+                defaultFramebufferDrawCalls: state.defaultFramebufferDrawCalls,
+                candidateDrawCalls: state.candidateDrawCalls,
+                lastViewport: state.lastViewport || null,
+                error: state.error || null
+              }
+            });
+          }, 1000);
+          return true;
+        }
+
+        function renderOutputProbePreview(frame, width, height, frameNumber) {
+          if (!frame || !width || !height || frame.byteLength !== width * height * 4) {
+            return false;
+          }
+          try {
+            var preview = document.getElementById('host4-output-preview');
+            if (!preview) {
+              preview = document.createElement('canvas');
+              preview.id = 'host4-output-preview';
+              preview.style.cssText = 'position:fixed;right:8px;bottom:8px;' +
+                'z-index:2147483647;border:1px solid #fff;background:#000;' +
+                'image-rendering:pixelated;pointer-events:none;';
+              document.body.appendChild(preview);
+            }
+            if (preview.width !== width || preview.height !== height) {
+              preview.width = width;
+              preview.height = height;
+            }
+            var previewContext = preview.getContext('2d');
+            var previewPixels = new Uint8ClampedArray(
+              frame.buffer, frame.byteOffset, frame.byteLength);
+            previewContext.putImageData(new ImageData(previewPixels, width, height), 0, 0);
+            return true;
+          } catch (_) {
+            return false;
+          }
+        }
+
+        function outputProbeSnapshot(owner) {
+          var canvas = owner && typeof owner.getCanvas === 'function'
+            ? owner.getCanvas() : document.getElementById('emulator');
+          var runtime = owner && typeof owner.getEmscripten === 'function'
+            ? owner.getEmscripten() : null;
+          var module = runtime && runtime.Module;
+          var probe = module && module.host4OutputProbe;
+          var gl = module && module.ctx;
+          // Prefer the explicitly instrumented RetroArch video callback. The
+          // WebGL texture fields are retained only as diagnostic evidence for
+          // legacy cores and must never be treated as the game frame.
+          var coreVideoAvailable = probe && probe.coreVideoCaptureAvailable === true;
+          var videoFrame = coreVideoAvailable ? probe.coreVideoFrame : probe && probe.videoFrame;
+          var videoWidth = coreVideoAvailable ? Number(probe.coreVideoWidth) || 0
+            : probe && Number(probe.textureUploadWidth) || 0;
+          var videoHeight = coreVideoAvailable ? Number(probe.coreVideoHeight) || 0
+            : probe && Number(probe.textureUploadHeight) || 0;
+          var videoPreviewAvailable = coreVideoAvailable
+            ? probe && probe.flutterPreviewAvailable === true
+            : renderOutputProbePreview(
+                videoFrame,
+                videoWidth,
+                videoHeight,
+                probe && Number(probe.videoCapturedFrames) || 0);
+          var videoChecksum = 0;
+          var videoNonBlackSamples = 0;
+          if (videoFrame) {
+            var videoSampleStride = Math.max(4,
+              Math.floor(videoFrame.byteLength / 256 / 4) * 4);
+            for (var videoOffset = 0;
+                videoOffset < videoFrame.byteLength;
+                videoOffset += videoSampleStride) {
+              var videoRed = videoFrame[videoOffset];
+              var videoGreen = videoFrame[videoOffset + 1];
+              var videoBlue = videoFrame[videoOffset + 2];
+              videoChecksum = (videoChecksum + videoRed + videoGreen * 257 +
+                videoBlue * 65537) >>> 0;
+              if (videoRed || videoGreen || videoBlue) videoNonBlackSamples += 1;
+            }
+          }
+          var videoCapture = {
+            available: coreVideoAvailable,
+            source: coreVideoAvailable ? 'retro_video_refresh' : 'untrusted_webgl_texture',
+            uploads: probe && Number(probe.textureUploadCalls) || 0,
+            pixelUploads: probe && Number(probe.textureUploadPixelCalls) || 0,
+            width: videoWidth,
+            height: videoHeight,
+            format: coreVideoAvailable ? Number(probe.coreVideoPixelFormat) || 0
+              : probe && Number(probe.textureUploadFormat) || 0,
+            type: probe && Number(probe.textureUploadType) || 0,
+            pointer: probe && Number(probe.textureUploadPointer) || 0,
+            // Unlike the Flutter thumbnail, this counter increments on every
+            // Core frame copied to the dedicated WebRTC canvas. It lets the
+            // native log verify the actual transport source cadence.
+            transportCapturedFrames: probe && Number(probe.webRtcCapturedFrames) || 0,
+            transportCaptureMode: probe && probe.webRtcCaptureMode || null,
+            frameCopy: {
+              available: coreVideoAvailable,
+              capturedFrames: coreVideoAvailable
+                ? Number(probe.coreVideoCapturedFrames) || 0
+                : probe && Number(probe.videoCapturedFrames) || 0,
+              byteLength: coreVideoAvailable
+                ? Number(probe.coreVideoByteLength) || 0
+                : probe && Number(probe.videoByteLength) || 0,
+              checksum: videoChecksum,
+              nonBlackSamples: videoNonBlackSamples,
+              copyDurationMs: coreVideoAvailable
+                ? Number(probe.coreVideoCopyDurationMs) || 0
+                : probe && Number(probe.videoCopyDurationMs) || 0,
+              previewAvailable: videoPreviewAvailable,
+              previewError: probe && probe.flutterPreviewError || null
+            }
+          };
+          var callbacks = probe && Number(probe.audioCallbacks) || 0;
+          var frames = probe && Number(probe.audioFrames) || 0;
+          if (probe) {
+            probe.audioCallbacks = 0;
+            probe.audioFrames = 0;
+            probe.textureUploadCalls = 0;
+            probe.textureUploadPixelCalls = 0;
+          }
+          return {
+          revision: 'ra-video-refresh-low-latency-poc-20261125-r4',
+            core: currentOutputProbeCore,
+            usesLocalCore: currentOutputProbeUsesLocalCore,
+            available: !!probe,
+            audio: {
+              callbacks: callbacks,
+              frames: frames,
+              sampleRate: probe && Number(probe.audioSampleRate) || null
+              ,capture: {
+                available: probe && probe.pcmCaptureAvailable === true,
+                capturedFrames: probe && Number(probe.pcmCapturedFrames) || 0,
+                bufferedFrames: probe && Number(probe.pcmBufferedFrames) || 0,
+                capacityFrames: probe && Number(probe.pcmCapacityFrames) || 0,
+                mediaTimestampUs: probe && Number(probe.mediaTimestampUs) || 0
+              }
+            },
+            webgl: {
+              available: !!gl,
+              contextLost: gl && typeof gl.isContextLost === 'function'
+                ? gl.isContextLost() : null,
+              drawingBuffer: gl ? [gl.drawingBufferWidth, gl.drawingBufferHeight] : null,
+              canvas: canvas ? [canvas.width, canvas.height] : null,
+              videoCapture: videoCapture
+            }
+          };
+        }
+
+        function startOutputProbe(owner) {
+          stopOutputProbe();
+          outputProbeTimer = setInterval(function () {
+            if (current !== owner) return;
+            post('diagnostic', {
+              reason: 'output_probe_snapshot',
+              outputProbe: outputProbeSnapshot(owner)
+            });
+          }, 1000);
+        }
+
         // Installed in the pinned core's scope: RWA is not exported by Nostalgist.
         // Keep the downloaded/cache bytes unchanged; adapt only the launch Blob.
         function installAudioRecovery(module, audio) {
+          // The native RetroArch video callback can arrive before the first
+          // WebAudio buffer. Initialise the shared receiver here so video
+          // evidence does not accidentally depend on audio scheduling.
+          module.host4OutputProbe = module.host4OutputProbe || {};
+          module.host4OutputProbe.renderCoreVideoPreview = function (frame, width, height) {
+            try {
+              var probe = module.host4OutputProbe;
+              var now = typeof performance !== 'undefined' ? performance.now() : Date.now();
+              var isWebRtcPublisher = probe.webRtcEnabled === true;
+              var webRtcCanvas = probe.webRtcCaptureCanvas;
+              // WebRTC must receive every Core frame. Keep its source separate
+              // from the deliberately rate-limited Flutter preview below.
+              if (isWebRtcPublisher) {
+                if (!webRtcCanvas) {
+                  webRtcCanvas = document.createElement('canvas');
+                  probe.webRtcCaptureCanvas = webRtcCanvas;
+                  window.__host4OutputProbeCanvas = webRtcCanvas;
+                }
+                if (webRtcCanvas.width !== width || webRtcCanvas.height !== height) {
+                  webRtcCanvas.width = width;
+                  webRtcCanvas.height = height;
+                }
+                var webRtcPixels = new Uint8ClampedArray(
+                  frame.buffer, frame.byteOffset, frame.byteLength
+                );
+                webRtcCanvas.getContext('2d').putImageData(
+                  new ImageData(webRtcPixels, width, height), 0, 0
+                );
+                // The publisher scheduler intentionally keeps only the
+                // freshest Core image while a previous capture is encoding.
+                probe.webRtcFrameDirty = true;
+                if (probe.webRtcLatencyProbe === true && width >= 256 && height >= 4) {
+                  var markerMagic = 0xA55A3CC3;
+                  var markerTimestamp = Date.now() >>> 0;
+                  var markerContext = webRtcCanvas.getContext('2d');
+                  for (var markerBit = 0; markerBit < 32; markerBit += 1) {
+                    markerContext.fillStyle = ((markerMagic >>> (31 - markerBit)) & 1) ? '#fff' : '#000';
+                    markerContext.fillRect(markerBit * 4, 0, 4, 4);
+                    markerContext.fillStyle = ((markerTimestamp >>> (31 - markerBit)) & 1) ? '#fff' : '#000';
+                    markerContext.fillRect(128 + markerBit * 4, 0, 4, 4);
+                  }
+                }
+                // Capture only from this source callback. The zero config is
+                // the normal low-latency cadence (at most one request every
+                // 16ms); a positive value is a deliberately slower A/B cap.
+                var captureMinimumInterval = Number(probe.webRtcCaptureIntervalMs);
+                if (!Number.isFinite(captureMinimumInterval) || captureMinimumInterval <= 0) {
+                  captureMinimumInterval = 16;
+                }
+                if (probe.webRtcCaptureTrack &&
+                    !probe.webRtcCaptureTimerActive &&
+                    typeof probe.webRtcCaptureTrack.requestFrame === 'function' &&
+                    (!probe.webRtcLastRequestedAt || now - probe.webRtcLastRequestedAt >=
+                      captureMinimumInterval)) {
+                  probe.webRtcCaptureTrack.requestFrame();
+                  probe.webRtcLastRequestedAt = now;
+                }
+                probe.webRtcCapturedFrames = (probe.webRtcCapturedFrames || 0) + 1;
+                if (probe.webRtcDataFrameSender) {
+                  probe.webRtcDataFrameSender(webRtcCanvas);
+                }
+              }
+              // The WebRTC transport owns the live publisher image.  Do not
+              // also encode the same Core frame as PNG/Base64 for Flutter:
+              // that bridge is only for the old small diagnostic thumbnail and
+              // competes with WebKit's encoder on the main thread.
+              if (probe.webRtcEnabled === true) return;
+              // The WebView canvas cannot out-rank Flutter's controls and mask.
+              // Encode an unattached canvas at a bounded cadence and let the
+              // Flutter Stack own the visible, topmost preview layer.
+              if (probe.flutterPreviewLastAt && now - probe.flutterPreviewLastAt < 100) return;
+              var canvas = probe.flutterPreviewCanvas;
+              if (!canvas) {
+                canvas = document.createElement('canvas');
+                probe.flutterPreviewCanvas = canvas;
+              }
+              if (canvas.width !== width || canvas.height !== height) {
+                canvas.width = width;
+                canvas.height = height;
+              }
+              var pixels = new Uint8ClampedArray(frame.buffer, frame.byteOffset, frame.byteLength);
+              canvas.getContext('2d').putImageData(new ImageData(pixels, width, height), 0, 0);
+              // A full RGBA frame becomes a large base64 bridge message on
+              // iOS. The Flutter overlay is deliberately small, so transport
+              // a pixelated 64px-wide frame instead of the full 256px source.
+              var transport = probe.flutterPreviewTransportCanvas;
+              if (!transport) {
+                transport = document.createElement('canvas');
+                probe.flutterPreviewTransportCanvas = transport;
+              }
+              var transportWidth = Math.min(64, width);
+              var transportHeight = Math.max(1, Math.round(height * transportWidth / width));
+              if (transport.width !== transportWidth || transport.height !== transportHeight) {
+                transport.width = transportWidth;
+                transport.height = transportHeight;
+              }
+              var transportContext = transport.getContext('2d');
+              transportContext.imageSmoothingEnabled = false;
+              transportContext.clearRect(0, 0, transportWidth, transportHeight);
+              transportContext.drawImage(canvas, 0, 0, transportWidth, transportHeight);
+              var dataUrl = transport.toDataURL('image/png');
+              window.Host4WebEmulatorPost('outputPreview', {
+                reason: 'output_preview_frame',
+                imageBase64: dataUrl.split(',')[1],
+                width: transportWidth,
+                height: transportHeight,
+                capturedFrames: probe.coreVideoCapturedFrames || 0
+              });
+              probe.flutterPreviewLastAt = now;
+              probe.flutterPreviewAvailable = true;
+            } catch (error) {
+              module.host4OutputProbe.flutterPreviewAvailable = false;
+              module.host4OutputProbe.flutterPreviewError = String(error);
+            }
+          };
+          module.host4OutputProbe.captureCoreVideoFrame = function (
+            pointer, width, height, pitch, pixelFormat
+          ) {
+            try {
+              // libretro's enum is 1 for XRGB8888 and 2 for RGB565.  Cores
+              // may select either format; mGBA uses RGB565 while FCEUmm uses
+              // XRGB8888.  Both arrive here at the same video callback.
+              if (!pointer || !width || !height ||
+                  (pixelFormat !== 1 && pixelFormat !== 2)) return;
+              var now = typeof performance !== 'undefined' ? performance.now() : Date.now();
+              var probe = module.host4OutputProbe;
+              var byteLength = width * height * 4;
+              if (!probe.coreVideoFrame || probe.coreVideoFrame.byteLength !== byteLength) {
+                probe.coreVideoFrame = new Uint8Array(byteLength);
+              }
+              var copyStarted = now;
+              var heap = module.HEAPU8;
+              for (var y = 0; y < height; y += 1) {
+                var src = pointer + y * pitch;
+                var dst = y * width * 4;
+                if (pixelFormat === 1) {
+                  for (var x = 0; x < width * 4; x += 4) {
+                    // RetroArch's XRGB8888 pixels are little-endian B,G,R,X.
+                    probe.coreVideoFrame[dst + x] = heap[src + x + 2];
+                    probe.coreVideoFrame[dst + x + 1] = heap[src + x + 1];
+                    probe.coreVideoFrame[dst + x + 2] = heap[src + x];
+                    probe.coreVideoFrame[dst + x + 3] = 255;
+                  }
+                } else {
+                  // RGB565 pixels are little-endian in the Emscripten heap.
+                  // Expand them to the RGBA buffer expected by ImageData.
+                  for (var pixel = 0; pixel < width; pixel += 1) {
+                    var packed = heap[src + pixel * 2] |
+                      (heap[src + pixel * 2 + 1] << 8);
+                    var target = dst + pixel * 4;
+                    probe.coreVideoFrame[target] = ((packed >>> 11) & 31) * 255 / 31;
+                    probe.coreVideoFrame[target + 1] = ((packed >>> 5) & 63) * 255 / 63;
+                    probe.coreVideoFrame[target + 2] = (packed & 31) * 255 / 31;
+                    probe.coreVideoFrame[target + 3] = 255;
+                  }
+                }
+              }
+              // Preview in the same callback as the core frame, rather than
+              // waiting for the once-per-second diagnostic snapshot.
+              probe.renderCoreVideoPreview(probe.coreVideoFrame, width, height);
+              probe.coreVideoLastCaptureAt = now;
+              probe.coreVideoCapturedFrames = (probe.coreVideoCapturedFrames || 0) + 1;
+              probe.coreVideoWidth = width;
+              probe.coreVideoHeight = height;
+              probe.coreVideoPitch = pitch;
+              probe.coreVideoPixelFormat = pixelFormat;
+              probe.coreVideoByteLength = byteLength;
+              probe.coreVideoCopyDurationMs =
+                (typeof performance !== 'undefined' ? performance.now() : Date.now()) - copyStarted;
+              probe.coreVideoCaptureAvailable = true;
+            } catch (_) {
+              module.host4OutputProbe.coreVideoCaptureAvailable = false;
+            }
+          };
           module.host4AudioSnapshot = function () {
             if (!audio || !audio.context) return { driverAvailable: !!audio, state: null };
             return { state: audio.context.state, currentTime: audio.context.currentTime,
@@ -292,6 +1814,9 @@
             payload: payload
           }));
         }
+        // Core callbacks execute outside this closure. Publish the bridge
+        // deliberately so their diagnostic preview frames can reach Flutter.
+        window.Host4WebEmulatorPost = post;
 
         function flushPendingMessages() {
           if (bridgeReady) return;
@@ -408,6 +1933,34 @@
 
         window.Host4WebEmulator = {
           diagnose: diagnose,
+          // This is intentionally callable after launch.  Starting a local
+          // share must not recreate Nostalgist or reset the player's game.
+          startWebRtcPreview: function (config) {
+            return startWebRtcPreview(config || {});
+          },
+          stopWebRtcPreview: function () {
+            stopWebRtcPreview();
+          },
+          sendWebRtcInput: function (event) {
+            var state = webRtcPreview;
+            if (!state || state.role !== 'viewer' || !isValidWebRtcInput(event)) {
+              reportWebRtc('remote_input_rejected', { role: state ? state.role : 'none' });
+              return false;
+            }
+            var channel = state.inputChannel;
+            if (!channel || channel.readyState !== 'open') {
+              reportWebRtc('remote_input_channel_unavailable', { role: state.role });
+              return false;
+            }
+            channel.send(JSON.stringify({ type: 'input', event: event }));
+            reportWebRtc('remote_input_sent', {
+              role: state.role,
+              button: event.button,
+              action: event.action,
+              player: event.player
+            });
+            return true;
+          },
           recoverForeground: function (force) {
             return recoverForegroundAudio('flutter_resumed', force === true);
           },
@@ -417,11 +1970,36 @@
             try {
               if (!window.Nostalgist) throw new Error('Nostalgist is not loaded.');
               if (current && typeof current.exit === 'function') current.exit();
+              stopOutputProbe();
+              stopWebRtcPreview();
+
+              if (config.webRtcPreviewRole === 'viewer') {
+                var viewerStarted = startWebRtcPreview(config);
+                report('launched', requestId, viewerStarted, {
+                  viewer: true,
+                  transport: 'local_webrtc_core_frame_poc'
+                }, viewerStarted ? null : new Error('WebRTC viewer unavailable.'));
+                return;
+              }
 
               var coreName = config.core || 'mgba';
               var coreZipUrl = config.coreZipUrl || null;
               var coreJsBase64 = config.coreJsBase64 || null;
               var coreWasmBase64 = config.coreWasmBase64 || null;
+              currentOutputProbeCore = coreName;
+              currentOutputProbeUsesLocalCore = !!coreJsBase64;
+              var outputProbeEnabled = config.outputProbeEnabled === true;
+              var externalWebGlPreviewEnabled =
+                config.externalWebGlPreviewEnabled === true;
+              var semanticScreenshotPreviewEnabled =
+                config.semanticScreenshotPreviewEnabled === true;
+              var inWebViewCanvasMirrorPreviewEnabled =
+                config.inWebViewCanvasMirrorPreviewEnabled === true;
+              var outputProbeInstalled = false;
+              var restoreCanvasGetContext =
+                inWebViewCanvasMirrorPreviewEnabled
+                  ? installPreservedDrawingBufferForCanvas()
+                  : null;
 
               current = await window.Nostalgist.launch({
                 element: document.getElementById('emulator'),
@@ -440,7 +2018,14 @@
                 },
                 resolveCoreJs: async function () {
                   var r = await extractCoreLocal(coreName, coreZipUrl, coreJsBase64, coreWasmBase64);
+                  // The external WebGL experiment must execute upstream Core
+                  // bytes exactly as supplied. Do not install the output probe
+                  // or audio-recovery source hook in this mode.
+                  if (externalWebGlPreviewEnabled) return r.js;
                   var source = await r.js.text();
+                  var outputProbe = instrumentOutputProbe(source, outputProbeEnabled);
+                  source = outputProbe.source;
+                  outputProbeInstalled = outputProbe.installed;
                   var hook = ';(' + installAudioRecovery.toString() +
                     ')(Module, typeof RWA === "undefined" ? null : RWA);';
                   // ESM cores enclose Module/RWA in their factory. Install before
@@ -460,7 +2045,37 @@
                   return r.wasm;
                 }
               });
+              if (restoreCanvasGetContext) restoreCanvasGetContext();
               currentRate = 1;
+              if (externalWebGlPreviewEnabled && !installExternalWebglPreview(current)) {
+                post('diagnostic', {
+                  reason: 'external_webgl_preview_unavailable',
+                  core: coreName
+                });
+              }
+              if (semanticScreenshotPreviewEnabled) {
+                startSemanticScreenshotPreview(current);
+              }
+              if (inWebViewCanvasMirrorPreviewEnabled &&
+                  !startInWebViewCanvasMirrorPreview(current)) {
+                post('diagnostic', {
+                  reason: 'in_webview_canvas_mirror_unavailable',
+                  core: coreName
+                });
+              }
+              if (outputProbeEnabled) {
+                if (outputProbeInstalled) {
+                  startOutputProbe(current);
+                } else {
+                  post('diagnostic', {
+                    reason: 'output_probe_unavailable',
+                    core: coreName
+                  });
+                }
+              }
+              if (config.webRtcPreviewRole === 'publisher') {
+                startWebRtcPreview(config);
+              }
               console.debug(
                 '[Host4WebEmulator] launch_rate_configured fastforward_ratio=2'
               );
@@ -516,6 +2131,7 @@
             requestId = requestId || 'exit';
             try {
               if (current && typeof current.exit === 'function') current.exit();
+              stopWebRtcPreview();
               current = null;
               currentRate = 1;
               report('exited', requestId, true, null, null);

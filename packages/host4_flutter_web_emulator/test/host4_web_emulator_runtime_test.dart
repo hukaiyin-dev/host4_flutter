@@ -129,6 +129,188 @@ void main() {
     });
   });
 
+  test('keeps output probing disabled unless a debug launch opts in', () {
+    final defaultConfig = Host4WebEmulatorLaunchConfig(
+      system: Host4WebEmulatorSystem.nes,
+      romFileUrl: Uri.file('/tmp/demo.nes'),
+      romName: 'demo.nes',
+    );
+    final probeConfig = Host4WebEmulatorLaunchConfig(
+      system: Host4WebEmulatorSystem.nes,
+      romFileUrl: Uri.file('/tmp/demo.nes'),
+      romName: 'demo.nes',
+      outputProbeEnabled: true,
+    );
+
+    expect(defaultConfig.toJson().containsKey('outputProbeEnabled'), isFalse);
+    expect(probeConfig.toJson()['outputProbeEnabled'], isTrue);
+  });
+
+  test('viewer WebRTC launch has no ROM and remains explicitly local', () {
+    final config = Host4WebEmulatorLaunchConfig(
+      system: Host4WebEmulatorSystem.nes,
+      romName: 'local-webrtc-viewer',
+      webRtcPreviewRole: 'viewer',
+      webRtcSignalUrl: 'ws://127.0.0.1:8787',
+      webRtcRoomId: 'local-poc',
+    );
+
+    expect(config.toJson(), containsPair('webRtcPreviewRole', 'viewer'));
+    expect(
+      config.toJson(),
+      containsPair('webRtcSignalUrl', 'ws://127.0.0.1:8787'),
+    );
+    expect(config.toJson(), containsPair('webRtcRoomId', 'local-poc'));
+    expect(config.toJson().containsKey('romBase64'), isFalse);
+    expect(config.toJson().containsKey('romFileUrl'), isFalse);
+
+    final html = File('assets/emulator/index.html').readAsStringSync();
+    expect(html, contains("config.webRtcPreviewRole === 'viewer'"));
+    expect(html, contains('probeCanvas.captureStream(60)'));
+    expect(html, contains('retro_video_refresh'));
+  });
+
+  test('publisher JavaScript carries the selected WebRTC transport', () {
+    final script = Host4WebEmulatorJavaScript.startWebRtcPublisher(
+      signalUrl: 'ws://127.0.0.1:8787',
+      roomId: 'local-poc',
+      transport: 'data',
+      captureIntervalMs: 33,
+      controlProfile: 'nes',
+      controlLayoutStyle: 'silicone',
+      siliconeLayoutVariant: 'retroTraditional',
+      maskEnabled: true,
+      maskPath: 'pantas-ios://simulator-mask/nes',
+      controlsCollapsed: true,
+    );
+
+    expect(script, contains('"webRtcTransport":"data"'));
+    expect(script, contains('"webRtcCaptureIntervalMs":33'));
+    expect(script, contains('"webRtcControlProfile":"nes"'));
+    expect(script, contains('"webRtcControlLayoutStyle":"silicone"'));
+    expect(
+      script,
+      contains('"webRtcSiliconeLayoutVariant":"retroTraditional"'),
+    );
+    expect(script, contains('"webRtcMaskEnabled":true'));
+    expect(
+      script,
+      contains('"webRtcMaskPath":"pantas-ios://simulator-mask/nes"'),
+    );
+    expect(script, contains('"webRtcControlsCollapsed":true'));
+  });
+
+  test('viewer JavaScript sends a bounded remote input event', () {
+    final script = Host4WebEmulatorJavaScript.sendWebRtcInput(
+      'a',
+      action: 'down',
+      player: 2,
+    );
+
+    expect(script, contains('sendWebRtcInput'));
+    expect(script, contains('"button":"a"'));
+    expect(script, contains('"action":"down"'));
+    expect(script, contains('"player":2'));
+  });
+
+  test('viewer retries signalling when it opens before a host starts sharing', () {
+    final html = File('assets/emulator/index.html').readAsStringSync();
+
+    expect(html, contains('function scheduleViewerSignalReconnect(reason)'));
+    expect(html, contains('webrtc_signal_reconnect_scheduled'));
+    expect(html, contains('connectSignalSocket();'));
+  });
+
+  test('runtime validates and injects remote input only on the host', () {
+    final html = File('assets/emulator/index.html').readAsStringSync();
+
+    expect(html, contains("host4-remote-input"));
+    expect(html, contains('function isValidWebRtcInput(event)'));
+    expect(html, contains('remote_input_rejected'));
+    expect(html, contains('remote_input_dispatched'));
+    expect(html, contains('Host4WebEmulator.keyEvent(event)'));
+    expect(html, contains('webrtc_remote_metadata'));
+    expect(html, contains('controlProfile: state.controlProfile'));
+    expect(html, contains('maskEnabled: state.maskEnabled'));
+    expect(html, contains('controlsCollapsed: state.controlsCollapsed'));
+    // A DataChannel can become open before the viewer installs its message
+    // handler. Metadata must be retried briefly so a viewer never remains on
+    // the safe NES fallback merely because of that connection-time race.
+    expect(html, contains('function sendPublisherMetadata(channel)'));
+    expect(html, contains('window.setTimeout(function () {'));
+    expect(html, contains('sendPublisherMetadata(channel);'));
+  });
+
+  test('WebRTC visual-latency marker is debug-only and opt-in', () {
+    final normal = Host4WebEmulatorLaunchConfig(
+      system: Host4WebEmulatorSystem.nes,
+      romFileUrl: Uri.file('/tmp/demo.nes'),
+      romName: 'demo.nes',
+    );
+    final measured = Host4WebEmulatorLaunchConfig(
+      system: Host4WebEmulatorSystem.nes,
+      romFileUrl: Uri.file('/tmp/demo.nes'),
+      romName: 'demo.nes',
+      webRtcLatencyProbeEnabled: true,
+    );
+
+    expect(normal.toJson().containsKey('webRtcLatencyProbeEnabled'), isFalse);
+    expect(measured.toJson()['webRtcLatencyProbeEnabled'], isTrue);
+  });
+
+  test('runtime exposes an in-session WebRTC publisher command', () async {
+    final html = await File('assets/emulator/index.html').readAsString();
+
+    expect(html, contains('startWebRtcPreview: function (config)'));
+    expect(html, contains('stopWebRtcPreview: function ()'));
+  });
+
+  test('in-session publisher can explicitly enable the optical latency probe', () {
+    final script = Host4WebEmulatorJavaScript.startWebRtcPublisher(
+      signalUrl: 'ws://192.168.1.8:57221',
+      roomId: 'room',
+      latencyProbe: true,
+    );
+
+    expect(script, contains('"webRtcLatencyProbeEnabled":true'));
+  });
+
+  test('semantic game screenshot preview is opt-in', () async {
+    final config = Host4WebEmulatorLaunchConfig(
+      system: Host4WebEmulatorSystem.gba,
+      romFileUrl: Uri.file('/tmp/demo.gba'),
+      romName: 'demo.gba',
+      semanticScreenshotPreviewEnabled: true,
+    );
+
+    expect(config.toJson()['semanticScreenshotPreviewEnabled'], isTrue);
+
+    final html = await File('assets/emulator/index.html').readAsString();
+    expect(html, contains('config.semanticScreenshotPreviewEnabled === true'));
+    expect(html, contains('current.screenshot()'));
+    expect(html, contains('semantic_ra_screenshot'));
+  });
+
+  test('in-WebView canvas mirror preview is opt-in', () async {
+    final config = Host4WebEmulatorLaunchConfig(
+      system: Host4WebEmulatorSystem.gba,
+      romFileUrl: Uri.file('/tmp/demo.gba'),
+      romName: 'demo.gba',
+      inWebViewCanvasMirrorPreviewEnabled: true,
+    );
+
+    expect(config.toJson()['inWebViewCanvasMirrorPreviewEnabled'], isTrue);
+
+    final html = await File('assets/emulator/index.html').readAsString();
+    expect(
+      html,
+      contains('config.inWebViewCanvasMirrorPreviewEnabled === true'),
+    );
+    expect(html, contains('installPreservedDrawingBufferForCanvas()'));
+    expect(html, contains('startInWebViewCanvasMirrorPreview(current)'));
+    expect(html, contains("document.getElementById('canvas')"));
+  });
+
   test('bridge messages use the agreed response envelope', () {
     final message = Host4WebEmulatorBridgeMessage.success(
       type: 'launched',
@@ -224,19 +406,21 @@ void main() {
     );
   });
 
-  test('controller marks foreground recovery as retryable by default', () async {
-    final scripts = <String>[];
-    final controller = Host4WebEmulatorController.forJavaScriptExecutor(
-      (script) async => scripts.add(script),
-    );
+  test(
+    'controller marks foreground recovery as retryable by default',
+    () async {
+      final scripts = <String>[];
+      final controller = Host4WebEmulatorController.forJavaScriptExecutor(
+        (script) async => scripts.add(script),
+      );
 
-    await controller.recoverForeground();
+      await controller.recoverForeground();
 
-    expect(
-      scripts,
-      <String>['void window.Host4WebEmulator?.recoverForeground?.(false);'],
-    );
-  });
+      expect(scripts, <String>[
+        'void window.Host4WebEmulator?.recoverForeground?.(false);',
+      ]);
+    },
+  );
 
   test('packaged web runtime wires SRAM restore and export', () async {
     final html = await File('assets/emulator/index.html').readAsString();
@@ -244,6 +428,89 @@ void main() {
     expect(html, contains('saveSRAM: async function (requestId)'));
     expect(html, contains("report('sramSaved', requestId"));
     expect(html, contains("report('rateSet', requestId"));
+  });
+
+  test(
+    'packaged web runtime only reports aggregate output probe snapshots',
+    () async {
+      final html = await File('assets/emulator/index.html').readAsString();
+
+      expect(html, contains('function instrumentOutputProbe'));
+      expect(html, contains('config.outputProbeEnabled === true'));
+      expect(html, contains('output_probe_snapshot'));
+      expect(html, contains('ra-video-refresh-low-latency-poc-20261125-r4'));
+      expect(html, contains('currentOutputProbeUsesLocalCore'));
+      expect(html, contains('module.HEAPU8'));
+      expect(html, contains('renderCoreVideoPreview'));
+      // Libretro cores are allowed to submit either XRGB8888 (1) or RGB565
+      // (2).  FCEUmm happens to use the former, while mGBA uses the latter.
+      expect(html, contains('pixelFormat !== 1 && pixelFormat !== 2'));
+      expect(html, contains('RGB565 pixels are little-endian'));
+      expect(html, contains("Host4WebEmulatorPost('outputPreview'"));
+      expect(html, contains('flutterPreviewCanvas'));
+      expect(html, contains('window.Host4WebEmulatorPost'));
+      expect(html, isNot(contains('host4-core-video-preview')));
+      expect(html, isNot(contains('previewContext.fillRect')));
+      expect(html, contains('pcmCaptureAvailable'));
+      expect(html, contains('pcmCapturedFrames'));
+      expect(html, contains('pcmBufferedFrames'));
+      expect(html, contains('mediaTimestampUs'));
+      expect(html, contains('videoCapture'));
+      expect(html, contains('textureUploadCalls'));
+      expect(html, contains('textureUploadPixelCalls'));
+      expect(html, contains('var _glTexImage2D='));
+      expect(html, contains('var _glTexSubImage2D='));
+      expect(html, isNot(contains('host4OutputVideoFrame')));
+      expect(html, isNot(contains('readPixels(')));
+      expect(html, contains('host4-output-preview'));
+      expect(html, contains('putImageData'));
+      expect(html, isNot(contains('previewContext.fillText')));
+      expect(html, contains('setInterval'));
+      // WebRTC is an explicit local-only role; the normal output-probe path
+      // must not start it merely because diagnostics are enabled.
+      expect(html, contains("config.webRtcPreviewRole === 'publisher'"));
+      expect(html, contains('probeCanvas.captureStream(60)'));
+    },
+  );
+
+  test(
+    'external WebGL preview mode keeps the RetroArch core source intact',
+    () async {
+      final html = await File('assets/emulator/index.html').readAsString();
+      final view = await File(
+        'lib/src/host4_web_emulator_view.dart',
+      ).readAsString();
+      final config = await File(
+        'lib/src/host4_web_emulator_launch_config.dart',
+      ).readAsString();
+
+      expect(config, contains('externalWebGlPreviewEnabled'));
+      expect(view, contains('externalWebGlPreviewEnabled'));
+      expect(view, contains('outputProbeEnabled &&'));
+      expect(html, contains('config.externalWebGlPreviewEnabled === true'));
+      expect(html, contains('return r.js;'));
+      expect(html, contains('installExternalWebglPreview'));
+      expect(html, contains('getEmscripten'));
+    },
+  );
+
+  test('video-refresh probe packages cover every product core', () async {
+    final view = await File(
+      'lib/src/host4_web_emulator_view.dart',
+    ).readAsString();
+    final pubspec = await File('pubspec.yaml').readAsString();
+
+    for (final core in <String>[
+      'fceumm',
+      'genesis_plus_gx',
+      'mgba',
+      'snes9x',
+    ]) {
+      expect(view, contains("'${core}': '${core}_libretro'"));
+      expect(pubspec, contains('assets/emulator/probe/${core}_libretro.js'));
+      expect(pubspec, contains('assets/emulator/probe/${core}_libretro.wasm'));
+    }
+    expect(view, contains('video-refresh probe package'));
   });
 
   test(

@@ -16,6 +16,7 @@ enum _MenuAction {
   continueGame,
   layout,
   keyLocator,
+  screenShare,
 }
 
 class _MenuItemModel {
@@ -82,6 +83,7 @@ class Host4EmulatorMenuOverlay extends StatefulWidget {
     this.dataSource,
     this.onOpenLayoutPicker,
     this.onOpenKeyLocator,
+    this.onOpenScreenShare,
     this.showLayoutAction = true,
     this.showKeyLocatorAction = true,
     this.enableSaveActions = true,
@@ -94,6 +96,11 @@ class Host4EmulatorMenuOverlay extends StatefulWidget {
   final VoidCallback onOpenSaveManager;
   final VoidCallback? onOpenLayoutPicker;
   final VoidCallback? onOpenKeyLocator;
+
+  /// Optional host-owned action for a local game-screen sharing flow.
+  ///
+  /// Kept opt-in so existing emulator consumers do not expose transport UI.
+  final VoidCallback? onOpenScreenShare;
   final bool showLayoutAction;
   final bool showKeyLocatorAction;
   final bool enableSaveActions;
@@ -279,6 +286,12 @@ class _Host4EmulatorMenuOverlayState extends State<Host4EmulatorMenuOverlay> {
       title: EmulatorUiLocalizations.of(context).menuKeyLocator,
       asset: 'assets/controls/ic_dingwei.svg',
     ),
+    _MenuAction.screenShare: const _MenuItemModel(
+      identifier: 'menu.screen_share',
+      title: '联机画面',
+      subtitle: '分享或接收',
+      asset: 'assets/controls/ic_expand.svg',
+    ),
   };
 
   @override
@@ -332,7 +345,23 @@ class _Host4EmulatorMenuOverlayState extends State<Host4EmulatorMenuOverlay> {
       _MenuAction.continueGame => () => unawaited(_run(widget.actions.resume)),
       _MenuAction.layout => widget.onOpenLayoutPicker,
       _MenuAction.keyLocator => widget.onOpenKeyLocator,
+      _MenuAction.screenShare => widget.onOpenScreenShare,
     };
+  }
+
+  _MenuSpec _withScreenShare(_MenuSpec spec, {required bool landscape}) {
+    if (!landscape || widget.onOpenScreenShare == null) return spec;
+    final rows = spec.rows
+        .map((row) => List<_MenuAction?>.of(row))
+        .toList(growable: false);
+    for (final row in rows) {
+      final emptyIndex = row.indexOf(null);
+      if (emptyIndex >= 0) {
+        row[emptyIndex] = _MenuAction.screenShare;
+        return _MenuSpec(layout: spec.layout, rows: rows);
+      }
+    }
+    return spec;
   }
 
   @override
@@ -342,7 +371,7 @@ class _Host4EmulatorMenuOverlayState extends State<Host4EmulatorMenuOverlay> {
       child: LayoutBuilder(
         builder: (context, constraints) {
           final landscape = constraints.maxWidth > constraints.maxHeight;
-          final spec = !landscape
+          final baseSpec = !landscape
               ? _portraitSpec
               : switch ((
                   widget.showLayoutAction,
@@ -353,6 +382,7 @@ class _Host4EmulatorMenuOverlayState extends State<Host4EmulatorMenuOverlay> {
                   (true, false) => _landscapeWithoutKeyLocatorSpec,
                   (false, false) => _landscapeWithoutLayoutOrKeyLocatorSpec,
                 };
+          final spec = _withScreenShare(baseSpec, landscape: landscape);
           final scale = (constraints.maxWidth / spec.layout.baseWidth).clamp(
             0.0,
             2.0,

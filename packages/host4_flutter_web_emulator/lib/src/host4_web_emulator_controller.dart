@@ -184,6 +184,58 @@ class Host4WebEmulatorController {
   Future<void> recoverForeground({bool force = false}) => _executeJavaScript(
     'void window.Host4WebEmulator?.recoverForeground?.($force);',
   );
+
+  /// Starts the local debug WebRTC publisher without recreating the Core.
+  ///
+  /// The browser captures the existing `retro_video_refresh` canvas, so the
+  /// playing game's state and timing remain untouched.
+  Future<void> startWebRtcPublisher({
+    required String signalUrl,
+    required String roomId,
+    String transport = 'data',
+    int? captureIntervalMs,
+    bool latencyProbe = false,
+    String? controlProfile,
+    String? controlLayoutStyle,
+    String? siliconeLayoutVariant,
+    bool? maskEnabled,
+    String? maskPath,
+    bool? controlsCollapsed,
+  }) => _executeJavaScript(
+    Host4WebEmulatorJavaScript.startWebRtcPublisher(
+      signalUrl: signalUrl,
+      roomId: roomId,
+      transport: transport,
+      captureIntervalMs: captureIntervalMs,
+      latencyProbe: latencyProbe,
+      controlProfile: controlProfile,
+      controlLayoutStyle: controlLayoutStyle,
+      siliconeLayoutVariant: siliconeLayoutVariant,
+      maskEnabled: maskEnabled,
+      maskPath: maskPath,
+      controlsCollapsed: controlsCollapsed,
+    ),
+  );
+
+  Future<void> stopWebRtcPreview() =>
+      _executeJavaScript(Host4WebEmulatorJavaScript.stopWebRtcPreview());
+
+  /// Relays an input from a viewer page to the host's running emulator.
+  ///
+  /// This command has no effect on an ordinary local page or on a publisher;
+  /// the browser runtime accepts it only from the active WebRTC viewer.
+  Future<void> sendWebRtcInput(
+    String button, {
+    String action = 'down',
+    int player = 1,
+  }) => _executeJavaScript(
+    Host4WebEmulatorJavaScript.sendWebRtcInput(
+      button,
+      action: action,
+      player: player,
+    ),
+  );
+
   Future<void> keyEvent(
     String button, {
     String action = 'down',

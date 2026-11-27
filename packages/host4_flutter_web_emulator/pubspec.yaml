@@ -25,3 +25,11 @@ flutter:
     - assets/emulator/index.html
     - assets/emulator/zip.min.js
     - assets/emulator/nostalgist.0.19.0.umd.js
+    - assets/emulator/probe/fceumm_libretro.js
+    - assets/emulator/probe/fceumm_libretro.wasm
+    - assets/emulator/probe/genesis_plus_gx_libretro.js
+    - assets/emulator/probe/genesis_plus_gx_libretro.wasm
+    - assets/emulator/probe/mgba_libretro.js
+    - assets/emulator/probe/mgba_libretro.wasm
+    - assets/emulator/probe/snes9x_libretro.js
+    - assets/emulator/probe/snes9x_libretro.wasm

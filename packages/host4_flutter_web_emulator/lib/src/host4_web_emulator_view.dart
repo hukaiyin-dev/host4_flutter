@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:host4_flutter_webview/host4_flutter_webview.dart';
 
 import 'host4_web_emulator_assets.dart';
@@ -49,8 +51,33 @@ class _Host4WebEmulatorViewState extends State<Host4WebEmulatorView> {
   Future<void> _launch(Host4WebEmulatorController controller) async {
     try {
       ResolvedCoreData? coreData;
+      final viewerOnly = widget.launchConfig.webRtcPreviewRole == 'viewer';
       final cacheDir = widget.coreCacheDirectory;
-      if (cacheDir != null) {
+      final probeCoreArtifact =
+          !viewerOnly &&
+              widget.launchConfig.outputProbeEnabled &&
+              !widget.launchConfig.externalWebGlPreviewEnabled
+          ? _videoRefreshProbeArtifacts[widget.launchConfig.system.core.name]
+          : null;
+      if (probeCoreArtifact != null) {
+        // These local video-refresh probe packages are generated from the
+        // same patched RetroArch frontend.  The callback is at the standard
+        // libretro video boundary, before WebGL draws an intermediate texture.
+        final js = await rootBundle.load(
+          'packages/host4_flutter_web_emulator/assets/emulator/probe/$probeCoreArtifact.js',
+        );
+        final wasm = await rootBundle.load(
+          'packages/host4_flutter_web_emulator/assets/emulator/probe/$probeCoreArtifact.wasm',
+        );
+        coreData = ResolvedCoreData(
+          jsBase64: base64Encode(
+            js.buffer.asUint8List(js.offsetInBytes, js.lengthInBytes),
+          ),
+          wasmBase64: base64Encode(
+            wasm.buffer.asUint8List(wasm.offsetInBytes, wasm.lengthInBytes),
+          ),
+        );
+      } else if (!viewerOnly && cacheDir != null) {
         final cache = Host4WebEmulatorCoreCache(cacheRoot: cacheDir);
         coreData = await cache.resolve(widget.launchConfig.system.core);
       }
@@ -76,6 +103,10 @@ class _Host4WebEmulatorViewState extends State<Host4WebEmulatorView> {
       ),
       backgroundColor: Colors.black,
       showProgressBar: false,
+      // The local WebRTC viewer has no user gesture before its remote track
+      // arrives. WKWebView otherwise rejects `video.play()` even for the
+      // muted inline receiver element.
+      allowAutoplayAudio: widget.launchConfig.webRtcPreviewRole == 'viewer',
       allowRoutePopGesture: true,
       onControllerReady: (controller) {
         _controller?.dispose();
@@ -95,6 +126,18 @@ class _Host4WebEmulatorViewState extends State<Host4WebEmulatorView> {
     );
   }
 }
+
+/// Supported local video-refresh probe package for each product core.
+///
+/// Keeping this mapping explicit means an unsupported core falls back to the
+/// normal pinned artifact instead of accidentally receiving an unrelated
+/// emulator binary.
+const _videoRefreshProbeArtifacts = <String, String>{
+  'fceumm': 'fceumm_libretro',
+  'genesis_plus_gx': 'genesis_plus_gx_libretro',
+  'mgba': 'mgba_libretro',
+  'snes9x': 'snes9x_libretro',
+};
 
 class _Host4WebEmulatorBridgeAdapter extends Host4JsBridgeAdapter {
   const _Host4WebEmulatorBridgeAdapter(this._controller, this._onMessage);

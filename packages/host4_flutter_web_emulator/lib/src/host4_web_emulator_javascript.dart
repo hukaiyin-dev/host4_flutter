@@ -53,6 +53,58 @@ class Host4WebEmulatorJavaScript {
     return 'window.Host4WebEmulator.setRate($rate, ${jsonEncode(requestId)});';
   }
 
+  static String startWebRtcPublisher({
+    required String signalUrl,
+    required String roomId,
+    String transport = 'data',
+    int? captureIntervalMs,
+    bool latencyProbe = false,
+    String? controlProfile,
+    String? controlLayoutStyle,
+    String? siliconeLayoutVariant,
+    bool? maskEnabled,
+    String? maskPath,
+    bool? controlsCollapsed,
+  }) {
+    final payload = <String, Object>{
+      'webRtcPreviewRole': 'publisher',
+      'webRtcSignalUrl': signalUrl,
+      'webRtcRoomId': roomId,
+      'webRtcTransport': transport,
+      if (captureIntervalMs != null) 'webRtcCaptureIntervalMs': captureIntervalMs,
+      if (latencyProbe) 'webRtcLatencyProbeEnabled': true,
+      if (controlProfile != null && controlProfile.isNotEmpty)
+        'webRtcControlProfile': controlProfile,
+      if (controlLayoutStyle != null && controlLayoutStyle.isNotEmpty)
+        'webRtcControlLayoutStyle': controlLayoutStyle,
+      if (siliconeLayoutVariant != null && siliconeLayoutVariant.isNotEmpty)
+        'webRtcSiliconeLayoutVariant': siliconeLayoutVariant,
+      if (maskEnabled != null) 'webRtcMaskEnabled': maskEnabled,
+      if (maskPath != null && maskPath.isNotEmpty) 'webRtcMaskPath': maskPath,
+      if (controlsCollapsed != null)
+        'webRtcControlsCollapsed': controlsCollapsed,
+    };
+    return 'window.Host4WebEmulator.startWebRtcPreview(${jsonEncode(payload)});';
+  }
+
+  static String stopWebRtcPreview() =>
+      'window.Host4WebEmulator.stopWebRtcPreview();';
+
+  /// Sends an input event from a WebRTC viewer to its publisher. The browser
+  /// runtime repeats validation before it ever reaches the host Core.
+  static String sendWebRtcInput(
+    String button, {
+    String action = 'down',
+    int player = 1,
+  }) {
+    final event = <String, Object>{
+      'button': button,
+      'action': action,
+      'player': player,
+    };
+    return 'window.Host4WebEmulator.sendWebRtcInput(${jsonEncode(event)});';
+  }
+
   /// 单个按键事件。
   ///
   /// [button]: up, down, left, right, a, b, x, y, l, r, select, start 等。
