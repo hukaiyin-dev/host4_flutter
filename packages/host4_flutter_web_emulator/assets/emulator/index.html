@@ -169,6 +169,11 @@
           try { if (state.socket) state.socket.close(); } catch (_) {}
           try { if (state.stream) state.stream.getTracks().forEach(function (track) { track.stop(); }); } catch (_) {}
           try { if (state.peer) state.peer.close(); } catch (_) {}
+          try {
+            Object.keys(state.peers || {}).forEach(function (peerId) {
+              state.peers[peerId].peer.close();
+            });
+          } catch (_) {}
           if (state.video && state.video.parentNode) state.video.parentNode.removeChild(state.video);
         }
 
@@ -189,8 +194,75 @@
         function isValidWebRtcInput(event) {
           return !!event && typeof event === 'object' &&
             webRtcInputButtons[event.button] === true &&
-            webRtcInputActions[event.action] === true &&
-            Number.isInteger(event.player) && event.player >= 1 && event.player <= 4;
+            webRtcInputActions[event.action] === true;
+        }
+
+        function createPixelPerfectViewerRenderer(canvas) {
+          var gl = canvas.getContext('webgl', { alpha: false, antialias: false }) ||
+            canvas.getContext('experimental-webgl', { alpha: false, antialias: false });
+          if (!gl) return null;
+          function shader(type, source) {
+            var value = gl.createShader(type);
+            gl.shaderSource(value, source);
+            gl.compileShader(value);
+            if (gl.getShaderParameter(value, gl.COMPILE_STATUS)) return value;
+            gl.deleteShader(value);
+            return null;
+          }
+          var vertex = shader(gl.VERTEX_SHADER,
+            'attribute vec2 p;attribute vec2 uv;varying vec2 v;void main(){v=uv;gl_Position=vec4(p,0.0,1.0);}');
+          var fragment = shader(gl.FRAGMENT_SHADER,
+            'precision mediump float;varying vec2 v;uniform sampler2D t;void main(){gl_FragColor=texture2D(t,v);}');
+          if (!vertex || !fragment) return null;
+          var program = gl.createProgram();
+          gl.attachShader(program, vertex);
+          gl.attachShader(program, fragment);
+          gl.linkProgram(program);
+          if (!gl.getProgramParameter(program, gl.LINK_STATUS)) return null;
+          gl.useProgram(program);
+          var buffer = gl.createBuffer();
+          gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+          gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+            -1, 1, 0, 0, 1, 1, 1, 0, -1, -1, 0, 1, 1, -1, 1, 1
+          ]), gl.STATIC_DRAW);
+          var position = gl.getAttribLocation(program, 'p');
+          var texturePosition = gl.getAttribLocation(program, 'uv');
+          gl.enableVertexAttribArray(position);
+          gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 16, 0);
+          gl.enableVertexAttribArray(texturePosition);
+          gl.vertexAttribPointer(texturePosition, 2, gl.FLOAT, false, 16, 8);
+          var texture = gl.createTexture();
+          gl.bindTexture(gl.TEXTURE_2D, texture);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+          gl.clearColor(0, 0, 0, 1);
+          return {
+            render: function (bitmap) {
+              var dpr = window.devicePixelRatio || 1;
+              var width = Math.max(1, Math.round(window.innerWidth * dpr));
+              var height = Math.max(1, Math.round(window.innerHeight * dpr));
+              if (canvas.width !== width || canvas.height !== height) {
+                canvas.width = width;
+                canvas.height = height;
+              }
+              var scale = Math.min(width / bitmap.width, height / bitmap.height);
+              var drawWidth = Math.max(1, Math.round(bitmap.width * scale));
+              var drawHeight = Math.max(1, Math.round(bitmap.height * scale));
+              gl.viewport(0, 0, width, height);
+              gl.clear(gl.COLOR_BUFFER_BIT);
+              gl.viewport(
+                Math.floor((width - drawWidth) / 2),
+                Math.floor((height - drawHeight) / 2),
+                drawWidth,
+                drawHeight
+              );
+              gl.bindTexture(gl.TEXTURE_2D, texture);
+              gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, bitmap);
+              gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+            }
+          };
         }
 
         function startWebRtcPreview(config) {
@@ -215,8 +287,15 @@
             role: role,
             room: config.webRtcRoomId || 'host4-local-poc',
             transport: config.webRtcTransport === 'data' ? 'data' : 'media',
-            peer: new RTCPeerConnection({ iceServers: [] }),
+            // A receiver has one publisher connection. A publisher owns one
+            // connection per receiver, keyed by the signalling peer id.
+            peer: role === 'viewer' ? new RTCPeerConnection({ iceServers: [] }) : null,
+            peers: {},
+            peerId: null,
+            remotePeerId: null,
+            assignedPlayerSlot: null,
             socket: null,
+            joinRejected: false,
             signalReconnectTimer: null,
             signalReconnectAttempt: 0,
             stream: null,
@@ -257,26 +336,52 @@
             stopped: false
           };
           webRtcPreview = state;
-          function dispatchRemoteInput(event) {
-            if (!isValidWebRtcInput(event)) {
+          function dispatchRemoteInput(event, peerState) {
+            if (!isValidWebRtcInput(event) || !peerState ||
+                !Number.isInteger(peerState.playerSlot)) {
               reportWebRtc('remote_input_rejected', { role: role });
               return;
             }
             try {
-              window.Host4WebEmulator.keyEvent(event);
+              // The receiving client never chooses its player. The host owns
+              // this mapping, so a forged `event.player` cannot control P1.
+              window.Host4WebEmulator.keyEvent({
+                button: event.button,
+                action: event.action,
+                player: peerState.playerSlot
+              });
               reportWebRtc('remote_input_dispatched', {
                 role: role,
                 button: event.button,
                 action: event.action,
-                player: event.player
+                player: peerState.playerSlot
               });
             } catch (error) {
               reportWebRtc('remote_input_failed', { role: role, error: String(error) });
             }
           }
-          function createPublisherInputChannel() {
-            if (role !== 'publisher' || !state.peer) return;
-            var channel = state.peer.createDataChannel(
+          function allocateRemotePlayerSlot(peerState) {
+            if (Number.isInteger(peerState.playerSlot)) return peerState.playerSlot;
+            var used = {};
+            Object.keys(state.peers).forEach(function (peerId) {
+              var slot = state.peers[peerId].playerSlot;
+              if (Number.isInteger(slot)) used[slot] = true;
+            });
+            for (var slot = 2; slot <= 4; slot += 1) {
+              if (!used[slot]) {
+                peerState.playerSlot = slot;
+                return slot;
+              }
+            }
+            return null;
+          }
+          function releaseRemotePlayerSlot(peerState) {
+            if (!peerState || !Number.isInteger(peerState.playerSlot)) return;
+            peerState.playerSlot = null;
+          }
+          function createPublisherInputChannel(peerState) {
+            if (role !== 'publisher' || !peerState) return;
+            var channel = peerState.peer.createDataChannel(
               'host4-remote-input', { ordered: true }
             );
             // `onopen` is local state: it can occur a few milliseconds before
@@ -292,10 +397,12 @@
                 siliconeLayoutVariant: state.siliconeLayoutVariant,
                 maskEnabled: state.maskEnabled,
                 maskPath: state.maskPath,
-                controlsCollapsed: state.controlsCollapsed
+                controlsCollapsed: state.controlsCollapsed,
+                playerSlot: peerState.playerSlot
               }));
             }
             channel.onopen = function () {
+              allocateRemotePlayerSlot(peerState);
               sendPublisherMetadata(channel);
               window.setTimeout(function () {
                 sendPublisherMetadata(channel);
@@ -317,16 +424,16 @@
                 reportWebRtc('remote_input_rejected', { role: role });
                 return;
               }
-              dispatchRemoteInput(payload.event);
+              dispatchRemoteInput(payload.event, peerState);
             };
-            state.inputChannel = channel;
+            peerState.inputChannel = channel;
+            channel.onclose = function () { releaseRemotePlayerSlot(peerState); };
           }
           reportWebRtc('webrtc_transport_selected', {
             role: role,
             transportMode: state.transport
           });
           if (role === 'publisher') {
-            createPublisherInputChannel();
             var publisherProbe = currentOutputProbe();
             if (publisherProbe) {
               publisherProbe.webRtcEnabled = true;
@@ -335,15 +442,12 @@
             }
           }
           function active() { return webRtcPreview === state && !state.stopped; }
-          function createPublisherDataChannel() {
-            if (role !== 'publisher' || state.transport !== 'data' || !state.peer) return;
-            state.frameChannel = state.peer.createDataChannel(
+          function createPublisherDataChannel(peerState) {
+            if (role !== 'publisher' || state.transport !== 'data' || !peerState) return;
+            peerState.frameChannel = peerState.peer.createDataChannel(
               'host4-core-frames',
               { ordered: false, maxRetransmits: 0 }
             );
-          }
-          if (state.transport === 'data' && role === 'publisher') {
-            createPublisherDataChannel();
           }
           function reportVideoStats() {
             if (!active()) return;
@@ -363,8 +467,14 @@
               });
               return;
             }
-            if (!state.peer || typeof state.peer.getStats !== 'function') return;
-            state.peer.getStats().then(function (reports) {
+            var statsPeer = state.peer;
+            if (!statsPeer && role === 'publisher') {
+              var publisherPeerIds = Object.keys(state.peers);
+              statsPeer = publisherPeerIds.length
+                ? state.peers[publisherPeerIds[0]].peer : null;
+            }
+            if (!statsPeer || typeof statsPeer.getStats !== 'function') return;
+            statsPeer.getStats().then(function (reports) {
               var videoReport = null;
               reports.forEach(function (report) {
                 var isVideo = report && (report.kind === 'video' || report.mediaType === 'video');
@@ -451,8 +561,12 @@
             }
           }
           function sendLatestDataFrame(canvas) {
-            var channel = state.frameChannel;
-            if (!channel || channel.readyState !== 'open' || channel.bufferedAmount > 131072) return;
+            var channels = Object.keys(state.peers).map(function (peerId) {
+              return state.peers[peerId].frameChannel;
+            }).filter(function (channel) {
+              return channel && channel.readyState === 'open' && channel.bufferedAmount <= 131072;
+            });
+            if (!channels.length) return;
             if (state.frameEncoding) {
               state.frameDirty = true;
               return;
@@ -464,7 +578,7 @@
                 return;
               }
               blob.arrayBuffer().then(function (bytes) {
-                if (active() && channel.readyState === 'open' && channel.bufferedAmount <= 131072) {
+                if (active()) {
                   // Keep the latency measurement out of the encoded image.
                   // The old visual marker was subject to JPEG artefacts, so it
                   // could not reliably be decoded even though frames were
@@ -478,8 +592,12 @@
                   packet[3] = 0x52; // R
                   new DataView(packet.buffer).setUint32(4, Date.now() >>> 0, false);
                   packet.set(new Uint8Array(bytes), 8);
-                  channel.send(packet.buffer);
-                  state.dataFramesSent = (state.dataFramesSent || 0) + 1;
+                  channels.forEach(function (channel) {
+                    if (channel.readyState === 'open' && channel.bufferedAmount <= 131072) {
+                      channel.send(packet.buffer);
+                      state.dataFramesSent = (state.dataFramesSent || 0) + 1;
+                    }
+                  });
                 }
               }).catch(function () {}).then(function () {
                 state.frameEncoding = false;
@@ -498,9 +616,15 @@
             var dataProbe = currentOutputProbe();
             if (dataProbe) dataProbe.webRtcDataFrameSender = sendLatestDataFrame;
           }
-          function installPeerHandlers(peer) {
+          function installPeerHandlers(peer, peerState) {
             peer.onicecandidate = function (event) {
-              if (event.candidate) signal({ type: 'signal', payload: { candidate: event.candidate } });
+              if (event.candidate && peerState && peerState.remotePeerId) {
+                signal({
+                  type: 'signal',
+                  targetPeerId: peerState.remotePeerId,
+                  payload: { candidate: event.candidate }
+                });
+              }
             };
             peer.onconnectionstatechange = function () {
               reportWebRtc('webrtc_connection_state', {
@@ -517,12 +641,16 @@
                   state.dataFramesReceived > 0) {
                 reportWebRtc('webrtc_data_frame', { role: role, recovered: true });
               }
+              if (role === 'publisher' &&
+                  (peer.connectionState === 'closed' || peer.connectionState === 'failed')) {
+                releaseRemotePlayerSlot(peerState);
+              }
             };
             peer.ontrack = function (event) {
             if (role !== 'viewer' || !active()) return;
             // Prefer the newest decodable frame. WebKit may not implement
             // this hint; feature-test it rather than relying on it.
-            state.peer.getReceivers().forEach(function (receiver) {
+            peer.getReceivers().forEach(function (receiver) {
               if (receiver && receiver.track && receiver.track.kind === 'video' &&
                   'playoutDelayHint' in receiver) {
                 try { receiver.playoutDelayHint = 0; } catch (_) {}
@@ -559,6 +687,8 @@
                   try { metadata = JSON.parse(String(event.data)); } catch (_) { return; }
                   if (!metadata || metadata.type !== 'metadata' ||
                       typeof metadata.controlProfile !== 'string') return;
+                  state.assignedPlayerSlot = Number.isInteger(metadata.playerSlot)
+                    ? metadata.playerSlot : null;
                   reportWebRtc('webrtc_remote_metadata', {
                     role: role,
                     controlProfile: metadata.controlProfile,
@@ -566,7 +696,8 @@
                     siliconeLayoutVariant: metadata.siliconeLayoutVariant,
                     maskEnabled: metadata.maskEnabled,
                     maskPath: metadata.maskPath,
-                    controlsCollapsed: metadata.controlsCollapsed
+                    controlsCollapsed: metadata.controlsCollapsed,
+                    playerSlot: state.assignedPlayerSlot
                   });
                 };
                 return;
@@ -577,8 +708,12 @@
               // can dismiss a recoverable connection-error overlay.
               state.dataFirstFrameReported = false;
               var canvas = document.createElement('canvas');
-              canvas.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;object-fit:contain;background:#000;z-index:2147483647';
+              canvas.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;object-fit:contain;image-rendering:pixelated;background:#000;z-index:2147483647';
               document.body.appendChild(canvas);
+              var renderer = createPixelPerfectViewerRenderer(canvas);
+              var fallbackContext = renderer ? null : canvas.getContext('2d', { willReadFrequently: true });
+              var markerCanvas = null;
+              var markerContext = null;
               event.channel.binaryType = 'arraybuffer';
               function decodeLatestDataFrame() {
                 if (!active() || state.dataFrameDecoding || !state.pendingDataFrame) return;
@@ -598,9 +733,24 @@
                     bitmap.close();
                     return;
                   }
-                  canvas.width = bitmap.width; canvas.height = bitmap.height;
-                  var context = canvas.getContext('2d', { willReadFrequently: true });
-                  context.drawImage(bitmap, 0, 0);
+                  if (renderer) {
+                    renderer.render(bitmap);
+                  } else {
+                    canvas.width = bitmap.width;
+                    canvas.height = bitmap.height;
+                    fallbackContext.drawImage(bitmap, 0, 0);
+                  }
+                  if (state.latencyProbe) {
+                    if (!markerCanvas) {
+                      markerCanvas = document.createElement('canvas');
+                      markerContext = markerCanvas.getContext('2d', { willReadFrequently: true });
+                    }
+                    if (markerCanvas.width !== bitmap.width || markerCanvas.height !== bitmap.height) {
+                      markerCanvas.width = bitmap.width;
+                      markerCanvas.height = bitmap.height;
+                    }
+                    markerContext.drawImage(bitmap, 0, 0);
+                  }
                   bitmap.close();
                   state.dataFramesReceived = (state.dataFramesReceived || 0) + 1;
                   if (sentAt !== null) {
@@ -612,9 +762,9 @@
                       if (state.visualLatencySamples.length > 180) state.visualLatencySamples.shift();
                     }
                   }
-                  if (state.latencyProbe && canvas.width >= 256 && canvas.height >= 4) {
+                  if (state.latencyProbe && markerCanvas.width >= 256 && markerCanvas.height >= 4) {
                     try {
-                      var pixels = context.getImageData(0, 0, 256, 4).data;
+                      var pixels = markerContext.getImageData(0, 0, 256, 4).data;
                       var markerMagic = 0;
                       var markerTimestamp = 0;
                       for (var bit = 0; bit < 32; bit += 1) {
@@ -655,34 +805,101 @@
               };
             };
           }
-          installPeerHandlers(state.peer);
-          function signalPublisherOffer(reason) {
-            if (!active() || role !== 'publisher' ||
-                (!state.stream && state.transport !== 'data') || state.makingOffer) return;
-            state.makingOffer = true;
-            state.peer.createOffer().then(function (offer) {
+          if (state.peer) {
+            state.viewerPeerState = { remotePeerId: null, peer: state.peer };
+            installPeerHandlers(state.peer, state.viewerPeerState);
+          }
+          function configurePublisherSender(sender) {
+            if (!sender || typeof sender.getParameters !== 'function') return;
+            try {
+              var parameters = sender.getParameters();
+              parameters.encodings = parameters.encodings && parameters.encodings.length
+                ? parameters.encodings : [{}];
+              parameters.encodings[0].maxFramerate = 60;
+              parameters.encodings[0].maxBitrate = 2000000;
+              parameters.degradationPreference = 'maintain-framerate';
+              var configured = sender.setParameters(parameters);
+              if (configured && typeof configured.catch === 'function') configured.catch(function () {});
+            } catch (_) {}
+          }
+          function attachPublisherTracks(peerState) {
+            if (!state.stream || peerState.tracksAttached) return;
+            state.stream.getTracks().forEach(function (track) {
+              var sender = peerState.peer.addTrack(track, state.stream);
+              if (track.kind === 'video' && !state.captureSender) state.captureSender = sender;
+              configurePublisherSender(sender);
+            });
+            peerState.tracksAttached = true;
+          }
+          function signalPublisherOffer(peerState, reason) {
+            if (!active() || role !== 'publisher' || !peerState ||
+                (!state.stream && state.transport !== 'data') || peerState.makingOffer) return;
+            peerState.makingOffer = true;
+            peerState.peer.createOffer().then(function (offer) {
               if (!active()) return null;
-              return state.peer.setLocalDescription(offer).then(function () {
-                state.offered = true;
-                signal({ type: 'signal', payload: { description: state.peer.localDescription } });
-                reportWebRtc('webrtc_offer_sent', { role: role, reason: reason });
+              return peerState.peer.setLocalDescription(offer).then(function () {
+                peerState.offered = true;
+                signal({
+                  type: 'signal',
+                  targetPeerId: peerState.remotePeerId,
+                  payload: { description: peerState.peer.localDescription }
+                });
+                reportWebRtc('webrtc_offer_sent', {
+                  role: role, reason: reason, peerId: peerState.remotePeerId
+                });
               });
             }).catch(function (error) {
               reportWebRtc('webrtc_offer_error', { role: role, reason: reason, error: String(error) });
             }).then(function () {
-              state.makingOffer = false;
+              peerState.makingOffer = false;
             });
           }
+          function closePublisherPeer(remotePeerId) {
+            var peerState = state.peers[remotePeerId];
+            if (!peerState) return;
+            delete state.peers[remotePeerId];
+            releaseRemotePlayerSlot(peerState);
+            try { peerState.peer.close(); } catch (_) {}
+          }
+          function createPublisherPeer(remotePeerId) {
+            if (!active() || role !== 'publisher' || !remotePeerId || state.peers[remotePeerId]) return;
+            var peerState = {
+              remotePeerId: remotePeerId,
+              peer: new RTCPeerConnection({ iceServers: [] }),
+              playerSlot: null,
+              inputChannel: null,
+              frameChannel: null,
+              tracksAttached: false,
+              offered: false,
+              makingOffer: false
+            };
+            state.peers[remotePeerId] = peerState;
+            installPeerHandlers(peerState.peer, peerState);
+            createPublisherInputChannel(peerState);
+            createPublisherDataChannel(peerState);
+            attachPublisherTracks(peerState);
+            signalPublisherOffer(peerState, 'receiver_joined');
+          }
           function startPublisherTrack() {
-            if (!active() || state.stream) return;
+            if (!active() || role !== 'publisher') return;
+            if (state.transport === 'data') {
+              Object.keys(state.peers).forEach(function (peerId) {
+                signalPublisherOffer(state.peers[peerId], 'initial_data_channel_ready');
+              });
+              return;
+            }
+            if (state.stream) {
+              Object.keys(state.peers).forEach(function (peerId) {
+                var peerState = state.peers[peerId];
+                attachPublisherTracks(peerState);
+                signalPublisherOffer(peerState, 'existing_capture_track');
+              });
+              return;
+            }
             var probeCanvas = window.__host4OutputProbeCanvas;
             if (!probeCanvas || typeof probeCanvas.captureStream !== 'function' ||
                 !probeCanvas.width || !probeCanvas.height) {
               setTimeout(startPublisherTrack, 50);
-              return;
-            }
-            if (state.transport === 'data') {
-              signalPublisherOffer('initial_data_channel_ready');
               return;
             }
             try {
@@ -712,22 +929,8 @@
                 // encoder backlog into visible stale playback.
                 probe.webRtcCaptureTimerActive = false;
               }
-              state.stream.getTracks().forEach(function (track) {
-                var sender = state.peer.addTrack(track, state.stream);
-                if (track.kind === 'video') state.captureSender = sender;
-                // Keep cadence aligned to the core's ~60fps callback instead
-                // of asking WebKit to encode duplicate canvas frames.
-                if (!sender || typeof sender.getParameters !== 'function') return;
-                try {
-                  var parameters = sender.getParameters();
-                  parameters.encodings = parameters.encodings && parameters.encodings.length
-                    ? parameters.encodings : [{}];
-                  parameters.encodings[0].maxFramerate = 60;
-                  parameters.encodings[0].maxBitrate = 2000000;
-                  parameters.degradationPreference = 'maintain-framerate';
-                  var configured = sender.setParameters(parameters);
-                  if (configured && typeof configured.catch === 'function') configured.catch(function () {});
-                } catch (_) {}
+              Object.keys(state.peers).forEach(function (peerId) {
+                attachPublisherTracks(state.peers[peerId]);
               });
               if (state.captureIntervalMs < 0 && state.captureTrack &&
                   state.captureSender &&
@@ -800,58 +1003,50 @@
                 state.captureSchedulerTimer = setInterval(requestLatestCanvasFrame, 4);
                 requestLatestCanvasFrame();
               }
-              signalPublisherOffer('initial_peer_ready');
+              Object.keys(state.peers).forEach(function (peerId) {
+                signalPublisherOffer(state.peers[peerId], 'initial_peer_ready');
+              });
             } catch (error) {
               reportWebRtc('webrtc_capture_stream_error', { error: String(error) });
             }
           }
-          function resetPublisherTransport() {
-            if (!active() || role !== 'publisher') return;
-            // A canvas capture track can retain encoded frames after its peer
-            // disappears. A late join must get a fresh track *and* a fresh
-            // RTCPeerConnection, otherwise WebKit replays that stale queue.
-            if (state.captureTimer) clearInterval(state.captureTimer);
-            state.captureTimer = null;
-            if (state.captureSchedulerTimer) clearInterval(state.captureSchedulerTimer);
-            state.captureSchedulerTimer = null;
-            var probe = currentOutputProbe();
-            if (probe) {
-              probe.webRtcCaptureTrack = null;
-              probe.webRtcCaptureTimerActive = false;
-              probe.webRtcCaptureMode = null;
-            }
-            try {
-              if (state.stream) state.stream.getTracks().forEach(function (track) { track.stop(); });
-            } catch (_) {}
-            state.stream = null;
-            state.captureTrack = null;
-            state.captureSender = null;
-            state.captureInFlight = false;
-            state.captureStatsPending = false;
-            state.captureLastEncodedFrames = 0;
-            state.offered = false;
-            state.makingOffer = false;
-            var previousPeer = state.peer;
-            state.peer = new RTCPeerConnection({ iceServers: [] });
-            installPeerHandlers(state.peer);
-            createPublisherInputChannel();
-            createPublisherDataChannel();
-            try { if (previousPeer) previousPeer.close(); } catch (_) {}
-            reportWebRtc('webrtc_publisher_transport_reset', { role: role });
-          }
-          async function receiveSignal(payload) {
+          async function receiveSignal(remotePeerId, payload) {
             if (!active() || !payload) return;
             try {
+              var peer;
+              if (role === 'publisher') {
+                var publisherPeer = state.peers[remotePeerId];
+                if (!publisherPeer) return;
+                peer = publisherPeer.peer;
+              } else {
+                if (!state.peer || state.remotePeerId !== remotePeerId) {
+                  try { if (state.peer) state.peer.close(); } catch (_) {}
+                  state.peer = new RTCPeerConnection({ iceServers: [] });
+                  state.remotePeerId = remotePeerId;
+                  state.viewerPeerState = {
+                    remotePeerId: remotePeerId,
+                    peer: state.peer
+                  };
+                  installPeerHandlers(state.peer, state.viewerPeerState);
+                } else if (state.viewerPeerState) {
+                  state.viewerPeerState.remotePeerId = remotePeerId;
+                }
+                peer = state.peer;
+              }
               if (payload.description) {
-                await state.peer.setRemoteDescription(payload.description);
+                await peer.setRemoteDescription(payload.description);
                 if (payload.description.type === 'offer' && role === 'viewer') {
-                  var answer = await state.peer.createAnswer();
-                  await state.peer.setLocalDescription(answer);
-                  signal({ type: 'signal', payload: { description: state.peer.localDescription } });
+                  var answer = await peer.createAnswer();
+                  await peer.setLocalDescription(answer);
+                  signal({
+                    type: 'signal',
+                    targetPeerId: remotePeerId,
+                    payload: { description: peer.localDescription }
+                  });
                   reportWebRtc('webrtc_answer_sent', { role: role });
                 }
               } else if (payload.candidate) {
-                await state.peer.addIceCandidate(payload.candidate);
+                await peer.addIceCandidate(payload.candidate);
               }
             } catch (error) {
               reportWebRtc('webrtc_signal_error', { role: role, error: String(error) });
@@ -890,18 +1085,47 @@
             };
               socket.onmessage = function (event) {
                 if (!active() || state.socket !== socket) return;
-              var message;
-              try { message = JSON.parse(event.data); } catch (_) { return; }
-              if (message.type === 'peer-ready' && role === 'publisher') {
-                if (state.stream || state.transport === 'data') {
-                  resetPublisherTransport();
-                  startPublisherTrack();
-                } else {
-                  startPublisherTrack();
+                var message;
+                try { message = JSON.parse(event.data); } catch (_) { return; }
+                if (message.type === 'joined') {
+                  state.peerId = message.peerId || null;
+                  if (role === 'publisher' && Array.isArray(message.peers)) {
+                    message.peers.forEach(function (peer) {
+                      if (peer && peer.role === 'viewer') createPublisherPeer(peer.peerId);
+                    });
+                    startPublisherTrack();
+                  }
+                  return;
                 }
-              }
-              if (message.type === 'signal') receiveSignal(message.payload);
-            };
+                if (message.type === 'join-rejected') {
+                  state.joinRejected = true;
+                  reportWebRtc('webrtc_join_rejected', {
+                    role: role,
+                    reason: message.reason || 'rejected',
+                    maxPlayers: message.maxPlayers || null
+                  });
+                  try { socket.close(); } catch (_) {}
+                  return;
+                }
+                if (message.type === 'peer-joined' && role === 'publisher' &&
+                    message.role === 'viewer') {
+                  createPublisherPeer(message.peerId);
+                  startPublisherTrack();
+                  return;
+                }
+                if (message.type === 'peer-left') {
+                  if (role === 'publisher') closePublisherPeer(message.peerId);
+                  if (role === 'viewer' && state.remotePeerId === message.peerId) {
+                    try { if (state.peer) state.peer.close(); } catch (_) {}
+                    state.peer = null;
+                    state.remotePeerId = null;
+                  }
+                  return;
+                }
+                if (message.type === 'signal') {
+                  receiveSignal(message.sourcePeerId, message.payload);
+                }
+              };
               socket.onerror = function () {
                 if (!active() || state.socket !== socket) return;
                 reportWebRtc('webrtc_signal_error', { role: role });
@@ -909,6 +1133,7 @@
               socket.onclose = function () {
                 if (!active() || state.socket !== socket) return;
                 reportWebRtc('webrtc_signal_closed', { role: role });
+                if (state.joinRejected) return;
                 scheduleViewerSignalReconnect('socket_closed');
               };
             } catch (error) {
@@ -1952,12 +2177,21 @@
               reportWebRtc('remote_input_channel_unavailable', { role: state.role });
               return false;
             }
-            channel.send(JSON.stringify({ type: 'input', event: event }));
+            if (!Number.isInteger(state.assignedPlayerSlot)) {
+              reportWebRtc('remote_player_slot_unavailable', { role: state.role });
+              return false;
+            }
+            // Player assignment belongs to the publisher connection. Do not
+            // forward a client-selected player id across the network.
+            channel.send(JSON.stringify({
+              type: 'input',
+              event: { button: event.button, action: event.action }
+            }));
             reportWebRtc('remote_input_sent', {
               role: state.role,
               button: event.button,
               action: event.action,
-              player: event.player
+              player: null
             });
             return true;
           },

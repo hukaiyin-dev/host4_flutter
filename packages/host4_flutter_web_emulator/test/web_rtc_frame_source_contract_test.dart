@@ -3,6 +3,20 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('viewer preserves sharp pixel-art scaling for received frames', () {
+    final source = File('assets/emulator/index.html').readAsStringSync();
+
+    expect(
+      source,
+      contains('object-fit:contain;image-rendering:pixelated;background:#000'),
+    );
+    expect(source, contains('function createPixelPerfectViewerRenderer(canvas)'));
+    expect(source, contains("canvas.getContext('webgl'"));
+    expect(source, contains('gl.NEAREST'));
+    expect(source, contains('window.devicePixelRatio'));
+    expect(source, contains('renderer.render(bitmap)'));
+  });
+
   test(
     'WebRTC capture canvas is independent from the rate-limited Flutter preview',
     () {
@@ -54,13 +68,13 @@ void main() {
             'a scaled, encoded frame cannot be mistaken for arbitrary game art.',
       );
       expect(source, contains('visualLatencyP95Ms'));
-      expect(source, contains('function signalPublisherOffer(reason)'));
+      expect(source, contains('function signalPublisherOffer(peerState, reason)'));
       expect(source, contains("config.webRtcTransport === 'data' ? 'data' : 'media'"));
       expect(source, contains("webrtc_transport_selected"));
       expect(source, contains("host4-core-frames"));
-      expect(source, contains("signalPublisherOffer('initial_data_channel_ready')"));
+      expect(source, contains("'initial_data_channel_ready'"));
       expect(source, contains("state.transport === 'data'"));
-      expect(source, contains("createPublisherDataChannel()"));
+      expect(source, contains('createPublisherDataChannel(peerState)'));
       expect(source, contains("webrtc_data_stats"));
       expect(source, contains("webrtc_data_frame"));
       expect(
@@ -95,9 +109,8 @@ void main() {
             'When it reconnects after frames were already rendered, Flutter '
             'needs an explicit frame-ready event to remove its error cover.',
       );
-      expect(source, contains("signalPublisherOffer('initial_peer_ready')"));
-      expect(source, contains('function resetPublisherTransport()'));
-      expect(source, contains('resetPublisherTransport();\n                  startPublisherTrack();'));
+      expect(source, contains("'initial_peer_ready'"));
+      expect(source, contains('function closePublisherPeer(remotePeerId)'));
       expect(
         source,
         contains('if (probe.webRtcEnabled === true) return;'),
@@ -116,4 +129,20 @@ void main() {
       );
     },
   );
+
+  test('publisher owns join-order player slots and ignores remote player ids', () {
+    final source = File('assets/emulator/index.html').readAsStringSync();
+
+    expect(source, contains('function allocateRemotePlayerSlot(peerState)'));
+    expect(source, contains('function releaseRemotePlayerSlot(peerState)'));
+    expect(source, contains('function dispatchRemoteInput(event, peerState)'));
+    expect(source, contains('player: peerState.playerSlot'));
+    expect(source, contains('assignedPlayerSlot: null'));
+    expect(source, contains('state.assignedPlayerSlot = Number.isInteger(metadata.playerSlot)'));
+    expect(source, contains("remote_player_slot_unavailable"));
+    expect(source, contains('function createPublisherPeer(remotePeerId)'));
+    expect(source, contains("message.type === 'peer-joined'"));
+    expect(source, contains("message.type === 'peer-left'"));
+    expect(source, contains('targetPeerId: remotePeerId'));
+  });
 }

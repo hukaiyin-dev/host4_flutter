@@ -227,12 +227,10 @@ class Host4WebEmulatorController {
   Future<void> sendWebRtcInput(
     String button, {
     String action = 'down',
-    int player = 1,
   }) => _executeJavaScript(
     Host4WebEmulatorJavaScript.sendWebRtcInput(
       button,
       action: action,
-      player: player,
     ),
   );
 

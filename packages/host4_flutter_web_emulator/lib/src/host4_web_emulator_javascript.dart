@@ -95,12 +95,10 @@ class Host4WebEmulatorJavaScript {
   static String sendWebRtcInput(
     String button, {
     String action = 'down',
-    int player = 1,
   }) {
     final event = <String, Object>{
       'button': button,
       'action': action,
-      'player': player,
     };
     return 'window.Host4WebEmulator.sendWebRtcInput(${jsonEncode(event)});';
   }

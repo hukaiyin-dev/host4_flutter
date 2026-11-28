@@ -204,13 +204,16 @@ void main() {
     final script = Host4WebEmulatorJavaScript.sendWebRtcInput(
       'a',
       action: 'down',
-      player: 2,
     );
 
     expect(script, contains('sendWebRtcInput'));
     expect(script, contains('"button":"a"'));
     expect(script, contains('"action":"down"'));
-    expect(script, contains('"player":2'));
+    expect(
+      script,
+      isNot(contains('"player"')),
+      reason: 'Only the publisher may assign a player slot.',
+    );
   });
 
   test('viewer retries signalling when it opens before a host starts sharing', () {
@@ -228,7 +231,9 @@ void main() {
     expect(html, contains('function isValidWebRtcInput(event)'));
     expect(html, contains('remote_input_rejected'));
     expect(html, contains('remote_input_dispatched'));
-    expect(html, contains('Host4WebEmulator.keyEvent(event)'));
+    expect(html, contains('window.Host4WebEmulator.keyEvent({'));
+    expect(html, contains('player: peerState.playerSlot'));
+    expect(html, isNot(contains('player: event.player')));
     expect(html, contains('webrtc_remote_metadata'));
     expect(html, contains('controlProfile: state.controlProfile'));
     expect(html, contains('maskEnabled: state.maskEnabled'));

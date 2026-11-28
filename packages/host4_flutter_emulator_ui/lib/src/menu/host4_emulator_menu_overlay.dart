@@ -78,12 +78,14 @@ class _MenuSpec {
 
 class Host4EmulatorMenuOverlay extends StatefulWidget {
   const Host4EmulatorMenuOverlay({
-    required this.actions,
+    this.actions,
     required this.onOpenSaveManager,
     this.dataSource,
     this.onOpenLayoutPicker,
     this.onOpenKeyLocator,
     this.onOpenScreenShare,
+    this.onExit,
+    this.onContinue,
     this.showLayoutAction = true,
     this.showKeyLocatorAction = true,
     this.enableSaveActions = true,
@@ -91,11 +93,13 @@ class Host4EmulatorMenuOverlay extends StatefulWidget {
     super.key,
   });
 
-  final Host4EmulatorSessionActions actions;
+  final Host4EmulatorSessionActions? actions;
   final Host4EmulatorSaveDataSource? dataSource;
   final VoidCallback onOpenSaveManager;
   final VoidCallback? onOpenLayoutPicker;
   final VoidCallback? onOpenKeyLocator;
+  final Future<void> Function()? onExit;
+  final Future<void> Function()? onContinue;
 
   /// Optional host-owned action for a local game-screen sharing flow.
   ///
@@ -319,11 +323,14 @@ class _Host4EmulatorMenuOverlayState extends State<Host4EmulatorMenuOverlay> {
   }
 
   Future<void> _toggleRate() async {
-    final next = widget.actions.rate == 1 ? 2.0 : 1.0;
-    await widget.actions.setRate(next);
+    final actions = widget.actions;
+    if (actions == null) return;
+    final next = actions.rate == 1 ? 2.0 : 1.0;
+    await actions.setRate(next);
   }
 
   VoidCallback? _onTapFor(_MenuAction action) {
+    final actions = widget.actions;
     if (!widget.enableSaveActions &&
         (action == _MenuAction.quickLoad ||
             action == _MenuAction.quickSave ||
@@ -332,17 +339,32 @@ class _Host4EmulatorMenuOverlayState extends State<Host4EmulatorMenuOverlay> {
     }
     if (!widget.enableSpeedAction && action == _MenuAction.speed) return null;
     return switch (action) {
-      _MenuAction.quickLoad => () => unawaited(_run(widget.actions.quickLoad)),
+      _MenuAction.quickLoad =>
+        actions == null ? null : () => unawaited(_run(actions.quickLoad)),
       _MenuAction.saveManager => widget.onOpenSaveManager,
-      _MenuAction.quickSave => () => unawaited(
-        _run(() async {
-          await widget.actions.quickSave();
-          await _loadSaveSummary();
-        }),
-      ),
-      _MenuAction.speed => () => unawaited(_run(_toggleRate)),
-      _MenuAction.exit => () => unawaited(_run(widget.actions.exit)),
-      _MenuAction.continueGame => () => unawaited(_run(widget.actions.resume)),
+      _MenuAction.quickSave =>
+        actions == null
+            ? null
+            : () => unawaited(
+                _run(() async {
+                  await actions.quickSave();
+                  await _loadSaveSummary();
+                }),
+              ),
+      _MenuAction.speed =>
+        actions == null ? null : () => unawaited(_run(_toggleRate)),
+      _MenuAction.exit =>
+        widget.onExit != null
+            ? () => unawaited(_run(widget.onExit!))
+            : actions == null
+            ? null
+            : () => unawaited(_run(actions.exit)),
+      _MenuAction.continueGame =>
+        widget.onContinue != null
+            ? () => unawaited(_run(widget.onContinue!))
+            : actions == null
+            ? null
+            : () => unawaited(_run(actions.resume)),
       _MenuAction.layout => widget.onOpenLayoutPicker,
       _MenuAction.keyLocator => widget.onOpenKeyLocator,
       _MenuAction.screenShare => widget.onOpenScreenShare,
@@ -415,7 +437,7 @@ class _Host4EmulatorMenuOverlayState extends State<Host4EmulatorMenuOverlay> {
                           autofocus: action == _MenuAction.continueGame,
                           scale: scale,
                           buttonHeight: spec.layout.buttonHeight,
-                          speed: widget.actions.rate,
+                          speed: widget.actions?.rate ?? 1,
                           onTap: _onTapFor(action),
                         ),
                       ),

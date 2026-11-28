@@ -115,6 +115,50 @@ void main() {
     await tester.pump();
     expect(actions.calls, ['resume']);
   });
+
+  testWidgets('receiver menu disables host actions and uses local callbacks', (
+    tester,
+  ) async {
+    var exits = 0;
+    var continues = 0;
+    var layouts = 0;
+    var locators = 0;
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('zh'),
+        localizationsDelegates: EmulatorUiLocalizations.localizationsDelegates,
+        supportedLocales: EmulatorUiLocalizations.supportedLocales,
+        home: Host4EmulatorMenuOverlay(
+          actions: null,
+          onOpenSaveManager: () {},
+          onExit: () async => exits += 1,
+          onContinue: () async => continues += 1,
+          onOpenLayoutPicker: () => layouts += 1,
+          onOpenKeyLocator: () => locators += 1,
+          enableSaveActions: false,
+          enableSpeedAction: false,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    for (final id in ['quick_save', 'quick_load', 'save_manager', 'speed']) {
+      final semantics = tester.widget<Semantics>(
+        find.byKey(ValueKey('menu.$id')),
+      );
+      expect(semantics.properties.enabled, isFalse);
+    }
+    await tester.tap(find.byKey(const ValueKey('menu.exit')));
+    await tester.pump();
+    await tester.tap(find.byKey(const ValueKey('menu.continue')));
+    await tester.pump();
+    await tester.tap(find.byKey(const ValueKey('menu.layout')));
+    await tester.tap(find.byKey(const ValueKey('menu.key_locator')));
+    expect(exits, 1);
+    expect(continues, 1);
+    expect(layouts, 1);
+    expect(locators, 1);
+  });
   testWidgets(
     'portrait menu clears the fixed Pantas button with a safe inset',
     (tester) async {

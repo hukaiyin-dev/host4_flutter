@@ -83,10 +83,13 @@ class _Host4EmulatorLandscapeControlsState
           left: 736,
           top: 336,
           baseSize: const Size.square(42),
-          child: Host4EmulatorAuxiliaryButton(
-            asset: 'ic_expand.svg',
-            size: Size.square(42 * scale),
-            onTap: _toggleCollapsed,
+          child: RotatedBox(
+            quarterTurns: _isCollapsed ? 2 : 0,
+            child: Host4EmulatorAuxiliaryButton(
+              asset: 'ic_expand.svg',
+              size: Size.square(42 * scale),
+              onTap: _toggleCollapsed,
+            ),
           ),
         );
         final menu = positioned(
